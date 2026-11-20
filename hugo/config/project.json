@@ -1,0 +1,45 @@
+{
+  "bbox_wgs84": [
+    76.7600837,
+    12.6238599,
+    84.7658033,
+    19.9172962
+  ],
+  "cell_m": 63.615,
+  "cols": 13312,
+  "crs": "ESRI:102028",
+  "datum": "WGS84",
+  "origin": [
+    -5451447.126942766,
+    2709891.1363760256
+  ],
+  "rows": 12544,
+  "slope_limit_deg": 20,
+  "tile_cells": 256,
+  "vertical_exaggeration": 1.2,
+  "village_layout": {
+    "allocation": "frontage-first",
+    "bridges": false,
+    "connectivity": "shared-edge",
+    "connector_every_columns": 12,
+    "network_sha256": "070a3a11825b2de86becb63067e9e005d437eb96bea0e0ff389759023e89e900",
+    "plot_slope_max_deg": 20,
+    "road_slope_max_deg": 12,
+    "road_width_range_m": [
+      3.5,
+      5
+    ],
+    "street_every_rows": 3,
+    "tie_break": [
+      "fewest_new_tree_cells",
+      "most_open_frontages",
+      "distance_squared_from_district_centroid",
+      "y",
+      "x",
+      "frontage_y",
+      "frontage_x"
+    ],
+    "version": 2
+  },
+  "world_plot": 63.615
+}

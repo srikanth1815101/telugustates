@@ -1,0 +1,16 @@
+{
+  "Andhra Pradesh": {
+    "count": 28,
+    "gap_km2": 0.0,
+    "outside_km2": 0.0,
+    "overlap_km2": 5.4931640625e-10,
+    "state_km2": 163054.0057009516
+  },
+  "Telangana": {
+    "count": 33,
+    "gap_km2": 0.0,
+    "outside_km2": 0.0,
+    "overlap_km2": 1.52587890625e-10,
+    "state_km2": 112090.42860361705
+  }
+}

@@ -1,0 +1,24 @@
+# What the land knows
+
+One square on the atlas is one acre. Its side is **63.615 metres**, whether you are standing at a gate or looking down at the two states. The elevation in the corner of the walk is the **source elevation in metres**, not the height of a stylized rock. Open the field menu and move **Relief exaggeration** from 1.0× to 3.0×. The default is **2.0×**. This changes the display, not house dimensions, distances, the parcel ledger or buildability.
+
+| Input | What the scene uses | What it cannot tell us |
+|---|---|---|
+| Frozen Copernicus-derived elevations, local slope and district mask | Actual crest lines, inland valleys, base grades, skyline beyond the detailed mesh | The exact position of a 2 m ledge |
+| Frozen ESA tree cover plus seven sampled WorldCover 2021 fractions | Forest density, cultivated plain, scrub, wetland, bare ground, mangrove and built fraction | A plant species or this season’s harvest |
+| OpenLandMap USDA surface texture (model, originally 250 m) | Bias for earthen colours and which field styles are plausible | Actual soil colour, farm boundaries or fertility |
+| GLiM v1 dominant lithology, originally **half-degree** | Bias toward blocky plutonic piles, layered scarps or loose talus | A geological map of any individual boulder |
+| NASA POWER / MERRA‑2 precipitation climatology | Broad wet/dry affinities alongside terrain and cover | Today's rain or local shade temperature |
+| Mapped open water, OSM river paths and width where present; HydroLAKES | Shoreline, channel direction, river surface animation, conditional lake life | Surveyed channel velocity, water discharge or exact depth at a point |
+| HydroLAKES modelled **lake-average** depth | An extra guard on deeper-water silhouettes; local water/bed clearance checked separately | Bathymetry. Zero means no positive sample, not measured zero depth |
+| Natural Earth coastline and ocean polygons | Salt-water horizon and a coastal planting zone | Surf, sand bars or an exact wet-sand line |
+
+**Three scales.** The survey and far horizon sample actual regional elevations. Within the walking landscape, a small normalized blur removes stair-stepping; steep slopes retain more of the stored profile. Close to the walker, eligible dry slopes have an indexed submesh: bands terrace the face, a deterministic incision notches it, and caps and talus change the tint. Its outer edge meets the original acre triangles. Feet use the same local triangles. Mapped water, house pads and occupied street cells do not receive this treatment. Houses sit on the original locally blended pads. Modelled pebbles, foliage and leaf litter supply the last few centimetres of detail, **not new measurements**.
+
+**Water.** Sharp canyon banks used to pull the water surface up the hillside. The displayed water grade now interpolates a low percentile of **only mapped water-cell** DEM observations in overlapping local sectors. It is a smoothed, inferred grade, not a measured gauge level. The bed tapers into those grades; the river ribbon uses the same local triangles as the polygon. A shore-to-centre colour ramp, grazing-angle sky reflection, bank glints, flow ribbons and rain ripples make water legible. The OSM waterfall-node extraction contains 26 in-state mapped points. A curtain additionally requires a nearby mapped river segment, a short segment length and a local displayed drop equivalent to at least 2.5 source metres. A node alone does not draw a waterfall. No waterfall count is inferred from steep terrain. No bridges have been inserted: the frozen village network has no qualifying water crossings. The coast and small channels can look angular at source resolution.
+
+The new grids are 832 × 784; one sample spans 16 × 16 acres (~1.018 km per side). Cover fractions are based on 64 native observations per block. The weather displayed in the HUD is simulated. No live weather, wildlife API or web tile server is called. The app reads ordinary static files from its own origin.
+
+**Rebuild / licences.** Source URLs, rights, input hashes, band order and output hashes are in `site/static/ecology/sources.json`; the preserved primary-map receipts are in `data/frozen/SOURCES.json`. The resampled USDA texture grid is CC BY-SA 4.0, GLiM CC BY 3.0, WorldCover and HydroLAKES CC BY 4.0, Natural Earth public domain. OSM water coordinates/names remain attributed under ODbL. The optional desktop bake uses the original local GIS inputs (`python scripts/bake_ecology.py`, then `python scripts/bake_trail.py`, which completes the coastal mesh and seeded village viewpoint using local data and Node); **neither is part of publishing or allocation**. Keep derived-layer licences with redistributed data.
+
+Desktop-bake tools: GDAL (`ogr2ogr`, `gdalbuildvrt`, `gdalwarp`), osmium-tool, Python with NumPy, SciPy, rasterio, Shapely, Requests and pyproj, and Node for the final yard camera. None of these GIS tools is needed to serve the frozen site.

@@ -1,0 +1,17 @@
+baseURL = 'https://telugustates.csrgo.com/'
+languageCode = 'en-IN'
+title = 'Telugu States by CSRGO'
+relativeURLs = true
+disableKinds = ['taxonomy','term','RSS','sitemap','robotsTXT']
+[markup.goldmark.renderer]
+unsafe = false
+[module]
+  [[module.mounts]]
+    source = 'content'
+    target = 'content'
+  [[module.mounts]]
+    source = 'static'
+    target = 'static'
+  [[module.mounts]]
+    source = '../data/frozen'
+    target = 'static/frozen'

@@ -1,0 +1,5 @@
+# Public words
+
+**Find your house** looks for a published Instagram username. **Your acre** is a virtual land square; the house is the home on it; a village is a group of homes. **Explore in 3D** enters Immersive Mode; **Back to map** returns without deleting the walk. In an empty district: **No houses here yet. Be the first.** Claims and removal requests go to the community page for human review. There is no automatic promise of allocation for a comment. Public counters never include historical test names. The default clock is shared world time, not the visitor's watch. Only label independently reported, authorized metrics as verified. A food shortage does not by itself imply drought.
+
+English and Telugu are paired in the static i18n catalog; technical data citations, source proper names, handle values and the explicitly retained legacy developer review are not translated as product claims. Native Telugu review is still requested for district spellings, terms for ridge/monsoon/withdrawal, crop stages, sound buses, finite virtual reserves and the difference between a virtual assignment and legal ownership. Early copy is not a claim of linguistic sign-off.

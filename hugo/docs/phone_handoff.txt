@@ -1,0 +1,46 @@
+TELUGU STATES BY CSRGO  |  MASTER PART 1 · FIELD CHECK
+
+Start with village-review.html. It opens offline: screenshots from the actual
+renderer, a measured acre, all 61 districts, performance and the remaining gate.
+No part of this handoff is a public deployment or a real Android benchmark.
+
+QUICKEST: On the Android phone, open this conversation and choose the live
+“Android phone field check · 104 homes” preview. Tap “Open the 104-home test”,
+then “Start 20-second walk”. Keep the tab visible. Copy the result or take a
+screenshot that includes the status. Share it with the phone model and Chrome
+version. An incomplete walk is not a pass. Nothing uploads automatically.
+The test creates no new names in the owner's 300-home site.
+
+WHEN THE PREVIEW IS NOT AVAILABLE — PRIVATE WI-FI TEST (no Git or Hugo)
+1. Keep the previous Telugu-States-by-CSRGO.tar.xz download. Do not unpack or
+   overwrite it. Unzip Master-Part-1-Update.zip next to that previous archive.
+2. On a computer with Python 3.11 or newer, open a terminal in the extracted
+   Master-Part-1-Update folder and run:
+       python run_phone_check.py
+   Use python3 instead of python where appropriate. This constructs the actual
+   ready-built test website in a temporary directory. It reuses unchanged map
+   files from the previous archive and verifies EVERY served file. No internet,
+   GIS, Node, changes to the previous release or re-downloading maps required.
+3. Connect the phone to the same trusted Wi-Fi. Open the “On a phone” address
+   printed by the command in Android Chrome. If asked, allow local-network
+   access on that computer's private network. Do not expose the port publicly.
+   Run the test as above. Ctrl+C on the computer stops the local server.
+   localhost on the phone is NOT your computer. If the archive lives elsewhere,
+   add --base followed by its full path in quotes. --check-only verifies then exits.
+
+TO GET THE UPDATED EDITABLE PROJECT (separate from the test website)
+Install Git and Python 3.11+. In the same folder run:
+    python restore_project.py
+This creates a NEW telugu-states-master-part-1 folder, including Git history,
+real frozen data, 300 homes, generated pages, the village gallery and tests.
+An existing destination is never overwritten. Optional: --dest "new-folder".
+Read its README.md, NOTES.md and REPORT.md. Hugo 0.131.0 runs the full atlas.
+Do NOT run the one-time migration again, and do not publish the phone-test copy.
+
+FOR AN EXISTING CLEAN CHECKOUT AT RELEASE 6ec9e46 OR A LATER CHECKPOINT
+The progress.bundle inside this kit is an ordinary Git increment. In the clean
+checkout: git fetch /path/to/progress.bundle main ; git merge --ff-only FETCH_HEAD
+Then run: python -S scripts/prepare_site.py --write-back
+          python -S scripts/prepare_site.py --check
+The original checkout plus this increment contain the entire master Part 1
+candidate, not just screenshots. Parts 2–5 wait for the physical-device gate.

@@ -1,0 +1,1161 @@
+[
+  {
+    "area_m2": 6554821289.5429125,
+    "centre_xy": [
+      -4851163.484690566,
+      3343815.0072553917
+    ],
+    "id": 1,
+    "label": [
+      82.67490060249953,
+      18.0591962
+    ],
+    "lgd": 745,
+    "name": "Alluri Sitharama Raju",
+    "osm_id": 13999461,
+    "osm_name": "Alluri Sitharama Raju District",
+    "state": "Andhra Pradesh",
+    "te": "అల్లూరి సీతారామరాజు",
+    "te_status": "unverified"
+  },
+  {
+    "area_m2": 4019670243.2363763,
+    "centre_xy": [
+      -4816254.787210646,
+      3309541.494925562
+    ],
+    "id": 2,
+    "label": [
+      82.77475669632513,
+      17.671533099999998
+    ],
+    "lgd": 744,
+    "name": "Anakapalli",
+    "osm_id": 13999884,
+    "osm_name": "Anakapalli District",
+    "state": "Andhra Pradesh",
+    "te": "అనకాపల్లి",
+    "te_status": "unverified"
+  },
+  {
+    "area_m2": 10189853671.567108,
+    "centre_xy": [
+      -5375369.199034765,
+      2916659.889300993
+    ],
+    "id": 3,
+    "label": [
+      77.43067380798242,
+      14.72421995
+    ],
+    "lgd": 502,
+    "name": "Ananthapuramu",
+    "osm_id": 2022303,
+    "osm_name": "Anantapuramu District",
+    "state": "Andhra Pradesh",
+    "te": "అనంతపురం",
+    "te_status": "unverified"
+  },
+  {
+    "area_m2": 6447288924.620445,
+    "centre_xy": [
+      -5221410.11762026,
+      2831255.833568002
+    ],
+    "id": 4,
+    "label": [
+      78.63462862888588,
+      13.78835745
+    ],
+    "lgd": 753,
+    "name": "Annamayya",
+    "osm_id": 13997864,
+    "osm_name": "Annamayya",
+    "state": "Andhra Pradesh",
+    "te": "అన్నమయ్య",
+    "te_status": "unverified"
+  },
+  {
+    "area_m2": 2882259108.7250957,
+    "centre_xy": [
+      -5048091.655682379,
+      3094676.6393302605
+    ],
+    "id": 5,
+    "label": [
+      80.45055218477734,
+      15.9344304
+    ],
+    "lgd": 750,
+    "name": "Bapatla",
+    "osm_id": 13998258,
+    "osm_name": "Bapatla District",
+    "state": "Andhra Pradesh",
+    "te": "బాపట్ల",
+    "te_status": "unverified"
+  },
+  {
+    "area_m2": 5500306882.115581,
+    "centre_xy": [
+      -5177502.072304401,
+      2778299.436530528
+    ],
+    "id": 6,
+    "label": [
+      79.64806109192918,
+      13.32503595
+    ],
+    "lgd": 503,
+    "name": "Chittoor",
+    "osm_id": 2022304,
+    "osm_name": "Chittoor District",
+    "state": "Andhra Pradesh",
+    "te": "చిత్తూరు",
+    "te_status": "unverified"
+  },
+  {
+    "area_m2": 2054947713.7752993,
+    "centre_xy": [
+      -4890216.0039885035,
+      3189566.551067821
+    ],
+    "id": 7,
+    "label": [
+      82.08193101584813,
+      16.62940475
+    ],
+    "lgd": 747,
+    "name": "Dr. B.R. Ambedkar Konaseema",
+    "osm_id": 13999603,
+    "osm_name": "Dr. B.R. Ambedkar Konaseema District",
+    "state": "Andhra Pradesh",
+    "te": "కోనసీమ",
+    "te_status": "unverified"
+  },
+  {
+    "area_m2": 2934567038.410428,
+    "centre_xy": [
+      -4924776.67009561,
+      3225474.177894402
+    ],
+    "id": 8,
+    "label": [
+      81.71543778889063,
+      16.99566385
+    ],
+    "lgd": 505,
+    "name": "East Godavari",
+    "osm_id": 2022126,
+    "osm_name": "East Godavari District",
+    "state": "Andhra Pradesh",
+    "te": "తూర్పు గోదావరి",
+    "te_status": "unverified"
+  },
+  {
+    "area_m2": 6516709967.100002,
+    "centre_xy": [
+      -4987805.041424695,
+      3212115.0068928623
+    ],
+    "id": 9,
+    "label": [
+      81.0803354123494,
+      17.01379805
+    ],
+    "lgd": 748,
+    "name": "Eluru",
+    "osm_id": 13999189,
+    "osm_name": "Eluru District",
+    "state": "Andhra Pradesh",
+    "te": "ఏలూరు",
+    "te_status": "unverified"
+  },
+  {
+    "area_m2": 2417149195.9750657,
+    "centre_xy": [
+      -5057415.64220036,
+      3128138.9147402793
+    ],
+    "id": 10,
+    "label": [
+      80.56861427693647,
+      16.2853547
+    ],
+    "lgd": 506,
+    "name": "Guntur",
+    "osm_id": 2022220,
+    "osm_name": "Guntur District",
+    "state": "Andhra Pradesh",
+    "te": "గుంటూరు",
+    "te_status": "unverified"
+  },
+  {
+    "area_m2": 3060441460.950582,
+    "centre_xy": [
+      -4870319.949255316,
+      3249325.6315688817
+    ],
+    "id": 11,
+    "label": [
+      82.18425041872928,
+      17.120459
+    ],
+    "lgd": 746,
+    "name": "Kakinada",
+    "osm_id": 13999862,
+    "osm_name": "Kakinada District",
+    "state": "Andhra Pradesh",
+    "te": "కాకినాడ",
+    "te_status": "unverified"
+  },
+  {
+    "area_m2": 3828816327.8672614,
+    "centre_xy": [
+      -4998048.390770197,
+      3136273.0635610744
+    ],
+    "id": 12,
+    "label": [
+      81.02778437825755,
+      16.21354655
+    ],
+    "lgd": 510,
+    "name": "Krishna",
+    "osm_id": 2022135,
+    "osm_name": "Krishna District",
+    "state": "Andhra Pradesh",
+    "te": "కృష్ణా",
+    "te_status": "unverified"
+  },
+  {
+    "area_m2": 7942702989.432584,
+    "centre_xy": [
+      -5374985.950547168,
+      3003481.470106085
+    ],
+    "id": 13,
+    "label": [
+      77.55425904309928,
+      15.54788035
+    ],
+    "lgd": 511,
+    "name": "Kurnool",
+    "osm_id": 2022277,
+    "osm_name": "Kurnool District",
+    "state": "Andhra Pradesh",
+    "te": "కర్నూలు",
+    "te_status": "unverified"
+  },
+  {
+    "area_m2": 10067182002.758995,
+    "centre_xy": [
+      -5187546.06227313,
+      3037380.7988720117
+    ],
+    "id": 14,
+    "label": [
+      79.22888809674598,
+      15.664486499999999
+    ],
+    "lgd": 790,
+    "name": "Markapuram",
+    "osm_id": 20182419,
+    "osm_name": "Markapuram District",
+    "state": "Andhra Pradesh",
+    "te": "మార్కాపురం",
+    "te_status": "unverified"
+  },
+  {
+    "area_m2": 9719632184.167671,
+    "centre_xy": [
+      -5279031.663754859,
+      3006597.4890255253
+    ],
+    "id": 15,
+    "label": [
+      78.41493955540743,
+      15.5247879
+    ],
+    "lgd": 755,
+    "name": "Nandyal",
+    "osm_id": 14000280,
+    "osm_name": "Nandyal District",
+    "state": "Andhra Pradesh",
+    "te": "నంద్యాల",
+    "te_status": "unverified"
+  },
+  {
+    "area_m2": 3287701214.6172347,
+    "centre_xy": [
+      -5066825.75435566,
+      3183010.5263031954
+    ],
+    "id": 16,
+    "label": [
+      80.25022993069638,
+      16.816911750000003
+    ],
+    "lgd": 749,
+    "name": "Ntr",
+    "osm_id": 14000341,
+    "osm_name": "NTR District",
+    "state": "Andhra Pradesh",
+    "te": "ఎన్టీఆర్",
+    "te_status": "unverified"
+  },
+  {
+    "area_m2": 7302219129.66223,
+    "centre_xy": [
+      -5132709.916881687,
+      3124127.542806305
+    ],
+    "id": 17,
+    "label": [
+      79.69750488987478,
+      16.32310375
+    ],
+    "lgd": 751,
+    "name": "Palnadu",
+    "osm_id": 14000417,
+    "osm_name": "Palnadu District",
+    "state": "Andhra Pradesh",
+    "te": "పల్నాడు",
+    "te_status": "unverified"
+  },
+  {
+    "area_m2": 3629125164.778295,
+    "centre_xy": [
+      -4754362.503363706,
+      3430737.0919882646
+    ],
+    "id": 18,
+    "label": [
+      83.54874728260714,
+      18.75149845
+    ],
+    "lgd": 743,
+    "name": "Parvathipuram Manyam",
+    "osm_id": 13998425,
+    "osm_name": "Parvathipuram Manyam District",
+    "state": "Andhra Pradesh",
+    "te": "పార్వతీపురం మన్యం",
+    "te_status": "unverified"
+  },
+  {
+    "area_m2": 6122155671.598023,
+    "centre_xy": [
+      -4940951.303165422,
+      3284844.033228599
+    ],
+    "id": 19,
+    "label": [
+      81.63312113965239,
+      17.6184957
+    ],
+    "lgd": 791,
+    "name": "Polavaram",
+    "osm_id": 20181344,
+    "osm_name": "Polavaram District",
+    "state": "Andhra Pradesh",
+    "te": "పోలవరం",
+    "te_status": "unverified"
+  },
+  {
+    "area_m2": 6374107800.965723,
+    "centre_xy": [
+      -5113940.77528874,
+      3042240.041511496
+    ],
+    "id": 20,
+    "label": [
+      80.00667859578397,
+      15.56419545
+    ],
+    "lgd": 517,
+    "name": "Prakasam",
+    "osm_id": 2022278,
+    "osm_name": "Prakasam District",
+    "state": "Andhra Pradesh",
+    "te": "ప్రకాశం",
+    "te_status": "unverified"
+  },
+  {
+    "area_m2": 10016119633.012604,
+    "centre_xy": [
+      -5117086.256769121,
+      2939815.4561262447
+    ],
+    "id": 21,
+    "label": [
+      79.72347808815766,
+      14.557000949999999
+    ],
+    "lgd": 515,
+    "name": "Sri Potti Sriramulu Nellore",
+    "osm_id": 2022291,
+    "osm_name": "Sri Potti Sri Ramulu Nellore District",
+    "state": "Andhra Pradesh",
+    "te": "శ్రీ పొట్టి శ్రీరాములు నెల్లూరు",
+    "te_status": "unverified"
+  },
+  {
+    "area_m2": 8948322296.786486,
+    "centre_xy": [
+      -5324190.870277838,
+      2856364.3735111803
+    ],
+    "id": 22,
+    "label": [
+      77.9641188083728,
+      14.1681806
+    ],
+    "lgd": 754,
+    "name": "Sri Sathya Sai",
+    "osm_id": 13997968,
+    "osm_name": "Sri Sathya Sai District",
+    "state": "Andhra Pradesh",
+    "te": "శ్రీ సత్యసాయి",
+    "te_status": "unverified"
+  },
+  {
+    "area_m2": 4441640854.792188,
+    "centre_xy": [
+      -4680503.2726467885,
+      3424878.8605663427
+    ],
+    "id": 23,
+    "label": [
+      84.14437640941347,
+      18.622438000000002
+    ],
+    "lgd": 519,
+    "name": "Srikakulam",
+    "osm_id": 2022096,
+    "osm_name": "Srikakulam District",
+    "state": "Andhra Pradesh",
+    "te": "శ్రీకాకుళం",
+    "te_status": "unverified"
+  },
+  {
+    "area_m2": 9982532011.555477,
+    "centre_xy": [
+      -5113316.249060674,
+      2854629.919182834
+    ],
+    "id": 24,
+    "label": [
+      79.67305035817583,
+      13.889192699999999
+    ],
+    "lgd": 752,
+    "name": "Tirupati",
+    "osm_id": 13997802,
+    "osm_name": "Tirupati District",
+    "state": "Andhra Pradesh",
+    "te": "తిరుపతి",
+    "te_status": "unverified"
+  },
+  {
+    "area_m2": 992222168.7217939,
+    "centre_xy": [
+      -4763073.32806928,
+      3333919.3536512996
+    ],
+    "id": 25,
+    "label": [
+      83.28276772667053,
+      17.80532215
+    ],
+    "lgd": 520,
+    "name": "Visakhapatnam",
+    "osm_id": 2022111,
+    "osm_name": "Visakhapatnam District",
+    "state": "Andhra Pradesh",
+    "te": "విశాఖపట్నం",
+    "te_status": "unverified"
+  },
+  {
+    "area_m2": 3922008890.266329,
+    "centre_xy": [
+      -4755801.160431874,
+      3382225.425253282
+    ],
+    "id": 26,
+    "label": [
+      83.46626919962608,
+      18.27600175
+    ],
+    "lgd": 521,
+    "name": "Vizianagaram",
+    "osm_id": 2022097,
+    "osm_name": "Vizianagaram District",
+    "state": "Andhra Pradesh",
+    "te": "విజయనగరం",
+    "te_status": "unverified"
+  },
+  {
+    "area_m2": 2267080712.5364475,
+    "centre_xy": [
+      -4935866.565419957,
+      3180393.441420111
+    ],
+    "id": 27,
+    "label": [
+      81.58852467942901,
+      16.64430285
+    ],
+    "lgd": 523,
+    "name": "West Godavari",
+    "osm_id": 2022127,
+    "osm_name": "West Godavari District",
+    "state": "Andhra Pradesh",
+    "te": "పశ్చిమ గోదావరి",
+    "te_status": "unverified"
+  },
+  {
+    "area_m2": 11632421151.413328,
+    "centre_xy": [
+      -5227595.581090362,
+      2921465.428112707
+    ],
+    "id": 28,
+    "label": [
+      78.65823315612057,
+      14.539575200000002
+    ],
+    "lgd": 504,
+    "name": "Y.S.R. Kadapa",
+    "osm_id": 2022290,
+    "osm_name": "YSR  Kadapa District",
+    "state": "Andhra Pradesh",
+    "te": "వైయస్ఆర్ కడప",
+    "te_status": "unverified"
+  },
+  {
+    "area_m2": 3981842038.7522516,
+    "centre_xy": [
+      -5326207.0034659095,
+      3419572.7897068947
+    ],
+    "id": 29,
+    "label": [
+      78.60867589700759,
+      19.54570375
+    ],
+    "lgd": 501,
+    "name": "Adilabad",
+    "osm_id": 2022179,
+    "osm_name": "Adilabad",
+    "state": "Telangana",
+    "te": "ఆదిలాబాద్",
+    "te_status": "unverified"
+  },
+  {
+    "area_m2": 7094032103.483031,
+    "centre_xy": [
+      -5052820.4520448055,
+      3275184.3221154525
+    ],
+    "id": 30,
+    "label": [
+      80.57126094455612,
+      17.71666325
+    ],
+    "lgd": 690,
+    "name": "Bhadradri Kothagudem",
+    "osm_id": 7698599,
+    "osm_name": "Bhadradri Kothagudem",
+    "state": "Telangana",
+    "te": "భద్రాద్రి కొత్తగూడెం",
+    "te_status": "unverified"
+  },
+  {
+    "area_m2": 1654053625.2523525,
+    "centre_xy": [
+      -5192280.285640186,
+      3291686.489242789
+    ],
+    "id": 31,
+    "label": [
+      79.42839689575725,
+      18.032699
+    ],
+    "lgd": 686,
+    "name": "Hanumakonda",
+    "osm_id": 2022181,
+    "osm_name": "Hanumakonda",
+    "state": "Telangana",
+    "te": "హనుమకొండ",
+    "te_status": "unverified"
+  },
+  {
+    "area_m2": 182469909.61427337,
+    "centre_xy": [
+      -5301573.426306781,
+      3204431.036820675
+    ],
+    "id": 32,
+    "label": [
+      78.46106473453146,
+      17.38878595
+    ],
+    "lgd": 507,
+    "name": "Hyderabad",
+    "osm_id": 7255986,
+    "osm_name": "Hyderabad",
+    "state": "Telangana",
+    "te": "హైదరాబాదు",
+    "te_status": "unverified"
+  },
+  {
+    "area_m2": 2851989270.5778284,
+    "centre_xy": [
+      -5279462.135557198,
+      3356961.414293244
+    ],
+    "id": 33,
+    "label": [
+      78.91506632525903,
+      18.82135895
+    ],
+    "lgd": 681,
+    "name": "Jagitial",
+    "osm_id": 7691427,
+    "osm_name": "Jagtial",
+    "state": "Telangana",
+    "te": "జగిత్యాల",
+    "te_status": "unverified"
+  },
+  {
+    "area_m2": 2104729145.0194204,
+    "centre_xy": [
+      -5216250.819157712,
+      3255539.0761584234
+    ],
+    "id": 34,
+    "label": [
+      79.24072182693956,
+      17.746584300000002
+    ],
+    "lgd": 689,
+    "name": "Jangoan",
+    "osm_id": 7666379,
+    "osm_name": "Jangaon",
+    "state": "Telangana",
+    "te": "జనగాం",
+    "te_status": "unverified"
+  },
+  {
+    "area_m2": 2952707843.6543503,
+    "centre_xy": [
+      -5154686.647814855,
+      3343293.5553145083
+    ],
+    "id": 35,
+    "label": [
+      79.96939659792528,
+      18.515987199999998
+    ],
+    "lgd": 687,
+    "name": "Jayashankar Bhupalapally",
+    "osm_id": 7698600,
+    "osm_name": "Jayashankar Bhupalapally",
+    "state": "Telangana",
+    "te": "జయశంకర్ భూపాలపల్లి",
+    "te_status": "unverified"
+  },
+  {
+    "area_m2": 2568475103.5921245,
+    "centre_xy": [
+      -5356081.8143998515,
+      3056510.201505446
+    ],
+    "id": 36,
+    "label": [
+      77.73415835077523,
+      16.0999202
+    ],
+    "lgd": 695,
+    "name": "Jogulamba Gadwal",
+    "osm_id": 7666146,
+    "osm_name": "Jogulamba Gadwal",
+    "state": "Telangana",
+    "te": "జోగులాంబ గద్వాల",
+    "te_status": "unverified"
+  },
+  {
+    "area_m2": 3696464628.9346633,
+    "centre_xy": [
+      -5363018.564690941,
+      3290650.030145766
+    ],
+    "id": 37,
+    "label": [
+      78.05393808043348,
+      18.316551
+    ],
+    "lgd": 685,
+    "name": "Kamareddy",
+    "osm_id": 7701043,
+    "osm_name": "Kamareddy",
+    "state": "Telangana",
+    "te": "కామారెడ్డి",
+    "te_status": "unverified"
+  },
+  {
+    "area_m2": 2127653023.3282096,
+    "centre_xy": [
+      -5230818.652114531,
+      3318253.3162025255
+    ],
+    "id": 38,
+    "label": [
+      79.2182933340387,
+      18.407599599999998
+    ],
+    "lgd": 508,
+    "name": "Karimnagar",
+    "osm_id": 2022180,
+    "osm_name": "Karimnagar",
+    "state": "Telangana",
+    "te": "కరీంనగర్",
+    "te_status": "unverified"
+  },
+  {
+    "area_m2": 4492575728.160579,
+    "centre_xy": [
+      -5084960.476879799,
+      3219421.6610798654
+    ],
+    "id": 39,
+    "label": [
+      80.40575365751027,
+      17.172918850000002
+    ],
+    "lgd": 509,
+    "name": "Khammam",
+    "osm_id": 2022134,
+    "osm_name": "Khammam",
+    "state": "Telangana",
+    "te": "ఖమ్మం",
+    "te_status": "unverified"
+  },
+  {
+    "area_m2": 4499813233.869476,
+    "centre_xy": [
+      -5226845.068182448,
+      3419552.0656537716
+    ],
+    "id": 40,
+    "label": [
+      79.4219792634756,
+      19.33381885
+    ],
+    "lgd": 699,
+    "name": "Kumuram Bheem Asifabad",
+    "osm_id": 7686917,
+    "osm_name": "Kumuram Bheem Asifabad",
+    "state": "Telangana",
+    "te": "కుమురం భీం ఆసిఫాబాద్",
+    "te_status": "unverified"
+  },
+  {
+    "area_m2": 3560573694.7725296,
+    "centre_xy": [
+      -5134452.396539855,
+      3259920.1628379654
+    ],
+    "id": 41,
+    "label": [
+      80.04134252767227,
+      17.7138983
+    ],
+    "lgd": 688,
+    "name": "Mahabubabad",
+    "osm_id": 7699117,
+    "osm_name": "Mahabubabad",
+    "state": "Telangana",
+    "te": "మహబూబాబాద్",
+    "te_status": "unverified"
+  },
+  {
+    "area_m2": 2744802439.6084814,
+    "centre_xy": [
+      -5344414.951586129,
+      3130397.6019444703
+    ],
+    "id": 42,
+    "label": [
+      77.95911462089693,
+      16.696568550000002
+    ],
+    "lgd": 512,
+    "name": "Mahabubnagar",
+    "osm_id": 2022227,
+    "osm_name": "Mahabubnagar",
+    "state": "Telangana",
+    "te": "మహబూబ్ నగర్",
+    "te_status": "unverified"
+  },
+  {
+    "area_m2": 3910090582.717966,
+    "centre_xy": [
+      -5209302.339577761,
+      3384938.1133733587
+    ],
+    "id": 43,
+    "label": [
+      79.51980961374048,
+      18.9812967
+    ],
+    "lgd": 684,
+    "name": "Mancherial",
+    "osm_id": 7686916,
+    "osm_name": "Mancherial",
+    "state": "Telangana",
+    "te": "మంచిర్యాల",
+    "te_status": "unverified"
+  },
+  {
+    "area_m2": 2768095122.819381,
+    "centre_xy": [
+      -5334686.883460359,
+      3257133.653308501
+    ],
+    "id": 44,
+    "label": [
+      78.21174498510584,
+      17.9375095
+    ],
+    "lgd": 513,
+    "name": "Medak",
+    "osm_id": 2022212,
+    "osm_name": "Medak",
+    "state": "Telangana",
+    "te": "మెదక్",
+    "te_status": "unverified"
+  },
+  {
+    "area_m2": 1087489963.6072028,
+    "centre_xy": [
+      -5293855.5366945295,
+      3221123.535249833
+    ],
+    "id": 45,
+    "label": [
+      78.52463873502381,
+      17.53498345
+    ],
+    "lgd": 700,
+    "name": "Medchal Malkajgiri",
+    "osm_id": 7664883,
+    "osm_name": "Medchal–Malkajgiri",
+    "state": "Telangana",
+    "te": "మేడ్చల్-మల్కాజ్‌గిరి",
+    "te_status": "unverified"
+  },
+  {
+    "area_m2": 4193271112.0324435,
+    "centre_xy": [
+      -5104775.314134263,
+      3329488.3051451426
+    ],
+    "id": 46,
+    "label": [
+      80.3458815996114,
+      18.31453475
+    ],
+    "lgd": 720,
+    "name": "Mulugu",
+    "osm_id": 9502792,
+    "osm_name": "Mulugu",
+    "state": "Telangana",
+    "te": "ములుగు",
+    "te_status": "unverified"
+  },
+  {
+    "area_m2": 6398652110.409971,
+    "centre_xy": [
+      -5270734.739083431,
+      3104204.513646822
+    ],
+    "id": 47,
+    "label": [
+      78.68304333132829,
+      16.415762649999998
+    ],
+    "lgd": 694,
+    "name": "Nagarkurnool",
+    "osm_id": 7700442,
+    "osm_name": "Nagarkurnool",
+    "state": "Telangana",
+    "te": "నాగర్ కర్నూల్",
+    "te_status": "unverified"
+  },
+  {
+    "area_m2": 7218234288.6360235,
+    "centre_xy": [
+      -5210930.950698709,
+      3165265.6212310526
+    ],
+    "id": 48,
+    "label": [
+      79.21749353315548,
+      16.8579636
+    ],
+    "lgd": 514,
+    "name": "Nalgonda",
+    "osm_id": 2022221,
+    "osm_name": "Nalgonda",
+    "state": "Telangana",
+    "te": "నల్లగొండ",
+    "te_status": "unverified"
+  },
+  {
+    "area_m2": 2376249276.526416,
+    "centre_xy": [
+      -5388603.549854965,
+      3111498.832353059
+    ],
+    "id": 49,
+    "label": [
+      77.61648447017446,
+      16.700551750000002
+    ],
+    "lgd": 721,
+    "name": "Narayanpet",
+    "osm_id": 9502953,
+    "osm_name": "Narayanpet",
+    "state": "Telangana",
+    "te": "నారాయణపేట",
+    "te_status": "unverified"
+  },
+  {
+    "area_m2": 3724289799.8214736,
+    "centre_xy": [
+      -5347534.817156815,
+      3374393.6101685027
+    ],
+    "id": 50,
+    "label": [
+      78.39660898429065,
+      19.091520950000003
+    ],
+    "lgd": 680,
+    "name": "Nirmal",
+    "osm_id": 7686918,
+    "osm_name": "Nirmal",
+    "state": "Telangana",
+    "te": "నిర్మల్",
+    "te_status": "unverified"
+  },
+  {
+    "area_m2": 4167211240.7311654,
+    "centre_xy": [
+      -5353378.212725456,
+      3331110.901952049
+    ],
+    "id": 51,
+    "label": [
+      78.1921832822481,
+      18.7248422
+    ],
+    "lgd": 516,
+    "name": "Nizamabad",
+    "osm_id": 2022213,
+    "osm_name": "Nizamabad",
+    "state": "Telangana",
+    "te": "నిజామాబాదు",
+    "te_status": "unverified"
+  },
+  {
+    "area_m2": 2196124383.603578,
+    "centre_xy": [
+      -5210233.726931695,
+      3346464.9124949365
+    ],
+    "id": 52,
+    "label": [
+      79.49501710882896,
+      18.62065305
+    ],
+    "lgd": 682,
+    "name": "Peddapalli",
+    "osm_id": 7691426,
+    "osm_name": "Peddapalli",
+    "state": "Telangana",
+    "te": "పెద్దపల్లి",
+    "te_status": "unverified"
+  },
+  {
+    "area_m2": 1896693374.6079369,
+    "centre_xy": [
+      -5285779.171334175,
+      3313859.320415641
+    ],
+    "id": 53,
+    "label": [
+      78.76455837158737,
+      18.452116
+    ],
+    "lgd": 683,
+    "name": "Rajanna Sircilla",
+    "osm_id": 7691428,
+    "osm_name": "Rajanna Sircilla",
+    "state": "Telangana",
+    "te": "రాజన్న సిరిసిల్ల",
+    "te_status": "unverified"
+  },
+  {
+    "area_m2": 4992179751.059018,
+    "centre_xy": [
+      -5303313.969232785,
+      3176611.259542404
+    ],
+    "id": 54,
+    "label": [
+      78.3970978701631,
+      17.133395399999998
+    ],
+    "lgd": 518,
+    "name": "Ranga Reddy",
+    "osm_id": 2022214,
+    "osm_name": "Ranga Reddy",
+    "state": "Telangana",
+    "te": "రంగారెడ్డి",
+    "te_status": "unverified"
+  },
+  {
+    "area_m2": 4447568504.030747,
+    "centre_xy": [
+      -5375146.761506826,
+      3232621.639555685
+    ],
+    "id": 55,
+    "label": [
+      77.82271887720601,
+      17.8684342
+    ],
+    "lgd": 691,
+    "name": "Sangareddy",
+    "osm_id": 7663387,
+    "osm_name": "Sangareddy",
+    "state": "Telangana",
+    "te": "సంగారెడ్డి",
+    "te_status": "unverified"
+  },
+  {
+    "area_m2": 3635373319.2618732,
+    "centre_xy": [
+      -5268838.39065129,
+      3273642.3882370465
+    ],
+    "id": 56,
+    "label": [
+      78.89611304969961,
+      18.005585099999998
+    ],
+    "lgd": 692,
+    "name": "Siddipet",
+    "osm_id": 7665824,
+    "osm_name": "Siddipet",
+    "state": "Telangana",
+    "te": "సిద్ధిపేట",
+    "te_status": "unverified"
+  },
+  {
+    "area_m2": 3584798937.1537266,
+    "centre_xy": [
+      -5150935.8024438005,
+      3196380.745607532
+    ],
+    "id": 57,
+    "label": [
+      79.7925329742427,
+      17.08001385
+    ],
+    "lgd": 696,
+    "name": "Suryapet",
+    "osm_id": 7699215,
+    "osm_name": "Suryapet",
+    "state": "Telangana",
+    "te": "సూర్యాపేట",
+    "te_status": "unverified"
+  },
+  {
+    "area_m2": 3607176423.9451737,
+    "centre_xy": [
+      -5380504.782282898,
+      3176423.67751415
+    ],
+    "id": 58,
+    "label": [
+      77.74529700637382,
+      17.2702855
+    ],
+    "lgd": 698,
+    "name": "Vikarabad",
+    "osm_id": 7685040,
+    "osm_name": "Vikarabad",
+    "state": "Telangana",
+    "te": "వికారాబాదు",
+    "te_status": "unverified"
+  },
+  {
+    "area_m2": 2170762773.419886,
+    "centre_xy": [
+      -5331117.318196323,
+      3084044.0614759387
+    ],
+    "id": 59,
+    "label": [
+      77.98644727021286,
+      16.285294399999998
+    ],
+    "lgd": 693,
+    "name": "Wanaparthy",
+    "osm_id": 7700765,
+    "osm_name": "Wanaparthy",
+    "state": "Telangana",
+    "te": "వనపర్తి",
+    "te_status": "unverified"
+  },
+  {
+    "area_m2": 1782388261.7067752,
+    "centre_xy": [
+      -5163900.096120236,
+      3276269.143217497
+    ],
+    "id": 60,
+    "label": [
+      79.80194703398814,
+      17.867581350000002
+    ],
+    "lgd": 522,
+    "name": "Warangal",
+    "osm_id": 7666378,
+    "osm_name": "Warangal",
+    "state": "Telangana",
+    "te": "వరంగల్",
+    "te_status": "unverified"
+  },
+  {
+    "area_m2": 3421597588.9063926,
+    "centre_xy": [
+      -5242967.10985766,
+      3220424.20738594
+    ],
+    "id": 61,
+    "label": [
+      79.09049097612106,
+      17.42819665
+    ],
+    "lgd": 697,
+    "name": "Yadadri Bhuvanagiri",
+    "osm_id": 7700443,
+    "osm_name": "Yadadri Bhuvanagiri",
+    "state": "Telangana",
+    "te": "యాదాద్రి భువనగిరి",
+    "te_status": "unverified"
+  }
+]

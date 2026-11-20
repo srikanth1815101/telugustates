@@ -1,0 +1,15 @@
+<resources>
+  <string name="app_name">Telugu States</string>
+  <color name="pine">#193C32</color>
+  <color name="paper">#F4F2E8</color>
+  <style name="AtlasTheme" parent="android:style/Theme.Material.Light.NoActionBar">
+    <item name="android:windowBackground">@color/paper</item>
+    <item name="android:fontFamily">sans</item>
+    <item name="android:colorAccent">#285440</item>
+    <item name="android:statusBarColor">@color/pine</item>
+    <item name="android:navigationBarColor">@color/pine</item>
+    <item name="android:windowLightStatusBar">false</item>
+    <item name="android:windowLightNavigationBar">false</item>
+    <item name="android:windowActionModeOverlay">true</item>
+  </style>
+</resources>

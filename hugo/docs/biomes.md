@@ -1,0 +1,5 @@
+# What shapes a landscape
+
+WorldCover crop/forest/marsh fractions, acre land/water class, Copernicus elevation and slope, coast distance, soil, rock and rainfall inform placement. Coast palms and mangroves have different conditions; mangroves require mapped wet-coast cover. Bapatla 15.991240 N, 80.260022 E: 12 m, 25 km in the coarse coast-distance layer, 100% crop cover in its source block. That supports a simulated farming plain, not default umbrella acacia. Inland fields may be cotton, maize, chilli or sunflower. Forest stops retain broadleaf/bamboo forms; rocky scrub sites do not acquire paddy merely because a home is nearby.
+
+Fields exclude mapped water, high built/tree cover, steep land, unsuitable elevations, assigned houses and active settlement paths. Prepared, planted, growing, mature, harvested and fallow appearances follow the shared agricultural calendar. Species, beds, irrigation and timing are artistic interpretations, **not a real parcel-level crop survey**. Crops are scenery and never secretly credit the food ledger.

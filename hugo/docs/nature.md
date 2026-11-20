@@ -1,0 +1,5 @@
+# A walk before the first house
+
+The public world needs no residents to show terrain, rivers, the coast, layered grasses, rock, regional stands, seasonal fields and wildlife. Follow the featured viewpoints rather than assuming an acre is an actual farm. The regional scene names identify modelled views, not photographic replicas or claims that the exact real trail exists. Distant vegetation chooses from local cover, precipitation and coastal conditions. In storms land animals approach nearby cover when a permitted route exists; they never snap to another habitat. At night many slow down. On Low, nearby contact and silhouettes take priority over effects. Falls need both a geocoded record and mapped descending water. No major water feature was invented.
+
+Sources and limits are in `site/static/ecology/sources.json`, `data/frozen/SOURCES.json` and `docs/biomes.md`. The comparison gallery records the actual start position and local dataset observations for each capture. A dry/fallow field is not evidence of a factual drought.
