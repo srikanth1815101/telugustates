@@ -1,4 +1,4 @@
-# Telugu States Atlas · 7.12.0
+# Telugu States Atlas · 7.14.0
 
 ## Run the map
 
@@ -12,22 +12,22 @@ Open **http://localhost:1313/**. No npm install, parent repository, remote tiles
 
 ## What is on the map?
 
-**300 published house files, 300 different virtual acres, 61 districts, 703 authored road paths, 27 trails, 13 places.** All 300 current house records are marked *demo* by their authors. The house inventory is not a count of real people or approved community members. Search any recorded username, pick a plot or open `/houses/` for the directory. There is one public catalog; no review switch is needed. The map groups plots at low zoom, shows individual plots up close, and streams nearby houses, entrance paths, fences and physical signboards in 3D. A place pin opens its authored location; places are not duplicated in a scenic menu or a guide.
+**133 new fictional households, 133 individually assigned farm acres, ten occupied villages in ten districts, 24 nature trails and 13 places.** The other 51 districts remain geographical districts, without seed households. The house inventory is not a count of real people or approved community members. Search any recorded username, pick a plot or open `/houses/` for the directory. There is one public catalog; no review switch is needed. The map groups plots at low zoom, shows individual plots up close, and streams nearby houses, courtyards, mud paths, shared shade trees and physical signboards in 3D. A place pin opens its authored location; places are not duplicated in a scenic menu or a guide.
 
 The four resource totals are **food, currency, gold and houses**. Food, currency and gold are explicitly authored balances. Houses is the number of published house records; adding a house does not mint currency. This release contains no private addresses, GPS feed, live weather feed or remote media player. Terrain follows the bundled geography; houses, vegetation, water depths and weather illustrate the virtual world.
 
 ## Try the new rooms and water
 
-- **Same shell, different lives:** visit **@demo_user134** for a loom and yarn, **@demo_user181** for books and a desk, **@demo_user148** for a cooking hearth, or **@demo_user163** for a plant bench. All four houses have the pillared-tile exterior. Doors, floor space, furniture footprints and entry views are planned together. The owner's seed selects an activity, room arrangement, colours, wall finish, lighting and floor covering. Leaving and coming back does not reroll them.
-- **River bend:** stand still at the starting rock. Follow one leaf or a patch of reflected sky past it; then look down at the earth beside your boots. A thin tongue of water runs along the low bank, covers the dirt, and slips away, often while the next patch is advancing. Pull back to **42 m** to see the stronger middle current. This is permanent river water; leave rain off to see it clearly. **Reservoir shallows** does not get that downstream motion. [Measurements and modelling limits](River-current.md).
+- **Village walk:** search **@palnadu_demo01**. Enter its furnished room or choose either destination icon beside Settings. Walk between the home and its acre without leaving the 3D world.
+- **River bend:** stand still at the starting rock. Follow one leaf or a patch of reflected sky past it; then look down at the earth beside your boots. In the **332 m** orbit, watch the water near both banks as well as the middle. A thin tongue of water runs along the low bank, covers the dirt, and slips away, often while the next patch is advancing. Pull back to **42 m** to see the stronger middle current. This is permanent river water; leave rain off to see it clearly. **Reservoir shallows** does not get that downstream motion. [Measurements and modelling limits](River-current.md).
 - **Coastal strand:** walk down to where the wash reaches your boots. Look beyond the thin edge: the next green face rises, its crest picks up foam, and the ridge travels in from the bay. Then watch the sand. The slower return from 7.10 is unchanged. Wading, the wet sand and the water share a bed and clock. This is illustrative breaking surf and run-up, not a tide forecast.
 
-## Houses, doors and fence crossings
+## Village houses and agricultural acres
 
-Search **@demo_user134** in Visakhapatnam. Follow the path through the timber gap and step onto the veranda. Tap **Enter house** (keyboard **E**, standard controller **X / west face button**) at the front door. The leaf opens into a furnished ground-floor room. Walk and drag to look. Tap **Leave house**, press **E**, or walk back through the open doorway. The indoor view is first person; your outdoor camera preference returns when you leave. A saved walk inside reopens in the room. English and Telugu labels are included.
+Search **@palnadu_demo01** in Palnadu. The search opens at the home, not the field. Follow the short courtyard path onto the veranda. Tap **Enter house** (keyboard **E**, standard controller **X / west face button**) at the front door. The leaf opens into a furnished ground-floor room. Walk and drag to look. Tap **Leave house**, press **E**, or walk back through the open doorway. The indoor view is first person; your outdoor camera preference returns when you leave. A saved walk inside reopens in the room. English and Telugu labels are included.
 
 - Every house uses a local cut-and-fill terrace under the full footprint, including its veranda and wings. Its height balances the hillside and the approach from the street. Graded shoulders taper into natural ground, without flattening the whole acre. Boot contact, the visible foundation and the distant terrain use the same terrace faces.
-- At a marked footpath, walk through without jumping. Both neighbouring plots use the same break, even where a curving track crosses away from the owner's gate. Away from the path, walk towards a timber rail and press **Jump / Space** while moving to clear it. Walking into an intact rail still stops you.
+- Select **My Acre → Walk there** for a marked route. Use the stick/WASD; the next turn and remaining path length follow your progress. **Teleport** opens the same acre at its walkable field entrance. Only the selected field is outlined. **My Home** also offers **Walk there** and **Teleport**, including in local orbit.
 - All 12 archetypes have a usable primary ground-floor room; stair towers, upstairs, side wings and farm sheds are not additional rooms. These interiors are illustrative, not surveys or floor plans of real homes.
 
 ## Walk, swim and listen
@@ -44,7 +44,7 @@ At the **1.1 km orbit** the fitted shoreline now has a height independent of the
 
 In third person, press Jump while moving. Both rigs use a retargeted non-looping model performance: the knees fold, the feet extend for the strike, and the body compresses on contact. The motor supplies the trajectory; grounded leg support releases in flight. Wading, rock grips and swimming remain separate.
 
-The five original surface photographs now overlap at irregular, rotated, map-fixed sampling positions. Smooth material weights replace the old single-tile choice in Saver. Far ground uses nonperiodic large-scale colour. On cliffs the material is sampled on the vertical planes as well as the ground plane, so a patch does not stretch into a column up the bank. Rain darkens the same surface; the small runoff network follows local downhill connections and drops are scattered afresh, not drawn in square rows.
+Full detail blends the five original surface photographs at irregular, rotated, map-fixed positions. The mobile dry-land shader uses a lighter photo blend. Smooth material weights replace the old single-tile choice in Saver. Far ground uses nonperiodic large-scale colour. On cliffs the material is sampled on the vertical planes as well as the ground plane, so a patch does not stretch into a column up the bank. Rain darkens the same surface; the small runoff network follows local downhill connections and drops are scattered afresh, not drawn in square rows.
 
 ## Rivers from a distance
 
@@ -75,18 +75,18 @@ Create `content/houses/river_studio.md`:
 ```yaml
 ---
 title: River studio
-district: Hyderabad
+district_id: 17
 archetype: round-thatch
 wall_color: '#789798'
 ---
 A note to display on the house page.
 ```
 
-The lowercase filename supplies the handle unless `username` is specified. Rebuild, search `river_studio`, or open `/houses/river_studio/`. Hugo assigns a free suggested acre in the chosen district, reserves explicit cells first, and rejects duplicate handles/cells. With no district specified the default is Hyderabad (ID 32). An unclassified new record is labelled *unreviewed*, still counted and visible. Only put public information in these files. If a suggested pool is full, provide an unused, buildable cell; the build reports the problem rather than stacking houses. To guarantee an automatic reservation never changes as future auto-allocated records are added, copy its two integer `c` values from `catalog.json` to `cell: [x, y]` in the Markdown.
+The lowercase filename supplies the handle unless `username` is specified. Use an explicit district. Keep the newly published handles, filenames, URLs and acre cells stable. Run **`node tools/settle.mjs`** (Node 20+ and Hugo on PATH), then rebuild Hugo. Commit the changed Markdown **and** `data/settlements.json` together; no network, package installation or backend is used. A production build refuses an unpinned record or conflicting coordinates.
 
-- `district_id`, `cell: [x,y]` and optional `elevation_m` describe the reservation. The UI derives its centre coordinates from the cell. In-plot placement uses `building.lateral_m` and `building.setback_m`; the front door, path, pad, opening and nameboard stay aligned.
-- `archetype`, `size_m: [width, depth, height]`, `facing`, `wall_color`, `roof_color`, `props` and `sign` control the constructed house. Supported forms are listed in `static/js/resident-design.js`. `sign` accepts `wood`, `trim` and an inscription containing the current username. Otherwise it prints `@username`.
-- An entrance is generated if an owned route is absent. A new file does **not** need copied fences, a profile URL, a prebuilt mesh or a custom Hugo `type`. If you rename an existing record, update its filename, `username`, custom `url` if present and any road/trail `owner` referring to it.
+- `cell` / `acreLocation` are the immutable integer southwest field corner. `homeLocation` is the fractional centre of the house; `villageId` is a stable settlement, **not** a district road bundle. Search and `/houses/<username>/` remain the same. `#/u/<username>` visits the home, `#/acre/<username>` visits the land, and the existing `#/plot/<username>` locates the acre on the paper map.
+- The planner reserves growth space without vacant buildings, favours the occupied village where safe space remains, checks actual cut/fill terrain and permanent water, and joins new lane branches to existing stored vertices. Previously published doors, courtyards, field entries, common shade spots and path polylines do not move. The original fields remain whole; a walking right of way does not transfer ownership. Failures are reported, not solved by moving an old resident. See **[Village layout](Villages.md)** for coordinate conventions and measured checks.
+- `archetype`, `size_m`, wall/roof colours, `props` and sign are the resident’s building design. The facing and depth of the front yard come from the fixed residential parcel. If changing the footprint, review the parcel and rerun geometry checks; do not move a neighbour to make it fit. A seed still determines furnishings. No profile lookup or private address is required.
 
 ### Other content
 
@@ -100,7 +100,7 @@ The lowercase filename supplies the handle unless `username` is specified. Rebui
 | Interface copy | `content/languages/{en,te}.md` | Bilingual runtime dictionaries (JSON in the body). The homepage intro is in `content/_index.md`. |
 | Seasonal clock, ecology and model assignments | `content/world/{calendar,ecology,models}.md` | YAML in the body, read by the simulator and the renderer. |
 
-Grid coordinates are **[x,y] in fractional atlas cells**, not lat/lon. One cell has 63.615 m sides; +x east, +y north in the atlas projection. Supply two or more points per route. Keep paths clear of fenceposts. `publication` and `sample_home` on historical data do not hide it. Pre-existing regional raster/vector geography lives under `static/frozen/`, `static/survey/` and `static/ecology/`.
+Grid coordinates are **[x,y] in fractional atlas cells**, not lat/lon. One cell has 63.615 m sides; +x east, +y north in the atlas projection. Supply two or more points per route. Keep authored paths clear of buildings, stones and the commons. `publication` and `sample_home` on historical data do not hide it. Pre-existing regional raster/vector geography lives under `static/frozen/`, `static/survey/` and `static/ecology/`.
 
 ## Optional local checks and credits
 
@@ -108,7 +108,9 @@ With Node 20+ and Hugo on the path (no npm dependencies):
 
 ```sh
 node tools/check-content.mjs --tiles    # Public lookup, geometry inputs, pages, counts and 1,193 original terrain hashes
-node tools/check-homes.mjs              # Full terraces, hollow rooms, jumpable timber and curved path clearances
+node tools/check-growth.mjs             # Two batches in a disposable copy; original pins and lanes cannot move
+node tools/check-villages.mjs           # Every home, parcel, shareable junction and dry route
+node tools/check-homes.mjs              # Full terraces, hollow rooms, four surveyed corners and synthetic rail jumps
 node tools/check-motion.mjs             # Controller, rigs, camera and water/terrain regressions
 node tools/check-stones.mjs             # Tap/held jumps, visible-mesh tops, crossing/off and a too-high negative control
 node tools/check-swim.mjs               # Both rigs: forward reach, moving wrists, upright treading, return to land
@@ -128,4 +130,6 @@ The prebuilt coverage pages are under `static/survey/banks/`. You do not need to
 
 For the optional hydraulic rebuild, run `python3 tools/bake-water-stages.py /path/to/empty-scratch` (Python, NumPy, SciPy 1.12+, shapely 2, pyproj, rasterio and scikit-image; Node 20). This includes the vector and far-stage bake. The prepared data and its layout are in `static/hydraulics/`; the source-only tracks and clipped HydroLAKES geometries are not downloaded by the app.
 
-For the offline Android wrapper and manual build, extract the companion ZIP **in the same parent directory** and see `Android/README.md`. Do not commit the generated site, ZIP downloads, APKs or signing secrets to your source repository.
+For the offline Android wrapper and manual build, open the sibling [`Android/README.md`](../Android/README.md). The [build workflow](../.github/workflows/build-android.yml) is already in place. The [handover guide](../Notes/NEW-CHAT-SETUP.md) explains repository import. Do not commit the generated site, APKs or signing secrets to your source repository.
+
+**7.14 distant current:** `static/current/` stores the bank coverage and signed east/south velocity; `node tools/bake-current.mjs` can rebuild it from the frozen inputs. `node tools/bake-survey-colours.mjs` regenerates the two pixel-equivalent overview colour charts. No request to an external map service is made. Pool levels, vector profiles, coastal surf and survey geometry are not replaced with a flat moving overlay.

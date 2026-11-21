@@ -214,7 +214,7 @@ async function route() {
   if (!a) return;
   const token = ++seq;
   const hash = location.hash,
-    match = hash.match(/^#\/(u|plot)\/([a-zA-Z0-9_.]+)$/),
+    match = hash.match(/^#\/(u|plot|acre)\/([a-zA-Z0-9_.]+)$/),
     f = hash.match(
       /^#\/field\/([a-z0-9_-]+)(?:\/(ground|mid|far|bank|grove))?$/,
     ),
@@ -269,11 +269,11 @@ async function route() {
     return;
   }
   paper(false);
-  if (cold?.route === hash && cold.active) {
+  if (cold?.route === hash && cold.active && (!r || cold.layout === 714)) {
     const b = cold;
     cold = null;
     v.restore(b, r, s);
-  } else if (r) v.visit(r);
+  } else if (r) v.visit(r, match[1] === "acre" ? "acre" : "gate");
   else if (s) v.guide(s.id, f[2] || "ground");
   else v.coordinate(+pt[2], +pt[1]);
 }
@@ -348,6 +348,8 @@ if (home) {
     };
     $("#find").onsubmit = async (e) => {
       e.preventDefault();
+      cold = null;
+      requestFull();
       const u = normalize($("#handle").value);
       if (!u || !(await lookup(u))) {
         tell(
@@ -382,7 +384,7 @@ if (home) {
     window.addEventListener("atlas:visit", (e) => {
       location.hash = "/u/" + e.detail;
     });
-    cold = readPosition(a);
+    cold = /^#\/(u|acre)\//.test(location.hash) ? null : readPosition(a);
     if (cold?.active && !location.hash)
       history.replaceState(null, "", cold.route);
     if (cold && !cold.active && !location.hash)

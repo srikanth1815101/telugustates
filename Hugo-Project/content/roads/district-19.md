@@ -1,106 +1,14 @@
 ---
-title: District 19 frontage network
+title: District 19 infrastructure
 district_id: 19
-paths:
-- owner: demo_user128
-  type: entrance
-  w: 0.9
-  xy:
-  - - 8024.5317535
-    - 9038.8255129
-  - - 8024.5317535
-    - 9038.9779926
-  - - 8024.5317535
-    - 9039.0
-- type: footpath
-  w: 1.4
-  xy:
-  - - 8024.5317535
-    - 9039.0
-  - - 8024.490440754145
-    - 9039.514141212414
-- owner: demo_user189
-  type: entrance
-  w: 0.9
-  xy:
-  - - 8024.4913542
-    - 9040.1729152
-  - - 8024.4913542
-    - 9040.0220074
-  - - 8024.4913542
-    - 9040.0
-- type: footpath
-  w: 1.4
-  xy:
-  - - 8024.4913542
-    - 9040.0
-  - - 8024.490440754145
-    - 9039.514141212414
-- owner: demo_user250
-  type: entrance
-  w: 0.9
-  xy:
-  - - 8025.4474967
-    - 9038.6970526
-  - - 8025.4474967
-    - 9038.9779926
-  - - 8025.4474967
-    - 9039.0
-- type: footpath
-  w: 1.4
-  xy:
-  - - 8025.4474967
-    - 9039.0
-  - - 8025.532514805058
-    - 9039.47584032598
-- owner: demo_user67
-  type: entrance
-  w: 0.9
-  xy:
-  - - 8025.5042443
-    - 9040.1917787
-  - - 8025.5042443
-    - 9040.0220074
-  - - 8025.5042443
-    - 9040.0
-- type: footpath
-  w: 1.4
-  xy:
-  - - 8025.5042443
-    - 9040.0
-  - - 8025.532514805058
-    - 9039.47584032598
-- type: village
-  w: 1.8634547476889567
-  xy:
-  - - 8024.490441
-    - 9039.514141
-  - - 8024.619856
-    - 9039.486382
-  - - 8024.749399
-    - 9039.46212
-  - - 8024.87918
-    - 9039.44432
-  - - 8025.009271
-    - 9039.434963
-  - - 8025.139699
-    - 9039.434745
-  - - 8025.270436
-    - 9039.44297
-  - - 8025.401411
-    - 9039.457656
-  - - 8025.532515
-    - 9039.47584
+paths: []
 network:
-  cellsPerHome: 0.5
-  homes: 4
+  cellsPerHome: 0
+  homes: 0
   lit: false
   poles: []
-  root:
-  - 8024
-  - 9039
   services: []
   spans: []
   v: 1
 ---
-Frontage routes for registered houses. Reserved demo approaches are not public streets.
+Only funded public works belong here. Residential lanes come from the village register.

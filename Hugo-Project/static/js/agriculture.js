@@ -98,7 +98,7 @@ export function farms(s, centre, tier, year, paths = []) {
     for (let j = -R; j <= R; j++) {
       const x = Math.floor(centre.x) + i,
         y = Math.floor(centre.y) + j;
-      if (s.homeMap.has(x + "," + y)) continue;
+      if (!s.acres?.has(x + "," + y)) continue;
       const t = s.t.at(x + 0.5, y + 0.5);
       if (!t) continue;
       const roll = h(x, y),

@@ -1,106 +1,14 @@
 ---
-title: District 51 frontage network
+title: District 51 infrastructure
 district_id: 51
-paths:
-- owner: demo_user160
-  type: entrance
-  w: 0.9
-  xy:
-  - - 1541.4396369
-    - 9764.8050774
-  - - 1541.4396369
-    - 9764.9779926
-  - - 1541.4396369
-    - 9765.0
-- type: footpath
-  w: 1.4
-  xy:
-  - - 1541.4396369
-    - 9765.0
-  - - 1541.500041334629
-    - 9765.44759476373
-- owner: demo_user221
-  type: entrance
-  w: 0.9
-  xy:
-  - - 1541.5194923
-    - 9766.2064607
-  - - 1541.5194923
-    - 9766.0220074
-  - - 1541.5194923
-    - 9766.0
-- type: footpath
-  w: 1.4
-  xy:
-  - - 1541.5194923
-    - 9766.0
-  - - 1541.500041334629
-    - 9765.44759476373
-- owner: demo_user282
-  type: entrance
-  w: 0.9
-  xy:
-  - - 1540.5243653
-    - 9764.8223689
-  - - 1540.5243653
-    - 9764.9779926
-  - - 1540.5243653
-    - 9765.0
-- type: footpath
-  w: 1.4
-  xy:
-  - - 1540.5243653
-    - 9765.0
-  - - 1540.4738207214978
-    - 9765.44548407917
-- owner: demo_user99
-  type: entrance
-  w: 0.9
-  xy:
-  - - 1540.5213786
-    - 9766.2781734
-  - - 1540.5213786
-    - 9766.0220074
-  - - 1540.5213786
-    - 9766.0
-- type: footpath
-  w: 1.4
-  xy:
-  - - 1540.5213786
-    - 9766.0
-  - - 1540.4738207214978
-    - 9765.44548407917
-- type: village
-  w: 2.0357489512069153
-  xy:
-  - - 1541.500041
-    - 9765.447595
-  - - 1541.371797
-    - 9765.43098
-  - - 1541.243548
-    - 9765.416854
-  - - 1541.11529
-    - 9765.407328
-  - - 1540.987019
-    - 9765.403812
-  - - 1540.858735
-    - 9765.406801
-  - - 1540.730438
-    - 9765.415799
-  - - 1540.602132
-    - 9765.429397
-  - - 1540.473821
-    - 9765.445484
+paths: []
 network:
-  cellsPerHome: 0.5
-  homes: 4
+  cellsPerHome: 0
+  homes: 0
   lit: false
   poles: []
-  root:
-  - 1541
-  - 9765
   services: []
   spans: []
   v: 1
 ---
-Frontage routes for registered houses. Reserved demo approaches are not public streets.
+Only funded public works belong here. Residential lanes come from the village register.

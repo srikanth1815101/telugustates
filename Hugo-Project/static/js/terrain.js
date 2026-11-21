@@ -1,3 +1,4 @@
+import { velocityAt } from "./current-page.js";
 import {
   runPace,
   shelfDepth,
@@ -22,6 +23,7 @@ const channelWater = (ch) =>
     ? (ch.seg.width ? 0.91 : 0.66) *
       (1 - smooth(0.12, 1.58, ch.dist / ch.seg.half))
     : 0;
+const signedWetEdge = (s, x, y) => s.mask(x, y)[0] > 0.3;
 export class Surface {
   constructor(tiles, origin, focus = null) {
     this.t = tiles;
@@ -106,9 +108,51 @@ export class Surface {
     return out;
   }
   baseZ(i, j) {
-    return this.stencil(Math.floor(i / 256), Math.floor(j / 256))[
-      (j & 255) * 257 + (i & 255)
-    ];
+    const tx = i >> 8,
+      ty = j >> 8,
+      tag = tx + "_" + ty;
+    let page = this.maps.get(tag);
+    if (!page) {
+      page = new Float32Array(257 * 257);
+      page.fill(NaN);
+      this.maps.set(tag, page);
+    }
+    const idx = (j & 255) * 257 + (i & 255);
+    if (!Number.isNaN(page[idx])) return page[idx];
+    const local = this.t.cache.get(tag),
+      xx = i & 255,
+      yy = j & 255;
+    let z = 0,
+      w = 0;
+    for (let y = 0; y < 6; y++) {
+      let hv = 0,
+        hw = 0;
+      for (let x = 0; x < 6; x++) {
+        const a = xx + x - 3,
+          b = yy + y - 3,
+          h =
+            local && a >= 0 && a < 256 && b >= 0 && b < 256
+              ? local.h[(b >> 1) * 128 + (a >> 1)]
+              : this.t.height(i + x - 3, j + y - 3);
+        if (h !== -32768) {
+          hv += h * K[x];
+          hw += K[x];
+        }
+      }
+      z += hv * K[y];
+      w += hw * K[y];
+    }
+    let h0 = w ? z / w : 0;
+    const sl = local?.s[yy * 256 + xx] || 0;
+    if (w && sl > 8) {
+      const real = this.sharp(i, j) / this.relief + this.o.z;
+      h0 += (real - h0) * Math.min(0.91, (sl - 8) * 0.042);
+      const period = this.ec?.at(i, j)?.rock === 2 ? 10 : 14,
+        b = Math.floor(h0 / period),
+        u = h0 / period - b;
+      h0 += (smooth(0.29, 0.69, u) - u) * period * smooth(11, 27, sl) * 0.4;
+    }
+    return (page[idx] = Math.fround(w ? (h0 - this.o.z) * this.relief : 0));
   }
   waterLevel(x, y, ch = null) {
     const v = headAt(this, x, y);
@@ -271,6 +315,17 @@ export class Surface {
       q = this.channel(x, y),
       lake =
         !!((c?.head || 0) & 32768) || (!c?.head && headAt(this, x, y)?.pool);
+    const wide = () => velocityAt(this.t, x, y);
+    if (
+      (lake && c?.c === 4) ||
+      (!q && (c?.c === 4 || (!lake && signedWetEdge(this, x, y))))
+    ) {
+      const baked = wide();
+      if (baked) {
+        baked[2] *= wet;
+        return baked;
+      }
+    }
     if (lake) {
       // Still head controls elevation, not the presence of a mapped inflowing thread. No current on open standing water.
       if (!q || wet <= 0 || q.dist > q.seg.half * 1.35 + 0.32)
@@ -693,21 +748,39 @@ function* chunkRows(s, cx, cy, step, mat, light = false) {
     const a = [];
     for (let i = lo; i < lo + 64; i++) {
       const d = Math.max(margin, Math.abs(i + 0.5 - focus)),
-        sub = s.surveyGrid
-          ? d < 9
-            ? 1
-            : 0
-          : d < 1.9 && inland
-            ? 20
-            : d < 4.7
-              ? 10
-              : d < 5.7
+        sub = s.midRiverLOD
+          ? d < 3
+            ? 4
+            : d < 8
+              ? 2
+              : d < 14
+                ? 1
+                : 0
+          : s.mobileMesh && !s.surveyGrid
+            ? d < 1.65
+              ? 8
+              : d < 3.2
                 ? 5
-                : d < 7
-                  ? 3
-                  : d < 12
+                : d < 5.2
+                  ? 2
+                  : d < 9
                     ? 1
-                    : 0;
+                    : 0
+            : s.surveyGrid
+              ? d < 9
+                ? 1
+                : 0
+              : d < 1.9 && inland
+                ? 20
+                : d < 4.7
+                  ? 10
+                  : d < 5.7
+                    ? 5
+                    : d < 7
+                      ? 3
+                      : d < 12
+                        ? 1
+                        : 0;
       if (sub) {
         for (let k = 0; k < sub; k++) a.push(i + k / sub);
       } else if (
@@ -769,17 +842,11 @@ function* chunkRows(s, cx, cy, step, mat, light = false) {
     return f;
   }
   function freshwaterApron(a, b, c) {
-    if (s.surveyGrid) return;
     const V0 = [V[a], V[b], V[c]];
     if (
       V0.some((v) => v.sea > 0.016 || v.w > 0) ||
       !V0.some((v) => v.w < 0) ||
-      !V0.some(
-        (v) =>
-          v.w > -0.043 &&
-          shelfDepth(v) > -0.22 &&
-          Math.hypot(v.x - s.focus[0], v.y - s.focus[1]) * U < 204,
-      )
+      !V0.some((v) => v.w > -0.043 && shelfDepth(v) > -0.22)
     )
       return;
     for (const v of V0) wetVertex(v);

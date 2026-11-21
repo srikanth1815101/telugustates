@@ -1,0 +1,40 @@
+---
+title: medak_demo02
+username: medak_demo02
+type: house
+state: Telangana
+district: Medak
+district_id: 44
+record_kind: demo
+approved: false
+area_acres: 1
+added: '2026-11-18'
+archetype: courtyard-house
+size_m:
+- 11.08
+- 9.4
+- 4.0
+facing: south
+wall_color: '#bca09a'
+roof_color: '#ad664e'
+props:
+- shade-tree
+- flower-bed
+- banana-clump
+sign:
+  label: '@medak_demo02'
+  wood: '#65513d'
+  trim: '#c5a477'
+building:
+  weathering: 0.588
+  path_width_m: 1.09
+cell: [1836,8600]
+homeLocation: [1839.4999784,8602.0435374]
+acreLocation: [1836,8600]
+villageId: "v44-01"
+lat: 17.954916
+lon: 78.2585664
+corners: [[17.9546609,78.2582468],[17.9545577,78.258794],[17.9551712,78.258886],[17.9552744,78.2583388]]
+elevation_m: 472
+---
+Fictional household for this village walk. This username and virtual acre do not identify a real person or land title.

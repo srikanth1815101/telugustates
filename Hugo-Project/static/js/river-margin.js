@@ -19,18 +19,10 @@ export function shelfDepth(v) {
 }
 export function bankGain(s, v, f, range) {
   const d = shelfDepth(v);
-  if (
-    s.surveyGrid ||
-    v.sea > 0.016 ||
-    range >= 204 ||
-    v.w < -0.043 ||
-    d < -0.27 ||
-    d > 1.0 ||
-    f[2] < 0.45
-  )
+  if (v.sea > 0.016 || v.w < -0.043 || d < -0.27 || d > 1.0 || f[2] < 0.45)
     return 0;
   return (
-    (1 - ramp(133, 204, range)) *
+    (0.8 + 0.2 * (1 - ramp(140, 550, range))) *
     ramp(0.45, 0.88, f[2]) *
     (1 - ramp(0.32, 1.0, d)) *
     ramp(-0.043, -0.017, v.w)

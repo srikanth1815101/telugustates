@@ -185,7 +185,7 @@ export function bankBuilder(s, cx, cy, V, emit, X, Y, outer) {
     }
     // A half- to one-metre change of wet footprint cannot be resolved by three-metre triangles.
     // Refine the submitted bed AND water locally on a running freshwater shelf. The same rule is used by both sides of chunk seams.
-    if (!s.surveyGrid && L > 0.0127) {
+    if (!s.surveyGrid && !s.midRiverLOD && L > 0.0127) {
       const X0 = mx / T,
         Y0 = my / T,
         r = ACRE * Math.hypot(X0 - s.focus[0], Y0 - s.focus[1]);
@@ -199,6 +199,16 @@ export function bankBuilder(s, cx, cy, V, emit, X, Y, outer) {
         )
           size = Math.min(size, r < 28 ? 0.0127 : 0.0252);
       }
+    }
+    if (
+      s.midRiverLOD &&
+      L > 0.12 &&
+      Math.hypot(mx / T - s.focus[0], my / T - s.focus[1]) * ACRE < 680 &&
+      L < 1.01
+    ) {
+      const wm = value(mx, my);
+      if (wm > -0.15 - L * 0.42 && wm < 0.24 + L * 0.42)
+        size = Math.min(size, 0.12);
     }
     const sx2 = sx > size,
       sy2 = sy > size;

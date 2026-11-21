@@ -12,9 +12,9 @@ export function terrace(s, h) {
     Y = h.centre[1],
     a = (Math.abs(rx) * w + Math.abs(fx) * d) / 2,
     b = (Math.abs(fx) * w + Math.abs(rx) * d) / 2,
-    m = 0.8,
-    lo = (x) => Math.floor(x * 10) / 10,
-    hi = (x) => Math.ceil(x * 10) / 10,
+    m = 0.48,
+    lo = (x) => Math.floor(x * 1920) / 1920,
+    hi = (x) => Math.ceil(x * 1920) / 1920,
     box = [
       lo(X - (a + m) / M),
       lo(Y - (b + m) / M),
@@ -27,12 +27,38 @@ export function terrace(s, h) {
       zs.push(s.point(...localPoint(h, u * w, v * d)).z);
   zs.sort((a, b) => a - b);
   // Balance cut and fill, but also constrain the rise from the front toe. A level foundation must not create an impassable lip on the way in.
-  const blend = 0.2,
+  const blend = 96 / 1920,
     { fx: F, fy: G } = basis(h),
     [gx, gy] = localPoint(h, h.door_x, 0),
     toe = [
-      F > 0 ? box[2] + blend : F < 0 ? box[0] - blend : gx,
-      G > 0 ? box[3] + blend : G < 0 ? box[1] - blend : gy,
+      gx +
+        F *
+          Math.min(
+            F > 1e-6
+              ? (box[2] + blend - gx) / F
+              : F < -1e-6
+                ? (box[0] - blend - gx) / F
+                : Infinity,
+            G > 1e-6
+              ? (box[3] + blend - gy) / G
+              : G < -1e-6
+                ? (box[1] - blend - gy) / G
+                : Infinity,
+          ),
+      gy +
+        G *
+          Math.min(
+            F > 1e-6
+              ? (box[2] + blend - gx) / F
+              : F < -1e-6
+                ? (box[0] - blend - gx) / F
+                : Infinity,
+            G > 1e-6
+              ? (box[3] + blend - gy) / G
+              : G < -1e-6
+                ? (box[1] - blend - gy) / G
+                : Infinity,
+          ),
     ],
     foot = s.point(...toe),
     rise = M * blend * 0.36;

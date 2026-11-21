@@ -56,10 +56,23 @@ export function residentDesign(row) {
     z = ACRE / 2 - h.setback_m - d / 2;
   if (i < 0) throw Error("Unknown house model: " + h.archetype);
   row.s = h.style = i;
-  h.centre = [
-    row.c[0] + 0.5 + (fx * z - fy * h.lateral_m) / ACRE,
-    row.c[1] + 0.5 + (fy * z + fx * h.lateral_m) / ACRE,
-  ].map((a) => R(a, 7));
+  if (i === 5) h.size_m[2] = Math.max(5.37, h.size_m[2]);
+  const lot = row.court?.p && row.court;
+  if (lot) {
+    h.centre = row.homeLocation;
+    h.yard = lot;
+    h.villageId = row.villageId;
+    h.facing = ["south", "east", "north", "west"][
+      (Math.round(lot.a / (Math.PI / 2)) + 4) % 4
+    ];
+    h.road_side = h.facing;
+    h.setback_m = lot.front;
+    h.timberOnly = true;
+  } else
+    h.centre = [
+      row.c[0] + 0.5 + (fx * z - fy * h.lateral_m) / ACRE,
+      row.c[1] + 0.5 + (fy * z + fx * h.lateral_m) / ACRE,
+    ].map((a) => R(a, 7));
   h.parts = (footprints[i] || [[0, 0, 1, 1, "body"]]).map(([a, b, c, e, k]) => [
     R(a * w, 3),
     R(b * d, 3),
@@ -71,7 +84,7 @@ export function residentDesign(row) {
   h.door_x = R(m[0] + (i === 6 ? 0.18 * w : 0), 3);
   const pt = (z) => localPoint(h, h.door_x, z).map((a) => R(a, 7));
   h.door = pt(m[1] + m[3] / 2);
-  h.gate = pt(d / 2 + h.setback_m);
+  h.gate = lot ? lot.gate : pt(d / 2 + h.setback_m);
   h.entry = pt(d / 2 + h.setback_m - 1.4);
   h.footprint_m2 = R(
     h.parts.reduce(
@@ -80,6 +93,6 @@ export function residentDesign(row) {
     ),
     2,
   );
-  h.frontage = [row.c[0] + fx, row.c[1] + fy];
+  h.frontage = lot ? lot.porch : [row.c[0] + fx, row.c[1] + fy];
   return row;
 }

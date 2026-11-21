@@ -1,0 +1,40 @@
+---
+title: palnadu_demo06
+username: palnadu_demo06
+type: house
+state: Andhra Pradesh
+district: Palnadu
+district_id: 17
+record_kind: demo
+approved: false
+area_acres: 1
+added: '2026-11-18'
+archetype: balcony-stair
+size_m:
+- 10.29
+- 9.64
+- 5.73
+facing: south
+wall_color: '#adc0ae'
+roof_color: '#ad664e'
+props:
+- kitchen-garden
+- shade-tree
+- banana-clump
+sign:
+  label: '@palnadu_demo06'
+  wood: '#65513d'
+  trim: '#c5a477'
+building:
+  weathering: 0.541
+  path_width_m: 1.17
+cell: [5015,6521]
+homeLocation: [5014.9242895,6523.9922322]
+acreLocation: [5015,6521]
+villageId: "v17-01"
+lat: 16.367094
+lon: 79.8145358
+corners: [[16.3668403,79.8142159],[16.3667418,79.8147663],[16.3673477,79.8148558],[16.3674461,79.8143053]]
+elevation_m: 182
+---
+Fictional household for this village walk. This username and virtual acre do not identify a real person or land title.

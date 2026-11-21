@@ -811,3 +811,128 @@ a.scenic-card small {
     bottom: calc(var(--pad-b, 0px) + 87px);
   }
 }
+
+/* Resident destinations, outside the joystick and minimap safe areas. */
+/* Shortcuts share the upper safe area with Settings in both 3-D modes. */
+#world .holding-icon {
+  display: grid;
+  place-items: center;
+  border: 1px solid #e4ead28f;
+  border-radius: 14px;
+  background: #254333c9;
+  color: #fffbea;
+  box-shadow: 0 1px 4px #15241426;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  padding: 9px;
+  margin: 0;
+  pointer-events: auto;
+}
+#world .holding-icon svg {
+  width: 24px;
+  height: 24px;
+}
+#world .holding-icon[aria-expanded="true"] {
+  background: #efe4bc;
+  color: #22412e;
+  border-color: #b9ac85;
+}
+#world .holding-icon:focus-visible,
+#holding-menu button:focus-visible,
+#holding-menu select:focus-visible {
+  outline: 3px solid #ffda87;
+  outline-offset: 2px;
+}
+#holding-menu {
+  position: absolute;
+  z-index: 12;
+  top: calc(var(--pad-t, 0px) + 60px);
+  left: calc(var(--pad-l, 0px) + 10px);
+  width: min(268px, calc(100% - 22px));
+  max-height: calc(100% - 100px);
+  overflow: auto;
+  color: #fcf8e7;
+  background: #203c31f4;
+  border: 1px solid #cfcaa880;
+  border-radius: 15px;
+  box-shadow: 0 6px 24px #20372a40;
+  padding: 12px;
+  box-sizing: border-box;
+}
+#holding-menu header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 5px;
+}
+#holding-menu header h3 {
+  font-size: 18px;
+  line-height: 1.2;
+  margin: 2px 0 8px;
+  color: inherit;
+}
+#holding-menu small,
+#holding-menu label {
+  font-size: 12px;
+  color: #edead6;
+}
+#holding-menu #close-holding {
+  background: transparent;
+  border: 0;
+  color: inherit;
+  font-size: 22px;
+  padding: 3px;
+  min-width: 34px;
+  min-height: 34px;
+}
+#holding-menu select {
+  max-width: 100%;
+  width: 100%;
+  height: 38px;
+  margin: 4px 0 10px;
+  border-radius: 6px;
+  font-size: 14px;
+}
+#holding-chart {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 3px 0 7px;
+  border-radius: 7px;
+}
+#holding-menu .home-pair {
+  display: flex;
+  gap: 7px;
+  margin-top: 9px;
+}
+#holding-menu .home-pair button {
+  min-height: 42px;
+  flex: 1;
+  border: 0;
+  border-radius: 8px;
+  background: #f4efd9;
+  color: #173c2c;
+  font: 600 13px system-ui;
+}
+#holding-menu .home-pair button:last-child {
+  background: #d8b06f;
+}
+#holding-menu button:disabled {
+  opacity: 0.48;
+}
+#world #route-step {
+  position: absolute;
+  z-index: 4;
+  top: calc(var(--pad-t, 0px) + 61px);
+  left: calc(var(--pad-l, 0px) + 10px);
+  border-radius: 8px;
+  padding: 5px 8px;
+  background: #203d32df;
+  color: #fffbe8;
+  font: 600 12px system-ui;
+  pointer-events: none;
+}
+#world:has(#holding-menu:not([hidden])) #route-step {
+  display: none;
+}

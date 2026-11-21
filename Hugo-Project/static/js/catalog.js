@@ -10,6 +10,7 @@ export async function records(url, ll, project) {
       active = rows,
       shards = Object.create(null),
       plots = {},
+      scenes = {},
       counts = {},
       byUser = new Map(rows.map((r) => [r.u, r])),
       directory = rows
@@ -19,12 +20,19 @@ export async function records(url, ll, project) {
       const [lon, lat] = ll(project, r.c[0] + 0.5, r.c[1] + 0.5);
       r.lat = lat;
       r.lon = lon;
+      r.homeLL = ll(project, ...r.house.centre);
       const k = Array.from(r.u.slice(0, 2), (c) =>
           c.charCodeAt(0).toString(16),
         ).join(""),
         tile = r.c.map((n) => Math.floor(n / 256)).join("_");
       (shards[k] ??= Object.create(null))[r.u] = r;
-      (plots[tile] ??= []).push([...r.c, r.u, r.s, r.d, r.house]);
+      const row = [...r.c, r.u, r.s, r.d, r.house];
+      (plots[tile] ??= []).push(row);
+      for (const k of new Set([
+        tile,
+        r.house.centre.map((n) => Math.floor(n / 256)).join("_"),
+      ]))
+        (scenes[k] ??= []).push(row);
       counts[r.d] = (counts[r.d] || 0) + 1;
     }
     const trails = j.trails.map((t) => ({
@@ -34,6 +42,7 @@ export async function records(url, ll, project) {
     for (const t of trails) t.ll = t.xy.map((p) => ll(project, ...p));
     for (const v of Object.values(j.roads))
       v.paths = v.paths.map((p, i) => {
+        if (p.surveyed || p.id?.startsWith("lane-") || p.id?.startsWith("field-")) return p; // junction coordinates are identity, not smoothing suggestions
         let pts = p.xy;
         const r = byUser.get(p.owner);
         if (p.snap_ends && r)
@@ -73,13 +82,11 @@ export async function records(url, ll, project) {
           type: "entrance",
           owner: r.u,
           w: r.house.path_width_m,
-          xy: curvedPoints(
-            [r.house.door, r.house.gate],
-            r.u,
-            r.house.path_width_m,
-          ),
+          xy: [r.house.door, r.house.gate],
         });
       }
+    for (const [id, bundle] of Object.entries(j.roads))
+      bundle.homes = counts[id] || 0;
     const places = j.places.map((p) => {
       const point = p.point || p.cell.map((n) => n + 0.5),
         [lon, lat] = ll(project, ...point);
@@ -94,6 +101,7 @@ export async function records(url, ll, project) {
       counts,
       shards,
       plots,
+      scenes,
       directory,
       trails,
       roads: j.roads,

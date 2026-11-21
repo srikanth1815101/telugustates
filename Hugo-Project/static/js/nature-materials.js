@@ -1,3 +1,9 @@
+import {
+  dryMobileVert,
+  dryMobileFrag,
+  reachVert,
+  reachFrag,
+} from "./dry-mobile.js";
 import { groundVert, groundFrag } from "./ground-weave.js";
 import { film, waterVert, waterFrag } from "./hydro-shaders.js";
 import { ACRE } from "./metres.js";
@@ -10,6 +16,9 @@ export function materials(u = {}) {
   );
   grain.wrapT = grain.wrapS = T.RepeatWrapping;
   grain.anisotropy = 2;
+  const movingGrain = new T.TextureLoader().load(url("art/current-grain.png"));
+  movingGrain.wrapT = movingGrain.wrapS = T.RepeatWrapping;
+  movingGrain.colorSpace = T.NoColorSpace;
   const names = [
     "leafy_grass",
     "coast_sand_02",
@@ -93,7 +102,10 @@ export function materials(u = {}) {
   const uniforms = {
     ...Object.fromEntries(surfaces.map((t, i) => ["ground" + i, { value: t }])),
     ...u,
+    laneWindow: { value: new T.Vector4(0, 0, 1, 0) },
+    laneEarth: { value: null },
     bankSky: { value: bankSky },
+    currentGrain: { value: movingGrain },
     bankStation: { value: new T.Vector4() },
     hydroOffset: { value: new T.Vector2() },
     soilDamp: { value: 0 },
@@ -155,6 +167,21 @@ export function materials(u = {}) {
     side: T.DoubleSide,
     blending: T.NoBlending,
   });
+  const fastLand = new T.ShaderMaterial({
+      uniforms,
+      side: T.DoubleSide,
+      vertexShader: dryMobileVert,
+      fragmentShader: dryMobileFrag,
+    }),
+    reach = new T.ShaderMaterial({
+      uniforms,
+      side: T.DoubleSide,
+      transparent: true,
+      forceSinglePass: true,
+      depthWrite: false,
+      vertexShader: reachVert,
+      fragmentShader: reachFrag,
+    });
   let slot = 0;
   return {
     land,
@@ -162,6 +189,8 @@ export function materials(u = {}) {
     landLow,
     waterSaver,
     surfDepth,
+    fastLand,
+    reach,
     surveyReflection,
     bankSky,
     uniforms,

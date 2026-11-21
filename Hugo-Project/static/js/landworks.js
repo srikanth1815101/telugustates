@@ -62,9 +62,19 @@ export function ribbons(s, paths, p, range = 6) {
         const a = x + ((X - x) * j) / n,
           b = y + ((Y - y) * j) / n;
         for (const side of [-1, 1]) {
-          const u = a + ox * side,
-            v = b + oy * side;
-          pos.push(...s.xyz(u, v, s.ground(u, v) + 0.042));
+          const rim =
+              1 +
+              0.065 * Math.sin(a * 31.3 + b * 18.1 + side) +
+              0.035 * Math.sin(a * 78.9 - b * 43.7),
+            u = a + ox * side * rim,
+            v = b + oy * side * rim;
+          pos.push(
+            ...s.xyz(
+              u,
+              v,
+              s.ground(u, v) + (path.type === "entrance" ? 0.069 : 0.046),
+            ),
+          );
           let m = 0.91 + 0.08 * Math.sin(u * 113 + v * 47);
           ci.push(color.r * m, color.g * m, color.b * m);
         }

@@ -1,3 +1,4 @@
+import { homesAt } from "./home-index.js";
 import * as T from "../vendor/three.module.min.js";
 import {
   Catchment,
@@ -37,6 +38,7 @@ export class RunoffWindow {
     this.stats = {};
     this.lastTime = null;
     this.acc = 0;
+    this.residual = 0;
     this.rocks = new Map();
     this.climate = Array.from({ length: 12 }, () => ({ depth: 0, sat: 0 }));
     if (opts.uniforms) {
@@ -50,8 +52,8 @@ export class RunoffWindow {
       Y = y / M,
       h = this.s.sample(X, Y),
       a = h.m || [0, 0, 0, 0],
-      home = this.s.homeMap?.get(Math.floor(X) + "," + Math.floor(Y))?.h;
-    let wall = !!(home && inHouse(home, X, Y, 0.03));
+      homes = homesAt(this.s, X, Y);
+    let wall = homes.some((h) => inHouse(h, X, Y, 0.03));
     const rocks = this.rocks.get(Math.floor(x / 12) + "," + Math.floor(y / 12));
     if (!wall && rocks) wall = rocks.some((o) => clearance(o, X, Y) < -0.29);
     const pores = soilField(0.078 * x - 0.036 * y, 0.058 * y + 0.047 * x, 134);
@@ -329,6 +331,10 @@ export class RunoffWindow {
       this.group.visible = false;
       this.stats.rillsDrawn = false;
       if (uniforms) uniforms.rillOn.value = 0;
+      return;
+    }
+    if (!raining && !this.net && this.residual < 1e-5) {
+      this.group.visible = false;
       return;
     }
     const [a, b] = this.around(x, y);

@@ -1,106 +1,14 @@
 ---
-title: District 10 frontage network
+title: District 10 infrastructure
 district_id: 10
-paths:
-- owner: demo_user119
-  type: entrance
-  w: 0.9
-  xy:
-  - - 6194.5367838
-    - 6574.1996385
-  - - 6194.5367838
-    - 6574.0220074
-  - - 6194.5367838
-    - 6574.0
-- type: footpath
-  w: 1.4
-  xy:
-  - - 6194.5367838
-    - 6574.0
-  - - 6194.466689900998
-    - 6573.4902080504135
-- owner: demo_user180
-  type: entrance
-  w: 0.9
-  xy:
-  - - 6194.5135188
-    - 6572.8044172
-  - - 6194.5135188
-    - 6572.9779926
-  - - 6194.5135188
-    - 6573.0
-- type: footpath
-  w: 1.4
-  xy:
-  - - 6194.5135188
-    - 6573.0
-  - - 6194.466689900998
-    - 6573.4902080504135
-- owner: demo_user241
-  type: entrance
-  w: 0.9
-  xy:
-  - - 6193.4500118
-    - 6574.179203
-  - - 6193.4500118
-    - 6574.0220074
-  - - 6193.4500118
-    - 6574.0
-- type: footpath
-  w: 1.4
-  xy:
-  - - 6193.4500118
-    - 6574.0
-  - - 6193.4816885683595
-    - 6573.473239632649
-- owner: demo_user58
-  type: entrance
-  w: 0.9
-  xy:
-  - - 6193.4962273
-    - 6572.7609054
-  - - 6193.4962273
-    - 6572.9779926
-  - - 6193.4962273
-    - 6573.0
-- type: footpath
-  w: 1.4
-  xy:
-  - - 6193.4962273
-    - 6573.0
-  - - 6193.4816885683595
-    - 6573.473239632649
-- type: village
-  w: 2.0870359432534316
-  xy:
-  - - 6194.46669
-    - 6573.490208
-  - - 6194.343219
-    - 6573.508174
-  - - 6194.2198
-    - 6573.523082
-  - - 6194.096479
-    - 6573.53234
-  - - 6193.973285
-    - 6573.534214
-  - - 6193.850229
-    - 6573.528098
-  - - 6193.7273
-    - 6573.514598
-  - - 6193.604468
-    - 6573.495448
-  - - 6193.481689
-    - 6573.47324
+paths: []
 network:
-  cellsPerHome: 0.5
-  homes: 4
+  cellsPerHome: 0
+  homes: 0
   lit: false
   poles: []
-  root:
-  - 6194
-  - 6573
   services: []
   spans: []
   v: 1
 ---
-Frontage routes for registered houses. Reserved demo approaches are not public streets.
+Only funded public works belong here. Residential lanes come from the village register.

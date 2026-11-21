@@ -1,23 +1,17 @@
 ---
-title: Timber acre
+title: Village lanes
 place:
-  title_te: దక్కన్ గ్రామ ప్రదేశం
+  title_te: పల్లె కాలిబాటలు
   cell:
-  - 2357
-  - 7774
-  district: Hyderabad
+  - 5015
+  - 6523
+  district: Palnadu
   id: village
-  lat: 17.395973
-  lon: 78.4682507
   observations:
-    elevation_m: 508
-    selection: Deccan settlement candidate; no public resident is implied.
+    selection: A foot-worn lane beside the common in a fictional occupied village.
   point:
-  - 2357.912785
-  - 7774.774446
-  yaw: 2.722198
-  review_observations:
-    user: demo_user141
-    elevation_m: 508
+  - 5015.3947358
+  - 6523.3560013
+  yaw: 1.4926225
 ---
-Map location: Timber acre.
+Walk the shared lane in Palnadu. The fields lie beyond the residential square.

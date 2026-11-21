@@ -1,0 +1,40 @@
+---
+title: mancherial_demo04
+username: mancherial_demo04
+type: house
+state: Telangana
+district: Mancherial
+district_id: 43
+record_kind: demo
+approved: false
+area_acres: 1
+added: '2026-11-18'
+archetype: l-court
+size_m:
+- 9.23
+- 10.44
+- 3.73
+facing: south
+wall_color: '#c5ae86'
+roof_color: '#b4774d'
+props:
+- shade-tree
+- flower-bed
+- banana-clump
+sign:
+  label: '@mancherial_demo04'
+  wood: '#65513d'
+  trim: '#c5a477'
+building:
+  weathering: 0.415
+  path_width_m: 1.1
+cell: [3819,10603]
+homeLocation: [3819.3349458,10600.3052473]
+acreLocation: [3819,10603]
+villageId: "v43-01"
+lat: 18.987077
+lon: 79.5236877
+corners: [[18.9868179,79.5233702],[18.9867166,79.523916],[18.9873362,79.5240052],[18.9874375,79.5234594]]
+elevation_m: 190
+---
+Fictional household for this village walk. This username and virtual acre do not identify a real person or land title.

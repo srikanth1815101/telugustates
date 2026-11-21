@@ -1,108 +1,14 @@
 ---
-title: District 25 frontage network
+title: District 25 infrastructure
 district_id: 25
-paths:
-- owner: demo_user134
-  type: entrance
-  w: 0.9
-  xy:
-  - - 10820.479093
-    - 9809.7706516
-  - - 10820.479093
-    - 9809.9779926
-  - - 10820.479093
-    - 9810.0
-- type: footpath
-  w: 1.4
-  xy:
-  - - 10820.479093
-    - 9810.0
-  - - 10820.498246129871
-    - 9810.53969189615
-- owner: demo_user195
-  type: entrance
-  w: 0.9
-  xy:
-  - - 10820.4721764
-    - 9811.1964945
-  - - 10820.4721764
-    - 9811.0220074
-  - - 10820.4721764
-    - 9811.0
-  publication: example
-  snap_ends: true
-- type: footpath
-  w: 1.4
-  xy:
-  - - 10820.4721764
-    - 9811.0
-  - - 10820.498246129871
-    - 9810.53969189615
-- owner: demo_user256
-  type: entrance
-  w: 0.9
-  xy:
-  - - 10821.5009432
-    - 9809.8302287
-  - - 10821.5009432
-    - 9809.9779926
-  - - 10821.5009432
-    - 9810.0
-- type: footpath
-  w: 1.4
-  xy:
-  - - 10821.5009432
-    - 9810.0
-  - - 10821.537825993895
-    - 9810.500537493872
-- owner: demo_user73
-  type: entrance
-  w: 0.9
-  xy:
-  - - 10821.5037727
-    - 9811.1964945
-  - - 10821.5037727
-    - 9811.0220074
-  - - 10821.5037727
-    - 9811.0
-- type: footpath
-  w: 1.4
-  xy:
-  - - 10821.5037727
-    - 9811.0
-  - - 10821.537825993895
-    - 9810.500537493872
-- type: village
-  w: 2.2275647560949436
-  xy:
-  - - 10820.498246
-    - 9810.539692
-  - - 10820.628508
-    - 9810.543134
-  - - 10820.758721
-    - 9810.545306
-  - - 10820.888847
-    - 9810.545134
-  - - 10821.018856
-    - 9810.541898
-  - - 10821.148742
-    - 9810.535345
-  - - 10821.278511
-    - 9810.525729
-  - - 10821.408192
-    - 9810.513768
-  - - 10821.537826
-    - 9810.500537
+paths: []
 network:
-  cellsPerHome: 0.5
-  homes: 4
+  cellsPerHome: 0
+  homes: 0
   lit: false
   poles: []
-  root:
-  - 10820
-  - 9810
   services: []
   spans: []
   v: 1
 ---
-Frontage routes for registered houses. Reserved demo approaches are not public streets.
+Only funded public works belong here. Residential lanes come from the village register.

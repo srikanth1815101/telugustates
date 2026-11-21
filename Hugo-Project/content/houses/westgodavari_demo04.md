@@ -1,0 +1,40 @@
+---
+title: westgodavari_demo04
+username: westgodavari_demo04
+type: house
+state: Andhra Pradesh
+district: West Godavari
+district_id: 27
+record_kind: demo
+approved: false
+area_acres: 1
+added: '2026-11-18'
+archetype: street-shop
+size_m:
+- 9.21
+- 11.21
+- 3.96
+facing: south
+wall_color: '#b5ab95'
+roof_color: '#944a30'
+props:
+- flower-bed
+- shade-tree
+- banana-clump
+sign:
+  label: '@westgodavari_demo04'
+  wood: '#65513d'
+  trim: '#c5a477'
+building:
+  weathering: 0.265
+  path_width_m: 1.11
+cell: [8097,7415]
+homeLocation: [8097.8765722,7411.9984701]
+acreLocation: [8097,7415]
+villageId: "v27-01"
+lat: 16.6118129
+lon: 81.5895156
+corners: [[16.6115564,81.5891974],[16.6114616,81.5897479],[16.6120693,81.5898338],[16.6121641,81.5892833]]
+elevation_m: 4
+---
+Fictional household for this village walk. This username and virtual acre do not identify a real person or land title.

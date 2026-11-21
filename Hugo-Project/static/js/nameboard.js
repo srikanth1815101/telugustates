@@ -9,8 +9,8 @@ export function nameboard(group, s, h, u, put) {
     dz = d / 2 + h.setback_m - 0.42,
     spot = beside(
       s,
-      [0, -1.6, -3.4, -5.8, -8, 2.5].flatMap((back) =>
-        [4.15, -4.15, 6.7, -6.7, 11, -11, 15, -15, 21, -21].map((side) =>
+      [0, -0.7].flatMap((back) =>
+        [3.3,-3.3,4.3,-4.3].filter(side=>Math.abs(h.door_x+side)<(h.yard?.lot[0] || w)/2-1.56).map((side) =>
           localPoint(h, h.door_x + side, dz + back),
         ),
       ),

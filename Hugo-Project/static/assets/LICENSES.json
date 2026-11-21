@@ -806,7 +806,7 @@
    "source": "In-project procedural geometry / DSP; no third-party download.",
    "license": "Project artwork",
    "verified_on": "2026-11-18",
-   "sha256": "76f1c375b2e9fed39ef526dfbc543c4e3a9b7d826aa424ac26b8a0ff01e61eef"
+   "sha256": "e6ff232fd18dd3eb0f98458697d57ed6bd52e77537a5944cbaa50bc9010d6246"
   },
   {
    "file": "js/fieldfx.js",
@@ -834,7 +834,7 @@
    "source": "Original procedural artwork/audio or captured rendering of the project. Scene components credited separately.",
    "license": "Project artwork",
    "verified_on": "2026-11-18",
-   "sha256": "c5b06676396fcd89ff6372b19e5c4c46a0541b16934fe083c3944a6fb48a2c84"
+   "sha256": "8749e8d6b1d5b9b5c0a86e6f3d2712896cc816747f1a427c8c86945230b98d91"
   },
   {
    "file": "js/landworks.js",
@@ -843,7 +843,7 @@
    "source": "Original procedural artwork/audio or captured rendering of the project. Scene components credited separately.",
    "license": "Project artwork",
    "verified_on": "2026-11-18",
-   "sha256": "8320c2225b006a49e2c6c11e05440daf538919c819aa51b3f17f719375c2aa11"
+   "sha256": "d8910d2feca8e62ee7d39564e1b8bbc407e5bcea0b2e608c65a4b7050616c115"
   },
   {
    "file": "js/rain-ground.js",
@@ -852,7 +852,7 @@
    "source": "Original procedural artwork/audio or captured rendering of the project. Scene components credited separately.",
    "license": "Project artwork",
    "verified_on": "2026-11-18",
-   "sha256": "210b983fee6bb884d245c905fb01c17a8bb5606088400c8ec7515ac7736e7334",
+   "sha256": "72d18681c84e03aeaaaa8b9d1555d743d943ca1966958d4dd19bf4813818c7c5",
    "modification": "7.2 terrain-aware renderer update."
   },
   {

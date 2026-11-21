@@ -1,0 +1,40 @@
+---
+title: sripottisriramu_demo13
+username: sripottisriramu_demo13
+type: house
+state: Andhra Pradesh
+district: Sri Potti Sriramulu Nellore
+district_id: 21
+record_kind: demo
+approved: false
+area_acres: 1
+added: '2026-11-18'
+archetype: thatch-longhouse
+size_m:
+- 10.23
+- 10.44
+- 3.79
+facing: south
+wall_color: '#c5ae86'
+roof_color: '#ad664e'
+props:
+- banana-clump
+- kitchen-garden
+- flower-bed
+sign:
+  label: '@sripottisriramu_demo13'
+  wood: '#65513d'
+  trim: '#c5a477'
+building:
+  weathering: 0.363
+  path_width_m: 1.13
+cell: [5242,3634]
+homeLocation: [5245.9400474,3633.0234064]
+acreLocation: [5242,3634]
+villageId: "v21-01"
+lat: 14.6081751
+lon: 79.6805492
+corners: [[14.6079251,79.6802273],[14.6078278,79.6807809],[14.6084251,79.6808711],[14.6085225,79.6803175]]
+elevation_m: 39
+---
+Fictional household for this village walk. This username and virtual acre do not identify a real person or land title.

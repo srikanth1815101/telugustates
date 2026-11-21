@@ -1,106 +1,14 @@
 ---
-title: District 13 frontage network
+title: District 13 infrastructure
 district_id: 13
-paths:
-- owner: demo_user122
-  type: entrance
-  w: 0.9
-  xy:
-  - - 1201.5422227
-    - 4615.2502554
-  - - 1201.5422227
-    - 4615.0220074
-  - - 1201.5422227
-    - 4615.0
-- type: footpath
-  w: 1.4
-  xy:
-  - - 1201.5422227
-    - 4615.0
-  - - 1201.5593094087671
-    - 4614.46199395651
-- owner: demo_user183
-  type: entrance
-  w: 0.9
-  xy:
-  - - 1201.4952841
-    - 4613.8082213
-  - - 1201.4952841
-    - 4613.9779926
-  - - 1201.4952841
-    - 4614.0
-- type: footpath
-  w: 1.4
-  xy:
-  - - 1201.4952841
-    - 4614.0
-  - - 1201.5593094087671
-    - 4614.46199395651
-- owner: demo_user244
-  type: entrance
-  w: 0.9
-  xy:
-  - - 1202.5139904
-    - 4615.2321779
-  - - 1202.5139904
-    - 4615.0220074
-  - - 1202.5139904
-    - 4615.0
-- type: footpath
-  w: 1.4
-  xy:
-  - - 1202.5139904
-    - 4615.0
-  - - 1202.489595434377
-    - 4614.552847693861
-- owner: demo_user61
-  type: entrance
-  w: 0.9
-  xy:
-  - - 1202.4647882
-    - 4613.8014541
-  - - 1202.4647882
-    - 4613.9779926
-  - - 1202.4647882
-    - 4614.0
-- type: footpath
-  w: 1.4
-  xy:
-  - - 1202.4647882
-    - 4614.0
-  - - 1202.489595434377
-    - 4614.552847693861
-- type: village
-  w: 1.901797128817998
-  xy:
-  - - 1201.559309
-    - 4614.461994
-  - - 1201.674672
-    - 4614.482799
-  - - 1201.790176
-    - 4614.502166
-  - - 1201.905939
-    - 4614.518875
-  - - 1202.022041
-    - 4614.532111
-  - - 1202.13851
-    - 4614.541588
-  - - 1202.255319
-    - 4614.547593
-  - - 1202.372387
-    - 4614.550939
-  - - 1202.489595
-    - 4614.552848
+paths: []
 network:
-  cellsPerHome: 0.5
-  homes: 4
+  cellsPerHome: 0
+  homes: 0
   lit: false
   poles: []
-  root:
-  - 1201
-  - 4614
   services: []
   spans: []
   v: 1
 ---
-Frontage routes for registered houses. Reserved demo approaches are not public streets.
+Only funded public works belong here. Residential lanes come from the village register.

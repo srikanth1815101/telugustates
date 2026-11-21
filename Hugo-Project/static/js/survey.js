@@ -66,55 +66,18 @@ export async function loadSurvey(a, boundaries = get("frozen/map.json")) {
       (height(i, j + 1) * (1 - u) + height(i + 1, j + 1) * u) * v
     );
   }
-  const rgb = new Uint8Array(n * 4),
-    dryRGB = new Uint8Array(n * 4),
-    dry = new T.Color("#c5c58e"),
-    low = new T.Color("#a5b487"),
-    wood = new T.Color("#567957"),
-    blue = new T.Color("#86b4b3"),
-    ridge = new T.Color("#9aa78f"),
-    col = new T.Color(),
-    scratch = new T.Color();
-  for (let j = 0; j < rows; j++)
-    for (let i = 0; i < w; i++) {
-      const k = j * w + i;
-      if (!d[k]) continue;
-      const elev = z[k],
-        grad =
-          (height(i - 1, j) - height(i + 1, j)) * 0.00072 +
-          (height(i, j + 1) - height(i, j - 1)) * 0.00051;
-      col
-        .copy(low)
-        .lerp(dry, smooth(50, 550, elev) * 0.8)
-        .lerp(wood, f[k] / 114)
-        .lerp(ridge, smooth(760, 1440, elev) * 0.42);
-      const set = (dst, c) => {
-        const v = c
-          .offsetHSL(
-            Math.floor(elev / 100) * 0.0023 + Math.floor(elev / 500) * 0.01,
-            0,
-            0,
-          )
-          .multiplyScalar(clamp(1 + grad, 0.64, 1.31))
-          .convertLinearToSRGB();
-        dst[k * 4] = Math.min(255, v.r * 255);
-        dst[k * 4 + 1] = Math.min(255, v.g * 255);
-        dst[k * 4 + 2] = Math.min(255, v.b * 255);
-        dst[k * 4 + 3] = Math.max(18, 2.55 * cover[k]);
-      };
-      set(dryRGB, scratch.copy(col));
-      set(rgb, col.lerp(blue, water[k] / 100));
-    }
-  function chart(rgb) {
-    const texture = new T.DataTexture(rgb, w, rows, T.RGBAFormat);
-    texture.colorSpace = T.SRGBColorSpace;
-    texture.minFilter = texture.magFilter = T.LinearFilter;
-    texture.generateMipmaps = false;
-    texture.needsUpdate = true;
-    return texture;
-  }
-  const texture = chart(rgb),
-    banks = surveyWater(bankPages, chart(dryRGB), [w * step, rows * step]);
+  const load = async (name) => {
+    const t = await new T.TextureLoader().loadAsync(
+      url("survey/" + name + ".png"),
+    );
+    t.flipY = false;
+    t.colorSpace = T.SRGBColorSpace;
+    t.magFilter = t.minFilter = T.LinearFilter;
+    t.generateMipmaps = false;
+    return t;
+  };
+  const [texture, dryAtlas] = await Promise.all([load("wet"), load("dry")]);
+  const banks = surveyWater(bankPages, dryAtlas, [w * step, rows * step]);
   return {
     map,
     O,

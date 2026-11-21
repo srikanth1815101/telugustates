@@ -66,7 +66,7 @@ export class FieldExtras {
                     : "Tamarind";
       const g = staticModel("tree", farSpecies, eco.presets, 2).clone();
       const distant = [],
-        R = tier === 2 ? 64 : tier ? 52 : 30,
+        R = tier === 2 ? 59 : tier ? 37 : 24,
         inner = tier === 2 ? 18 : tier ? 13 : 7;
       for (let j = -R; j < R; j += 2)
         for (let i = -R; i < R; i += 2) {
@@ -76,7 +76,11 @@ export class FieldExtras {
             gy = Math.floor(y) + j,
             t = s.t.at(gx, gy);
           if (!t?.d || t.f < 28 || [3, 4, 5].includes(t.c)) continue;
-          for (let k = 0; k < Math.min(7, t.f / 15); k++) {
+          for (
+            let k = 0;
+            k < Math.min(tier === 2 ? 6 : tier ? 3 : 2, t.f / 17);
+            k++
+          ) {
             const xx = gx + noise(gx, gy, k) * 1.98,
               yy = gy + noise(gy, gx, k) * 1.98,
               cl = s.t.at(xx, yy);
@@ -224,7 +228,7 @@ uniform vec2 hydroOffset;uniform float liquidTime,uDay,uFog;uniform vec3 uHor;va
   }
   update(cam, x, y, range, reduce) {
     if (
-      range < 520 &&
+      range < 148 &&
       (!this.driftFocus ||
         Math.hypot(x - this.driftFocus[0], y - this.driftFocus[1]) * U > 43)
     ) {
@@ -237,7 +241,7 @@ uniform vec2 hydroOffset;uniform float liquidTime,uDay,uFog;uniform vec3 uHor;va
       if (this.drift) this.g.add(this.drift);
       this.driftFocus = [x, y];
     }
-    if (this.drift) this.drift.visible = range < 520;
+    if (this.drift) this.drift.visible = range < 148;
     if (
       this.far &&
       (performance.now() > this.nextCull ||

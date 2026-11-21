@@ -22,7 +22,7 @@ export function readPosition(a) {
       p.tilt < -0.7 ||
       p.tilt > 1.6 ||
       typeof p.route !== "string" ||
-      !/^#\/(?:field\/[a-z0-9_-]+\/(?:ground|mid|far|bank|grove)|u\/[a-z0-9_.]{1,30}|at\/-?[\d.]+,-?[\d.]+)$/.test(
+      !/^#\/(?:field\/[a-z0-9_-]+\/(?:ground|mid|far|bank|grove)|(?:u|acre)\/[a-z0-9_.]{1,30}|at\/-?[\d.]+,-?[\d.]+)$/.test(
         p.route,
       )
     )
@@ -34,6 +34,6 @@ export function readPosition(a) {
 }
 export function writePosition(p) {
   try {
-    localStorage.setItem(key, JSON.stringify({ ...p, schema: 1 }));
+    localStorage.setItem(key, JSON.stringify({ ...p, schema: 1, layout: 714 }));
   } catch {}
 }

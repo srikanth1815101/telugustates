@@ -1,3 +1,4 @@
+import { indexHome } from "./home-index.js";
 import { doorLeaf } from "./home-interior.js";
 import { registerTerraces } from "./house-ground.js";
 import { nameboard } from "./nameboard.js";
@@ -25,18 +26,18 @@ export function padDistance(h, x, y) {
 export function preparePads(s, rows) {
   s.homeMap = new Map();
   s.approach = new Map();
-  const beds = new Map(registerTerraces(s, rows).map((p) => [p.h, p]));
+  registerTerraces(s, rows);
   for (const [x, y, , , , h] of rows) {
     if (!h) continue;
-    s.homeMap.set(`${x},${y}`, beds.get(h));
+    indexHome(s, h);
     if (h.door && h.gate) {
       const [a, b] = h.door,
         [c, d] = h.gate,
         dx = c - a,
         dy = d - b,
         n = Math.hypot(dx, dy) || 1,
-        X = c + ((dx / n) * 10) / ACRE,
-        Y = d + ((dy / n) * 10) / ACRE;
+        X = c + ((dx / n) * 2.4) / ACRE,
+        Y = d + ((dy / n) * 2.4) / ACRE;
       for (
         let j = Math.floor(Math.min(b, Y) - 0.06);
         j <= Math.floor(Math.max(b, Y) + 0.06);
@@ -97,7 +98,8 @@ export function residents(s, rows, p, tier) {
       group.add(leaf);
       (group.userData.doors ??= new Map()).set(u, leaf);
     }
-    if (typeof document !== "undefined") nameboard(group, s, h, u, put);
+    if (d < (tier ? 105 : 62) && typeof document !== "undefined")
+      nameboard(group, s, h, u, put);
   }
   for (const [key, arr] of bins) {
     const shape = key.split(":").at(-1);

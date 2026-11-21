@@ -12,6 +12,12 @@ export const SIDE = Object.freeze({
   west: [-1, 0],
 });
 export function basis(h) {
+  if (Number.isFinite(h.yard?.a)) {
+    const a = h.yard.a,
+      fx = Math.sin(a),
+      rx = Math.cos(a);
+    return { fx, fy: -rx, rx, ry: fx, yaw: a };
+  }
   const [fx, fy] = SIDE[h.facing];
   return { fx, fy, rx: -fy, ry: fx, yaw: Math.atan2(fx, -fy) };
 }

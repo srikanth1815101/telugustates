@@ -1,106 +1,14 @@
 ---
-title: District 46 frontage network
+title: District 46 infrastructure
 district_id: 46
-paths:
-- owner: demo_user155
-  type: entrance
-  w: 0.9
-  xy:
-  - - 5449.2326495
-    - 9739.4925804
-  - - 5449.0220074
-    - 9739.4925804
-  - - 5449.0
-    - 9739.4925804
-- type: footpath
-  w: 1.4
-  xy:
-  - - 5449.0
-    - 9739.4925804
-  - - 5448.462413835517
-    - 9739.513935278355
-- owner: demo_user216
-  type: entrance
-  w: 0.9
-  xy:
-  - - 5447.8019335
-    - 9739.5550185
-  - - 5447.9779926
-    - 9739.5550185
-  - - 5448.0
-    - 9739.5550185
-- type: footpath
-  w: 1.4
-  xy:
-  - - 5448.0
-    - 9739.5550185
-  - - 5448.462413835517
-    - 9739.513935278355
-- owner: demo_user277
-  type: entrance
-  w: 0.9
-  xy:
-  - - 5449.179203
-    - 9740.4500118
-  - - 5449.0220074
-    - 9740.4500118
-  - - 5449.0
-    - 9740.4500118
-- type: footpath
-  w: 1.4
-  xy:
-  - - 5449.0
-    - 9740.4500118
-  - - 5448.522986918278
-    - 9740.538241700977
-- owner: demo_user94
-  type: entrance
-  w: 0.9
-  xy:
-  - - 5447.8066494
-    - 9740.5312819
-  - - 5447.9779926
-    - 9740.5312819
-  - - 5448.0
-    - 9740.5312819
-- type: footpath
-  w: 1.4
-  xy:
-  - - 5448.0
-    - 9740.5312819
-  - - 5448.522986918278
-    - 9740.538241700977
-- type: village
-  w: 2.051089016592596
-  xy:
-  - - 5448.462414
-    - 9739.513935
-  - - 5448.451529
-    - 9739.643065
-  - - 5448.443454
-    - 9739.772029
-  - - 5448.44057
-    - 9739.900685
-  - - 5448.444471
-    - 9740.028941
-  - - 5448.455714
-    - 9740.156762
-  - - 5448.47374
-    - 9740.284182
-  - - 5448.496959
-    - 9740.411295
-  - - 5448.522987
-    - 9740.538242
+paths: []
 network:
-  cellsPerHome: 0.5
-  homes: 4
+  cellsPerHome: 0
+  homes: 0
   lit: false
   poles: []
-  root:
-  - 5448
-  - 9739
   services: []
   spans: []
   v: 1
 ---
-Frontage routes for registered houses. Reserved demo approaches are not public streets.
+Only funded public works belong here. Residential lanes come from the village register.

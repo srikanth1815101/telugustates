@@ -94,6 +94,9 @@ export function refineTread(s, t, cell, X, Y, V, n, i, j, p, c, wear, ix) {
     dx = X[i + 1] - x,
     dy = Y[j + 1] - y;
   if (
+    (s.mobileMesh &&
+      Math.hypot(x + dx * 0.5 - s.focus[0], y + dy * 0.5 - s.focus[1]) * U >
+        97) ||
     dx > 0.34 ||
     dy > 0.34 ||
     !t.hit(x + dx * 0.5, y + dy * 0.5, Math.hypot(dx, dy) * U * 0.5)
@@ -105,7 +108,17 @@ export function refineTread(s, t, cell, X, Y, V, n, i, j, p, c, wear, ix) {
     C = V[a + n],
     D = V[a + n + 1];
   if ([A, B, C, D].some((v) => v.w >= 0)) return false;
-  const N = 16,
+  // In occupied hamlets fine terrace cuts already supply vertices; bound wear resolution by metres, not by parcel count.
+  const N =
+      s.compactLaneLOD || s.mobileMesh
+        ? Math.max(
+            2,
+            Math.min(
+              16,
+              2 ** Math.ceil(Math.log2((Math.max(dx, dy) * U) / 0.79)),
+            ),
+          )
+        : 16,
     base = p.length / 3,
     delta = new Float32Array((N + 1) * (N + 1)),
     ww = new Float32Array(delta.length);

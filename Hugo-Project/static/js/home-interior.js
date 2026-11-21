@@ -3,7 +3,7 @@ import * as T from "../vendor/three.module.min.js";
 import { basis, localPoint } from "./metres.js";
 import { roomPlan } from "./home-volume.js";
 // Hollow ground-floor shell, framed openings and furnishings. Exterior and interior occupy the same footprint and use the same floor.
-export function buildRoom(h, paint) {
+export function buildRoom(h, paint, detail = true) {
   const p = roomPlan(h),
     { cx, cz, w, d, front, door, dw, dh, top, floor: F } = p;
   const box = (x, y, z, w, H, d, c, rot = 0) =>
@@ -37,6 +37,14 @@ export function buildRoom(h, paint) {
       if (hi - lo > 0.002)
         box(f.x, (lo + hi) / 2, f.z, f.len + 0.015, hi - lo, dep, color, f.rot);
     };
+    if (!detail) {
+      if (f.kind === "door") rail(F + dh, top, trim);
+      else if (f.kind === "window") {
+        rail(F - 0.07, F + 0.93, lime);
+        rail(Math.min(top - 0.22, F + 1.75), top, lime);
+      } else rail(F - 0.07, top, lime);
+      continue;
+    }
     if (f.kind === "wall") {
       rail(F - 0.07, top, lime);
       lining(F, top);
@@ -139,7 +147,7 @@ export function buildRoom(h, paint) {
     );
   box(door, F + dh + 0.06, front, dw + 0.22, 0.12, 0.245, wood);
   box(door, 0.07, front + 0.41, dw + 0.52, 0.14, 0.82, "#b8a385");
-  fittings(p, paint);
+  if (detail) fittings(p, paint);
 }
 export function doorLeaf(s, h, u) {
   const p = roomPlan(h),

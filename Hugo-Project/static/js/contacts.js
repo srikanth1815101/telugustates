@@ -1,3 +1,4 @@
+import { homesAt } from "./home-index.js";
 import { houseBlocked, thresholdFloor } from "./home-volume.js";
 import { ACRE as U } from "./metres.js";
 import { fenceTop } from "./acre-edge.js";
@@ -180,13 +181,13 @@ export function passes(
   actor = null,
 ) {
   if (!s.traversable(px, py) || !s.sample(px, py).drawn) return false;
-  const home = s.homeMap?.get(Math.floor(px) + "," + Math.floor(py))?.h;
-  if (
-    home &&
-    houseBlocked(home, px, py, s.openHome === home) &&
-    !houseBlocked(home, ox, oy, s.openHome === home)
-  )
-    return false;
+  for (const home of homesAt(s, px, py))
+    if (
+      home &&
+      houseBlocked(home, px, py, s.openHome === home) &&
+      !houseBlocked(home, ox, oy, s.openHome === home)
+    )
+      return false;
   const timber = fenceTop(fences, px, py);
   if (
     timber > -Infinity &&
@@ -267,12 +268,11 @@ export function support(s, x, y, objects) {
     const y0 = topAt(o, x, y);
     if (y0 != null) z = Math.max(z, y0);
   }
-  const houseZ = thresholdFloor(
-    s,
-    x,
-    y,
-    s.homeMap?.get(Math.floor(x) + "," + Math.floor(y))?.h,
-  );
+  let houseZ = null;
+  for (const h of homesAt(s, x, y)) {
+    const z0 = thresholdFloor(s, x, y, h);
+    if (z0 != null && (houseZ == null || z0 > houseZ)) houseZ = z0;
+  }
   if (houseZ != null && houseZ >= z - 0.001)
     return { ...h, z: houseZ, depth: 0, support: "floor" };
   return z === h.z

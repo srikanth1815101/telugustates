@@ -1,3 +1,4 @@
+import { inCourt } from "./home-index.js";
 import { bedStones } from "./moving-water.js";
 import { trunkFootprint, meshShape } from "./contacts.js";
 import { padDistance, clearApproach } from "./resident-scene.js";
@@ -145,9 +146,11 @@ export class EcologyScene {
       rows = this.rows
         .filter(
           (a) =>
-            Math.abs(a[0] - x) < r + 3 && Math.abs(a[1] - y) < r + 3 && a[5],
+            a[5] &&
+            Math.abs(a[5].centre[0] - x) < r + 3 &&
+            Math.abs(a[5].centre[1] - y) < r + 3,
         )
-        .map((a) => [a[0], a[1], a[5]]);
+        .map((a) => [...a[5].centre, a[5]]);
     for (let j = Math.floor(y) - r; j <= Math.floor(y) + r; j++)
       for (let i = Math.floor(x) - r; i <= Math.floor(x) + r; i++) {
         let c = s.t.at(i, j);
@@ -251,9 +254,7 @@ export class EcologyScene {
       dyn = [];
     let tick = performance.now();
     for (const v of [...patch.static, ...fauna]) {
-      const house = s.homeMap?.get(Math.floor(v.x) + "," + Math.floor(v.y))?.h;
-      if (house && padDistance(house, v.x, v.y) < (v.kind === "tree" ? 2 : 1))
-        continue;
+      if (inCourt(s, v.x, v.y, v.kind === "tree" ? 2.6 : 1.4)) continue;
       if (
         v.kind !== "animal" &&
         clearApproach(s, v.x, v.y, v.kind === "tree" ? 2.7 : 1.8)
@@ -324,7 +325,7 @@ export class EcologyScene {
           v.scale;
         if (
           !s.ways.clear(v.x, v.y, radius) ||
-          (house && padDistance(house, v.x, v.y) < radius + 0.4)
+          inCourt(s, v.x, v.y, radius + 0.4)
         )
           continue;
       }
@@ -476,8 +477,7 @@ export class EcologyScene {
     }
   }
   permitted(v, x, y) {
-    const house = this.s.homeMap?.get(Math.floor(x) + "," + Math.floor(y))?.h;
-    if (house && padDistance(house, x, y) < 2) return false;
+    if (inCourt(this.s, x, y, 2)) return false;
     const s = this.s,
       c = s.t.at(x, y),
       i = Math.floor(x),

@@ -12,6 +12,8 @@ export class PocketMap {
     const span = r < 50 ? 3.1 : r < 500 ? 10 : 36,
       key = [
         L.id,
+        L.activeAcre,
+        L.routeLine?.length,
         Math.round(x * 100),
         Math.round(y * 100),
         Math.round(yaw * 14),
@@ -56,10 +58,23 @@ export class PocketMap {
       if (!h) continue;
       const a = point(X, Y + 1);
       c.strokeStyle = "#6d7152";
-      c.strokeRect(...a, k, k);
+      if (row[2] === L.activeAcre) {
+        c.strokeStyle = "#ffdb7c";
+        c.lineWidth = 2.3;
+        c.strokeRect(...a, k, k);
+      }
       const p = point(...h.centre);
       c.fillStyle = "#9b6349";
       c.fillRect(p[0] - 2.5, p[1] - 2.5, 5, 5);
+    }
+    if (L.routeLine) {
+      c.beginPath();
+      c.strokeStyle = "#ffeb98";
+      c.lineWidth = 2.6;
+      L.routeLine.forEach((p, i) =>
+        i ? c.lineTo(...point(...p)) : c.moveTo(...point(...p)),
+      );
+      c.stroke();
     }
     c.save();
     c.translate(56, 56);

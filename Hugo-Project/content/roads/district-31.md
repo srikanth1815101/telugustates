@@ -1,106 +1,14 @@
 ---
-title: District 31 frontage network
+title: District 31 infrastructure
 district_id: 31
-paths:
-- owner: demo_user140
-  type: entrance
-  w: 0.9
-  xy:
-  - - 4073.5125757
-    - 9145.1854908
-  - - 4073.5125757
-    - 9145.0220074
-  - - 4073.5125757
-    - 9145.0
-- type: footpath
-  w: 1.4
-  xy:
-  - - 4073.5125757
-    - 9145.0
-  - - 4073.4591954182183
-    - 9144.490343539212
-- owner: demo_user201
-  type: entrance
-  w: 0.9
-  xy:
-  - - 4073.4809793
-    - 9143.7885404
-  - - 4073.4809793
-    - 9143.9779926
-  - - 4073.4809793
-    - 9144.0
-- type: footpath
-  w: 1.4
-  xy:
-  - - 4073.4809793
-    - 9144.0
-  - - 4073.4591954182183
-    - 9144.490343539212
-- owner: demo_user262
-  type: entrance
-  w: 0.9
-  xy:
-  - - 4074.5111609
-    - 9145.1666274
-  - - 4074.5111609
-    - 9145.0220074
-  - - 4074.5111609
-    - 9145.0
-- type: footpath
-  w: 1.4
-  xy:
-  - - 4074.5111609
-    - 9145.0
-  - - 4074.5178378342184
-    - 9144.484100054475
-- owner: demo_user79
-  type: entrance
-  w: 0.9
-  xy:
-  - - 4074.4955985
-    - 9143.8129372
-  - - 4074.4955985
-    - 9143.9779926
-  - - 4074.4955985
-    - 9144.0
-- type: footpath
-  w: 1.4
-  xy:
-  - - 4074.4955985
-    - 9144.0
-  - - 4074.5178378342184
-    - 9144.484100054475
-- type: village
-  w: 2.108145199879073
-  xy:
-  - - 4073.459195
-    - 9144.490344
-  - - 4073.591357
-    - 9144.460957
-  - - 4073.723544
-    - 9144.435925
-  - - 4073.855779
-    - 9144.41894
-  - - 4073.988076
-    - 9144.41247
-  - - 4074.12044
-    - 9144.417379
-  - - 4074.252865
-    - 9144.432803
-  - - 4074.385339
-    - 9144.456274
-  - - 4074.517838
-    - 9144.4841
+paths: []
 network:
-  cellsPerHome: 0.5
-  homes: 4
+  cellsPerHome: 0
+  homes: 0
   lit: false
   poles: []
-  root:
-  - 4073
-  - 9144
   services: []
   spans: []
   v: 1
 ---
-Frontage routes for registered houses. Reserved demo approaches are not public streets.
+Only funded public works belong here. Residential lanes come from the village register.

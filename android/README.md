@@ -2,7 +2,7 @@
 
 **Install:** open `Telugu-States-Atlas.apk` in this folder on Android 8.0 or later. This field build has the same application ID and signing certificate as 7.13.0, with a higher version code. It can be installed over that build without clearing its local data. The application does not request Internet, location, or storage permissions. Use an up-to-date Android System WebView for interactive 3D; the bilingual 2D map is the fallback.
 
-**Files:** `src/` is the native WebView host and local asset router; `res/` contains launcher resources; `console/` is a small offline return-to-map page. The manifest and build scripts are here. All atlas content and terrain are edited in the **other ZIP's `Hugo-Project/`**, not in a duplicate web tree inside this wrapper.
+**Files:** `src/` is the native WebView host and local asset router; `res/` contains launcher resources; `console/` is a small offline return-to-map page. The manifest and build scripts are here. All atlas content and terrain are edited in the sibling [`Hugo-Project/`](../Hugo-Project/) folder, not in a duplicate web tree inside this wrapper.
 
 ### Try this version
 
@@ -18,7 +18,7 @@ See [Verification.md](Verification.md) for the checks, field pictures and limits
 
 ### Build locally
 
-Extract **both ZIPs in the same parent directory**. You should see `Hugo-Project/`, `Android/` and `.github/workflows/build-android.yml`. Install Hugo 0.131.0, Python 3.11+, JDK 11 or 17 and Android SDK Platform 35 + Build Tools 35.0.0. No Gradle, Maven, Node dependency install or running web server is required.
+Start at the workspace root. `Hugo-Project/`, `Android/` and `.github/workflows/build-android.yml` are already in place; no extraction is needed. Install Hugo 0.131.0, Python 3.11+, JDK 11 or 17 and Android SDK Platform 35 + Build Tools 35.0.0. No Gradle, Maven, Node dependency install or running web server is required.
 
 ```sh
 # Run at the common parent. Set JAVA_HOME and ANDROID_HOME to the installed toolchains.
@@ -31,11 +31,11 @@ unset ATLAS_SIGN_PASS
 
 The script renders Hugo into a temporary directory, compiles Java/resources/DEX, embeds the fresh publication, aligns, signs (v2/v3), verifies the signer and compares every embedded web asset with that render. No pinned old publication or hand-edited hash is required for ordinary Markdown edits. Use a new Android `versionCode` and `versionName` for future releases.
 
-Supply a PKCS12 keystore whose key and store passwords match. For a **new, separately signed installation**, generate your own private key with `keytool -genkeypair -storetype PKCS12 -keystore /private/path/atlas-signing.p12 -alias atlas-field -keyalg RSA -keysize 3072 -validity 10000`. A new key cannot upgrade the distributed APK. Do not uninstall a previous build merely to test a new signer if you need its local data; use a separate test device/profile or application ID. No signing secret is in either ZIP.
+Supply a PKCS12 keystore whose key and store passwords match. For a **new, separately signed installation**, generate your own private key with `keytool -genkeypair -storetype PKCS12 -keystore /private/path/atlas-signing.p12 -alias atlas-field -keyalg RSA -keysize 3072 -validity 10000`. A new key cannot upgrade the distributed APK. Do not uninstall a previous build merely to test a new signer if you need its local data; use a separate test device/profile or application ID. No signing secret is included in this workspace.
 
 ### Optional manual workflow
 
-To use Actions, put the extracted `.github/workflows/build-android.yml` at the **repository root**, with `Hugo-Project/` and `Android/` beside `.github/`. Add repository secrets `ATLAS_KEYSTORE_B64` (base64 of your private keystore) and `ATLAS_SIGN_PASS`. If needed, set repository variable `ATLAS_KEY_ALIAS` (default `atlas-field`). Run **Build offline atlas APK** manually. The workflow builds only on request, has read-only repository permissions, uploads one one-day artifact and never deploys or commits binaries. `Android/.gitignore` excludes APKs and signing files. Leave the delivered APK out of source control; use the copy in this ZIP to install now.
+The manual workflow is already at [`.github/workflows/build-android.yml`](../.github/workflows/build-android.yml). Keep `.github/` at the **repository root**, beside `Hugo-Project/` and `Android/`. Add repository secrets `ATLAS_KEYSTORE_B64` (base64 of your private keystore) and `ATLAS_SIGN_PASS`. If needed, set repository variable `ATLAS_KEY_ALIAS` (default `atlas-field`). Run **Build offline atlas APK** manually. The workflow builds only on request, has read-only repository permissions, uploads one one-day artifact and never deploys or commits binaries. `Android/.gitignore` excludes APKs and signing files. Leave the delivered APK out of source control; use `Android/Telugu-States-Atlas.apk` from this workspace for a local installation.
 
 ### Identify this installer
 

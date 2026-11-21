@@ -1,106 +1,14 @@
 ---
-title: District 34 frontage network
+title: District 34 infrastructure
 district_id: 34
-paths:
-- owner: demo_user143
-  type: entrance
-  w: 0.9
-  xy:
-  - - 3697.5342686
-    - 8576.7128979
-  - - 3697.5342686
-    - 8576.9779926
-  - - 3697.5342686
-    - 8577.0
-- type: footpath
-  w: 1.4
-  xy:
-  - - 3697.5342686
-    - 8577.0
-  - - 3697.509200467067
-    - 8577.46642040898
-- owner: demo_user204
-  type: entrance
-  w: 0.9
-  xy:
-  - - 3697.5180775
-    - 8578.1854908
-  - - 3697.5180775
-    - 8578.0220074
-  - - 3697.5180775
-    - 8578.0
-- type: footpath
-  w: 1.4
-  xy:
-  - - 3697.5180775
-    - 8578.0
-  - - 3697.509200467067
-    - 8577.46642040898
-- owner: demo_user265
-  type: entrance
-  w: 0.9
-  xy:
-  - - 3698.5336399
-    - 8576.8176531
-  - - 3698.5336399
-    - 8576.9779926
-  - - 3698.5336399
-    - 8577.0
-- type: footpath
-  w: 1.4
-  xy:
-  - - 3698.5336399
-    - 8577.0
-  - - 3698.45048322171
-    - 8577.486570838782
-- owner: demo_user82
-  type: entrance
-  w: 0.9
-  xy:
-  - - 3698.5108465
-    - 8578.1917787
-  - - 3698.5108465
-    - 8578.0220074
-  - - 3698.5108465
-    - 8578.0
-- type: footpath
-  w: 1.4
-  xy:
-  - - 3698.5108465
-    - 8578.0
-  - - 3698.45048322171
-    - 8577.486570838782
-- type: village
-  w: 2.219660185126122
-  xy:
-  - - 3697.5092
-    - 8577.46642
-  - - 3697.627104
-    - 8577.457589
-  - - 3697.74497
-    - 8577.450485
-  - - 3697.862768
-    - 8577.446574
-  - - 3697.980477
-    - 8577.446835
-  - - 3698.098089
-    - 8577.451612
-  - - 3698.215612
-    - 8577.46056
-  - - 3698.333066
-    - 8577.472701
-  - - 3698.450483
-    - 8577.486571
+paths: []
 network:
-  cellsPerHome: 0.5
-  homes: 4
+  cellsPerHome: 0
+  homes: 0
   lit: false
   poles: []
-  root:
-  - 3697
-  - 8577
   services: []
   spans: []
   v: 1
 ---
-Frontage routes for registered houses. Reserved demo approaches are not public streets.
+Only funded public works belong here. Residential lanes come from the village register.

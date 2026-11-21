@@ -28,7 +28,7 @@ void main(){shelf=marginGain;P=position;depth=depthM;F=flow;surfSlope=vec4(0.);i
  wetM=depth+surfSlope.w;vec4 eye=modelViewMatrix*vec4(P,1.);fogD=-eye.z;gl_Position=projectionMatrix*eye;}`;
 export const waterFrag = (
   lite,
-) => `varying float shelf;uniform sampler2D bankSky;uniform vec4 bankStation;varying vec4 surfSlope;uniform vec3 cameraInPatch,uSun,uZen,uHor;uniform float uFog,uDay,uRain,liquidTime,wakeClock,calmWater;uniform vec2 hydroOffset;uniform vec4 wakes[6];varying float depth,wetM,fogD;varying vec4 F;varying vec3 P;
+) => `varying float shelf;uniform sampler2D bankSky,currentGrain;uniform vec4 bankStation;varying vec4 surfSlope;uniform vec3 cameraInPatch,uSun,uZen,uHor;uniform float uFog,uDay,uRain,liquidTime,wakeClock,calmWater;uniform vec2 hydroOffset;uniform vec4 wakes[6];varying float depth,wetM,fogD;varying vec4 F;varying vec3 P;
 ${shoreGLSL}
 ${drops}
 // A backtraced parcel has a broad optical glide and, only in rough pockets, short wind/collision wavelets.
@@ -44,7 +44,7 @@ vec4 movingSkin(vec2 q,vec2 rd,vec2 ax0,vec2 ax1,float turn,float px,float bed){
  float seam=mix(grainAlong(q,ax0,bend,slow),grainAlong(q,ax1,bend,slow),turn);float lane=.19+.81*smoothstep(-.41,.42,shear-.28*bend);
  vec2 tilt=rd*(.068*slow+.037*thread)+side*(.059*bend+lane*.171*seam-.019*thread);
  float detail=1.-smoothstep(.24,1.15,px);
- if(detail*agitation>.008){const mat2 R=mat2(.868,.496,-.496,.868);vec2 g=R*q*(1./7.65),cell=floor(g),f=fract(g),other=step(vec2(.5),f)*2.-1.;
+ if(${lite ? "false" : "true"} && detail*agitation>.008){const mat2 R=mat2(.868,.496,-.496,.868);vec2 g=R*q*(1./7.65),cell=floor(g),f=fract(g),other=step(vec2(.5),f)*2.-1.;
  for(int i=0;i<4;i++){vec2 nb=other*vec2(float(i%2),float(i/2)),id=cell+nb;uint h=fieldBits(ivec2(id));vec4 h0=vec4(uvec4(h,h>>8u,h>>16u,h>>24u)&uvec4(255u))*(1./255.);
  vec2 rel=transpose(R)*((f-nb-(.21+.58*h0.xy))*7.65);vec2 ax=normalize(rd+side*(1.76*h0.z-.76));vec2 bx=vec2(-ax.y,ax.x);float along=dot(rel,ax),crosswise=dot(rel,bx);
  vec2 r=vec2(along/(1.17+2.29*h0.w),crosswise/(1.5+2.65*h0.x));float envelope=max(0.,1.-dot(r,r));if(envelope>0.){
@@ -52,19 +52,32 @@ vec4 movingSkin(vec2 q,vec2 rd,vec2 ax0,vec2 ax1,float turn,float px,float bed){
  float ph=k*(along+curve)*(1.+.17*r.x+.10*r.y)+6.28*h0.w,aa=1.-smoothstep(1.05,3.,px*k);float cap=.67*sin(ph)+.33*sin(ph*(.68+.41*h0.z)+2.9*h0.x+2.1*r.y)+.12*cos(1.89*ph+.7)*aa;
  tilt+=agitation*detail*envelope*envelope*(.105+.145*h0.w)*aa*cap*(ax+bx*(.12+crosswise*.095));}}}
  return vec4(tilt,(.31+.69*lane)*seam+.31*slow,.46*bend+.11*thread);}
+// Meter-scale packets survive a 300–1000 m orbit. Two fixed axes blend across bends without rotating a regional coordinate by a different angle per pixel.
+vec3 broadSkin(vec2 q,vec2 d){float phase=atan(d.y,d.x)*1.2732395,k=floor(phase)*.78539816;vec2 ax=vec2(cos(k),sin(k)),bx=vec2(-ax.y,ax.x),az=.7071068*(ax+bx),bz=vec2(-az.y,az.x);
+ vec2 a=vec2(dot(q,ax),dot(q,bx)),b=vec2(dot(q,az),dot(q,bz));float w=smoothstep(.0,1.,fract(phase));float bow=texture2D(currentGrain,q/163.).g-.5;
+ return 2.*(mix(texture2D(currentGrain,a*vec2(.009,.012)+vec2(.017,.11*bow)).rgb,texture2D(currentGrain,b*vec2(.009,.012)+vec2(.24,.13*bow)).rgb,w)-.5);}
 void main(){vec2 local=P.xz,p=local+hydroOffset;float tm=liquidTime,sea=smoothstep(.18,.8,F.w),speed=max(0.,F.z),river=(1.-sea)*smoothstep(.025,.20,speed),pixel=max(length(dFdx(local)),length(dFdy(local))),fine=1.-smoothstep(.12,.64,pixel),middle=1.-smoothstep(.7,3.7,pixel),wide=1.-smoothstep(3.,15.,pixel);
  if((sea>.5||shelf>0.||depth<0.)&&wetM<=0.)discard;
+ // Distant water should not compile or shade boot-scale capillaries per pixel. Use travelling pressure fields in the entire wet silhouette.
+ if(sea<.005 && river>.04 && (fogD>74. || pixel>.43)){
+ vec2 dir=normalize(F.xy+vec2(.00001,.00002));vec2 vel=dir*(speed+smoothstep(.06,.52,speed)*(.88+.64*sqrt(clamp(wetM,0.,4.))));float a=mod(tm,26.),b=mod(a+13.,26.),swap=smoothstep(.1,.90,abs(a-13.)/13.);
+ vec3 surf=mix(broadSkin(p-vel*a,dir),broadSkin(p-vel*b,dir),swap);float g=surf.x*.83+surf.z*.29,front=smoothstep(.14,.61,g+.40*surf.y);
+ float d=max(0.,wetM),edge=1.-smoothstep(.07,1.32,d),deep=smoothstep(.04,2.3,d);vec3 body=mix(vec3(.144,.274,.196),vec3(.064,.208,.199),deep);vec3 n=normalize(vec3(dir.x*.11*g-dir.y*surf.x*.18,1.,dir.y*.11*g+dir.x*surf.x*.18)),V=normalize(cameraInPatch-P);float refl=.12+.56*pow(1.-clamp(dot(n,V),0.,1.),2.8);
+ vec3 col=mix(body,mix(uHor,uZen,.27),refl)*(.88+.73*g+.24*surf.y);col+=vec3(.071,.093,.087)*front;
+ float fold=(.42+.58*smoothstep(-.16,.42,surf.z+surf.x*.5))*edge*smoothstep(.02,.28,speed);col=mix(col,vec3(.39,.51,.423),.50*fold);col*=mix(.43,1.,uDay);col=mix(col,uHor,1.-exp(-pow(max(0.,fogD)*uFog,2.)));float alpha=mix(.47,.946,deep)+.075*fold;alpha*=smoothstep(-.001,max(.014,.6*fwidth(wetM)),wetM);gl_FragColor=vec4(col,clamp(alpha,0.,.995));
+#include <colorspace_fragment>
+ return;}
  vec2 wind=vec2(.814,.581),wt=vec2(-wind.y,wind.x),rd=normalize(F.xy+vec2(.00001,.00002));float area=fieldNoise(p*.016+vec2(4.71,-43.)),wavelet=0.,scum=0.;vec2 grad=vec2(0.);
  // Open pools: independent broad wind patches and little curved capillary fans. No crossing sine gratings, even in still water.
  vec2 b=vec2(dot(p,wind),dot(p,wt));float wr=fieldNoise(b*vec2(.088,.044)+vec2(-tm*.079,.28*area)),gr=fieldNoise(b*vec2(.37,.113)+vec2(-tm*.30,wr*.94));float small=0.;if(fine>.02)small=fieldNoise(b*vec2(1.01,.367)+vec2(-tm*.61,gr*.94+wr));
  float gust=clamp(.48+.50*wr+.21*area,.12,1.);grad+=wind*(.034*wr*wide+.067*gr*middle+.028*small*fine)*gust+wt*.029*gr*middle;wavelet=(.54*wr*wide+.38*gr*middle+.08*small*fine)*gust;
- if(river>.002){float a=mod(tm+3.8*area,24.),b2=mod(a+12.,24.),w=smoothstep(.16,.84,abs(a-12.)/12.);vec2 vel=rd*speed;
+ if(river>.002){float a=mod(tm+3.8*area,24.),b2=mod(a+12.,24.),w=smoothstep(.16,.84,abs(a-12.)/12.);vec2 vel=rd*(speed+smoothstep(.06,.52,speed)*(.88+.64*sqrt(clamp(wetM,0.,4.))));
  float sec=atan(rd.y,rd.x)*1.27323954,theta=floor(sec)*.78539816;vec2 ax0=vec2(cos(theta),sin(theta)),ax1=mat2(.70710678,.70710678,-.70710678,.70710678)*ax0;float turn=smoothstep(0.,1.,fract(sec));
  vec4 skin=mix(movingSkin(p-vel*a,rd,ax0,ax1,turn,pixel,depth),movingSkin(p-vel*b2,rd,ax0,ax1,turn,pixel,depth),w);
  grad=mix(grad,skin.xy*middle*1.13+wind*.012*wr*wide,river);
  // Narrow bending ripples ride a moving pressure packet on the shallow shelf. The signed sheet depth, NOT a white outline, decides where ground is wet.
  if(shelf>.001&&pixel<.57){vec2 crossRun=vec2(-rd.y,rd.x);float k=mod(tm,8.),j=mod(k+4.,8.),fade=smoothstep(.12,.88,abs(k-4.)*.25);float ripple=0.;
- for(int l=0;l<2;l++){vec2 q=p-rd*speed*(l==0?k:j);float pocket=.5+.5*fieldNoise(q*.48+vec2(7.1,-4.2));float wrinkle=3.9*fieldNoise(q*.55)+2.16*fieldNoise(q*.93+9.5);float crest=mix(sin(dot(q,ax0)*7.3+wrinkle),sin(dot(q,ax1)*7.3+wrinkle),turn);
+ for(int l=0;l<2;l++){vec2 q=p-vel*(l==0?k:j);float pocket=.5+.5*fieldNoise(q*.48+vec2(7.1,-4.2));float wrinkle=3.9*fieldNoise(q*.55)+2.16*fieldNoise(q*.93+9.5);float crest=mix(sin(dot(q,ax0)*7.3+wrinkle),sin(dot(q,ax1)*7.3+wrinkle),turn);
  float r=crest*smoothstep(.31,.73,pocket)*(l==0?1.-fade:fade);ripple+=r;}
  float lift=smoothstep(-.024,.106,surfSlope.w);grad+=rd*(.135+.105*lift)*ripple*shelf*fine+crossRun*.051*skin.w*shelf;scum+=shelf*.12*lift*smoothstep(.36,.85,ripple)*fine;}
  // Body colour changes gently over several metres. Contrast at small scales comes from reflecting light, not from dyeing each high point white.

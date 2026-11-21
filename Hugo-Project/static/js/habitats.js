@@ -84,12 +84,8 @@ export function generate(input) {
       [0, 1],
       [0, -1],
     ].some(([dx, dy]) => isWet(map.get(i + dx + "," + (j + dy))));
-  // Let natural vegetation continue across assignments. Keep large trunks out of the actual fence strips.
-  const assigned = new Set((input.homes || []).map(([x, y]) => x + "," + y));
-  const allowed = (x, y, big) =>
-    !big ||
-    !assigned.has(Math.floor(x) + "," + Math.floor(y)) ||
-    Math.min(x % 1, 1 - (x % 1), y % 1, 1 - (y % 1)) > 0.105;
+  // Acre ownership does not suppress vegetation. The scene clips actual courtyards, commons and the walking width.
+  const allowed = () => true;
   const selectFauna = (names, rc, c, hd) => {
     let xs = names.filter((n) => presets.animals[n]);
     if (!xs.length) return null;

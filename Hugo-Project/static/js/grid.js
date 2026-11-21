@@ -1,3 +1,4 @@
+import { currentPage } from "./current-page.js";
 import { readHeads } from "./hydraulic-stage.js";
 import { dev } from "./edition.js";
 // Exact WGS84 ellipsoidal Albers equations for ESRI:102028, including its negative cone constant.
@@ -84,6 +85,7 @@ export async function get(p) {
       recordStats: c.recordStats,
       total: c.active.length,
       plots: Object.keys(c.plots),
+      sceneTiles: Object.keys(c.scenes),
       shards: Object.keys(c.shards),
       districts: c.districts.map((d) => ({
         ...d,
@@ -108,6 +110,7 @@ export async function get(p) {
         lit: false,
       }
     );
+  if (p.includes("/scenes/")) return c.scenes[id] || [];
   return p.includes("/plots/") ? c.plots[id] || [] : c.shards[id] || {};
 }
 let atlasPromise;
@@ -151,7 +154,8 @@ export class Tiles {
       const paths = JSON.parse(
         new TextDecoder().decode(new Uint8Array(buf, o)),
       );
-      const [heads, pathHead] = await Promise.all([
+      const [I, J] = k.split("_").map(Number);
+      const [heads, pathHead, sheet] = await Promise.all([
         readHeads(k, d, b),
         paths.some(([, p]) => p.length >= 4)
           ? fetch(url("hydraulics/paths/" + k + ".json.gz")).then(async (r) => {
@@ -161,8 +165,21 @@ export class Tiles {
               );
             })
           : null,
+        currentPage(I >> 1, J >> 1),
       ]);
-      const t = { h, s, b, d, f, w, ok, paths, heads, pathHead };
+      const t = {
+        h,
+        s,
+        b,
+        d,
+        f,
+        w,
+        ok,
+        paths,
+        heads,
+        pathHead,
+        currentPage: sheet,
+      };
       this.cache.set(k, t);
       return t;
     })();

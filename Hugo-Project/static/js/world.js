@@ -1,3 +1,8 @@
+import { laneSoil } from "./lane-soil.js";
+import { hamletScene, marks } from "./hamlet-scene.js";
+import { pathTo, guideStep, drawHolding } from "./hamlet-route.js";
+import { farms } from "./agriculture.js";
+import { homesAt, inCourt } from "./home-index.js";
 import {
   roomLocal,
   roomPlan,
@@ -210,12 +215,51 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
   host.append(orbitTools);
   for (const b of orbitTools.querySelectorAll("button"))
     on(b, "click", () => zoom(b.dataset.zo === "in" ? 1.32 : 1 / 1.32));
+  let selectedKind = "",
+    flashUntil = 0,
+    journey = null,
+    landMenu = false;
+  let menuRecord = null,
+    preferred = null,
+    menuSerial = 0;
+  const strip = q(".world-top"),
+    cards = document.createElement("section");
+  cards.id = "holding-menu";
+  cards.hidden = true;
+  cards.setAttribute("role", "dialog");
+  cards.setAttribute("aria-labelledby", "destination-name");
+  const homeIcon = '<path d="m3 11 9-7.5 9 7.5M5.5 10v10h5v-6h3v6h5V10"/>',
+    landIcon =
+      '<path d="m2.8 10.4 11.6-6.2 7.1 4.2-11.7 6.5zM4 13.5l5.8 3.3 10.5-5.9M4.5 17l5.2 3 10.4-5.8m-8.4-8.4 6 3.4"/>';
+  for (const [id, k, ink] of [
+    ["my-home", "village.home", homeIcon],
+    ["my-acre", "village.acre", landIcon],
+  ]) {
+    strip.insertAdjacentHTML(
+      "beforeend",
+      `<button class="holding-icon" id="${id}" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="holding-menu" data-msg-aria="${k}" data-msg-title="${k}"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${ink}</svg></button>`,
+    );
+  }
+  cards.innerHTML = `<header><div><small class="resident-handle"></small><h3 id="destination-name"></h3></div><button type="button" id="close-holding" data-msg-aria="details.close">×</button></header><label id="holding-choose"><span data-msg="holding.household"></span><select id="holding-resident"></select></label><div id="acre-actions"><canvas id="holding-chart" data-msg-aria="village.map"></canvas><small id="holding-distance"></small><div class="home-pair"><button id="walk-acre" type="button" data-msg="village.walk"></button><button id="teleport-acre" type="button" data-msg="village.teleport"></button></div></div>`;
+  host.append(cards);
+  host.insertAdjacentHTML(
+    "beforeend",
+    '<output id="route-step" hidden></output>',
+  );
+  const pinFromName = async (u) => {
+    if (!u) return null;
+    const shard = Array.from(u.slice(0, 2), (c) =>
+      c.charCodeAt(0).toString(16),
+    ).join("");
+    if (!a.shards.includes(shard)) return null;
+    return (await get("data/search/" + shard + ".json"))[u] || null;
+  };
   const pref = matchMedia("(prefers-reduced-motion:reduce)"),
     gov = new Governor(deviceTier(renderer)),
     tiles = new Tiles(a),
     ds = new Map(a.districts.map((d) => [d.id, d])),
     pl = new Map(),
-    pk = new Set(a.plots),
+    pk = new Set(a.sceneTiles),
     O = data.O,
     reg = regional(data, a, gov.tier);
   scene.add(reg.group);
@@ -435,6 +479,7 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
       if (el) el.disabled = !!r;
     }
     if (r) {
+      if (!L.s.roomDetail?.has(owner)) nature(L, false);
       const leaf = L.doors?.get(owner);
       if (leaf) leaf.userData.hinge.rotation.y = 1.52;
       const p = roomPlan(r.h);
@@ -455,19 +500,19 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
   function nearbyDoor() {
     if (!L || !canPlay() || !motor.grounded || motor.swim) return null;
     if (roomOwner) return doorRow();
-    const r = L.s.homeMap.get(Math.floor(x) + "," + Math.floor(y))?.h;
-    if (!r) return null;
-    const p = roomPlan(r),
-      [u, w] = roomLocal(r, x, y),
-      d = w - p.front;
-    if (
-      d < -0.08 ||
-      d > 2.6 ||
-      Math.hypot(u - p.door, d) > 2.65 ||
-      Math.abs(u - p.door) > 1.05
-    )
-      return null;
-    return L.sc?.userData.near.find((v) => v.h === r);
+    for (const r of homesAt(L.s, x, y)) {
+      const p = roomPlan(r),
+        [u, w] = roomLocal(r, x, y),
+        d = w - p.front;
+      if (
+        d >= -0.08 &&
+        d <= 2.6 &&
+        Math.hypot(u - p.door, d) <= 2.65 &&
+        Math.abs(u - p.door) <= 1.05
+      )
+        return L.sc?.userData.near.find((v) => v.h === r);
+    }
+    return null;
   }
   function promptDoor() {
     const r = nearbyDoor();
@@ -533,6 +578,7 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
     !hostPaused &&
     !photo &&
     sheet.hidden &&
+    !landMenu &&
     !ui?.busy() &&
     !document.querySelector("dialog[open]");
   const buzz = (n) => {
@@ -675,6 +721,7 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
     q(".world-back").setAttribute("aria-label", msg("hud.back"));
     dq(".chart-tag span").textContent = msg("world.canvas");
     dq(".flight-guide").textContent = msg("world.zoomHint");
+    if (landMenu) showMenu(landMenu, menuRecord);
     lastLabels = lastHud = -1e8;
     cornerOwner = "";
     dirty = true;
@@ -746,22 +793,230 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
     l.extras?.dispose();
     l.drain?.dispose();
     l.cover?.dispose();
+    l.lane?.tex.dispose();
     clearSc(l);
     remove(scene, l.group);
   }
-  function nature(l = L) {
+  function paintMarks(l = L) {
+    if (!l?.sc) return;
+    remove(l.sc, l.selection);
+    l.selection = null;
+    const owner = journey?.record || menuRecord || v;
+    l.activeAcre = selectedKind === "acre" ? owner?.u : null;
+    l.routeLine = journey?.xy || null;
+    if (
+      owner &&
+      Math.hypot(owner.c[0] - l.fx, owner.c[1] - l.fy) < 20 &&
+      (journey ||
+        selectedKind === "acre" ||
+        (selectedKind === "home" && performance.now() < flashUntil))
+    ) {
+      l.selection = marks(l.s, owner, selectedKind || journey?.kind, journey);
+      l.sc.add(l.selection);
+    }
+    dirty = true;
+  }
+  function selectKind(kind) {
+    selectedKind = kind;
+    if (kind === "home") flashUntil = performance.now() + 4600;
+    paintMarks();
+    pocket.last = "";
+  }
+  function menus(kind) {
+    landMenu = kind || false;
+    cards.hidden = !kind;
+    for (const [k, id] of [
+      ["home", "#my-home"],
+      ["acre", "#my-acre"],
+    ])
+      q(id).setAttribute("aria-expanded", String(kind === k));
+    if (!kind) menuSerial++;
+  }
+  function displayOwner() {
+    const visible = expanded && !photo;
+    for (const id of ["#my-home", "#my-acre"]) q(id).hidden = !visible;
+    if (!visible) menus(false);
+  }
+  function remember(r) {
+    if (!r) return;
+    preferred = r;
+    try {
+      localStorage.setItem("atlas-chosen-house-v714", r.u);
+    } catch {}
+  }
+  async function showMenu(kind, record) {
+    const mark = ++menuSerial;
+    menus(kind);
+    q("#walk-acre").disabled = q("#teleport-acre").disabled = true;
+    sheet.hidden = true;
+    ui.close();
+    neutral();
+    let chosen = record || v || preferred;
+    try {
+      if (!chosen)
+        chosen = await pinFromName(
+          localStorage.getItem("atlas-chosen-house-v714"),
+        );
+    } catch {}
+    if (mark !== menuSerial) return;
+    menuRecord = chosen;
+    const select = q("#holding-resident");
+    if (!select.options.length) {
+      select.add(new Option(msg("holding.pick"), ""));
+      for (const [u, d] of await get("data/directory.json"))
+        select.add(new Option("@" + u + " · " + (ds.get(d)?.name || ""), u));
+    }
+    if (mark !== menuSerial) return;
+    select.options[0].text = msg("holding.pick");
+    select.value = chosen?.u || "";
+    q("#holding-choose").hidden = !!v;
+    const en = kind === "acre" ? "village.acre" : "village.home";
+    q("#destination-name").textContent = msg(en);
+    q(".resident-handle").textContent = chosen ? "@" + chosen.u : "";
+    q("#walk-acre").disabled = q("#teleport-acre").disabled = !chosen;
+    q("#holding-chart").hidden = q("#holding-distance").hidden = !chosen;
+    if (chosen) {
+      const [net] = await villageData([chosen.d]);
+      if (mark !== menuSerial) return;
+      let rows = L?.all || [];
+      if (!rows.some((z) => z[2] === chosen.u))
+        rows = await get(
+          "data/scenes/" +
+            chosen.homeLocation.map((n) => Math.floor(n / 256)).join("_") +
+            ".json",
+        );
+      const route = drawHolding(q("#holding-chart"), rows, net.paths, chosen, net.settlements?.find(x=>x.id===chosen.villageId)?.square);
+      q("#holding-distance").textContent =
+        (kind === "acre"
+          ? msg("village.field", { code: chosen.c.join("–") })
+          : chosen.villageId.toUpperCase()) +
+        " · " +
+        msg("holding.byPath", { n: Math.round(route?.metres || 0) });
+    }
+    if (mark === menuSerial)
+      q(chosen ? "#walk-acre" : "#holding-resident").focus({
+        preventScroll: true,
+      });
+  }
+  for (const [id, kind] of [
+    ["#my-home", "home"],
+    ["#my-acre", "acre"],
+  ])
+    on(q(id), "click", () =>
+      landMenu === kind ? menus(false) : showMenu(kind),
+    );
+  on(q("#holding-resident"), "change", async (e) => {
+    const r = await pinFromName(e.target.value);
+    if (r) {
+      remember(r);
+      showMenu(landMenu || "home", r);
+    }
+  });
+  on(q("#close-holding"), "click", () => {
+    const b = landMenu === "acre" ? "#my-acre" : "#my-home";
+    menus(false);
+    q(b).focus();
+  });
+  on(cards, "keydown", (e) => {
+    if (e.key === "Escape") {
+      q("#close-holding").click();
+      e.stopPropagation();
+    }
+  });
+  on(q("#teleport-acre"), "click", () => {
+    const r = menuRecord,
+      k = landMenu;
+    if (!r || !k) return;
+    remember(r);
+    menus(false);
+    history.replaceState(
+      null,
+      "",
+      "#/" + (k === "acre" ? "acre" : "u") + "/" + r.u,
+    );
+    resultRoute = location.hash;
+    visit(r, k === "acre" ? "acre" : "gate");
+  });
+  on(q("#walk-acre"), "click", async () => {
+    const r = menuRecord,
+      k = landMenu;
+    if (!r || !k) return;
+    remember(r);
+    const pg =
+      mode === "ground"
+        ? [x, y]
+        : orbitActor
+          ? [orbitActor.x, orbitActor.y]
+          : [P.x, P.y];
+    if (!within(L, ...pg) || busy || mode === "flight") {
+      ui.toast(msg("holding.landFirst"));
+      return;
+    }
+    if (mode !== "ground" && !L.s.traversable(...pg)) {
+      ui.toast(msg("holding.dryFirst"));
+      return;
+    }
+    const dest = k === "acre" ? r.court.land : r.court.porch,
+      [net] = await villageData([r.d]),
+      route = pathTo(net.paths, dest, pg);
+    if (!route) {
+      ui.toast(msg("village.noRoute"));
+      return;
+    }
+    menus(false);
+    if (mode !== "ground") {
+      heldPoint = { x: pg[0], y: pg[1], yaw: P.yaw };
+      goCell(pg.map(Math.floor), false);
+    }
+    journey = { ...route, record: r, kind: k, end: dest };
+    selectKind(k);
+    ui.toast(
+      msg(
+        Math.hypot(pg[0] - route.xy[0][0], pg[1] - route.xy[0][1]) * U > 18
+          ? "holding.joinLane"
+          : "village.follow",
+      ),
+    );
+    lastHud = -1e8;
+  });
+  function nature(l = L, refreshLife = true) {
     if (!l) return;
     const settled = mode === "ground" && L === l,
       p = { x: settled ? x : l.fx, y: settled ? y : l.fy };
     remove(l.group, l.sc);
+    l.selection = null;
     const sample = l.all.find((r) => r[2] === v?.u);
     l.sc = yards(l.s, l.all, p, walkArt, gov.tier);
     l.group.add(l.sc);
     const infrastructure = works(l.s, l.villages, p, false);
     l.sc.add(infrastructure);
+    const ham = hamletScene(l.s, l.all, l.s.commons, p, gov.tier);
+    l.sc.add(ham);
+    l.communitySolids = ham.userData.solids;
+    if (l.all.some((r) => Math.hypot(r[0] + 0.5 - p.x, r[1] + 0.5 - p.y) < 6)) {
+      l.farms = farms(
+        l.s,
+        p,
+        gov.tier,
+        calendar(calendarAt, worldConfig).year,
+        l.villages.flatMap((q) => q.paths),
+      );
+      l.sc.add(l.farms);
+    }
+    paintMarks(l);
     l.bulbs = infrastructure.userData.bulbs;
     l.soils = null;
     l.gateRock = null;
+    l.s.roomDetail = new Set(
+      l.all
+        .filter(
+          (r) =>
+            r[2] === roomOwner ||
+            Math.hypot(r[5].centre[0] - p.x, r[5].centre[1] - p.y) * U <
+              (gov.tier ? 42 : 20),
+        )
+        .map((r) => r[2]),
+    );
     const homes = residents(l.s, l.all, p, gov.tier);
     homes.position.copy(l.sc.position).multiplyScalar(-1);
     l.paths = l.villages.reduce((n, v) => n + v.paths.length, 0);
@@ -771,7 +1026,7 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
       p,
       walkArt,
     );
-    if (sample) {
+    if (sample && !sample[5]?.yard) {
       const b = restStone(l.s, sample[5], walkArt.rock_smallFlatA);
       if (b) {
         stones.add(b);
@@ -794,7 +1049,7 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
     });
     l.nx = p.x;
     l.ny = p.y;
-    if (l.bio && !l.bio.rebuilding)
+    if (refreshLife && l.bio && !l.bio.rebuilding)
       l.bio.build(p.x, p.y).catch((e) => console.warn("Ecology refresh", e));
   }
   const within = (l, x, y) =>
@@ -803,7 +1058,14 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
   const surveyGrid = () =>
     mode !== "ground" &&
     flight?.end !== "walk" &&
-    goal.r > (L?.s.surveyGrid ? 720 : 1050);
+    goal.r > (L?.s.surveyGrid ? 92 : 148);
+  let firstPatch = null;
+  function clearFirst() {
+    if (firstPatch) {
+      firstPatch.group.removeFromParent();
+      firstPatch = null;
+    }
+  }
   async function prepare(xx, yy, force = false) {
     if (dead) return;
     const cx = Math.floor(xx / 64),
@@ -819,6 +1081,7 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
         (farGrid ? ":orbit" : ":walk") +
         (":" + Math.round(xx / 3) + "," + Math.round(yy / 3));
     if (!force && (building === id || L?.id === id)) return;
+    clearFirst();
     const ver = ++job;
     building = id;
     busy = true;
@@ -859,11 +1122,15 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
         [...ks].map(async (k) => {
           await tiles.load(k);
           if (pk.has(k) && !pl.has(k))
-            pl.set(k, await get(`data/plots/${k}.json`));
+            pl.set(k, await get(`data/scenes/${k}.json`));
         }),
       );
       if (dead || job !== ver) return;
-      const all = [...ks].flatMap((k) => pl.get(k) || []);
+      const all = [
+        ...new Map(
+          [...ks].flatMap((k) => pl.get(k) || []).map((row) => [row[2], row]),
+        ).values(),
+      ];
       const [eco, villages] = await Promise.all([
         ecology(),
         villageData([
@@ -893,8 +1160,14 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
         });
       const s = new Surface(tiles, O, [xx, yy]);
       s.ec = eco;
+      s.commons = villages.flatMap((v) => v.settlements || []);
       s.surveyGrid = farGrid;
+      s.mobileMesh = tier === 0 || prefs.saver;
+      s.midRiverLOD = farGrid && goal.r < 1900;
       s.natureWalk = !dev;
+      s.compactLaneLOD =
+        tier === 0 &&
+        s.commons.some((v) => Math.hypot(v.hub[0] - xx, v.hub[1] - yy) < 12);
       s.ways = pathIndex(villages.flatMap((v) => v.paths));
       s.tread = new Tread(
         villages.flatMap((v) => v.paths),
@@ -910,6 +1183,7 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
         s.maps = L.s.maps;
       s.focus = [xx, yy];
       preparePads(s, all);
+      s.acres = new Set(all.map((r) => r[0] + "," + r[1]));
       const loc = ll(a.project, xx, yy),
         elev = tiles.at(xx, yy)?.z || 0;
       const m = calendar(calendarAt, worldConfig).month;
@@ -922,9 +1196,16 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
         1,
       );
       // Per streaming job: do not mutate the material identity of a half-built patch when a tier changes.
+      const inland = (eco.at(xx, yy)?.coast ?? 400) > 24;
+      const lightLand = tier === 0 && inland && !env.weather.rain;
+      const midSkin = farGrid && inland && !env.weather.rain;
       const groundMaterials = {
-        land: tier === 0 ? mats.landLow : landFull,
-        water: prefs.saver ? mats.waterSaver : waterFull,
+        land: lightLand ? mats.fastLand : tier === 0 ? mats.landLow : landFull,
+        water: midSkin
+          ? mats.reach
+          : prefs.saver || tier === 0
+            ? mats.waterSaver
+            : waterFull,
         surfDepth: mats.surfDepth,
       };
       l = {
@@ -942,7 +1223,9 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
         villages,
         chunks: new Map(),
       };
+      l.inland = inland;
       l.group.position.fromArray(s.offset);
+      l.lane = laneSoil(s, all, villages);
       for (let b = 0; b < plan.length; b++) {
         if (dead || job !== ver) {
           free(l);
@@ -960,6 +1243,34 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
         }
         l.group.add(ob);
         l.chunks.set(k, ob);
+        if (b === 0 && !L) {
+          const G = new T.Group();
+          G.position.fromArray(s.offset);
+          const copy = ob.clone(true);
+          copy.traverse((o) => {
+            if (o.isMesh) {
+              if (o.material === groundMaterials.water)
+                o.userData.role = "continuous-water";
+              if (o.material === groundMaterials.land)
+                o.userData.role = "natural-terrain";
+            }
+          });
+          G.add(copy);
+          scene.add(G);
+          firstPatch = {
+            group: G,
+            s,
+            cut: [i * 64, j * 64, (i + 1) * 64, (j + 1) * 64],
+          };
+          mats.uniforms.hydroOffset.value.set(s.offset[0], s.offset[2]);
+          mats.uniforms.laneEarth.value = l.lane?.tex || null;
+          mats.uniforms.laneWindow.value.fromArray(
+            l.lane?.wrap || [0, 0, 1, 0],
+          );
+          dirty = true;
+          await next();
+        }
+
         if (b % 4 === 1) await next();
       }
       if (dead || job !== ver) {
@@ -1047,7 +1358,10 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
       l.drain.obstacles(l.bio.statics);
       if (L?.drain.net && Math.hypot(xx - L.fx, yy - L.fy) * U < 260)
         l.drain.inherit(L.drain);
-      if (mode === "ground" || P.r < 380)
+      if (
+        (mode === "ground" || P.r < 380) &&
+        (env.weather.rain > 0.02 || l.drain.net)
+      )
         await l.drain.warm(xx, yy, () => !dead && ver === job);
       if (dead || job !== ver) {
         free(l);
@@ -1056,7 +1370,8 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
       l.group.add(l.extras.g);
       if (mode === "ground" && L) {
         const focusNow = [O.x + cam.position.x / U, O.y - cam.position.z / U];
-        await l.drain.warm(...focusNow, () => !dead && ver === job);
+        if (env.weather.rain > 0.02 || l.drain.net)
+          await l.drain.warm(...focusNow, () => !dead && ver === job);
         if (dead || ver !== job) {
           free(l);
           return;
@@ -1067,11 +1382,14 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
         once = true;
         mats.resetWakes();
       }
+      clearFirst();
       free(L);
       L = l;
       if (roomOwner) setRoom(doorRow(l) ? roomOwner : null);
       mats.uniforms.rillOn.value = 0;
       mats.uniforms.hydroOffset.value.set(s.offset[0], s.offset[2]);
+      mats.uniforms.laneEarth.value = l.lane?.tex || null;
+      mats.uniforms.laneWindow.value.fromArray(l.lane?.wrap || [0, 0, 1, 0]);
       mats.surveyReflection(s);
       scene.add(l.group);
       tiles.trim(ks);
@@ -1087,6 +1405,7 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
       if (ver === job) {
         busy = false;
         building = "";
+        clearFirst();
       }
     }
   }
@@ -1132,10 +1451,16 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
       expand();
       requested = cell;
       homeArrival = home;
-      prepare(dest.x, dest.y, true);
+      if (
+        !L ||
+        L.s.surveyGrid ||
+        L.tier !== gov.tier ||
+        Math.hypot(dest.x - L.fx, dest.y - L.fy) * U > 72
+      )
+        prepare(dest.x, dest.y);
     } else if (end === "inspect") {
       requested = cell;
-      prepare(...cell);
+      prepare(dest.x, dest.y);
     } else requested = null;
     badge.hidden = false;
     badge.textContent =
@@ -1147,14 +1472,22 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
     lastLabels = -1e8;
     dirty = true;
   }
-  function visit(record) {
+  function visit(record, kind = "gate") {
+    journey = null;
+    menus(false);
+    selectedKind = "";
     heldPoint = restorePose = null;
     activeStop = districtWalk = null;
     stopView = "ground";
     follow = 4.6;
     v = record;
+    menuRecord = record;
+    remember(record);
     language();
-    goCell(record.c, "gate");
+    goCell(
+      kind === "acre" ? record.c : record.homeLocation.map(Math.floor),
+      kind,
+    );
   }
   function doorstep(cell, home) {
     if (
@@ -1163,13 +1496,17 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
       cell[1] === Math.floor(heldPoint.y)
     )
       return heldPoint;
+    if (home === "acre" && v?.court) {
+      const [x, y] = v.court.land;
+      return { x, y, yaw: Math.atan2(x - v.c[0] - 0.5, v.c[1] + 0.5 - y) };
+    }
     if (home && v) {
       if (home === "gate" && v.house) {
-        const [fx, fy] = SIDE[v.house.facing],
+        const { fx, fy } = basis(v.house),
           [gx, gy] = v.house.gate;
         return {
-          x: gx + (fx * 8.6) / U,
-          y: gy + (fy * 8.6) / U,
+          x: v.court?.porch[0] ?? gx + (fx * 8.6) / U,
+          y: v.court?.porch[1] ?? gy + (fy * 8.6) / U,
           yaw: Math.atan2(fx, -fy),
         };
       }
@@ -1210,7 +1547,7 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
     activeStop = districtWalk = null;
     stopView = "ground";
     language();
-    goCell(v.c, "gate");
+    goCell(v.homeLocation.map(Math.floor), "gate");
   }
   function inspect(d) {
     if (!d) return;
@@ -1240,7 +1577,7 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
     closestHome = null;
     let best = Math.min(22, Math.max(1.5, P.r / U));
     for (const r of L.all) {
-      let c = [r[0] + 0.5, r[1] + 0.5];
+      let c = r[5].centre;
       let d = Math.hypot(c[0] - P.x, c[1] - P.y);
       if (d < best) {
         best = d;
@@ -1268,9 +1605,9 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
   function homeNear(xx, yy) {
     if (!L) return false;
     let chosen = null,
-      best = 1.2;
+      best = 0.22;
     for (const row of L.all) {
-      const [a, b] = [row[0] + 0.5, row[1] + 0.5],
+      const [a, b] = row[5].centre,
         d = Math.hypot(a - xx, b - yy);
       if (d < best) {
         chosen = row[2];
@@ -1334,9 +1671,14 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
     });
   }
   function restore(p, record, scenic) {
+    journey = null;
+    menus(false);
+    selectedKind = "";
     restorePose = p;
     third = prefs.third;
     v = record || null;
+    menuRecord = v;
+    if (v) remember(v);
     activeStop = scenic || null;
     districtWalk = null;
     heldPoint = { x: p.x, y: p.y, yaw: p.yaw };
@@ -1462,6 +1804,9 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
     flight = null;
     allowLanding = false;
     v = activeStop = districtWalk = orbitActor = null;
+    menuRecord = null;
+    journey = null;
+    menus(false);
     heldPoint = restorePose = null;
     expand();
     resize();
@@ -1640,6 +1985,10 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
       lastContact = 0;
       lastEventLand = 0;
       ui.start();
+      if (v && f.home) selectKind(f.home === "acre" ? "acre" : "home");
+      else if (!journey && v && location.hash.startsWith("#/acre/"))
+        selectKind("acre");
+      displayOwner();
       lastMark = walked = 0;
       gov.reset();
       softWindow = [];
@@ -1667,10 +2016,10 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
   }
   function flying(dt) {
     const f = flight;
-    f.t += Math.min(0.16, dt);
+    f.t += Math.min(0.65, dt);
     const needs = f.end === "walk" || f.end === "inspect";
     const at = needs && (!L || !within(L, ...f.cell) || busy);
-    if (at && f.t / f.dur > 0.7) f.t = 0.7 * f.dur;
+    if (at) f.t = Math.min(f.t, f.dur * (firstPatch ? 0.99999 : 0.78));
     let t = clamp(f.t / f.dur, 0, 1),
       ease = smooth(0, 1, t),
       s = f.start,
@@ -1764,6 +2113,7 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
         if (solid) L.solids.push(solid);
       }
       if (L.gateRock) L.solids.push(L.gateRock);
+      L.solids.push(...(L.communitySolids || []));
     }
     if (L.coverPatch !== L.cover?.solids || L.coverCentre !== L.solidCentre) {
       L.coverPatch = L.cover?.solids;
@@ -2093,6 +2443,38 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
       d = ds.get(did);
     lastLL = loc;
     if (expanded && !L && mode === "survey") bookmark();
+    displayOwner();
+    q("#route-step").hidden = !journey || mode !== "ground";
+    if ((v || journey) && L && mode === "ground") {
+      const line = q("#route-step");
+      line.hidden = !journey;
+      if (journey) {
+        const { remain, point } = guideStep(journey, x, y);
+        if (Math.hypot(x - journey.end[0], y - journey.end[1]) * U < 2.2) {
+          journey = null;
+          paintMarks();
+          line.hidden = true;
+          ui.toast(msg("holding.arrived"));
+        } else {
+          const angle = Math.atan2(point[0] - x, point[1] - y) + yaw;
+          line.textContent =
+            ["↑", "↗", "→", "↘", "↓", "↙", "←", "↖"][
+              (Math.round(angle / (Math.PI / 4)) + 16) % 8
+            ] +
+            "  " +
+            msg("village.remaining", { n: Math.round(remain) });
+        }
+      }
+      if (
+        !journey &&
+        selectedKind === "home" &&
+        L.selection &&
+        now > flashUntil
+      ) {
+        selectedKind = "";
+        paintMarks();
+      }
+    }
     if (expanded && L) {
       pocket.draw(L, P.x, P.y, P.yaw, P.r);
       const name = d ? tr(d.name, d.te) : msg("world.landscape"),
@@ -2225,11 +2607,12 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
   function cameraOrbit() {
     const alt = P.r * Math.sin(P.tilt);
     cameraAGL = alt;
-    ex = within(L, P.x, P.y) ? L.s.relief : prefs.relief;
+    const frame = within(firstPatch, P.x, P.y) ? firstPatch : L;
+    ex = within(frame, P.x, P.y) ? frame.s.relief : prefs.relief;
     const b = data.sample(P.x, P.y) * ex;
     let h = b;
-    if (within(L, P.x, P.y) && P.r < 22000) {
-      const v = L.s.sample(P.x, P.y);
+    if (within(frame, P.x, P.y) && P.r < 22000) {
+      const v = frame.s.sample(P.x, P.y);
       h = mix(
         Math.max(v.z, v.depth > 0.025 ? v.line : -Infinity),
         b,
@@ -2321,7 +2704,7 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
       stationary &&
       !dirty &&
       now - lastOrbitPaint <
-        (P.r > 2400 ? 1000 : P.r > 900 ? 178 : prefs.saver || reduced ? 66 : 33)
+        (P.r > 15000 ? 510 : P.r > 3000 ? 95 : prefs.saver || reduced ? 45 : 32)
     )
       return;
     lastOrbitPaint = now;
@@ -2391,6 +2774,10 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
     }
     cam.updateMatrixWorld();
 
+    if (firstPatch)
+      mats.uniforms.cameraInPatch.value
+        .copy(cam.position)
+        .sub(firstPatch.group.position);
     if (L)
       mats.uniforms.cameraInPatch.value
         .copy(cam.position)
@@ -2518,12 +2905,27 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
           L.camHomes?.some(
             (h) => Math.hypot(h.centre[0] - x, h.centre[1] - y) * U < 6,
           ),
-        village: L.all.length > 0,
+        village: L.s.commons.some(
+          (q) => Math.hypot(q.hub[0] - x, q.hub[1] - y) * U < 115,
+        ),
         forest: cx?.f > 48,
         animal: animal?.name,
         animalM,
         pan,
       });
+    }
+    if (L?.inland) {
+      const simple = env.weather.rain <= 0.002 && !(L.drain?.residual > 1e-5);
+      const lmat =
+          L.tier === 0 ? (simple ? mats.fastLand : mats.landLow) : landFull,
+        wmat =
+          simple && L.s.surveyGrid
+            ? mats.reach
+            : L.tier === 0 || prefs.saver
+              ? mats.waterSaver
+              : waterFull;
+      for (const ob of L.pickGround)
+        ob.material = ob.userData.role === "natural-terrain" ? lmat : wmat;
     }
     if (L) {
       L.s.storm = env.weather.storm;
@@ -2535,7 +2937,7 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
       const period = prefs.season === "auto" ? sh.season : prefs.season;
       mats.uniforms.summer.value = +(period === "summer");
       if (L.s.period !== period && !busy) {
-        prepare(x, y, true);
+        prepare(mode === "ground" ? x : P.x, mode === "ground" ? y : P.y, true);
       }
     }
     if (L?.soils)
@@ -2543,6 +2945,7 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
     const liquidTime = waterClock;
     if (L) L.s.liquidTime = liquidTime;
     mats.uniforms.liquidTime.value = liquidTime;
+    data.banks.time(liquidTime);
     mats.uniforms.wakeClock.value = now * 0.001;
     mats.uniforms.lowWakes.value = prefs.saver;
     mats.uniforms.calmWater.value = +reduced;
@@ -2581,27 +2984,55 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
     env.track(cam, cameraAGL, P.r > 28000, now / 1000);
     renderer.setClearColor(P.r > 28000 ? 0xe7eddf : env.uni.uHor.value);
     env.uni.uGrid.value = 0;
+    // A steep local orbit cannot see the coarser rings surrounding a many-kilometre window. Cull only if even the lowest view ray is above the interior cutoff, allowing 1.8 km of relief.
+    const box = L?.cut,
+      angle = P.tilt - 0.43 * Math.max(1, cam.aspect),
+      edgeM = box
+        ? U * Math.min(P.x - box[0], P.y - box[1], box[2] - P.x, box[3] - P.y)
+        : 0;
+    const inCut =
+      mode === "survey" &&
+      expanded &&
+      P.r < 1300 &&
+      angle > 0.19 &&
+      edgeM > P.r + (P.r + 1800) / Math.tan(angle);
+    if (L) {
+      L.collar.visible = L.inset.visible = !inCut;
+    }
     const useHorizon = localVisible && P.r < 4200 && within(L, P.x, P.y);
     reg.group.visible = !useHorizon;
-    if (L) L.horizon.visible = useHorizon;
+    if (L) L.horizon.visible = useHorizon && !inCut;
     reg.update(
       P.x,
       P.y,
       P.r,
       ex,
-      localVisible ? L.inset.userData.cut : null,
+      localVisible ? L.inset.userData.cut : firstPatch?.cut || null,
       env.uni.uDetail.value,
     );
+    const cullPose = [
+      L?.id,
+      cam.position.x,
+      cam.position.y,
+      cam.position.z,
+      cam.quaternion.x,
+      cam.quaternion.y,
+      cam.quaternion.z,
+      cam.quaternion.w,
+      cam.aspect,
+    ].join("/");
     if (
-      mode === "ground" &&
+      cullPose !== L?.lastCullPose &&
+      (mode === "ground" || (mode === "survey" && expanded)) &&
       L &&
-      (now - stamp > 175 ||
+      (now - stamp > (mode === "ground" ? 260 : 400) ||
         Math.abs(yaw - lastCullYaw) > 0.038 ||
         Math.abs(pitch - lastCullPitch) > 0.038)
     ) {
       cam.updateMatrixWorld(true);
       if (gov.tier === 0) cropDraws(L.group, cam);
       else if (L.sc) cropDraws(L.sc, cam);
+      L.lastCullPose = cullPose;
       stamp = now;
       lastCullYaw = yaw;
       lastCullPitch = pitch;
@@ -2638,6 +3069,19 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
     if (mode === "ground" && L && L.cover?.last) L.groundDrawn = true;
     fr++;
     elapsed += dt;
+    if (
+      mode === "survey" &&
+      expanded &&
+      !busy &&
+      !flight &&
+      gov.tier > 0 &&
+      prefs.quality === "auto" &&
+      dt > 0.07 &&
+      gov.observe(dt, 0, 0)
+    ) {
+      applyQuality();
+      prepare(P.x, P.y, true);
+    }
     if (mode === "ground" && !busy && !arrivalStep) {
       fcount++;
       fsec += dt;
@@ -2871,6 +3315,7 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
   });
   on(window, "blur", neutral);
   q("#world-menu").onclick = () => {
+    menus(false);
     sheet.hidden = !sheet.hidden;
     ui.close();
     neutral();
@@ -2912,6 +3357,10 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
     if (view === "bank" && !override) view = "ground";
     districtWalk = null;
     activeStop = stop;
+    menus(false);
+    journey = null;
+    selectedKind = "";
+    menuRecord = null;
     stopView = view;
     expand();
     sheet.hidden = true;
@@ -3066,7 +3515,14 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
       demoHouse: v?.record_kind === "demo",
       housesDrawn: L?.houses || 0,
       treadCells: L?.s.tread?.refined || 0,
-      sceneFarms: 0,
+      sceneFarms: L?.farms?.userData.fields?.length || 0,
+      destination: selectedKind,
+      highlightVisible: !!L?.selection,
+      villageId: v?.villageId,
+      homeLocation: v?.homeLocation,
+      acreLocation: v?.acreLocation,
+      walkWaypoints: journey?.xy.length || 0,
+      fieldRailSegments: L?.sc?.userData.blocks.length || 0,
       site: activeStop
         ? stopView === "bank"
           ? "lake-bank"
@@ -3299,7 +3755,7 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
       return passes(
         L.s,
         L.sc.userData.blocks,
-        obs,
+        [...obs, ...(L.communitySolids || [])],
         L.cover?.solids,
         X,
         Y,
@@ -3387,6 +3843,10 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
           observations: {},
         };
       activeStop = stop;
+      menus(false);
+      journey = null;
+      selectedKind = "";
+      menuRecord = null;
       districtWalk = v = null;
       stopView = "ground";
       expand();
@@ -3412,6 +3872,9 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
       reg.dispose();
       landFull.dispose();
       mats.landLow.dispose();
+      mats.fastLand.dispose();
+      mats.reach.dispose();
+      mats.uniforms.currentGrain.value.dispose();
       mats.waterSaver.dispose();
       mats.grain.dispose();
       mats.surfaces.forEach((t) => t.dispose());
@@ -3419,7 +3882,9 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
       floorShade.geometry.dispose();
       floorShade.material.dispose();
       walker.dispose();
-      mats.water.dispose();mats.surfDepth.dispose();mats.bankSky.dispose();
+      mats.water.dispose();
+      mats.surfDepth.dispose();
+      mats.bankSky.dispose();
       env.dispose();
       avatar.traverse((o) => {
         o.geometry?.dispose();

@@ -201,99 +201,28 @@ try {
     assert(houseBlocked(h, ...localPoint(h, p.cx - p.a, p.cz), true), "side");
     q.rooms++;
     if (!q.models.includes(h.archetype)) q.models.push(h.archetype);
-    for (const [dx, dy] of [
-      [-1, 0],
-      [1, 0],
-      [0, 1],
-      [0, -1],
-    ]) {
-      const X = x + (dx > 0),
-        Y = y + (dy > 0),
-        along = !!dy,
-        k = ptId(X, Y, along),
-        e = edges.get(k) || { X, Y, along, owners: [], gates: [] };
-      e.owners.push(u);
-      if (dx === fx && dy === fy) e.gates.push(h.gate[along ? 0 : 1]);
-      edges.set(k, e);
-    }
-    let k = [Math.floor(x / 64), Math.floor(y / 64)].join(",");
-    (group.get(k) || group.set(k, []).get(k)).push([x, y, u, h.style, 0, h]);
-  }
-  q.edges = edges.size;
-  const tested = new Set();
-  for (const row of rows) {
-    if (tested.has(row[2])) continue;
-    const [xx, yy] = row,
-      near = rows.filter(([x, y]) => Math.hypot(x - xx, y - yy) < 4.9);
-    const origin = { x: xx + 0.5, y: yy + 0.5 }; // centred floating frame; real transformed rail/post vertices
-    const s = { ...ff, xyz: (x, y, z) => [(x - xx) * M, z, -(y - yy) * M] },
-      g = yards(s, rows, origin, asset, 0),
-      blocks = g.userData.blocks;
-    for (const r of near) tested.add(r[2]);
-    const geo = g.children[0].geometry.attributes.position;
-    for (let i = 0; i < geo.count; i += 3) {
-      assert(
-        ways.clear(xx + geo.getX(i) / M, yy - geo.getZ(i) / M, -0.5),
-        "timber intrudes on road",
-      );
-      q.railSamples++;
-    }
-    for (const [x, y] of g.userData.stones)
-      assert(ways.clear(x, y, 0.2), "corner stone on road");
-    for (const e of edges.values()) {
-      const { X, Y, along, owners, gates } = e;
-      if (
-        e.checked ||
-        !owners.every((u) => g.userData.near.some((v) => v.u === u))
-      )
-        continue;
-      e.checked = true;
-      const once = new Set();
-      for (const seg of new Set([
-        ...ways.near(X, Y),
-        ...ways.near(X + (along ? 1 : 0), Y + (along ? 0 : 1)),
-      ])) {
-        const { a, b, r } = seg,
-          i = along ? 1 : 0,
-          j = 1 - i,
-          delta = b[i] - a[i];
-        if (Math.abs(delta) < 1e-10) continue;
-        const t = ((along ? Y : X) - a[i]) / delta;
-        if (t < -0.00001 || t > 1.00001) continue;
-        const c = a[j] + t * (b[j] - a[j]),
-          v = c - (along ? X : Y);
-        if (v < 0 || v > 1) continue;
-        const pos = along ? [c, Y] : [X, c],
-          sig = pos.map((a) => a.toFixed(5)).join(",");
-        if (once.has(sig)) continue;
-        once.add(sig);
-        for (const k of [-1, -0.5, 0, 0.5, 1]) {
-          const d = (k * (r - 0.88)) / M;
-          assert(
-            !fenceAt(
-              blocks,
-              pos[0] + (along ? d : 0),
-              pos[1] + (along ? 0 : d),
-            ),
-            `road width ${owners} ${sig}`,
-          );
-        }
-        q.crossings++;
-        if (owners.length > 1) q.shared++;
-        if (
-          Math.min(Math.abs(b[0] - a[0]), Math.abs(b[1] - a[1])) /
-            Math.hypot(b[0] - a[0], b[1] - a[1]) >
-          0.24
-        )
-          q.oblique++;
-        if (gates.every((g) => Math.abs(c - g) * M > RAIL_END)) {
-          q.extraOpenings++;
-          if (q.examples.length < 5 || owners.includes("demo_user134"))
-            q.examples.push({ owners, pos, a, b });
-        }
-      }
-    }
-    g.traverse((o) => {
+    let key = h.centre.map((t) => Math.floor(t / 64)).join(",");
+    (group.get(key) || group.set(key, []).get(key)).push([
+      x,
+      y,
+      u,
+      h.style,
+      0,
+      h,
+    ]);
+    const ys = yards(ff, rows, { x: x + 0.5, y: y + 0.5 }, asset, 0),
+      stones = new Set(ys.userData.stones.map((p) => p.join(",")));
+    assert.equal(ys.userData.blocks.length, 0);
+    assert.equal(ys.userData.edges, 0);
+    assert(!ys.children.some((o) => o.userData.role === "acre-timber"));
+    for (const pt of [
+      [x, y],
+      [x + 1, y],
+      [x + 1, y + 1],
+      [x, y + 1],
+    ])
+      assert(stones.has(pt.join(",")), u + " missing surveyed stone");
+    ys.traverse((o) => {
       o.geometry?.dispose();
       o.material?.dispose();
     });
@@ -337,8 +266,19 @@ try {
     line: 0,
     m: [0, 0, 0, 0],
   });
-  const fence = yards(sim, pair, { x: 1, y: 0.5 }, asset, 1),
-    bs = fence.userData.blocks,
+  // Synthetic obstacles stay vaultable. There are intentionally NO live field rails.
+  const bs = [
+      [1, 0, 1, 0.3],
+      [1, 0.51, 1, 0.63],
+      [1, 0.84, 1, 1],
+    ].map(([x, y, X, Y]) => [
+      x,
+      y,
+      X,
+      Y,
+      sim.ground(x, y) + 0.97,
+      sim.ground(X, Y) + 0.97,
+    ]),
     allow = (...v) => passes(sim, bs, [], [], ...v);
   assert(!fenceAt(bs, 1, 0.74));
   for (const [name, Y, jump] of [
@@ -385,7 +325,7 @@ try {
     profile = await get("library/walk/ground_pathStraight.json");
   function meshTests(s, gr, mes, ray) {
     const rc = new T.Raycaster();
-    mes.updateMatrixWorld(true);
+    mes.forEach((m) => m.updateMatrixWorld(true));
     for (const [x, y, u, , , h] of gr) {
       const [w, d] = h.size_m,
         z = s.ground(...h.centre);
@@ -398,7 +338,7 @@ try {
           if (ray) {
             const [a, b, c] = s.xyz(X, Y, z + 12);
             rc.set(new T.Vector3(a, b, c), new T.Vector3(0, -1, 0));
-            const k = rc.intersectObject(mes)[0];
+            const k = rc.intersectObjects(mes, false)[0];
             assert(k, u);
             q.groundRayError = Math.max(
               q.groundRayError,
@@ -419,7 +359,7 @@ try {
     await Promise.all([...ks].map((k) => tiles.load(k)));
     tiles.trim(ks);
     const detail =
-      gr.find((r) => r[2] === "demo_user134") || (!q.groundRays ? gr[0] : null);
+      gr.find((r) => r[2] === "palnadu_demo01") || (!q.groundRays ? gr[0] : null);
     for (const [focus, survey, g, ray] of [
       [[x + 20, y - 18], true, gr, false],
       ...(detail
@@ -437,9 +377,27 @@ try {
       s.relief = 2;
       s.tread = new Tread(paths, profile, focus);
       preparePads(s, gr);
-      const ob = chunk(s, cx, cy, 1, mats, true);
-      meshTests(s, g, ob.children[0], ray);
-      ob.traverse((o) => o.geometry?.dispose());
+      const neighbourhood = new Set([id]);
+      for (const r of g) {
+        const h = r[5];
+        for (const i of [-0.5, 0.5])
+          for (const j of [-0.5, 0.5])
+            neighbourhood.add(
+              localPoint(h, i * h.size_m[0], j * h.size_m[1])
+                .map((v) => Math.floor(v / 64))
+                .join(","),
+            );
+      }
+      const obs = [...neighbourhood].map((k) =>
+        chunk(s, ...k.split(",").map(Number), 1, mats, true),
+      );
+      meshTests(
+        s,
+        g,
+        obs.map((b) => b.children[0]),
+        ray,
+      );
+      obs.forEach((b) => b.traverse((o) => o.geometry?.dispose()));
     }
     q.terraces += gr.length;
   }
@@ -449,13 +407,13 @@ try {
       q.heightError < 0.002 &&
       q.groundRayError < 0.003,
   );
-  assert([...edges.values()].every((e) => e.checked));
+
   q.profiles = Object.fromEntries([...byShell].map(([k, v]) => [k, v.size]));
   assert(
     Object.keys(q.layouts).length === 11 &&
       [...byShell.values()].every((v) => v.size >= 3) &&
-      profiles.size === 300 &&
-      q.furniturePieces === 900,
+      profiles.size === rows.length &&
+      q.furniturePieces === rows.length * 3,
   );
   q.uniquePlans = profiles.size;
   console.log(JSON.stringify(q, null, 1));

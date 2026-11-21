@@ -49,7 +49,7 @@ export async function mountMap(a, tr, boundaries = get("frozen/map.json")) {
     reg = el("g", {}, world),
     labels = el("g", { "pointer-events": "none" }),
     ticks = el("g", { "pointer-events": "none" });
-  const marks = el("g", { "aria-label": "Assigned virtual plots" }),
+  const marks = el("g", { "aria-label": "Resident houses and selected acre" }),
     paths = new Map(),
     plotCache = new Map(),
     pending = new Set();
@@ -61,7 +61,7 @@ export async function mountMap(a, tr, boundaries = get("frozen/map.json")) {
   });
   let features = [],
     trailLines = [];
-  const tileBoxes = a.plots.map((k) => {
+  const tileBoxes = a.sceneTiles.map((k) => {
     const [i, j] = k.split("_").map(Number),
       ps = [
         [0, 0],
@@ -248,7 +248,7 @@ export async function mountMap(a, tr, boundaries = get("frozen/map.json")) {
       }
       const title = el("title", {}, group);
       title.textContent =
-        label || (single ? "@" + rows[0].u : `${n} assigned acres · zoom in`);
+        label || (single ? "@" + rows[0].u : `${n} village homes · zoom in`);
       const open = (e) => {
         e.stopPropagation();
         if (single) {
@@ -315,6 +315,39 @@ export async function mountMap(a, tr, boundaries = get("frozen/map.json")) {
         );
       return;
     }
+    if (locked && highlight && zoom > 150) {
+      const [gx, gy] = locked.c,
+        pts = [
+          [0, 0],
+          [1, 0],
+          [1, 1],
+          [0, 1],
+        ]
+          .map(([dx, dy]) => ll(a.project, gx + dx, gy + dy))
+          .map(([lo, la]) => sx(lo) + "," + sy(la))
+          .join(" ");
+      el(
+        "polygon",
+        {
+          points: pts,
+          fill: "#d9ac4b",
+          "fill-opacity": 0.18,
+          stroke: "#97691e",
+          "stroke-width": 1.4,
+          "pointer-events": "none",
+        },
+        marks,
+      );
+      const [x, y] = [sx(locked.lon), sy(locked.lat)];
+      text(marks, x, y - 9, msg("village.acre"), {
+        "font-size": 10,
+        "text-anchor": "middle",
+        fill: "#664312",
+        stroke: "#fff5de",
+        "stroke-width": 2.4,
+        "paint-order": "stroke",
+      });
+    }
     const bins = new Map(),
       visible = new Set();
     for (const [k, l, b, r, t] of tileBoxes) {
@@ -324,15 +357,21 @@ export async function mountMap(a, tr, boundaries = get("frozen/map.json")) {
       if (!plotCache.has(k)) {
         if (!pending.has(k)) {
           pending.add(k);
-          get(`data/plots/${k}.json`)
+          get(`data/scenes/${k}.json`)
             .then((rs) => {
               plotCache.set(
                 k,
-                rs.map(([x, y, u, style, did, h]) => ({
-                  u,
-                  did,
-                  pt: ll(a.project, x + 0.5, y + 0.5),
-                })),
+                rs
+                  .filter(
+                    (r) =>
+                      r[5].centre.map((n) => Math.floor(n / 256)).join("_") ===
+                      k,
+                  )
+                  .map(([x, y, u, style, did, h]) => ({
+                    u,
+                    did,
+                    pt: ll(a.project, ...h.centre),
+                  })),
               );
               pending.delete(k);
               pins();

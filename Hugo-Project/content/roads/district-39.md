@@ -1,108 +1,14 @@
 ---
-title: District 39 frontage network
+title: District 39 infrastructure
 district_id: 39
-paths:
-- owner: demo_user148
-  type: entrance
-  w: 0.9
-  xy:
-  - - 5761.2276193
-    - 8009.4578716
-  - - 5761.0220074
-    - 8009.4578716
-  - - 5761.0
-    - 8009.4578716
-- type: footpath
-  w: 1.4
-  xy:
-  - - 5761.0
-    - 8009.4578716
-  - - 5760.548392437678
-    - 8009.464831154207
-- owner: demo_user209
-  type: entrance
-  w: 0.9
-  xy:
-  - - 5759.819225
-    - 8009.4479682
-  - - 5759.9779926
-    - 8009.4479682
-  - - 5760.0
-    - 8009.4479682
-  publication: example
-  snap_ends: true
-- type: footpath
-  w: 1.4
-  xy:
-  - - 5760.0
-    - 8009.4479682
-  - - 5760.548392437678
-    - 8009.464831154207
-- owner: demo_user270
-  type: entrance
-  w: 0.9
-  xy:
-  - - 5761.1902067
-    - 8008.505659
-  - - 5761.0220074
-    - 8008.505659
-  - - 5761.0
-    - 8008.505659
-- type: footpath
-  w: 1.4
-  xy:
-  - - 5761.0
-    - 8008.505659
-  - - 5760.502420488615
-    - 8008.448698701784
-- owner: demo_user87
-  type: entrance
-  w: 0.9
-  xy:
-  - - 5759.6740391
-    - 8008.5476303
-  - - 5759.9779926
-    - 8008.5476303
-  - - 5760.0
-    - 8008.5476303
-- type: footpath
-  w: 1.4
-  xy:
-  - - 5760.0
-    - 8008.5476303
-  - - 5760.502420488615
-    - 8008.448698701784
-- type: village
-  w: 1.972041538951453
-  xy:
-  - - 5760.548392
-    - 8009.464831
-  - - 5760.539614
-    - 8009.337952
-  - - 5760.531298
-    - 8009.211051
-  - - 5760.523834
-    - 8009.084113
-  - - 5760.517485
-    - 8008.957123
-  - - 5760.512341
-    - 8008.830079
-  - - 5760.508312
-    - 8008.702985
-  - - 5760.505136
-    - 8008.575852
-  - - 5760.50242
-    - 8008.448699
+paths: []
 network:
-  cellsPerHome: 0.5
-  homes: 4
+  cellsPerHome: 0
+  homes: 0
   lit: false
   poles: []
-  root:
-  - 5760
-  - 8009
   services: []
   spans: []
   v: 1
 ---
-Frontage routes for registered houses. Reserved demo approaches are not public streets.
+Only funded public works belong here. Residential lanes come from the village register.

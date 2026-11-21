@@ -1,0 +1,40 @@
+---
+title: mulugu_demo01
+username: mulugu_demo01
+type: house
+state: Telangana
+district: Mulugu
+district_id: 46
+record_kind: demo
+approved: false
+area_acres: 1
+added: '2026-11-18'
+archetype: l-court
+size_m:
+- 9.32
+- 11.06
+- 4.12
+facing: south
+wall_color: '#adc0ae'
+roof_color: '#af6340'
+props:
+- flower-bed
+- shade-tree
+- banana-clump
+sign:
+  label: '@mulugu_demo01'
+  wood: '#65513d'
+  trim: '#c5a477'
+building:
+  weathering: 0.379
+  path_width_m: 1.09
+cell: [5451,9752]
+homeLocation: [5449.1460786,9752.5136063]
+acreLocation: [5451,9752]
+villageId: "v46-01"
+lat: 18.2979125
+lon: 80.3401918
+corners: [[18.2976539,80.3398742],[18.297555,80.3404214],[18.2981711,80.3405093],[18.29827,80.3399621]]
+elevation_m: 170
+---
+Fictional household for this village walk. This username and virtual acre do not identify a real person or land title.

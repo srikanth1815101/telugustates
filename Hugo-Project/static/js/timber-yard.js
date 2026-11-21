@@ -1,135 +1,26 @@
 import { beside } from "./path-right-of-way.js";
 import { hull } from "./contacts.js";
-// Surveyed timber perimeters. Adjacent acres share one span; a gate on either side stays open.
+// Survey features and wayside stones; individual acres are not fenced.
 import * as T from "../vendor/three.module.min.js";
-import { ACRE as U, SIDE, RAIL_END } from "./metres.js";
-export function demoEdges(x, y, h) {
-  const [fx, fy] = SIDE[h.facing],
-    edges = [],
-    gate = h.gate;
-  for (const [dx, dy] of Object.values(SIDE)) {
-    const A = [x + (dx > 0 ? 1 : 0), y + (dy > 0 ? 1 : 0)],
-      line = (t) => [A[0] + (dy ? t : 0), A[1] + (dx ? t : 0)],
-      cut = dy ? gate[0] - x : gate[1] - y;
-    for (const [u, v] of dx === fx && dy === fy
-      ? [
-          [0, cut - RAIL_END / U],
-          [cut + RAIL_END / U, 1],
-        ]
-      : [[0, 1]]) {
-      edges.push([...line(u), ...line(v)]);
-    }
-  }
-  return edges;
-}
+import { ACRE as U, SIDE } from "./metres.js";
+// Four surveyed corners for each acre; adjacent owners share the same physical stone. No field perimeter mesh or collider.
 export function yards(s, rows, p, assets, tier) {
-  const near = [],
-    edges = new Map(),
-    blocks = [],
+  const g = new T.Group(),
+    near = [],
     corners = new Map(),
-    g = new T.Group();
+    range = tier ? 9.1 : 5.5;
   for (const [x, y, u, , did, h] of rows) {
-    if (Math.hypot(x + 0.5 - p.x, y + 0.5 - p.y) > (tier ? 9.1 : 5.5)) continue;
-    near.push({ x, y, u, did, h });
-    for (const [dx, dy] of Object.values(SIDE)) {
-      const X = x + (dx > 0 ? 1 : 0),
-        Y = y + (dy > 0 ? 1 : 0),
-        along = !!dy,
-        k = [X, Y, +along].join("/");
-      const e = edges.get(k) || {
-        X,
-        Y,
-        along,
-        gaps: s.ways?.cuts(X, Y, along) || [],
-      };
-      edges.set(k, e);
-      if (SIDE[h.facing][0] === dx && SIDE[h.facing][1] === dy) {
-        let f = along ? h.gate[0] - X : h.gate[1] - Y;
-        e.gaps.push([
-          Math.max(0, f - RAIL_END / U),
-          Math.min(1, f + RAIL_END / U),
-        ]);
-      }
-    }
-    for (const ij of [
+    if (Math.hypot(h.centre[0] - p.x, h.centre[1] - p.y) < range)
+      near.push({ x, y, u, did, h });
+    if (Math.hypot(x + 0.5 - p.x, y + 0.5 - p.y) > range) continue;
+    for (const xy of [
       [x, y],
       [x + 1, y],
-      [x, y + 1],
       [x + 1, y + 1],
+      [x, y + 1],
     ])
-      corners.set(ij.join("/"), ij);
+      corners.set(xy.join("/"), xy);
   }
-  for (const { X, Y, along, gaps } of edges.values()) {
-    const seg = (a, b) => {
-      if ((b - a) * U > 0.68)
-        blocks.push([
-          X + (along ? a : 0),
-          Y + (along ? 0 : a),
-          X + (along ? b : 0),
-          Y + (along ? 0 : b),
-        ]);
-    };
-    let f = 0;
-    for (const [lo, hi] of gaps.sort((a, b) => a[0] - b[0])) {
-      seg(f, lo);
-      f = Math.max(f, hi);
-    }
-    seg(f, 1);
-  }
-  const contact = [],
-    pos = [],
-    cs = [],
-    v = new T.Color(),
-    m = assets.fence_simple;
-  const wood = [new T.Color("#805e40"), new T.Color("#ac8058")];
-  for (const [ax, ay, bx, by] of blocks) {
-    const dx = bx - ax,
-      dy = by - ay,
-      len = Math.hypot(dx, dy),
-      sections = Math.ceil((len * U) / 3.25);
-    for (let j = 0; j < sections; j++) {
-      const xyz = m.p.map(([X, Y, Z]) => {
-        const f = (j + X + 0.5) / sections,
-          off = ((Z - 0.465) * 2.4) / U,
-          gx = ax + dx * f - (dy / len) * off,
-          gy = ay + dy * f + (dx / len) * off;
-        return s.xyz(gx, gy, s.ground(gx, gy) + Y * 3.3 - 0.045);
-      });
-      // One capsule segment per rendered picket/rail section. End heights come from the same transformed vertices (slopes included).
-      const heights = [-1, 1].map((side) =>
-        Math.max(
-          ...xyz.filter((_, k) => m.p[k][0] * side > 0.4).map((p) => p[1]),
-        ),
-      );
-      contact.push([
-        ax + (dx * j) / sections,
-        ay + (dy * j) / sections,
-        ax + (dx * (j + 1)) / sections,
-        ay + (dy * (j + 1)) / sections,
-        ...heights,
-      ]);
-      for (let i = 0; i < m.i.length; i++) {
-        pos.push(...xyz[m.i[i]]);
-        v.copy(wood[m.mat[(i / 3) | 0] === "woodDark" ? 0 : 1]).multiplyScalar(
-          0.92 + 0.07 * Math.sin(j * 1.8),
-        );
-        cs.push(v.r, v.g, v.b);
-      }
-    }
-  }
-  const geo = new T.BufferGeometry();
-  geo.setAttribute("position", new T.Float32BufferAttribute(pos, 3));
-  geo.setAttribute("color", new T.Float32BufferAttribute(cs, 3));
-  geo.computeVertexNormals();
-  const mesh = new T.Mesh(
-    geo,
-    new T.MeshLambertMaterial({ vertexColors: true }),
-  );
-  mesh.userData.role = "acre-timber";
-  mesh.userData.disposableMaterial = true;
-  g.add(mesh);
-  for (const [k, [x, y]] of corners)
-    if (s.ways && !s.ways.clear(x, y, 0.24)) corners.delete(k);
   if (corners.size) {
     const geo = new T.CylinderGeometry(0.14, 0.21, 0.4, 6),
       mat = new T.MeshLambertMaterial({ color: 0xa99c83 }),
@@ -148,10 +39,10 @@ export function yards(s, rows, p, assets, tier) {
   }
   g.userData = {
     near,
-    blocks: contact,
-    spans: blocks,
+    blocks: [],
+    spans: [],
     stones: [...corners.values()],
-    edges: edges.size,
+    edges: 0,
     gates: near.length,
     labels: [],
   };

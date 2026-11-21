@@ -1,0 +1,40 @@
+---
+title: vikarabad_demo03
+username: vikarabad_demo03
+type: house
+state: Telangana
+district: Vikarabad
+district_id: 58
+record_kind: demo
+approved: false
+area_acres: 1
+added: '2026-11-18'
+archetype: balcony-stair
+size_m:
+- 9.18
+- 10.77
+- 5.69
+facing: south
+wall_color: '#adc0ae'
+roof_color: '#9d6047'
+props:
+- kitchen-garden
+- shade-tree
+- banana-clump
+sign:
+  label: '@vikarabad_demo03'
+  wood: '#65513d'
+  trim: '#c5a477'
+building:
+  weathering: 0.673
+  path_width_m: 1.18
+cell: [1127,7342]
+homeLocation: [1128.9280817,7341.1883309]
+acreLocation: [1127,7342]
+villageId: "v58-01"
+lat: 17.258869
+lon: 77.7537871
+corners: [[17.258616,77.7534664],[17.2585124,77.7540146],[17.259122,77.7541078],[17.2592257,77.7535596]]
+elevation_m: 538
+---
+Fictional household for this village walk. This username and virtual acre do not identify a real person or land title.

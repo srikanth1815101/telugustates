@@ -1,106 +1,14 @@
 ---
-title: District 27 frontage network
+title: District 27 infrastructure
 district_id: 27
-paths:
-- owner: demo_user136
-  type: entrance
-  w: 0.9
-  xy:
-  - - 8104.553698
-    - 7396.2414525
-  - - 8104.553698
-    - 7396.0220074
-  - - 8104.553698
-    - 7396.0
-- type: footpath
-  w: 1.4
-  xy:
-  - - 8104.553698
-    - 7396.0
-  - - 8104.541527747968
-    - 7395.541426746398
-- owner: demo_user197
-  type: entrance
-  w: 0.9
-  xy:
-  - - 8104.4883675
-    - 7394.8003615
-  - - 8104.4883675
-    - 7394.9779926
-  - - 8104.4883675
-    - 7395.0
-- type: footpath
-  w: 1.4
-  xy:
-  - - 8104.4883675
-    - 7395.0
-  - - 8104.541527747968
-    - 7395.541426746398
-- owner: demo_user258
-  type: entrance
-  w: 0.9
-  xy:
-  - - 8105.4445885
-    - 7396.1870628
-  - - 8105.4445885
-    - 7396.0220074
-  - - 8105.4445885
-    - 7396.0
-- type: footpath
-  w: 1.4
-  xy:
-  - - 8105.4445885
-    - 7396.0
-  - - 8105.520176148806
-    - 7395.491692987541
-- owner: demo_user75
-  type: entrance
-  w: 0.9
-  xy:
-  - - 8105.5325395
-    - 7394.7987896
-  - - 8105.5325395
-    - 7394.9779926
-  - - 8105.5325395
-    - 7395.0
-- type: footpath
-  w: 1.4
-  xy:
-  - - 8105.5325395
-    - 7395.0
-  - - 8105.520176148806
-    - 7395.491692987541
-- type: village
-  w: 1.977952160453424
-  xy:
-  - - 8104.541528
-    - 7395.541427
-  - - 8104.664701
-    - 7395.551789
-  - - 8104.787747
-    - 7395.559627
-  - - 8104.910555
-    - 7395.562801
-  - - 8105.033054
-    - 7395.559882
-  - - 8105.155217
-    - 7395.550368
-  - - 8105.277071
-    - 7395.53476
-  - - 8105.398688
-    - 7395.514488
-  - - 8105.520176
-    - 7395.491693
+paths: []
 network:
-  cellsPerHome: 0.5
-  homes: 4
+  cellsPerHome: 0
+  homes: 0
   lit: false
   poles: []
-  root:
-  - 8104
-  - 7395
   services: []
   spans: []
   v: 1
 ---
-Frontage routes for registered houses. Reserved demo approaches are not public streets.
+Only funded public works belong here. Residential lanes come from the village register.

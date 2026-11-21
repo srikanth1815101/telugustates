@@ -1,106 +1,14 @@
 ---
-title: District 20 frontage network
+title: District 20 infrastructure
 district_id: 20
-paths:
-- owner: demo_user129
-  type: entrance
-  w: 0.9
-  xy:
-  - - 5305.5096047
-    - 5224.1666274
-  - - 5305.5096047
-    - 5224.0220074
-  - - 5305.5096047
-    - 5224.0
-- type: footpath
-  w: 1.4
-  xy:
-  - - 5305.5096047
-    - 5224.0
-  - - 5305.45853543845
-    - 5223.471100219395
-- owner: demo_user190
-  type: entrance
-  w: 0.9
-  xy:
-  - - 5305.5534465
-    - 5222.7836674
-  - - 5305.5534465
-    - 5222.9779926
-  - - 5305.5534465
-    - 5223.0
-- type: footpath
-  w: 1.4
-  xy:
-  - - 5305.5534465
-    - 5223.0
-  - - 5305.45853543845
-    - 5223.471100219395
-- owner: demo_user251
-  type: entrance
-  w: 0.9
-  xy:
-  - - 5306.5670597
-    - 5224.2628311
-  - - 5306.5670597
-    - 5224.0220074
-  - - 5306.5670597
-    - 5224.0
-- type: footpath
-  w: 1.4
-  xy:
-  - - 5306.5670597
-    - 5224.0
-  - - 5306.478123857034
-    - 5223.478232121328
-- owner: demo_user68
-  type: entrance
-  w: 0.9
-  xy:
-  - - 5306.5407137
-    - 5222.7753674
-  - - 5306.5407137
-    - 5222.9779926
-  - - 5306.5407137
-    - 5223.0
-- type: footpath
-  w: 1.4
-  xy:
-  - - 5306.5407137
-    - 5223.0
-  - - 5306.478123857034
-    - 5223.478232121328
-- type: village
-  w: 2.1877076005679554
-  xy:
-  - - 5305.458535
-    - 5223.4711
-  - - 5305.586062
-    - 5223.460802
-  - - 5305.713577
-    - 5223.452207
-  - - 5305.84107
-    - 5223.44676
-  - - 5305.968534
-    - 5223.445426
-  - - 5306.095967
-    - 5223.448543
-  - - 5306.223371
-    - 5223.455773
-  - - 5306.350754
-    - 5223.466151
-  - - 5306.478124
-    - 5223.478232
+paths: []
 network:
-  cellsPerHome: 0.5
-  homes: 4
+  cellsPerHome: 0
+  homes: 0
   lit: false
   poles: []
-  root:
-  - 5305
-  - 5223
   services: []
   spans: []
   v: 1
 ---
-Frontage routes for registered houses. Reserved demo approaches are not public streets.
+Only funded public works belong here. Residential lanes come from the village register.

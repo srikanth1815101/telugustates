@@ -89,9 +89,9 @@ export function makeHouse(s, h, u, distance, tier, put) {
     cell = s.t.at(...h.centre),
     z = s.ground(...h.centre),
     seed = h.seed,
-    near = distance < (tier ? 108 : 72),
+    near = distance < (tier ? 78 : 36),
     mid = distance < (tier ? 310 : 155),
-    hi = near || (tier > 0 && distance < 210);
+    hi = near || (tier > 0 && distance < 128);
   const [cx, , cz] = s.xyz(...h.centre, z),
     cc = Math.cos(yaw),
     ss = Math.sin(yaw),
@@ -177,7 +177,7 @@ export function makeHouse(s, h, u, distance, tier, put) {
     const hollow = first && mid;
     if (!mid && !covered && role !== "round")
       box(px, 0.095, pz, bw, 0.31, bd, tint(wall, -0.14));
-    if (hollow) buildRoom(h, paint);
+    if (hollow) buildRoom(h, paint, !s.roomDetail || s.roomDetail.has(u));
     if (role === "round") {
       if (!hollow) drum(px, foundation + coreH / 2, pz, bw, coreH, bd, wall);
       if (!hollow) drum(px, 0.16, pz, bw + 0.04, 0.3, bd + 0.04, earth);
@@ -599,20 +599,17 @@ export function makeHouse(s, h, u, distance, tier, put) {
     const [X, H, Z] = s.xyz(x, yy, s.ground(x, yy));
     put(k, g, X, H + y, Z, wid, ht, dep, col, undefined, yaw + rot, rx, rz);
   }
-  // Every arrangement has rear yard space; do not plant on a house, on the gate, or on a road.
-  const plots = [
-    [-w * 0.5 - 3.2, d * 0.05],
-    [w * 0.5 + 3.4, d * 0.13],
-    [-w * 0.37, -d * 0.5 - 4.8],
-    [w * 0.35, -d * 0.5 - 7.4],
-    [-w * 0.5 - 4, -d * 0.52],
-    [w * 0.5 + 4, -d * 0.5 - 4.6],
-    [0, -d * 0.5 - 12],
-  ];
+  // Personal yard furnishings stay in the front courtyard, on the dry shoulder of the entrance path.
+  const side = h.door_x > 0 ? -1 : 1,
+    plots = [
+      [side * (w / 2 - 1.6), d / 2 + 1.55],
+      [-side * (w / 2 - 1.6), d / 2 + 1.52],
+      [side * (w / 2 - 1.55), d / 2 + Math.max(2.65, h.setback_m - 1.0)],
+    ];
   for (const [j, prop] of h.props.entries()) {
     let [lx, lz] = plots[(j + (seed % 3)) % plots.length];
     const nearYard = localPoint(h, lx, lz);
-    if (s.ways && !s.ways.clear(...nearYard, 1.98)) continue;
+    if (j > 1 || (s.ways && !s.ways.clear(...nearYard, 1.55))) continue;
     const obj = (g, a, b, y, sw, sh, sd, col, rot = 0, rx = 0, rz = 0) =>
       fixture("yard-" + g, g, lx + a, lz + b, y, sw, sh, sd, col, rot, rx, rz);
     if (prop === "shade-tree" || prop === "banana-clump") {

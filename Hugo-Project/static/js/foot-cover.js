@@ -1,3 +1,4 @@
+import { inCourt } from "./home-index.js";
 import { clearApproach, padDistance } from "./resident-scene.js";
 import * as T from "../vendor/three.module.min.js";
 import { ACRE as U } from "./metres.js";
@@ -164,12 +165,11 @@ export class FootCover {
           G = (I * S + X) / U,
           Q = (J * S - Z) / U,
           z = s.ground(G, Q);
-        const home = s.homeMap?.get(Math.floor(G) + "," + Math.floor(Q))?.h;
         if (
           (s.ways && !s.ways.clear(G, Q, r)) ||
           s.tread?.hit(G, Q, r)?.wear > 0 ||
           clearApproach(s, G, Q, 1.8 + r) ||
-          (home && padDistance(home, G, Q) < r + 0.8)
+          inCourt(s, G, Q, r + 0.8)
         )
           continue;
         pebble(X, z, Z, r, 7, noise(I, J, 323 + k), true);
@@ -192,9 +192,8 @@ export class FootCover {
             0.5 +
             0.24 * Math.sin((I * S + x) * 0.34 + (J * S - z) * 0.19) +
             0.21 * Math.sin((J * S - z) * 0.47 + (I * S + x) * 0.31);
-        const plot = s.homeMap?.get(Math.floor(gx) + "," + Math.floor(gy))?.h;
         if (
-          (plot && padDistance(plot, gx, gy) < 0.45) ||
+          inCourt(s, gx, gy, 0.45) ||
           (s.ways && !s.ways.clear(gx, gy, -0.48))
         )
           continue;
