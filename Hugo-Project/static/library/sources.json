@@ -1,0 +1,893 @@
+{
+ "format": 2,
+ "licenceURL": "https://creativecommons.org/publicdomain/zero/1.0/",
+ "notes": "One self-contained mesh and local LODs or skeleton/clips per file. Representative habitat forms, not surveyed species or animals. Colour adjustments, metre normalization, compact skin clips, five retargeted human performances, terrestrial foot support, mesh reduction and 512px surface derivatives by Atlas.",
+ "files": [
+  {
+   "file": "models/atlas-bat.model.gz",
+   "sha256": "67fd957744344eeaaab073a72aae758614b50ae592799a6988c0680f790441cf",
+   "id": "atlas-bat",
+   "author": "Atlas project",
+   "license": "Project artwork",
+   "source": "scripts/atlas_fauna_shapes.mjs; scripts/bake_atlas_fauna.mjs"
+  },
+  {
+   "file": "models/atlas-bee.model.gz",
+   "sha256": "cf20574ce6c65a9d7eb1ef165fc9bf4cdf6fe9b7dce0bb6e6773d42ee81c270c",
+   "id": "atlas-bee",
+   "author": "Atlas project",
+   "license": "Project artwork",
+   "source": "scripts/atlas_fauna_shapes.mjs; scripts/bake_atlas_fauna.mjs"
+  },
+  {
+   "file": "models/atlas-bonnet-macaque.model.gz",
+   "sha256": "bc62bddca712f8e3636f095e0eb72aef89f54e51afa84594a5f004ed1ab15b41",
+   "id": "atlas-bonnet-macaque",
+   "author": "Atlas project",
+   "license": "Project artwork",
+   "source": "scripts/atlas_fauna_shapes.mjs; scripts/bake_atlas_fauna.mjs"
+  },
+  {
+   "file": "models/atlas-buffalo.model.gz",
+   "sha256": "696d278f66af8b5d86740b7a9e477bef5d414baa8c387d2712ede5e52bfb3150",
+   "id": "atlas-buffalo",
+   "author": "Atlas project",
+   "license": "Project artwork",
+   "source": "scripts/atlas_fauna_shapes.mjs; scripts/bake_atlas_fauna.mjs"
+  },
+  {
+   "file": "models/atlas-bullock.model.gz",
+   "sha256": "9ea745933632c01d197ac55ceb5c5c19d7b0b19872fab7e0f0df40285906aabf",
+   "id": "atlas-bullock",
+   "author": "Atlas project",
+   "license": "Project artwork",
+   "source": "scripts/atlas_fauna_shapes.mjs; scripts/bake_atlas_fauna.mjs"
+  },
+  {
+   "file": "models/atlas-butterfly.model.gz",
+   "sha256": "9cee278f56ef280602d663a402102f1a16bb479c6ba9230278f09e0fcaf81020",
+   "id": "atlas-butterfly",
+   "author": "Atlas project",
+   "license": "Project artwork",
+   "source": "scripts/atlas_fauna_shapes.mjs; scripts/bake_atlas_fauna.mjs"
+  },
+  {
+   "file": "models/atlas-chick.model.gz",
+   "sha256": "0c57d9c74f7efcb3a1f074bdc62693a9e9d51c00da1e507e15aea91467724fa9",
+   "id": "atlas-chick",
+   "author": "Atlas project",
+   "license": "Project artwork",
+   "source": "scripts/atlas_fauna_shapes.mjs; scripts/bake_atlas_fauna.mjs"
+  },
+  {
+   "file": "models/atlas-cormorant.model.gz",
+   "sha256": "b5ecb4ce9f85479b1540c17081006f33e0c09fcea6f21740dae66b049b3b95e7",
+   "id": "atlas-cormorant",
+   "author": "Atlas project",
+   "license": "Project artwork",
+   "source": "scripts/atlas_fauna_shapes.mjs; scripts/bake_atlas_fauna.mjs"
+  },
+  {
+   "file": "models/atlas-cow.model.gz",
+   "sha256": "21f3cb001d26a9a97277885c0a23a8e50d522e6160984320af8e85d004980042",
+   "id": "atlas-cow",
+   "author": "Atlas project",
+   "license": "Project artwork",
+   "source": "scripts/atlas_fauna_shapes.mjs; scripts/bake_atlas_fauna.mjs"
+  },
+  {
+   "file": "models/atlas-crow.model.gz",
+   "sha256": "a88fcea6c31f95264e659b9247eb5b8c224193ff6486ff87bcc8bf4acaca2f0a",
+   "id": "atlas-crow",
+   "author": "Atlas project",
+   "license": "Project artwork",
+   "source": "scripts/atlas_fauna_shapes.mjs; scripts/bake_atlas_fauna.mjs"
+  },
+  {
+   "file": "models/atlas-dragonfly.model.gz",
+   "sha256": "211ae88424bf318532b7c981270e00571b1bf1d3b5d95d44416fd32dddf5db39",
+   "id": "atlas-dragonfly",
+   "author": "Atlas project",
+   "license": "Project artwork",
+   "source": "scripts/atlas_fauna_shapes.mjs; scripts/bake_atlas_fauna.mjs"
+  },
+  {
+   "file": "models/atlas-duck.model.gz",
+   "sha256": "22d67d0f0985b381a28c86b8fa20c6620fa73bf81bdd95274d85f7687fe28106",
+   "id": "atlas-duck",
+   "author": "Atlas project",
+   "license": "Project artwork",
+   "source": "scripts/atlas_fauna_shapes.mjs; scripts/bake_atlas_fauna.mjs"
+  },
+  {
+   "file": "models/atlas-eagle.model.gz",
+   "sha256": "4bec3a089fdc12bf9a0c8d2349fa1a8f4d4b1dde6b60df01fa08e8df85207e91",
+   "id": "atlas-eagle",
+   "author": "Atlas project",
+   "license": "Project artwork",
+   "source": "scripts/atlas_fauna_shapes.mjs; scripts/bake_atlas_fauna.mjs"
+  },
+  {
+   "file": "models/atlas-egret.model.gz",
+   "sha256": "6d7e245609c368547c021a125a857be8b02b48149a7cc21ab083442dee2d68f3",
+   "id": "atlas-egret",
+   "author": "Atlas project",
+   "license": "Project artwork",
+   "source": "scripts/atlas_fauna_shapes.mjs; scripts/bake_atlas_fauna.mjs"
+  },
+  {
+   "file": "models/atlas-firefly.model.gz",
+   "sha256": "eab2173e5c13ed5065df091c79d4918f8ccab222b625c3bfd389db07dc4e502d",
+   "id": "atlas-firefly",
+   "author": "Atlas project",
+   "license": "Project artwork",
+   "source": "scripts/atlas_fauna_shapes.mjs; scripts/bake_atlas_fauna.mjs"
+  },
+  {
+   "file": "models/atlas-frog.model.gz",
+   "sha256": "92f68a8169b8b00f32435b42b5c11dbb728e8e0885a10aed5354d0525fca1af4",
+   "id": "atlas-frog",
+   "author": "Atlas project",
+   "license": "Project artwork",
+   "source": "scripts/atlas_fauna_shapes.mjs; scripts/bake_atlas_fauna.mjs"
+  },
+  {
+   "file": "models/atlas-goat.model.gz",
+   "sha256": "973b4791efb22ca101493f6ede092258493bceb95de214f41d3588030579cce7",
+   "id": "atlas-goat",
+   "author": "Atlas project",
+   "license": "Project artwork",
+   "source": "scripts/atlas_fauna_shapes.mjs; scripts/bake_atlas_fauna.mjs"
+  },
+  {
+   "file": "models/atlas-gull.model.gz",
+   "sha256": "c7d3cc3b9dfb11fd73079a5f027e9ab1636dda804c083d0df8c0d375137b7c0a",
+   "id": "atlas-gull",
+   "author": "Atlas project",
+   "license": "Project artwork",
+   "source": "scripts/atlas_fauna_shapes.mjs; scripts/bake_atlas_fauna.mjs"
+  },
+  {
+   "file": "models/atlas-hare.model.gz",
+   "sha256": "04d714369472fd6edecc41276919ee6b1d05abe90431d86258488ef9ef48322b",
+   "id": "atlas-hare",
+   "author": "Atlas project",
+   "license": "Project artwork",
+   "source": "scripts/atlas_fauna_shapes.mjs; scripts/bake_atlas_fauna.mjs"
+  },
+  {
+   "file": "models/atlas-hen.model.gz",
+   "sha256": "6ce5cb6e275c41fa8a67741d3cb99a100eca73cfee40114d7eea3c67c060201c",
+   "id": "atlas-hen",
+   "author": "Atlas project",
+   "license": "Project artwork",
+   "source": "scripts/atlas_fauna_shapes.mjs; scripts/bake_atlas_fauna.mjs"
+  },
+  {
+   "file": "models/atlas-heron.model.gz",
+   "sha256": "7248530f73c116f53226fe962aa136aa949e2765e660fde030cf91cd7d0810b3",
+   "id": "atlas-heron",
+   "author": "Atlas project",
+   "license": "Project artwork",
+   "source": "scripts/atlas_fauna_shapes.mjs; scripts/bake_atlas_fauna.mjs"
+  },
+  {
+   "file": "models/atlas-jungle-fowl.model.gz",
+   "sha256": "3ce54ba58406da271897ea3cb64bc99c1e545b9b5eaaf8acb4d3f443f5ffcecb",
+   "id": "atlas-jungle-fowl",
+   "author": "Atlas project",
+   "license": "Project artwork",
+   "source": "scripts/atlas_fauna_shapes.mjs; scripts/bake_atlas_fauna.mjs"
+  },
+  {
+   "file": "models/atlas-kingfisher.model.gz",
+   "sha256": "4972eefea880eddc085b0b7ec92a423fc6b9ebe5da4b3b0ec8def4b4140050ec",
+   "id": "atlas-kingfisher",
+   "author": "Atlas project",
+   "license": "Project artwork",
+   "source": "scripts/atlas_fauna_shapes.mjs; scripts/bake_atlas_fauna.mjs"
+  },
+  {
+   "file": "models/atlas-kite.model.gz",
+   "sha256": "dba7424f59a7e82f5d61e9abeb6044f632bfb6f692e721ab7f0ea35070eef246",
+   "id": "atlas-kite",
+   "author": "Atlas project",
+   "license": "Project artwork",
+   "source": "scripts/atlas_fauna_shapes.mjs; scripts/bake_atlas_fauna.mjs"
+  },
+  {
+   "file": "models/atlas-langur.model.gz",
+   "sha256": "1f03c991f7bb9b8b78111dc9526f0bf40922f72be9c60fa0ac1458afcd9bea5c",
+   "id": "atlas-langur",
+   "author": "Atlas project",
+   "license": "Project artwork",
+   "source": "scripts/atlas_fauna_shapes.mjs; scripts/bake_atlas_fauna.mjs"
+  },
+  {
+   "file": "models/atlas-lapwing.model.gz",
+   "sha256": "5d778dd95c49efb928a7ef589c4989c85c1c5291bfc2263c2a3470ec4d9afc7f",
+   "id": "atlas-lapwing",
+   "author": "Atlas project",
+   "license": "Project artwork",
+   "source": "scripts/atlas_fauna_shapes.mjs; scripts/bake_atlas_fauna.mjs"
+  },
+  {
+   "file": "models/atlas-leopard.model.gz",
+   "sha256": "c79b323e48cab23d9101efc1c8421997552d8fa2d3db7a02b79d499d32d87aa4",
+   "id": "atlas-leopard",
+   "author": "Atlas project",
+   "license": "Project artwork",
+   "source": "scripts/atlas_fauna_shapes.mjs; scripts/bake_atlas_fauna.mjs"
+  },
+  {
+   "file": "models/atlas-mongoose.model.gz",
+   "sha256": "77551ee47477e6fb0a47646d698e63a09261c96898d6330ca381e6525eae5706",
+   "id": "atlas-mongoose",
+   "author": "Atlas project",
+   "license": "Project artwork",
+   "source": "scripts/atlas_fauna_shapes.mjs; scripts/bake_atlas_fauna.mjs"
+  },
+  {
+   "file": "models/atlas-moth.model.gz",
+   "sha256": "3deaf5460e4b55a7b0e15d0f9af56f604999c6184418dbe89c4ede8eec4f74fd",
+   "id": "atlas-moth",
+   "author": "Atlas project",
+   "license": "Project artwork",
+   "source": "scripts/atlas_fauna_shapes.mjs; scripts/bake_atlas_fauna.mjs"
+  },
+  {
+   "file": "models/atlas-parakeet.model.gz",
+   "sha256": "0fa971f42b76d9ab0d6d49edf89bdf41ffdf4ef2cc4ca95b91664de31e35e9fd",
+   "id": "atlas-parakeet",
+   "author": "Atlas project",
+   "license": "Project artwork",
+   "source": "scripts/atlas_fauna_shapes.mjs; scripts/bake_atlas_fauna.mjs"
+  },
+  {
+   "file": "models/atlas-peafowl.model.gz",
+   "sha256": "9942a3b9b0adb53a3f27b84185ff7a40b71939c693fd7845851bcda04b143eb8",
+   "id": "atlas-peafowl",
+   "author": "Atlas project",
+   "license": "Project artwork",
+   "source": "scripts/atlas_fauna_shapes.mjs; scripts/bake_atlas_fauna.mjs"
+  },
+  {
+   "file": "models/atlas-sand-crab.model.gz",
+   "sha256": "852327aa10fceb7d0ae3ea73894a0f3818b6a4cee9e2770ba2ef9871c9e7b7f8",
+   "id": "atlas-sand-crab",
+   "author": "Atlas project",
+   "license": "Project artwork",
+   "source": "scripts/atlas_fauna_shapes.mjs; scripts/bake_atlas_fauna.mjs"
+  },
+  {
+   "file": "models/atlas-sheep.model.gz",
+   "sha256": "fb72ebf4e448aabc49ba55bd322e9829cb075ed41ab3142732a559ae6b6de08d",
+   "id": "atlas-sheep",
+   "author": "Atlas project",
+   "license": "Project artwork",
+   "source": "scripts/atlas_fauna_shapes.mjs; scripts/bake_atlas_fauna.mjs"
+  },
+  {
+   "file": "models/atlas-squirrel.model.gz",
+   "sha256": "7e487a47166b8bd7d19f7065b54b0691ca0f5d0f6af50dc84b3ad741ffeee550",
+   "id": "atlas-squirrel",
+   "author": "Atlas project",
+   "license": "Project artwork",
+   "source": "scripts/atlas_fauna_shapes.mjs; scripts/bake_atlas_fauna.mjs"
+  },
+  {
+   "file": "models/atlas-stork.model.gz",
+   "sha256": "185bc41eeb363d7fa841ce6bea3f4f5840b37cad9e7b35d4bfd53d2a9429430f",
+   "id": "atlas-stork",
+   "author": "Atlas project",
+   "license": "Project artwork",
+   "source": "scripts/atlas_fauna_shapes.mjs; scripts/bake_atlas_fauna.mjs"
+  },
+  {
+   "file": "models/atlas-tern.model.gz",
+   "sha256": "bee55e026c1cd54d90da2b11ce99dbb7e898e911643bfd405dfb16f2627c2137",
+   "id": "atlas-tern",
+   "author": "Atlas project",
+   "license": "Project artwork",
+   "source": "scripts/atlas_fauna_shapes.mjs; scripts/bake_atlas_fauna.mjs"
+  },
+  {
+   "file": "models/atlas-turtle.model.gz",
+   "sha256": "430f78988c4150dcaa8ea76b05f0c55bc8fe4e044f9b507e176a2fc7f750d56b",
+   "id": "atlas-turtle",
+   "author": "Atlas project",
+   "license": "Project artwork",
+   "source": "scripts/atlas_fauna_shapes.mjs; scripts/bake_atlas_fauna.mjs"
+  },
+  {
+   "file": "models/atlas-village-dog.model.gz",
+   "sha256": "0e1f73115a6c57ac72092b8da1d6d03099d1968a8dac30c8148895159edbb973",
+   "id": "atlas-village-dog",
+   "author": "Atlas project",
+   "license": "Project artwork",
+   "source": "scripts/atlas_fauna_shapes.mjs; scripts/bake_atlas_fauna.mjs"
+  },
+  {
+   "file": "models/atlas-wild-boar.model.gz",
+   "sha256": "36e264e4daeb277eef4d1914fb419574420f3274820ebe6e43d1ea19433d8872",
+   "id": "atlas-wild-boar",
+   "author": "Atlas project",
+   "license": "Project artwork",
+   "source": "scripts/atlas_fauna_shapes.mjs; scripts/bake_atlas_fauna.mjs"
+  },
+  {
+   "file": "models/atlas-yard-cat.model.gz",
+   "sha256": "3ebc5047ff9991ddc3b49a916bf8ea70908109400843e8f6f327afb792dbf979",
+   "id": "atlas-yard-cat",
+   "author": "Atlas project",
+   "license": "Project artwork",
+   "source": "scripts/atlas_fauna_shapes.mjs; scripts/bake_atlas_fauna.mjs"
+  },
+  {
+   "file": "models/birch-tree-2.model.gz",
+   "sha256": "3c823bd726200d215c1d8f0f11371cd7b23bbbb3f1077d501a1677040ad6e1e5",
+   "id": "birch-tree-2",
+   "author": "Quaternius",
+   "license": "CC0-1.0",
+   "source": "https://quaternius.trebeljahr.com/glb/nature_pack/BirchTree_2.glb",
+   "creatorPage": "https://quaternius.com/packs/ultimatenature.html",
+   "inputSHA256": "165aac1b43f009cd7b8145242c86f5b189917281324d272eafde312cd09d16c8"
+  },
+  {
+   "file": "models/birch-tree-4.model.gz",
+   "sha256": "17f701b45fcc7446d32d55d7e2cfeee4ddc7a3f33ae01b73efd8b9453a406a24",
+   "id": "birch-tree-4",
+   "author": "Quaternius",
+   "license": "CC0-1.0",
+   "source": "https://quaternius.trebeljahr.com/glb/nature_pack/BirchTree_4.glb",
+   "creatorPage": "https://quaternius.com/packs/ultimatenature.html",
+   "inputSHA256": "c8a821325e2819710b4cad047b3c4cc6570c77221c888ff9aa51393eead981cd"
+  },
+  {
+   "file": "models/common-tree-1.model.gz",
+   "sha256": "6c8163a022aee752e55d8f24f3f43318c7180f292179f194e5cd8ee544092e25",
+   "id": "common-tree-1",
+   "author": "Quaternius",
+   "license": "CC0-1.0",
+   "source": "https://quaternius.trebeljahr.com/glb/nature_pack/CommonTree_1.glb",
+   "creatorPage": "https://quaternius.com/packs/ultimatenature.html",
+   "inputSHA256": "61c05d351070fb5fb9f7c1b46b53f59cfd9625ddd16ba8de1ef3855f35557f72"
+  },
+  {
+   "file": "models/common-tree-2.model.gz",
+   "sha256": "1cca8c232f598e6e115008174f247f6e559339e51a14c6a17dfeea3729b4ab68",
+   "id": "common-tree-2",
+   "author": "Quaternius",
+   "license": "CC0-1.0",
+   "source": "https://quaternius.trebeljahr.com/glb/nature_pack/CommonTree_2.glb",
+   "creatorPage": "https://quaternius.com/packs/ultimatenature.html",
+   "inputSHA256": "8c40e7f17e87568dab4dcee469c4c6579868bf1ed73b7e88ca9bc5c2312bbe1c"
+  },
+  {
+   "file": "models/common-tree-4.model.gz",
+   "sha256": "ce4ba6a38525d183ffc3c3153663476148f36832db2e19bcdff7e10dd6fe6372",
+   "id": "common-tree-4",
+   "author": "Quaternius",
+   "license": "CC0-1.0",
+   "source": "https://quaternius.trebeljahr.com/glb/nature_pack/CommonTree_4.glb",
+   "creatorPage": "https://quaternius.com/packs/ultimatenature.html",
+   "inputSHA256": "054cc2c5c4bf4071df577646ce32aadc05e04ae4cd87e43484586d2377f5f6bf"
+  },
+  {
+   "file": "models/crops-bamboo-stage-b.model.gz",
+   "sha256": "a3d71102d508f4cf42af8d2bfa2b25c27205c99de5e12f93cc8c294b3ec4421b",
+   "id": "crops-bamboo-stage-b",
+   "author": "Kenney",
+   "license": "CC0-1.0",
+   "creatorPage": "https://kenney.nl/assets/nature-kit",
+   "source": "https://opengameart.org/sites/default/files/Nature%20Kit%20%282.1%29.zip",
+   "member": "Models/OBJ format/crops_bambooStageB.obj",
+   "inputSHA256": "92260e3139488c1aa0d960de9e62420f71419c83542a14a2ea0cecc485d9f9c5",
+   "mtlSHA256": "b186368ad09ddb6673f90f63c45ecac3f793b36fe14f96bd62e6d44922e7e874"
+  },
+  {
+   "file": "models/flower-purple-a.model.gz",
+   "sha256": "49294c12d81e81030421f89eed0ab0a4c7d3d93b30a968ab5adc17ed9029c017",
+   "id": "flower-purple-a",
+   "author": "Kenney",
+   "license": "CC0-1.0",
+   "creatorPage": "https://kenney.nl/assets/nature-kit",
+   "source": "https://opengameart.org/sites/default/files/Nature%20Kit%20%282.1%29.zip",
+   "member": "Models/OBJ format/flower_purpleA.obj",
+   "inputSHA256": "039c21db5a505edeb9d889077436b5f18055ae28b58ad89795b016ee29981479",
+   "mtlSHA256": "74c412d68fd1756dac2043a7e0602f8ef1be9b80221a9626519758eba9c8026b"
+  },
+  {
+   "file": "models/flower-purple-b.model.gz",
+   "sha256": "5fd25fe45de1d44f9d04c75a6dc161bf1a4d99a327a3008fa84cf749ee978875",
+   "id": "flower-purple-b",
+   "author": "Kenney",
+   "license": "CC0-1.0",
+   "creatorPage": "https://kenney.nl/assets/nature-kit",
+   "source": "https://opengameart.org/sites/default/files/Nature%20Kit%20%282.1%29.zip",
+   "member": "Models/OBJ format/flower_purpleB.obj",
+   "inputSHA256": "4c63606e05c4e61f7693db6cedac9f280031c340a8da4c4b4972312b842a5864",
+   "mtlSHA256": "74c412d68fd1756dac2043a7e0602f8ef1be9b80221a9626519758eba9c8026b"
+  },
+  {
+   "file": "models/flower-red-b.model.gz",
+   "sha256": "9fef7cb360562b4f2129e759bf59553a6844d6ebba65ac2a2785def40e7b30f1",
+   "id": "flower-red-b",
+   "author": "Kenney",
+   "license": "CC0-1.0",
+   "creatorPage": "https://kenney.nl/assets/nature-kit",
+   "source": "https://opengameart.org/sites/default/files/Nature%20Kit%20%282.1%29.zip",
+   "member": "Models/OBJ format/flower_redB.obj",
+   "inputSHA256": "f60d27e6a318e5ec7a6bc9d588d5409a9785f7ac42d1274a4d858b3027043c56",
+   "mtlSHA256": "0c9ad4852b07f6c3b8d1b1d54ed2c19ce48828f259c6fb900c1ced26ba645b53"
+  },
+  {
+   "file": "models/flower-yellow-a.model.gz",
+   "sha256": "b6597e286c86038449030ea02273299f03f8e7b169f61228d519f841d5ef4579",
+   "id": "flower-yellow-a",
+   "author": "Kenney",
+   "license": "CC0-1.0",
+   "creatorPage": "https://kenney.nl/assets/nature-kit",
+   "source": "https://opengameart.org/sites/default/files/Nature%20Kit%20%282.1%29.zip",
+   "member": "Models/OBJ format/flower_yellowA.obj",
+   "inputSHA256": "09a81fe229ab3d60e7c3a080b39d9cbbe379af44ce4b646139c2081550692cb2",
+   "mtlSHA256": "ca4a55c6fd87ce8026d1a8beba9c87fb88b22dff30619f8b80d329a6116cdbc9"
+  },
+  {
+   "file": "models/flower-yellow-b.model.gz",
+   "sha256": "bd8e4bfc2acc6ee9c3b7ab4213c87f8ae1f1ff824f995899f782399f9f1f6235",
+   "id": "flower-yellow-b",
+   "author": "Kenney",
+   "license": "CC0-1.0",
+   "creatorPage": "https://kenney.nl/assets/nature-kit",
+   "source": "https://opengameart.org/sites/default/files/Nature%20Kit%20%282.1%29.zip",
+   "member": "Models/OBJ format/flower_yellowB.obj",
+   "inputSHA256": "3a9e9c5cbc05d33882bb48d1fccd650b88809d13b4884010e81a0099a304a86f",
+   "mtlSHA256": "ca4a55c6fd87ce8026d1a8beba9c87fb88b22dff30619f8b80d329a6116cdbc9"
+  },
+  {
+   "file": "models/grass-large.model.gz",
+   "sha256": "415822237482cc347d0f8438f36f581c1c6b16f8322b3eae6b453a095a2194f8",
+   "id": "grass-large",
+   "author": "Kenney",
+   "license": "CC0-1.0",
+   "creatorPage": "https://kenney.nl/assets/nature-kit",
+   "source": "https://opengameart.org/sites/default/files/Nature%20Kit%20%282.1%29.zip",
+   "member": "Models/OBJ format/grass_large.obj",
+   "inputSHA256": "8a7cd258fa054bb6d3db5ecd05b746c002a51c8d0542757f3b6e1079df34567f",
+   "mtlSHA256": "b186368ad09ddb6673f90f63c45ecac3f793b36fe14f96bd62e6d44922e7e874"
+  },
+  {
+   "file": "models/grass-leafs-large.model.gz",
+   "sha256": "e6dc199c3b38c0f59c2a8620e687b8364e27580a23d2752df29b18b794fa1de9",
+   "id": "grass-leafs-large",
+   "author": "Kenney",
+   "license": "CC0-1.0",
+   "creatorPage": "https://kenney.nl/assets/nature-kit",
+   "source": "https://opengameart.org/sites/default/files/Nature%20Kit%20%282.1%29.zip",
+   "member": "Models/OBJ format/grass_leafsLarge.obj",
+   "inputSHA256": "4cb95c585bc98d47aa661de7bb9b14ab6e2912880fb9dca74efce8abbd818f49",
+   "mtlSHA256": "b186368ad09ddb6673f90f63c45ecac3f793b36fe14f96bd62e6d44922e7e874"
+  },
+  {
+   "file": "models/grass.model.gz",
+   "sha256": "d2eab035ee53c67a36cb1ca4457c33aad4f396f1be52412b1474a4c6fe8f936d",
+   "id": "grass",
+   "author": "Kenney",
+   "license": "CC0-1.0",
+   "creatorPage": "https://kenney.nl/assets/nature-kit",
+   "source": "https://opengameart.org/sites/default/files/Nature%20Kit%20%282.1%29.zip",
+   "member": "Models/OBJ format/grass.obj",
+   "inputSHA256": "a444b815fa29d2278e3fcac03ef79e52d7232a845f65dce2443075d2b294c74e",
+   "mtlSHA256": "b186368ad09ddb6673f90f63c45ecac3f793b36fe14f96bd62e6d44922e7e874"
+  },
+  {
+   "file": "models/hind.model.gz",
+   "sha256": "81a9ad02d5c80e7057c0c03edb53915b93c5bf0b6799b0608f4a6b3f17d0d534",
+   "id": "hind",
+   "author": "Quaternius",
+   "license": "CC0-1.0",
+   "source": "https://quaternius.trebeljahr.com/glb/animals_pack/Deer.glb",
+   "creatorPage": "https://quaternius.com/packs/ultimateanimatedanimals.html",
+   "inputSHA256": "b6558249bfb225313c35dd1b6c91d832b2031d064039bb6b3600a624a882a174"
+  },
+  {
+   "file": "models/jackal.model.gz",
+   "sha256": "3166b55887faf3584c182494fc0f26914a3f542ea6cf408a52e29b2fc5aece37",
+   "id": "jackal",
+   "author": "Quaternius",
+   "license": "CC0-1.0",
+   "source": "https://quaternius.trebeljahr.com/glb/animals_pack/Wolf.glb",
+   "creatorPage": "https://quaternius.com/packs/ultimateanimatedanimals.html",
+   "inputSHA256": "8382f3d3b97e2338d2fd26190ddcc095d34d642d0e97105bda807ec87ccfd534"
+  },
+  {
+   "file": "models/lily-large.model.gz",
+   "sha256": "4a64971829307861ba8af213fa7865b842a62111e3e87803d8a537b3d089e737",
+   "id": "lily-large",
+   "author": "Kenney",
+   "license": "CC0-1.0",
+   "creatorPage": "https://kenney.nl/assets/nature-kit",
+   "source": "https://opengameart.org/sites/default/files/Nature%20Kit%20%282.1%29.zip",
+   "member": "Models/OBJ format/lily_large.obj",
+   "inputSHA256": "1b563ce3cdbb40b33003bf258cdf9dbf10488d59facb9408035a2d32d04b5ebb",
+   "mtlSHA256": "5efdbae1f40eb57810041db6f1a223bbb568f9d6b96c744c3436d7619085c6eb"
+  },
+  {
+   "file": "models/lily-small.model.gz",
+   "sha256": "1b485bc96bbba61ec58d7b589136795d26eff66f34b43dce3ae760d0f984acf8",
+   "id": "lily-small",
+   "author": "Kenney",
+   "license": "CC0-1.0",
+   "creatorPage": "https://kenney.nl/assets/nature-kit",
+   "source": "https://opengameart.org/sites/default/files/Nature%20Kit%20%282.1%29.zip",
+   "member": "Models/OBJ format/lily_small.obj",
+   "inputSHA256": "83e2b671096789a2a0ed8857e8b496282e2ac30bd5d351e4118c71228511ee9e",
+   "mtlSHA256": "cbff78631489ebd9cd03c9edba3871fa395caba4b67d01157b8d0cd8a27a808f"
+  },
+  {
+   "file": "models/log-large.model.gz",
+   "sha256": "971d1071bc0a477980e22f56b437df5480c05e813f34a474b0813cfe0666e860",
+   "id": "log-large",
+   "author": "Kenney",
+   "license": "CC0-1.0",
+   "creatorPage": "https://kenney.nl/assets/nature-kit",
+   "source": "https://opengameart.org/sites/default/files/Nature%20Kit%20%282.1%29.zip",
+   "member": "Models/OBJ format/log_large.obj",
+   "inputSHA256": "47efd76cbbcdaf17d010858f13d71dc9076ad8617e0e95913f500808864009aa",
+   "mtlSHA256": "0da11a6ffeafc7ba144a51e856e10e1143bd4e94aa99a69a2eea30239e58a7d5"
+  },
+  {
+   "file": "models/mushroom-tan-group.model.gz",
+   "sha256": "bc399ca5e9c392d3a90d1c9ba8fa4334514ffe8722dfa8e2b8bac94c8707b3d3",
+   "id": "mushroom-tan-group",
+   "author": "Kenney",
+   "license": "CC0-1.0",
+   "creatorPage": "https://kenney.nl/assets/nature-kit",
+   "source": "https://opengameart.org/sites/default/files/Nature%20Kit%20%282.1%29.zip",
+   "member": "Models/OBJ format/mushroom_tanGroup.obj",
+   "inputSHA256": "4d4bc40e8e7255da37181fb572f86597452a94543b659822a10932edf9ae64cb",
+   "mtlSHA256": "95496812b7c3974cad89ff4826b06c3cf0e52a7fa06348547725a3d5137675ea"
+  },
+  {
+   "file": "models/palm-tree-2.model.gz",
+   "sha256": "43c9c35a44e66e3091c478dead48ea082b34289a4398701aff69fff95255c15d",
+   "id": "palm-tree-2",
+   "author": "Quaternius",
+   "license": "CC0-1.0",
+   "source": "https://quaternius.trebeljahr.com/glb/nature_pack/PalmTree_2.glb",
+   "creatorPage": "https://quaternius.com/packs/ultimatenature.html",
+   "inputSHA256": "d7c62c72501213f12f2d46a76c274f2eca743262ac2ab0da331fb7b6f4f0217a"
+  },
+  {
+   "file": "models/palm-tree-3.model.gz",
+   "sha256": "ff745956daee952cf9c69019dcba5988329b2751cd231830ec42f8cce74f96b4",
+   "id": "palm-tree-3",
+   "author": "Quaternius",
+   "license": "CC0-1.0",
+   "source": "https://quaternius.trebeljahr.com/glb/nature_pack/PalmTree_3.glb",
+   "creatorPage": "https://quaternius.com/packs/ultimatenature.html",
+   "inputSHA256": "a32a48b0f84efcb7451b34f3d445bc9f552dc1d9c962e12dc3ef3d1997afdd14"
+  },
+  {
+   "file": "models/pine-tree-2.model.gz",
+   "sha256": "3c705fad79fbafef342403327a5c8a7e823bd283d70c092edbcecd477807c26d",
+   "id": "pine-tree-2",
+   "author": "Quaternius",
+   "license": "CC0-1.0",
+   "source": "https://quaternius.trebeljahr.com/glb/nature_pack/PineTree_2.glb",
+   "creatorPage": "https://quaternius.com/packs/ultimatenature.html",
+   "inputSHA256": "de378bdc2d1faf7e6b76f96ec4566231e39049753aa680397649900c74d0b0bb"
+  },
+  {
+   "file": "models/plant-1.model.gz",
+   "sha256": "6780fd03c45cbcc64388d2b5b050aa43ba692df57b7bcededabfe655317a55de",
+   "id": "plant-1",
+   "author": "Quaternius",
+   "license": "CC0-1.0",
+   "source": "https://quaternius.trebeljahr.com/glb/nature_pack/Plant_1.glb",
+   "creatorPage": "https://quaternius.com/packs/ultimatenature.html",
+   "inputSHA256": "388328b6215de26e9f0b1fa3642e443ce9c53a2de544b790ea6cebc4506eb976"
+  },
+  {
+   "file": "models/plant-2.model.gz",
+   "sha256": "d980044d4b4007218774d81ca00ba81569af457402af2378949eced2eec60cce",
+   "id": "plant-2",
+   "author": "Quaternius",
+   "license": "CC0-1.0",
+   "source": "https://quaternius.trebeljahr.com/glb/nature_pack/Plant_2.glb",
+   "creatorPage": "https://quaternius.com/packs/ultimatenature.html",
+   "inputSHA256": "6e4a0a55b49bc21822238f357792bb1f4fb321feca0cc77d823cc45b915d008d"
+  },
+  {
+   "file": "models/plant-bush-detailed.model.gz",
+   "sha256": "5b0f89b31aeba03be7f11950922b904ecdb29f3951202fe94562753a46df29d7",
+   "id": "plant-bush-detailed",
+   "author": "Kenney",
+   "license": "CC0-1.0",
+   "creatorPage": "https://kenney.nl/assets/nature-kit",
+   "source": "https://opengameart.org/sites/default/files/Nature%20Kit%20%282.1%29.zip",
+   "member": "Models/OBJ format/plant_bushDetailed.obj",
+   "inputSHA256": "f657029e99a52f6933389c8d445699d352102990af574cfe190f4ec746de0b7d",
+   "mtlSHA256": "b186368ad09ddb6673f90f63c45ecac3f793b36fe14f96bd62e6d44922e7e874"
+  },
+  {
+   "file": "models/plant-flat-short.model.gz",
+   "sha256": "cc3204f7f798b74a0e87e3041a84247e7adbf0739a7bd6b3e9f00f5d562d958b",
+   "id": "plant-flat-short",
+   "author": "Kenney",
+   "license": "CC0-1.0",
+   "creatorPage": "https://kenney.nl/assets/nature-kit",
+   "source": "https://opengameart.org/sites/default/files/Nature%20Kit%20%282.1%29.zip",
+   "member": "Models/OBJ format/plant_flatShort.obj",
+   "inputSHA256": "8c70e2e83ea65a5496b77c29a9130c710348fe9fbf2fc443ccb9d1bc13d1e7e5",
+   "mtlSHA256": "df409a06731706f40b6b36eeaae085e2500009721c2098063e80cf045c464952"
+  },
+  {
+   "file": "models/reservoir-fish.model.gz",
+   "sha256": "75492f222a6e4e0dac7c7413308e2be12fa0d92567d86e2c2a17ea2e9cf94f87",
+   "id": "reservoir-fish",
+   "author": "Quaternius",
+   "license": "CC0-1.0",
+   "source": "https://quaternius.trebeljahr.com/glb/fish_pack/Fish2.glb",
+   "creatorPage": "https://quaternius.com/packs/animatedfish.html",
+   "inputSHA256": "6e04c645836f1ad6cabf1b999976fa74d50fd7dd23f504154ee03427eb194d51"
+  },
+  {
+   "file": "models/rock-2.model.gz",
+   "sha256": "b9f9b896b2c15c7ff37dd152ab8f7e549e134d2ec77472fe7637f99609a8ea99",
+   "id": "rock-2",
+   "author": "Quaternius",
+   "license": "CC0-1.0",
+   "source": "https://quaternius.trebeljahr.com/glb/nature_pack/Rock_2.glb",
+   "creatorPage": "https://quaternius.com/packs/ultimatenature.html",
+   "inputSHA256": "d802dcfaf6eb5c267157baec1e724371c092aebe160e216be9466d2074518384"
+  },
+  {
+   "file": "models/rock-large-c.model.gz",
+   "sha256": "bb14a7a91e23e61452e3724fe74da55b6062fecc87b5cc7aec3c0fcbf18b0a12",
+   "id": "rock-large-c",
+   "author": "Kenney",
+   "license": "CC0-1.0",
+   "creatorPage": "https://kenney.nl/assets/nature-kit",
+   "source": "https://opengameart.org/sites/default/files/Nature%20Kit%20%282.1%29.zip",
+   "member": "Models/OBJ format/rock_largeC.obj",
+   "inputSHA256": "e96d6790800163ab57547538b0500821693ea9c5d99a9664ab45e56390366c70",
+   "mtlSHA256": "b1f406513a297dd69c38653fd9b9de390123ff45242be9bf204f775d9e88c98c"
+  },
+  {
+   "file": "models/rock-large-d.model.gz",
+   "sha256": "d3440c70d63a02acae2319950f762ec2a61af5fdd229890e4accdec20d9d1a12",
+   "id": "rock-large-d",
+   "author": "Kenney",
+   "license": "CC0-1.0",
+   "creatorPage": "https://kenney.nl/assets/nature-kit",
+   "source": "https://opengameart.org/sites/default/files/Nature%20Kit%20%282.1%29.zip",
+   "member": "Models/OBJ format/rock_largeD.obj",
+   "inputSHA256": "7deb3676590e82cf9180ece19666b7a8395b259240937c5b779c80325c576138",
+   "mtlSHA256": "db75535695bc97d26e50a03f55306f04938b123f0fc3622cac4ac15e5ef27ab8"
+  },
+  {
+   "file": "models/rock-small-flat-b.model.gz",
+   "sha256": "a422e5c1df5021c182052860c9059f146bbbc8df4234c86da7d54df3f7e7c93f",
+   "id": "rock-small-flat-b",
+   "author": "Kenney",
+   "license": "CC0-1.0",
+   "creatorPage": "https://kenney.nl/assets/nature-kit",
+   "source": "https://opengameart.org/sites/default/files/Nature%20Kit%20%282.1%29.zip",
+   "member": "Models/OBJ format/rock_smallFlatB.obj",
+   "inputSHA256": "7f63650669f5ba2ecbcfa5a49d0116a1b61bba75359a7173af61ff32ca102b6f",
+   "mtlSHA256": "86d10214ce28199e4134d718b5df04356f295c63705435369565dcbd003c8971"
+  },
+  {
+   "file": "models/shoal.model.gz",
+   "sha256": "53280ec094fa4cdcca4433d75197874f5ee7efa99ca110c521a2512eb82546c3",
+   "id": "shoal",
+   "author": "Quaternius",
+   "license": "CC0-1.0",
+   "source": "https://quaternius.trebeljahr.com/glb/fish_pack/Fish1.glb",
+   "creatorPage": "https://quaternius.com/packs/animatedfish.html",
+   "inputSHA256": "bfea34878b92eb05d9b2c584c3a9e97abe2b402141b9c7b4b3f1ecb55a29df02"
+  },
+  {
+   "file": "models/stag.model.gz",
+   "sha256": "f901e162983a0a3d19173a321903c905c8b79b13392566e49b9da4e646861817",
+   "id": "stag",
+   "author": "Quaternius",
+   "license": "CC0-1.0",
+   "source": "https://quaternius.trebeljahr.com/glb/animals_pack/Stag.glb",
+   "creatorPage": "https://quaternius.com/packs/ultimateanimatedanimals.html",
+   "inputSHA256": "34818768f3e9298c9580ea79bfca2b79854a36877888a5e1e5df374b015f9e89"
+  },
+  {
+   "file": "models/stone-large-f.model.gz",
+   "sha256": "378eedf548607b6f85a608384e2e50a1bdfa33d3fea456ec576db24c74f37b9e",
+   "id": "stone-large-f",
+   "author": "Kenney",
+   "license": "CC0-1.0",
+   "creatorPage": "https://kenney.nl/assets/nature-kit",
+   "source": "https://opengameart.org/sites/default/files/Nature%20Kit%20%282.1%29.zip",
+   "member": "Models/OBJ format/stone_largeF.obj",
+   "inputSHA256": "e90019178f21333d7d27d704dc2f9e10d5bc7550f067b092df661d6ec9a5909f",
+   "mtlSHA256": "09b7bb00c99e2cb9b114d77c07b99171ee79a4d1ad72af0345e47c916d32d6a3"
+  },
+  {
+   "file": "models/stone-tall-i.model.gz",
+   "sha256": "76db20b2ee81a7a56dc70527b923c255b7f77e58286bce47b114323fb70ab8a4",
+   "id": "stone-tall-i",
+   "author": "Kenney",
+   "license": "CC0-1.0",
+   "creatorPage": "https://kenney.nl/assets/nature-kit",
+   "source": "https://opengameart.org/sites/default/files/Nature%20Kit%20%282.1%29.zip",
+   "member": "Models/OBJ format/stone_tallI.obj",
+   "inputSHA256": "c758d961fe310df6c601bd4da394a8a18deead6904060f7048df4edcfafa7c98",
+   "mtlSHA256": "09b7bb00c99e2cb9b114d77c07b99171ee79a4d1ad72af0345e47c916d32d6a3"
+  },
+  {
+   "file": "models/stump-old.model.gz",
+   "sha256": "c9fcea5c26b67aaefec781eba84cdcae6000ee218653855c8589a7862e07dead",
+   "id": "stump-old",
+   "author": "Kenney",
+   "license": "CC0-1.0",
+   "creatorPage": "https://kenney.nl/assets/nature-kit",
+   "source": "https://opengameart.org/sites/default/files/Nature%20Kit%20%282.1%29.zip",
+   "member": "Models/OBJ format/stump_old.obj",
+   "inputSHA256": "a6950a10df44ca0c05c57d27a181c1ed6b42e488275dc86fbfd70818d0ef31af",
+   "mtlSHA256": "676a091aa335047dd6ab0e98adeb78744a19b9717d3e1c78a7a264dbbf329334"
+  },
+  {
+   "file": "models/traveller-man.model.gz",
+   "sha256": "bd0f8b921d91ba685b2b5d56ec4fde42f286f357b6e89d08105761bf3dc8d3c8",
+   "id": "traveller-man",
+   "author": "Quaternius",
+   "license": "CC0-1.0",
+   "source": "https://cdn.cinevva.com/assets/packs/quaternius/ultimate-modular-men/Adventurer.glb",
+   "creatorPage": "https://quaternius.com/packs/ultimatemodularcharacters.html",
+   "inputSHA256": "98b315af0bea37faccc425716b443584444463d71027bde68f94c4bbcdc97877",
+   "modification": "Existing authored stand/walk/run plus retargeted Swim_Fwd_Loop, Swim_Idle_Loop, Jump_Start, Jump_Loop and Jump_Land. Atlas metre-space skin, waterline and terrain IK. Live jump/recovery: Casual man model Jump, directional retarget with preserved limb lengths and contact-driven phase, plus separate Atlas ledge reach and rain treatment.",
+   "animationSource": "https://opengameart.org/content/universal-animation-library",
+   "animationArchiveSHA256": "18ff1a7215f4852b320203e8aaf02a1578b5c8eef9027fbaedfcedc7b85a3ac2",
+   "jumpSource": "https://opengameart.org/content/animated-characters-pack",
+   "jumpInputSHA256": "1b8784f5e0971b0831b17940dd27e81c326a49104b9b771268080dfce57202a3"
+  },
+  {
+   "file": "models/traveller-woman.model.gz",
+   "sha256": "be5cb6362cd5c0e208254408229c65e20a67c171ce0fee0495da189ae0ee0923",
+   "id": "traveller-woman",
+   "author": "Quaternius",
+   "license": "CC0-1.0",
+   "source": "https://cdn.cinevva.com/assets/packs/quaternius/ultimate-modular-women/Adventurer.glb",
+   "creatorPage": "https://quaternius.com/packs/ultimatemodularwomen.html",
+   "inputSHA256": "d8fdefa6428d856e947d8f98b1857f020c654c7e4e2a73ed0108c8ac3a2b4e12",
+   "modification": "Existing authored stand/walk/run plus retargeted Swim_Fwd_Loop, Swim_Idle_Loop, Jump_Start, Jump_Loop and Jump_Land. Atlas metre-space skin, waterline and terrain IK. Live jump/recovery: Casual woman model Jump, directional retarget with preserved limb lengths and contact-driven phase, plus separate Atlas ledge reach and rain treatment.",
+   "animationSource": "https://opengameart.org/content/universal-animation-library",
+   "animationArchiveSHA256": "18ff1a7215f4852b320203e8aaf02a1578b5c8eef9027fbaedfcedc7b85a3ac2",
+   "jumpSource": "https://opengameart.org/content/animated-characters-pack",
+   "jumpInputSHA256": "3b4f39d27dc8a5f3b42d023f88a928679e7b1b0ea49ddb4857a07399bc4d8332"
+  },
+  {
+   "file": "models/tree-detailed.model.gz",
+   "sha256": "740dc4cda95d19aeb9be5f0694a146d56ec883a88b92f4b6b42600330cd4f036",
+   "id": "tree-detailed",
+   "author": "Kenney",
+   "license": "CC0-1.0",
+   "creatorPage": "https://kenney.nl/assets/nature-kit",
+   "source": "https://opengameart.org/sites/default/files/Nature%20Kit%20%282.1%29.zip",
+   "member": "Models/OBJ format/tree_detailed.obj",
+   "inputSHA256": "0a67913edf811aabb1c2f54b671c0626eb7c17e6818536484f34d4444030a9c7",
+   "mtlSHA256": "4037993d8d84f1c7528962076bcf796ba368801622874a2bf2960e70d8b8fc99"
+  },
+  {
+   "file": "models/tree-oak.model.gz",
+   "sha256": "0ae799a0a5b3ea57015578e705e3f668f94765cabef07732058deedda2485fee",
+   "id": "tree-oak",
+   "author": "Kenney",
+   "license": "CC0-1.0",
+   "creatorPage": "https://kenney.nl/assets/nature-kit",
+   "source": "https://opengameart.org/sites/default/files/Nature%20Kit%20%282.1%29.zip",
+   "member": "Models/OBJ format/tree_oak.obj",
+   "inputSHA256": "1a1dba69f49a454492db2413110e0867dc6dc3d5fe412d2499047625c93a3c06",
+   "mtlSHA256": "0d90ca9c9ac521fcc0a0889ac1aca36f6e4b4ab6cd6975c337ecaf764f08e2e7"
+  },
+  {
+   "file": "models/tree-palm-detailed-short.model.gz",
+   "sha256": "0766168d89a6d5a9aaba201e390e4a9f63abad167d1db1a3796581b2cc785e43",
+   "id": "tree-palm-detailed-short",
+   "author": "Kenney",
+   "license": "CC0-1.0",
+   "creatorPage": "https://kenney.nl/assets/nature-kit",
+   "source": "https://opengameart.org/sites/default/files/Nature%20Kit%20%282.1%29.zip",
+   "member": "Models/OBJ format/tree_palmDetailedShort.obj",
+   "inputSHA256": "993e93a6e7bffa168b47d89dfac3539531142db6ef1f342ac6d0def74ad3c40e",
+   "mtlSHA256": "2f754b719f8d7902d7940fe5f5216fe24cfaf0f021ce3533cace85cee7d0ce44"
+  },
+  {
+   "file": "models/tree-plateau.model.gz",
+   "sha256": "05d3f844df17ebc41975fbafb2a5bd3e582e5f68e12ced1495f41f76177216ad",
+   "id": "tree-plateau",
+   "author": "Kenney",
+   "license": "CC0-1.0",
+   "creatorPage": "https://kenney.nl/assets/nature-kit",
+   "source": "https://opengameart.org/sites/default/files/Nature%20Kit%20%282.1%29.zip",
+   "member": "Models/OBJ format/tree_plateau.obj",
+   "inputSHA256": "c7a2d563c79fdb27175d457a680f0bfa5469a75c006ba7efcf650374acc57091",
+   "mtlSHA256": "0d90ca9c9ac521fcc0a0889ac1aca36f6e4b4ab6cd6975c337ecaf764f08e2e7"
+  },
+  {
+   "file": "surfaces/brown_mud.jpg",
+   "id": "brown_mud",
+   "sha256": "8a9126fe995673d91d1b47054f563111e965e3e1cd36bc90bd3d3ec048c753be",
+   "author": "Rob Tuytel",
+   "license": "CC0-1.0",
+   "source": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/brown_mud/brown_mud_diff_1k.jpg",
+   "creatorPage": "https://polyhaven.com/a/brown_mud",
+   "inputSHA256": "df3f135c899f10a3b018738343b222cbc67d13e7c76c5d8da834a3d34c984417"
+  },
+  {
+   "file": "surfaces/coast_sand_02.jpg",
+   "id": "coast_sand_02",
+   "sha256": "48988e08ec5b5dd2e6c9850e66c66090560aee3f915b869787b912125ebd7966",
+   "author": "Rob Tuytel",
+   "license": "CC0-1.0",
+   "source": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/coast_sand_02/coast_sand_02_diff_1k.jpg",
+   "creatorPage": "https://polyhaven.com/a/coast_sand_02",
+   "inputSHA256": "6854bc49936d7b2971b579095c21342ad2c8fd1495aa3382b840335202964f53"
+  },
+  {
+   "file": "surfaces/forest_ground_04.jpg",
+   "id": "forest_ground_04",
+   "sha256": "375bac2ecbffaf276b442605ea6b51f7d624fc343db1ef0c1486b054b6615318",
+   "author": "Rob Tuytel, Rico Cilliers",
+   "license": "CC0-1.0",
+   "source": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/forest_ground_04/forest_ground_04_diff_1k.jpg",
+   "creatorPage": "https://polyhaven.com/a/forest_ground_04",
+   "inputSHA256": "50a4dda30875020c64385261aa7e00e2155b592302fa6794165f58fae73cbd2c"
+  },
+  {
+   "file": "surfaces/leafy_grass.jpg",
+   "id": "leafy_grass",
+   "sha256": "49da4aeb8520b0356f9f0c84fd1ba12af7bf7dc9475a516afb35a42a426dff73",
+   "author": "Charlotte Baglioni",
+   "license": "CC0-1.0",
+   "source": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/leafy_grass/leafy_grass_diff_1k.jpg",
+   "creatorPage": "https://polyhaven.com/a/leafy_grass",
+   "inputSHA256": "cfa40bc9d9417d1852db8753a8d5917f110c40101179f63543c382e39bc05e4a"
+  },
+  {
+   "file": "surfaces/rock_face_03.jpg",
+   "id": "rock_face_03",
+   "sha256": "3370c3e0decc669dc4734c65e6998d82213be7254fc19ccd119a752352e82df3",
+   "author": "Dario Barresi, Rico Cilliers",
+   "license": "CC0-1.0",
+   "source": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/rock_face_03/rock_face_03_diff_1k.jpg",
+   "creatorPage": "https://polyhaven.com/a/rock_face_03",
+   "inputSHA256": "ea48e0e47ad42c8bd312476178b1248ec66f0eb19156a26a1c222f2a40caaf2d"
+  },
+  {
+   "file": "walk/rainfall.ogg",
+   "id": "rainfall",
+   "author": "Ylmir",
+   "source": "https://opengameart.org/content/rain-loopable",
+   "license": "CC0-1.0",
+   "inputSHA256": "4f659f68cf5219007d0bb0969a1862491ceee4057fda4c491c6001e8608fa2cb",
+   "sha256": "c1b47b47f5d47d60dc866456a84b761d74c49e2d38119c1d143409271d84e746"
+  },
+  {
+   "file": "walk/grove.ogg",
+   "id": "grove",
+   "author": "Spring Spring; bird sounds by isaiah658, syncopika and pauliuw",
+   "source": "https://opengameart.org/content/birds-and-wind-ambient-birds-wind-and-synth",
+   "license": "CC0-1.0",
+   "inputSHA256": "28f99f536a0772d80052f03bcb22c9ed8fd7c6e4db7f2e8356efcf26a8e24f01",
+   "sha256": "cfc0f87ea0124aa7f8251e34ae34e9fa644186d3fd236702e6c79d146b6170fc"
+  },
+  {
+   "file": "walk/acre-song.ogg",
+   "id": "acre-song",
+   "author": "Atlas project",
+   "source": "Original 16-bar score, produced for this publication",
+   "license": "Project artwork",
+   "sha256": "68d1213882ee371a3aa36693bcb8fb4d21fae1c9290c09bd69fb2949fcd6a04f"
+  }
+ ]
+}

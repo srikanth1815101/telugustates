@@ -1,0 +1,16 @@
+baseURL = '/'
+languageCode = 'en-IN'
+title = 'Telugu States by CSRGO'
+relativeURLs = true
+disableKinds = ['taxonomy','term','RSS','sitemap','robotsTXT']
+[markup.goldmark.renderer]
+unsafe = false
+
+# All runtime data is local. No mounts outside this project and no network modules.
+[outputs]
+  home = ['HTML','Catalog']
+[outputFormats.Catalog]
+  mediaType = 'application/json'
+  baseName = 'catalog'
+  isPlainText = true
+  notAlternative = true

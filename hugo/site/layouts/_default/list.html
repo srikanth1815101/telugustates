@@ -1,1 +1,0 @@
-{{ define "main" }}<main class="shell house-page"><div class="eyebrow" data-msg="home.community">COMMUNITY</div><h1 data-msg="nav.residents">Residents</h1><div class="directory">{{ range where .Pages "Params.record_kind" "community" }}<a href="/houses/{{ .Params.username }}/">@{{ .Title }} <small>{{ .Params.district }}</small></a>{{ end }}</div></main>{{ end }}

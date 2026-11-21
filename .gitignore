@@ -1,0 +1,10 @@
+# Keep downloadable builds, generated installs and private signing material out of Git.
+/01-Hugo-Project.zip
+/02-Android-Workflow-and-APK.zip
+*.apk
+*.idsig
+*.p12
+*.pfx
+*.jks
+*.keystore
+.DS_Store

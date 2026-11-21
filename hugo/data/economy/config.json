@@ -1,8 +1,0 @@
-{
-  "schema": 1, "campaignReels": [], "rates": {"likes":1,"comments":1,"shares":1}, "foodPerHouse":1,
-  "zone":"Asia/Kolkata", "startsOn":"2026-11-18", "goldExchange":10,
-  "thresholds":{"healthyAbove":10,"stableFrom":5,"lowFrom":2},
-  "costs":{"path":100,"well":250,"bridge":400,"lights":500,"school":1500,"health":2000},
-  "minHomes":{"path":1,"well":3,"bridge":2,"lights":3,"school":12,"health":24},
-  "policy":"Only operator-reviewed official export or manually verified eligible reel totals. Unavailable shares are null. No automatic exchange. Future conversion changes require a versioned migration."
-}

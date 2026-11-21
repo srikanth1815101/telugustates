@@ -83,6 +83,7 @@ public final class AtlasActivity extends Activity {
 
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
+        setVolumeControlStream(android.media.AudioManager.STREAM_MUSIC);
         root = new FrameLayout(this);
         root.setBackgroundColor(PINE);
         // Render the camera under the cutout. Only HUD / keyboard safe bounds are inset.
@@ -189,10 +190,6 @@ public final class AtlasActivity extends Activity {
             if (local(u)) {
                 if("/_field/resident".equals(u.getPath())){String n=u.getQueryParameter("name");if(req.isForMainFrame()&&req.hasGesture()&&safeLocal(w.getUrl())&&!hub(w.getUrl())&&n!=null&&n.matches("[a-z0-9._]{1,30}")){try{startActivity(Intent.createChooser(new Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT,"@"+n+" · Telugu States\nhttps://telugustates.csrgo.com/#/u/"+n),"Share virtual house"));}catch(RuntimeException e){toast("No sharing app available.");}}return true;}
                 if("/_field/photo".equals(u.getPath())){if(req.isForMainFrame()&&req.hasGesture()&&safeLocal(w.getUrl())&&!hub(w.getUrl()))savePhoto(w);return true;}
-                if ("/_field/share".equals(u.getPath())) {
-                    if (req.isForMainFrame() && req.hasGesture() && safeLocal(w.getUrl())) share(w);
-                    return true;
-                }
                 return AssetRoute.key(u.getPath()) == null;
             }
             if (req.isForMainFrame() && req.hasGesture() && u.getHost() != null && u.getUserInfo() == null
@@ -214,17 +211,15 @@ public final class AtlasActivity extends Activity {
             last=url;if(hub(url))immersive(false);publishInsets(); if(!hub(url))wireHaptics(w);else closeHapticPort();
             if (hub(url)) {
                 w.clearHistory();
-                String detail = Build.MODEL + " · Android " + Build.VERSION.RELEASE + " · WebView " + provider();
-                w.evaluateJavascript("window.showAtlasDevice && window.showAtlasDevice(" + JSONObject.quote(detail) + ")", null);
             }
         }
         @Override public boolean onRenderProcessGone(WebView w, RenderProcessGoneDetail detail) {
-            if (w == atlas) failure("The graphics view stopped", "Return to the test launcher and try the map. If it happens during a walk, note the scene and your phone model.");
+            if (w == atlas) failure("The graphics view stopped", "Return to the offline atlas and try the map. If it happens during a walk, note the scene and your phone model.");
             return true;
         }
         @Override public void onReceivedError(WebView w, WebResourceRequest r, WebResourceError e) {
             if (r.isForMainFrame() && w == atlas && local(r.getUrl()) && e.getErrorCode() != WebViewClient.ERROR_UNKNOWN) {
-                w.post(() -> { if (w == atlas) failure("Could not open this atlas view", "The atlas is installed locally. Retry from the test launcher or update Android System WebView."); });
+                w.post(() -> { if (w == atlas) failure("Could not open this atlas view", "The atlas is installed locally. Retry from the offline atlas or update Android System WebView."); });
             }
         }
     }
@@ -241,43 +236,15 @@ public final class AtlasActivity extends Activity {
         }catch(RuntimeException e){photoBytes=null;toast("Unable to open the picture picker.");}
     });}
     @Override protected void onActivityResult(int request,int result,Intent data){super.onActivityResult(request,result,data);if(request!=82)return;byte[] bytes=photoBytes;photoBytes=null;if(result!=RESULT_OK||bytes==null||data==null||data.getData()==null)return;try(java.io.OutputStream out=getContentResolver().openOutputStream(data.getData(),"w")){if(out==null)throw new IOException();out.write(bytes);toast("Picture saved.");}catch(Exception e){toast("The picture could not be saved.");}}
-    private String provider() {
-        try {
-            PackageInfo p = WebView.getCurrentWebViewPackage();
-            return p == null ? "unknown" : p.versionName;
-        } catch (RuntimeException e) { return "unknown"; }
-    }
-    private void share(final WebView w) {
-        if (w != atlas || !hub(w.getUrl())) return;
-        w.evaluateJavascript("(function(){try{var a=JSON.parse(localStorage.getItem('atlas-field-readings')||'[]');return Array.isArray(a)?a.slice(-12):[]}catch(e){return []}})()", value -> {
-            if (w != atlas || !hub(w.getUrl()) || isFinishing()) return;
-            try {
-                if (value == null || value.length() > 131072) throw new IllegalArgumentException();
-                JSONArray readings = new JSONArray(value);
-                if (readings.length() == 0) { toast("Measure a walk before sharing."); return; }
-                JSONObject result = new JSONObject().put("app", "Telugu States Atlas 7.1.0")
-                        .put("device", Build.MANUFACTURER + " " + Build.MODEL).put("android", Build.VERSION.RELEASE)
-                        .put("webView", provider()).put("walks", readings);
-                Intent send = new Intent(Intent.ACTION_SEND).setType("text/plain")
-                        .putExtra(Intent.EXTRA_SUBJECT, "Telugu States Atlas · phone field test")
-                        .putExtra(Intent.EXTRA_TEXT, result.toString(2));
-                startActivity(Intent.createChooser(send, "Share atlas readings"));
-            } catch (Exception e) { toast("Unable to share. The atlas menu also shows the measurement text."); }
-        });
-    }
     private void toast(String text) { Toast.makeText(this, text, Toast.LENGTH_LONG).show(); }
     private void back() {
         final WebView w = atlas;
         if (w == null || hub(w.getUrl())) { finish(); return; }
         ValueCallback<String> result = value -> {
             if (w != atlas || isFinishing()) return;
-            if ("true".equals(value)) {
-                new AlertDialog.Builder(this).setTitle("Leave this measurement?")
-                    .setMessage("The current walk has not finished. Completed readings will stay on this phone.")
-                    .setNegativeButton("Keep measuring", null).setPositiveButton("Leave walk", (d,i) -> w.loadUrl(HOME)).show();
-            } else if(!"2".equals(value)){ if("1".equals(value))return; if(HOME.equals(w.getUrl())|| (HOME+"index.html").equals(w.getUrl()))finish();else w.loadUrl(HOME); }
+            if(!"2".equals(value)){ if("1".equals(value))return; if(HOME.equals(w.getUrl())|| (HOME+"index.html").equals(w.getUrl()))finish();else w.loadUrl(HOME); }
         };
-        w.evaluateJavascript("(function(){var b=document.getElementById('record-field');if(b&&b.disabled)return true;if(window.atlasWalk?.dismissTransient?.())return 2;if(document.body.classList.contains('walking')){(document.querySelector('#leave-world')||document.querySelector('.world-back'))?.click();return 1}if(document.querySelector('dialog[open]')){document.querySelector('dialog[open]').close();return 1}return false})()",result);
+        w.evaluateJavascript("(function(){if(window.atlasWalk?.dismissTransient?.())return 2;if(document.body.classList.contains('walking')){(document.querySelector('#leave-world')||document.querySelector('.world-back'))?.click();return 1}if(document.querySelector('dialog[open]')){document.querySelector('dialog[open]').close();return 1}return false})()",result);
     }
     @Override public void onBackPressed() { back(); }
     @Override public void onSaveInstanceState(Bundle b) {

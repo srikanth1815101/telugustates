@@ -1,0 +1,1 @@
+{{ define "main" }}<main class="shell house-page"><h1 data-msg="map.houses">Atlas houses</h1><div class="directory">{{ range where .Pages "Section" "houses" }}<a href="{{ .RelPermalink }}">@{{ .Params.username | default .File.ContentBaseName }} <small>{{ .Params.district }}</small></a>{{ end }}</div></main>{{ end }}

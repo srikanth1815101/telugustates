@@ -1,0 +1,1542 @@
+{
+  "release": "7.14.0",
+  "versionCode": 71400,
+  "signedAPKBytes": 60496810,
+  "apkSHA256": "5fac6087dda197e49a4f29991a6c60de95402dbcb997f646d5cfd1a8df166b5e",
+  "signerCertificateSHA256": "3962f6574ff35e591c1d8da315e89de04071cfb462a07b47435b2f528be04b8c",
+  "occupationByDistrict": {
+    "seed": "0x714cc",
+    "districts": {
+      "17": {
+        "name": "Palnadu",
+        "state": "Andhra Pradesh",
+        "count": 14
+      },
+      "21": {
+        "name": "Sri Potti Sriramulu Nellore",
+        "state": "Andhra Pradesh",
+        "count": 13
+      },
+      "43": {
+        "name": "Mancherial",
+        "state": "Telangana",
+        "count": 12
+      },
+      "58": {
+        "name": "Vikarabad",
+        "state": "Telangana",
+        "count": 15
+      },
+      "46": {
+        "name": "Mulugu",
+        "state": "Telangana",
+        "count": 15
+      },
+      "42": {
+        "name": "Mahabubnagar",
+        "state": "Telangana",
+        "count": 11
+      },
+      "28": {
+        "name": "Y.S.R. Kadapa",
+        "state": "Andhra Pradesh",
+        "count": 11
+      },
+      "27": {
+        "name": "West Godavari",
+        "state": "Andhra Pradesh",
+        "count": 14
+      },
+      "14": {
+        "name": "Markapuram",
+        "state": "Andhra Pradesh",
+        "count": 13
+      },
+      "44": {
+        "name": "Medak",
+        "state": "Telangana",
+        "count": 15
+      }
+    },
+    "total": 133,
+    "examples": [
+      "palnadu_demo01",
+      "sripottisriramu_demo01",
+      "mancherial_demo01",
+      "vikarabad_demo01",
+      "mulugu_demo01",
+      "mahabubnagar_demo01",
+      "ysrkadapa_demo01",
+      "westgodavari_demo01",
+      "markapuram_demo01",
+      "medak_demo01"
+    ]
+  },
+  "survey": {
+    "squares": [
+      {
+        "village": "v42-01",
+        "district": 42,
+        "acres": 16,
+        "capacity": 31,
+        "occupied": 11
+      },
+      {
+        "village": "v43-01",
+        "district": 43,
+        "acres": 16,
+        "capacity": 32,
+        "occupied": 12
+      },
+      {
+        "village": "v14-01",
+        "district": 14,
+        "acres": 9,
+        "capacity": 27,
+        "occupied": 13
+      },
+      {
+        "village": "v44-01",
+        "district": 44,
+        "acres": 16,
+        "capacity": 34,
+        "occupied": 15
+      },
+      {
+        "village": "v46-01",
+        "district": 46,
+        "acres": 16,
+        "capacity": 33,
+        "occupied": 15
+      },
+      {
+        "village": "v17-01",
+        "district": 17,
+        "acres": 9,
+        "capacity": 25,
+        "occupied": 14
+      },
+      {
+        "village": "v21-01",
+        "district": 21,
+        "acres": 16,
+        "capacity": 31,
+        "occupied": 13
+      },
+      {
+        "village": "v58-01",
+        "district": 58,
+        "acres": 9,
+        "capacity": 22,
+        "occupied": 15
+      },
+      {
+        "village": "v27-01",
+        "district": 27,
+        "acres": 16,
+        "capacity": 34,
+        "occupied": 14
+      },
+      {
+        "village": "v28-01",
+        "district": 28,
+        "acres": 9,
+        "capacity": 29,
+        "occupied": 11
+      }
+    ],
+    "uniqueLinks": 3020,
+    "sharedBundM": 4264,
+    "fieldsOnShared": 126,
+    "residents": 133,
+    "uniqueAcres": 133,
+    "virtualAreaPerFieldM2": 4046.87,
+    "districts": 61,
+    "hamlets": 10,
+    "occupancy": {
+      "11": 2,
+      "12": 1,
+      "13": 2,
+      "14": 2,
+      "15": 3
+    },
+    "homeToAcreCentreM": {
+      "min": 119.53,
+      "median": 198.99,
+      "p95": 272.8,
+      "max": 343.2
+    },
+    "in100to500M": 133,
+    "residentialAreaM2": {
+      "min": 186.92,
+      "median": 229.77,
+      "p95": 259.27,
+      "max": 274.81
+    },
+    "nearestHouseCentreM": {
+      "min": 23.39,
+      "median": 26.29,
+      "p95": 31.47,
+      "max": 34.23
+    },
+    "nearestWallGapM": {
+      "min": 9.86,
+      "median": 14.23,
+      "p95": 18.94,
+      "max": 22.48
+    },
+    "routes": 133,
+    "routeLengthFromGateM": {
+      "min": 157.1,
+      "median": 260.19,
+      "p95": 420.69,
+      "max": 511.3
+    },
+    "dryWalkSamples": 10735,
+    "gradeRisePerMetre": {
+      "min": 0,
+      "median": 0.01,
+      "p95": 0.07,
+      "max": 0.28
+    },
+    "multiHomeCellsWithinHamlets": 37,
+    "safePorches": 133
+  },
+  "twoBatchGrowth": {
+    "temporaryJoins": 12,
+    "existingPinAndPathChecks": true,
+    "allJoinedExistingVillages": true,
+    "noOpByteIdentical": true,
+    "conflictingPinsRejected": true
+  },
+  "reserveStressTest": {
+    "allOccupiedRoutesSurveyed": 298,
+    "drySamples": 19062,
+    "unpublishedSimulatedJoins": 165,
+    "originalPinsUnchanged": true,
+    "originalSquareCapacityAndResult": [
+      [
+        "v42-01",
+        31,
+        31
+      ],
+      [
+        "v43-01",
+        32,
+        32
+      ],
+      [
+        "v14-01",
+        27,
+        27
+      ],
+      [
+        "v44-01",
+        34,
+        34
+      ],
+      [
+        "v46-01",
+        33,
+        33
+      ],
+      [
+        "v17-01",
+        25,
+        25
+      ],
+      [
+        "v21-01",
+        31,
+        31
+      ],
+      [
+        "v58-01",
+        22,
+        22
+      ],
+      [
+        "v27-01",
+        34,
+        34
+      ],
+      [
+        "v28-01",
+        29,
+        29
+      ]
+    ],
+    "totalVillagesAfter": 10,
+    "newVillages": 0
+  },
+  "roomAndGroundChecks": {
+    "rooms": 133,
+    "uniquePlans": 133,
+    "groundRays": 294,
+    "groundRayError": 1.5462262808796368e-05,
+    "furniturePieces": 399,
+    "terraces": 133,
+    "models": [
+      "stone-gable",
+      "street-shop",
+      "courtyard-house",
+      "mud-veranda",
+      "pillared-tile",
+      "thatch-longhouse",
+      "round-thatch",
+      "rcc-tank",
+      "balcony-stair",
+      "l-court",
+      "sheet-lean-to",
+      "cattle-compound"
+    ],
+    "layouts": {
+      "reading": 16,
+      "book-shop": 6,
+      "weaving": 12,
+      "kitchen": 19,
+      "sleeping": 18,
+      "pottery": 12,
+      "garden": 15,
+      "gathering": 20,
+      "cloth-shop": 4,
+      "music": 10,
+      "spice-shop": 1
+    }
+  },
+  "residentControls": {
+    "home": {
+      "u": "palnadu_demo01",
+      "villageId": "v17-01",
+      "homeLocation": [
+        5015.1935128,
+        6523.3717638
+      ],
+      "acreLocation": [
+        5016,
+        6521
+      ],
+      "x": 5015.3947358,
+      "y": 6523.3560013,
+      "mode": "ground",
+      "destination": "home",
+      "walkWaypoints": 0,
+      "fieldRailSegments": 0
+    },
+    "guided": {
+      "u": "palnadu_demo01",
+      "villageId": "v17-01",
+      "homeLocation": [
+        5015.1935128,
+        6523.3717638
+      ],
+      "acreLocation": [
+        5016,
+        6521
+      ],
+      "x": 5015.3947358,
+      "y": 6523.3560013,
+      "mode": "ground",
+      "destination": "acre",
+      "walkWaypoints": 58,
+      "fieldRailSegments": 0
+    },
+    "field": {
+      "u": "palnadu_demo01",
+      "villageId": "v17-01",
+      "homeLocation": [
+        5015.1935128,
+        6523.3717638
+      ],
+      "acreLocation": [
+        5016,
+        6521
+      ],
+      "x": 5016.5620982,
+      "y": 6521.0259373,
+      "mode": "ground",
+      "destination": "acre",
+      "walkWaypoints": 0,
+      "fieldRailSegments": 0
+    },
+    "returnGuide": {
+      "u": "palnadu_demo01",
+      "villageId": "v17-01",
+      "homeLocation": [
+        5015.1935128,
+        6523.3717638
+      ],
+      "acreLocation": [
+        5016,
+        6521
+      ],
+      "x": 5016.5620982,
+      "y": 6521.0259373,
+      "mode": "ground",
+      "destination": "home",
+      "walkWaypoints": 58,
+      "fieldRailSegments": 0
+    },
+    "returned": {
+      "u": "palnadu_demo01",
+      "villageId": "v17-01",
+      "homeLocation": [
+        5015.1935128,
+        6523.3717638
+      ],
+      "acreLocation": [
+        5016,
+        6521
+      ],
+      "x": 5015.3947358,
+      "y": 6523.3560013,
+      "mode": "ground",
+      "destination": "home",
+      "walkWaypoints": 0,
+      "fieldRailSegments": 0
+    },
+    "orbitHomeWalk": {
+      "u": "palnadu_demo01",
+      "villageId": "v17-01",
+      "homeLocation": [
+        5015.1935128,
+        6523.3717638
+      ],
+      "acreLocation": [
+        5016,
+        6521
+      ],
+      "x": 5016.5620982,
+      "y": 6521.0259373,
+      "mode": "ground",
+      "destination": "home",
+      "walkWaypoints": 58,
+      "fieldRailSegments": 0
+    },
+    "normalizedProfileURLSearch": true,
+    "homeHighlightExpired": true,
+    "scenicOrbitHouseholdPickerAndTeleport": true,
+    "fieldMenuInTelugu": "@palnadu_demo01\nనా ఎకరం\n×\nఎకరం 5016–6521 · ఇల్లు ↔ పొలం: బాటలో 200 మీ.\nనడిచి వెళ్ళు\nనేరుగా వెళ్ళు",
+    "walkMotorReplay": {
+      "waypoints": 58,
+      "plannedWaypoints": 58,
+      "metres": 199.18010434457835,
+      "steps": 1286,
+      "dry": true,
+      "blocked": 0,
+      "completed": true
+    },
+    "pageErrors": [],
+    "missingAssets": [],
+    "unexpectedNetwork": []
+  },
+  "publishedLinksAndDoors": {
+    "entered": [
+      "palnadu_demo01",
+      "palnadu_demo02"
+    ],
+    "errors": [],
+    "page": "palnadu_demo01",
+    "publishedLinks": [
+      "#/u/palnadu_demo01",
+      "#/acre/palnadu_demo01",
+      "#/plot/palnadu_demo01"
+    ],
+    "selectedAcreOnPaper": true,
+    "unknown": "No virtual house was found for @demo_user20. Check the spelling and try again.",
+    "sharedCell": [
+      5015,
+      6523
+    ],
+    "remote": [],
+    "missing": []
+  },
+  "benchmarkMethod": "Short still-camera measurements using Chromium 156, WebGL2 via SwiftShader, 390 × 844 CSS-pixel touch viewport, actual 203 × 441 render buffer, Low + Battery Saver + reduced motion, Clear winter daytime. Fresh browser context; served the exact Android assets at the Android virtual origin. Not physical handset FPS. 7.13 village: 17 homes at the old @demo_user20. 7.14: 14 in Palnadu. Matched distance and settings, not identical villages.",
+  "matchedDistanceBenchmarks": {
+    "river": {
+      "7.13.0": {
+        "site": "river",
+        "u": "demo_user20",
+        "errors": [],
+        "edition": "713",
+        "pref": "low",
+        "readyMs": 9155.89999999851,
+        "firstLocalDrawMs": 7674.80000000447,
+        "firstWaterDrawMs": 7944.89999999851,
+        "frameCount": 22,
+        "gameFPS": 3.1551902880259184,
+        "medianFrameMs": 311.29999999701977,
+        "p95FrameMs": 352.6000000014901,
+        "drawCalls": 32,
+        "triangles": 215307,
+        "shape": [
+          203,
+          441
+        ],
+        "localRange": 331.9999999999999,
+        "tier": 0,
+        "tread": 268,
+        "houses": 0,
+        "firstBuildLongTasks": [
+          [
+            1042.5,
+            1339
+          ],
+          [
+            8009.5,
+            1126
+          ],
+          [
+            2613.7000000029802,
+            458
+          ],
+          [
+            7631.10000000149,
+            334
+          ],
+          [
+            7143.30000000447,
+            164
+          ]
+        ],
+        "currentClock": 13.816100000000008,
+        "missing": [],
+        "remote": []
+      },
+      "7.14.0": {
+        "site": "river",
+        "u": "palnadu_demo01",
+        "errors": [],
+        "edition": "714",
+        "pref": "low",
+        "readyMs": 8246.70000000298,
+        "firstLocalDrawMs": 5875.60000000149,
+        "firstWaterDrawMs": 5911.29999999702,
+        "frameCount": 35,
+        "gameFPS": 15.433499773036768,
+        "medianFrameMs": 66.60000000149012,
+        "p95FrameMs": 71.79999999701977,
+        "drawCalls": 28,
+        "triangles": 28588,
+        "shape": [
+          203,
+          441
+        ],
+        "localRange": 331.9999999999999,
+        "tier": 0,
+        "tread": 6,
+        "houses": 0,
+        "firstBuildLongTasks": [
+          [
+            1279.7000000029802,
+            1434
+          ],
+          [
+            2852.2999999970198,
+            794
+          ],
+          [
+            4435.5,
+            413
+          ],
+          [
+            8016.70000000298,
+            219
+          ],
+          [
+            7214.39999999851,
+            193
+          ]
+        ],
+        "currentClock": 7.79960000000001,
+        "missing": [],
+        "remote": []
+      }
+    },
+    "village": {
+      "7.13.0": {
+        "site": "village",
+        "u": "demo_user20",
+        "errors": [],
+        "edition": "713",
+        "pref": "low",
+        "readyMs": 10113.5,
+        "firstLocalDrawMs": 9545.09999999404,
+        "firstWaterDrawMs": 9898.5,
+        "frameCount": 22,
+        "gameFPS": 1.810110761539456,
+        "medianFrameMs": 536.7999999970198,
+        "p95FrameMs": 590.1000000014901,
+        "drawCalls": 61,
+        "triangles": 399346,
+        "shape": [
+          203,
+          441
+        ],
+        "localRange": 21,
+        "tier": 0,
+        "tread": 1680,
+        "houses": 17,
+        "firstBuildLongTasks": [
+          [
+            1014.0999999940395,
+            753
+          ],
+          [
+            9433.79999999702,
+            644
+          ],
+          [
+            1963.2999999970198,
+            517
+          ],
+          [
+            7263.0999999940395,
+            303
+          ],
+          [
+            5730.39999999851,
+            275
+          ]
+        ],
+        "currentClock": 21.532458000000013,
+        "missing": [],
+        "remote": []
+      },
+      "7.14.0": {
+        "site": "village",
+        "u": "palnadu_demo01",
+        "errors": [],
+        "edition": "714",
+        "pref": "low",
+        "readyMs": 5572.4000000059605,
+        "firstLocalDrawMs": 3851.60000000149,
+        "frameCount": 24,
+        "gameFPS": 9.74948073417213,
+        "medianFrameMs": 82.40000000596046,
+        "p95FrameMs": 151,
+        "drawCalls": 42,
+        "triangles": 105097,
+        "shape": [
+          203,
+          441
+        ],
+        "localRange": 21,
+        "tier": 0,
+        "tread": 44,
+        "houses": 14,
+        "firstBuildLongTasks": [
+          [
+            1013.9000000059605,
+            1168
+          ],
+          [
+            4340,
+            256
+          ],
+          [
+            3099.3000000044703,
+            165
+          ],
+          [
+            2591.60000000149,
+            118
+          ],
+          [
+            2352.60000000149,
+            88
+          ]
+        ],
+        "currentClock": 5.716429999999999,
+        "missing": [],
+        "remote": []
+      }
+    }
+  },
+  "riverObservationMethod": "Fixed cameras. In natural frames, a pixel changed if any channel spanned >=7 levels (>=3 for the first pair). Omit a 2 px silhouette band. Margin: 2–10 rendered px. Phase-stepped analysis: same actual material, camera and geometry, 0.29 s clock step; optical flow on normal colours, signed against independently projected downstream direction. Counts aggregate repeat observations, not distinct parcels. Stepped frames are not playback timing. Compare only like views. First foot/sea pairs below are the first compatible render sizes after dynamic resolution changes.",
+  "motionFromNormalAndSteppedFrames": {
+    "foot": {
+      "allWater": {
+        "pixels": 22636,
+        "movingVectorPercent": 100.0,
+        "medianMps": 1.21,
+        "visiblyChangedPercent": 98.43,
+        "organicChangePercent": 78.96,
+        "firstNaturalPairChangePercent": 70.15,
+        "medianChannelSpan": 26.0
+      },
+      "bankBand2to10px": {
+        "pixels": 8088,
+        "movingVectorPercent": 100.0,
+        "medianMps": 1.25,
+        "visiblyChangedPercent": 95.62,
+        "organicChangePercent": 66.99,
+        "firstNaturalPairChangePercent": 63.27,
+        "medianChannelSpan": 24.0
+      },
+      "interiorOver10px": {
+        "pixels": 14548,
+        "movingVectorPercent": 100.0,
+        "medianMps": 1.17,
+        "visiblyChangedPercent": 99.99,
+        "organicChangePercent": 85.61,
+        "firstNaturalPairChangePercent": 73.98,
+        "medianChannelSpan": 27.0
+      },
+      "leftBankBand": {
+        "pixels": 3938,
+        "movingVectorPercent": 100.0,
+        "medianMps": 1.35,
+        "visiblyChangedPercent": 93.8,
+        "organicChangePercent": 71.13,
+        "firstNaturalPairChangePercent": 64.8,
+        "medianChannelSpan": 22.0
+      },
+      "rightBankBand": {
+        "pixels": 4150,
+        "movingVectorPercent": 100.0,
+        "medianMps": 1.16,
+        "visiblyChangedPercent": 97.35,
+        "organicChangePercent": 63.06,
+        "firstNaturalPairChangePercent": 61.81,
+        "medianChannelSpan": 25.0
+      },
+      "screenStripsTopToBottom": [
+        {
+          "pixels": 6292,
+          "movingVectorPercent": 100.0,
+          "medianMps": 1.84,
+          "visiblyChangedPercent": 94.37,
+          "organicChangePercent": 82.15,
+          "firstNaturalPairChangePercent": 71.07,
+          "medianChannelSpan": 36.0
+        },
+        {
+          "pixels": 4976,
+          "movingVectorPercent": 100.0,
+          "medianMps": 1.53,
+          "visiblyChangedPercent": 100.0,
+          "organicChangePercent": 90.11,
+          "firstNaturalPairChangePercent": 85.65,
+          "medianChannelSpan": 24.0
+        },
+        {
+          "pixels": 4534,
+          "movingVectorPercent": 100.0,
+          "medianMps": 1.07,
+          "visiblyChangedPercent": 100.0,
+          "organicChangePercent": 72.36,
+          "firstNaturalPairChangePercent": 63.7,
+          "medianChannelSpan": 28.0
+        },
+        {
+          "pixels": 4700,
+          "movingVectorPercent": 100.0,
+          "medianMps": 1.0,
+          "visiblyChangedPercent": 100.0,
+          "organicChangePercent": 70.87,
+          "firstNaturalPairChangePercent": 64.4,
+          "medianChannelSpan": 18.0
+        },
+        {
+          "pixels": 2134,
+          "movingVectorPercent": 100.0,
+          "medianMps": 0.99,
+          "visiblyChangedPercent": 99.95,
+          "organicChangePercent": 75.35,
+          "firstNaturalPairChangePercent": 57.69,
+          "medianChannelSpan": 13.0
+        }
+      ],
+      "normalFeatureTracks": {
+        "count": 1359,
+        "medianPixelsPerSecond": 9.0,
+        "downstreamComponentPct": 79.54
+      },
+      "edgeFeatureTracks": {
+        "count": 727,
+        "medianPixelsPerSecond": 4.53,
+        "downstreamComponentPct": 77.58
+      },
+      "firstTwoNormalFramesFromNavigationS": [
+        14.191,
+        14.399
+      ],
+      "normalFrameSpanS": 1.125,
+      "maxCameraMatrixChange": 0.0,
+      "rangeM": 4.6,
+      "raster": [
+        184,
+        399
+      ],
+      "shader": "immersive"
+    },
+    "lake": {
+      "allWater": {
+        "pixels": 62372,
+        "movingVectorPercent": 0.0,
+        "medianMps": 0.0,
+        "visiblyChangedPercent": 0.0,
+        "organicChangePercent": 0.0,
+        "firstNaturalPairChangePercent": 0.0,
+        "medianChannelSpan": 0.0
+      },
+      "bankBand2to10px": {
+        "pixels": 2486,
+        "movingVectorPercent": 0.0,
+        "medianMps": 0.0,
+        "visiblyChangedPercent": 0.0,
+        "organicChangePercent": 0.0,
+        "firstNaturalPairChangePercent": 0.0,
+        "medianChannelSpan": 0.0
+      },
+      "interiorOver10px": {
+        "pixels": 59886,
+        "movingVectorPercent": 0.0,
+        "medianMps": 0.0,
+        "visiblyChangedPercent": 0.0,
+        "organicChangePercent": 0.0,
+        "firstNaturalPairChangePercent": 0.0,
+        "medianChannelSpan": 0.0
+      },
+      "leftBankBand": {
+        "pixels": 1034,
+        "movingVectorPercent": 0.0,
+        "medianMps": 0.0,
+        "visiblyChangedPercent": 0.0,
+        "organicChangePercent": 0.0,
+        "firstNaturalPairChangePercent": 0.0,
+        "medianChannelSpan": 0.0
+      },
+      "rightBankBand": {
+        "pixels": 1452,
+        "movingVectorPercent": 0.0,
+        "medianMps": 0.0,
+        "visiblyChangedPercent": 0.0,
+        "organicChangePercent": 0.0,
+        "firstNaturalPairChangePercent": 0.0,
+        "medianChannelSpan": 0.0
+      },
+      "screenStripsTopToBottom": [
+        {
+          "pixels": 17864,
+          "movingVectorPercent": 0.0,
+          "medianMps": 0.0,
+          "visiblyChangedPercent": 0.0,
+          "organicChangePercent": 0.0,
+          "firstNaturalPairChangePercent": 0.0,
+          "medianChannelSpan": 0.0
+        },
+        {
+          "pixels": 17864,
+          "movingVectorPercent": 0.0,
+          "medianMps": 0.0,
+          "visiblyChangedPercent": 0.0,
+          "organicChangePercent": 0.0,
+          "firstNaturalPairChangePercent": 0.0,
+          "medianChannelSpan": 0.0
+        },
+        {
+          "pixels": 17661,
+          "movingVectorPercent": 0.0,
+          "medianMps": 0.0,
+          "visiblyChangedPercent": 0.0,
+          "organicChangePercent": 0.0,
+          "firstNaturalPairChangePercent": 0.0,
+          "medianChannelSpan": 0.0
+        },
+        {
+          "pixels": 8275,
+          "movingVectorPercent": 0.0,
+          "medianMps": 0.0,
+          "visiblyChangedPercent": 0.0,
+          "organicChangePercent": 0.0,
+          "firstNaturalPairChangePercent": 0.0,
+          "medianChannelSpan": 0.0
+        },
+        {
+          "pixels": 708,
+          "movingVectorPercent": 0.0,
+          "medianMps": 0.0,
+          "visiblyChangedPercent": 0.0,
+          "organicChangePercent": 0.0,
+          "firstNaturalPairChangePercent": 0.0,
+          "medianChannelSpan": 0.0
+        }
+      ],
+      "normalFeatureTracks": {
+        "count": 0,
+        "medianPixelsPerSecond": null,
+        "downstreamComponentPct": null
+      },
+      "edgeFeatureTracks": {
+        "count": 0,
+        "medianPixelsPerSecond": null,
+        "downstreamComponentPct": null
+      },
+      "firstTwoNormalFramesFromNavigationS": [
+        6.374,
+        6.756
+      ],
+      "normalFrameSpanS": 4.808,
+      "maxCameraMatrixChange": 0.0,
+      "rangeM": 332.0,
+      "raster": [
+        203,
+        441
+      ],
+      "shader": "reach"
+    },
+    "river": {
+      "allWater": {
+        "pixels": 44117,
+        "movingVectorPercent": 99.7,
+        "medianMps": 1.86,
+        "visiblyChangedPercent": 99.24,
+        "organicChangePercent": 98.81,
+        "firstNaturalPairChangePercent": 70.31,
+        "medianChannelSpan": 33.0
+      },
+      "bankBand2to10px": {
+        "pixels": 9083,
+        "movingVectorPercent": 98.68,
+        "medianMps": 1.41,
+        "visiblyChangedPercent": 97.18,
+        "organicChangePercent": 95.86,
+        "firstNaturalPairChangePercent": 54.55,
+        "medianChannelSpan": 22.0
+      },
+      "interiorOver10px": {
+        "pixels": 35034,
+        "movingVectorPercent": 99.96,
+        "medianMps": 1.89,
+        "visiblyChangedPercent": 99.77,
+        "organicChangePercent": 99.58,
+        "firstNaturalPairChangePercent": 74.4,
+        "medianChannelSpan": 36.0
+      },
+      "leftBankBand": {
+        "pixels": 3352,
+        "movingVectorPercent": 96.42,
+        "medianMps": 1.33,
+        "visiblyChangedPercent": 93.76,
+        "organicChangePercent": 91.74,
+        "firstNaturalPairChangePercent": 48.72,
+        "medianChannelSpan": 20.0
+      },
+      "rightBankBand": {
+        "pixels": 5731,
+        "movingVectorPercent": 100.0,
+        "medianMps": 1.52,
+        "visiblyChangedPercent": 99.18,
+        "organicChangePercent": 98.27,
+        "firstNaturalPairChangePercent": 57.97,
+        "medianChannelSpan": 23.0
+      },
+      "screenStripsTopToBottom": [
+        {
+          "pixels": 9849,
+          "movingVectorPercent": 100.0,
+          "medianMps": 1.9,
+          "visiblyChangedPercent": 99.13,
+          "organicChangePercent": 98.2,
+          "firstNaturalPairChangePercent": 65.12,
+          "medianChannelSpan": 29.0
+        },
+        {
+          "pixels": 14990,
+          "movingVectorPercent": 100.0,
+          "medianMps": 1.87,
+          "visiblyChangedPercent": 99.81,
+          "organicChangePercent": 99.72,
+          "firstNaturalPairChangePercent": 75.61,
+          "medianChannelSpan": 37.0
+        },
+        {
+          "pixels": 13306,
+          "movingVectorPercent": 98.99,
+          "medianMps": 1.84,
+          "visiblyChangedPercent": 98.41,
+          "organicChangePercent": 98.02,
+          "firstNaturalPairChangePercent": 70.5,
+          "medianChannelSpan": 35.0
+        },
+        {
+          "pixels": 4147,
+          "movingVectorPercent": 100.0,
+          "medianMps": 1.86,
+          "visiblyChangedPercent": 99.86,
+          "organicChangePercent": 99.25,
+          "firstNaturalPairChangePercent": 66.67,
+          "medianChannelSpan": 30.0
+        },
+        {
+          "pixels": 1825,
+          "movingVectorPercent": 100.0,
+          "medianMps": 1.34,
+          "visiblyChangedPercent": 99.78,
+          "organicChangePercent": 99.51,
+          "firstNaturalPairChangePercent": 61.64,
+          "medianChannelSpan": 19.0
+        }
+      ],
+      "normalFeatureTracks": {
+        "count": 14332,
+        "medianPixelsPerSecond": 3.8,
+        "downstreamComponentPct": 99.65
+      },
+      "edgeFeatureTracks": {
+        "count": 3305,
+        "medianPixelsPerSecond": 2.65,
+        "downstreamComponentPct": 98.67
+      },
+      "firstTwoNormalFramesFromNavigationS": [
+        6.685,
+        7.019
+      ],
+      "normalFrameSpanS": 4.748,
+      "maxCameraMatrixChange": 0.0,
+      "rangeM": 332.0,
+      "raster": [
+        203,
+        441
+      ],
+      "shader": "reach"
+    },
+    "sea": {
+      "allWater": {
+        "pixels": 37617,
+        "movingVectorPercent": 0.0,
+        "medianMps": 0.0,
+        "visiblyChangedPercent": 99.26,
+        "organicChangePercent": 41.21,
+        "firstNaturalPairChangePercent": 55.45,
+        "medianChannelSpan": 44.0
+      },
+      "bankBand2to10px": {
+        "pixels": 8328,
+        "movingVectorPercent": 0.0,
+        "medianMps": 0.0,
+        "visiblyChangedPercent": 96.66,
+        "organicChangePercent": 49.0,
+        "firstNaturalPairChangePercent": 59.28,
+        "medianChannelSpan": 40.0
+      },
+      "interiorOver10px": {
+        "pixels": 29289,
+        "movingVectorPercent": 0.0,
+        "medianMps": 0.0,
+        "visiblyChangedPercent": 100.0,
+        "organicChangePercent": 38.99,
+        "firstNaturalPairChangePercent": 54.36,
+        "medianChannelSpan": 45.0
+      },
+      "leftBankBand": {
+        "pixels": 4664,
+        "movingVectorPercent": 0.0,
+        "medianMps": 0.0,
+        "visiblyChangedPercent": 97.34,
+        "organicChangePercent": 47.9,
+        "firstNaturalPairChangePercent": 57.25,
+        "medianChannelSpan": 36.0
+      },
+      "rightBankBand": {
+        "pixels": 3664,
+        "movingVectorPercent": 0.0,
+        "medianMps": 0.0,
+        "visiblyChangedPercent": 95.8,
+        "organicChangePercent": 50.41,
+        "firstNaturalPairChangePercent": 61.87,
+        "medianChannelSpan": 42.0
+      },
+      "screenStripsTopToBottom": [
+        {
+          "pixels": 10304,
+          "movingVectorPercent": 0.0,
+          "medianMps": 0.0,
+          "visiblyChangedPercent": 97.3,
+          "organicChangePercent": 37.73,
+          "firstNaturalPairChangePercent": 68.18,
+          "medianChannelSpan": 35.0
+        },
+        {
+          "pixels": 8654,
+          "movingVectorPercent": 0.0,
+          "medianMps": 0.0,
+          "visiblyChangedPercent": 100.0,
+          "organicChangePercent": 23.32,
+          "firstNaturalPairChangePercent": 30.45,
+          "medianChannelSpan": 23.0
+        },
+        {
+          "pixels": 8619,
+          "movingVectorPercent": 0.0,
+          "medianMps": 0.0,
+          "visiblyChangedPercent": 100.0,
+          "organicChangePercent": 10.82,
+          "firstNaturalPairChangePercent": 19.56,
+          "medianChannelSpan": 53.0
+        },
+        {
+          "pixels": 7300,
+          "movingVectorPercent": 0.0,
+          "medianMps": 0.0,
+          "visiblyChangedPercent": 100.0,
+          "organicChangePercent": 81.12,
+          "firstNaturalPairChangePercent": 92.77,
+          "medianChannelSpan": 53.0
+        },
+        {
+          "pixels": 2740,
+          "movingVectorPercent": 0.0,
+          "medianMps": 0.0,
+          "visiblyChangedPercent": 100.0,
+          "organicChangePercent": 100.0,
+          "firstNaturalPairChangePercent": 100.0,
+          "medianChannelSpan": 63.0
+        }
+      ],
+      "normalFeatureTracks": {
+        "count": 0,
+        "medianPixelsPerSecond": null,
+        "downstreamComponentPct": null
+      },
+      "edgeFeatureTracks": {
+        "count": 0,
+        "medianPixelsPerSecond": null,
+        "downstreamComponentPct": null
+      },
+      "firstTwoNormalFramesFromNavigationS": [
+        13.401,
+        13.872
+      ],
+      "normalFrameSpanS": 0.471,
+      "maxCameraMatrixChange": 0.0,
+      "rangeM": 4.6,
+      "raster": [
+        184,
+        399
+      ],
+      "shader": "immersive"
+    }
+  },
+  "previous332mSameCamera": {
+    "allWater": {
+      "pixels": 44437,
+      "movingVectorPercent": 99.58,
+      "medianMps": 1.86,
+      "visiblyChangedPercent": 97.54,
+      "organicChangePercent": 98.5,
+      "firstNaturalPairChangePercent": 70.77,
+      "medianChannelSpan": 16.0
+    },
+    "bankBand2to10px": {
+      "pixels": 8980,
+      "movingVectorPercent": 97.96,
+      "medianMps": 1.39,
+      "visiblyChangedPercent": 89.54,
+      "organicChangePercent": 92.95,
+      "firstNaturalPairChangePercent": 62.31,
+      "medianChannelSpan": 14.0
+    },
+    "interiorOver10px": {
+      "pixels": 35457,
+      "movingVectorPercent": 99.99,
+      "medianMps": 1.88,
+      "visiblyChangedPercent": 99.56,
+      "organicChangePercent": 99.9,
+      "firstNaturalPairChangePercent": 72.91,
+      "medianChannelSpan": 17.0
+    },
+    "leftBankBand": {
+      "pixels": 2668,
+      "movingVectorPercent": 93.25,
+      "medianMps": 1.23,
+      "visiblyChangedPercent": 82.95,
+      "organicChangePercent": 87.67,
+      "firstNaturalPairChangePercent": 54.8,
+      "medianChannelSpan": 12.0
+    },
+    "rightBankBand": {
+      "pixels": 6312,
+      "movingVectorPercent": 99.95,
+      "medianMps": 1.63,
+      "visiblyChangedPercent": 92.33,
+      "organicChangePercent": 95.18,
+      "firstNaturalPairChangePercent": 65.48,
+      "medianChannelSpan": 15.0
+    },
+    "screenStripsTopToBottom": [
+      {
+        "pixels": 9987,
+        "movingVectorPercent": 99.97,
+        "medianMps": 1.9,
+        "visiblyChangedPercent": 97.81,
+        "organicChangePercent": 99.05,
+        "firstNaturalPairChangePercent": 68.48,
+        "medianChannelSpan": 15.0
+      },
+      {
+        "pixels": 15248,
+        "movingVectorPercent": 100.0,
+        "medianMps": 1.87,
+        "visiblyChangedPercent": 99.42,
+        "organicChangePercent": 99.85,
+        "firstNaturalPairChangePercent": 72.82,
+        "medianChannelSpan": 17.0
+      },
+      {
+        "pixels": 13294,
+        "movingVectorPercent": 98.62,
+        "medianMps": 1.84,
+        "visiblyChangedPercent": 96.46,
+        "organicChangePercent": 97.47,
+        "firstNaturalPairChangePercent": 71.1,
+        "medianChannelSpan": 17.0
+      },
+      {
+        "pixels": 4099,
+        "movingVectorPercent": 100.0,
+        "medianMps": 1.85,
+        "visiblyChangedPercent": 97.24,
+        "organicChangePercent": 98.54,
+        "firstNaturalPairChangePercent": 69.72,
+        "medianChannelSpan": 16.0
+      },
+      {
+        "pixels": 1809,
+        "movingVectorPercent": 100.0,
+        "medianMps": 1.34,
+        "visiblyChangedPercent": 88.78,
+        "organicChangePercent": 91.54,
+        "firstNaturalPairChangePercent": 66.0,
+        "medianChannelSpan": 14.0
+      }
+    ],
+    "normalFeatureTracks": {
+      "count": 16518,
+      "medianPixelsPerSecond": 2.02,
+      "downstreamComponentPct": 99.21
+    },
+    "edgeFeatureTracks": {
+      "count": 3780,
+      "medianPixelsPerSecond": 1.76,
+      "downstreamComponentPct": 96.88
+    },
+    "firstTwoNormalFramesFromNavigationS": [
+      10.938,
+      11.813
+    ],
+    "normalFrameSpanS": 8.056,
+    "maxCameraMatrixChange": 0.0,
+    "rangeM": 332.0,
+    "raster": [
+      203,
+      441
+    ],
+    "shader": "immersive"
+  },
+  "firstSubmittedWaterFrames": {
+    "scene": "River bend / 332 m",
+    "capturedAt": "first two native-size normal render submissions that contained the local water, not phase-stepped or redrawn; readback may slow the clock",
+    "raster": [
+      203,
+      441
+    ],
+    "waterMask": "same posed final water pass, exclude first 2 px at silhouettes; initial camera differs by <0.001 matrix units",
+    "firstSubmittedWaterFramesS": [
+      6.841,
+      7.279
+    ],
+    "sharedFlowClockS": [
+      2.883,
+      3.4
+    ],
+    "sameCameraAndWaterGeometry": true,
+    "fullPatchStillLoading": true,
+    "percentChangingAtLeastThreeRGBLevels": {
+      "water": 72.57,
+      "2to10pxWetMargin": 57.19,
+      "nonWaterInteriorControl": 0.0
+    }
+  },
+  "regionalFlowPages": {
+    "pages": 326,
+    "coverageSamplesCompared": 85458944,
+    "coverageNonzero": 5719130,
+    "coverageWithVelocity": 1691679,
+    "runningCells": 1097515,
+    "connectedSamples": 1097409
+  },
+  "basinAndChannelStages": {
+    "Inlet": {
+      "triangles": 659,
+      "modelDatumRange": [
+        261.99999125162765,
+        261.99999125162765
+      ],
+      "modelRiseM": 0,
+      "renderedRiseM": 0,
+      "triangleTiltP95Deg": 0,
+      "p99ContactErrorM": 1.0498046833617991e-05
+    },
+    "Gorge": {
+      "triangles": 878,
+      "modelDatumRange": [
+        190.99999379475912,
+        190.99999379475912
+      ],
+      "modelRiseM": 0,
+      "renderedRiseM": 0,
+      "triangleTiltP95Deg": 0,
+      "p99ContactErrorM": 7.446289060908384e-06
+    },
+    "Reservoir": {
+      "triangles": 854,
+      "modelDatumRange": [
+        261.99999125162765,
+        261.99999125162765
+      ],
+      "modelRiseM": 0,
+      "renderedRiseM": 0,
+      "triangleTiltP95Deg": 0,
+      "p99ContactErrorM": 1.0498046833617991e-05
+    },
+    "Reach": {
+      "triangles": 1133,
+      "modelDatumRange": [
+        274.088699069553,
+        292.84681165907125
+      ],
+      "modelRiseM": 18.758112589518248,
+      "renderedRiseM": 22.509735107421896,
+      "triangleTiltP95Deg": 2.147691437524535,
+      "p99ContactErrorM": 1.2071612331965298e-05,
+      "crossSections": 79,
+      "p90AcrossRiseM": 2.368475785867001e-13,
+      "maxCurrentMps": 2.1
+    }
+  },
+  "inheritedBankContacts": [
+    {
+      "site": "bend",
+      "stationOffsetsM": [
+        -12,
+        -9,
+        -6,
+        -3,
+        0,
+        3,
+        6,
+        9,
+        12
+      ],
+      "origin": [
+        3108.808088275478,
+        2628.191911782089
+      ],
+      "normal": [
+        0.8407490487068989,
+        -0.5414250059781547
+      ],
+      "tangent": [
+        0.5414250059781547,
+        0.8407490487068989
+      ],
+      "bedRiseAtOneMetre": [
+        0.042,
+        0.059,
+        0.072,
+        0.08,
+        0.086,
+        0.09,
+        0.095,
+        0.1,
+        0.105
+      ],
+      "stepS": 0.12,
+      "stepM": 0.04,
+      "totalS": 24,
+      "furthestLandwardM": 1.96,
+      "furthestChannelwardM": 0.64,
+      "maxExcursionAtOneStationM": 2.6,
+      "medianConcurrentWidthDifferenceM": 1.88,
+      "samplesWithSimultaneousAdvanceAndRetreat": 195,
+      "eligibleDryControlSites": 844,
+      "highGroundFloodedReadings": 0,
+      "nearbyParcelLegs": 545,
+      "parcelMedianMps": 1.85,
+      "parcelP10P90Mps": [
+        1.349,
+        1.94
+      ],
+      "meanTriangles": 18592,
+      "extraMarginTriangles": 4125
+    },
+    {
+      "site": "tributary",
+      "stationOffsetsM": [
+        -12,
+        -9,
+        -6,
+        -3,
+        0,
+        3,
+        6,
+        9,
+        12
+      ],
+      "origin": [
+        3212.005605721468,
+        2723.412500214916
+      ],
+      "normal": [
+        -0.9702005338347157,
+        -0.2423033721326067
+      ],
+      "tangent": [
+        -0.2423033721326067,
+        0.9702005338347157
+      ],
+      "bedRiseAtOneMetre": [
+        0.106,
+        0.111,
+        0.113,
+        0.115,
+        0.116,
+        0.114,
+        0.111,
+        0.105,
+        0.096
+      ],
+      "stepS": 0.12,
+      "stepM": 0.04,
+      "totalS": 24,
+      "furthestLandwardM": 0.8,
+      "furthestChannelwardM": 0.4,
+      "maxExcursionAtOneStationM": 1.2,
+      "medianConcurrentWidthDifferenceM": 1.04,
+      "samplesWithSimultaneousAdvanceAndRetreat": 183,
+      "eligibleDryControlSites": 614,
+      "highGroundFloodedReadings": 0,
+      "nearbyParcelLegs": 481,
+      "parcelMedianMps": 1.662,
+      "parcelP10P90Mps": [
+        1.171,
+        1.781
+      ],
+      "meanTriangles": 43340,
+      "extraMarginTriangles": 3904
+    },
+    {
+      "site": "reservoir",
+      "stationOffsetsM": [
+        -12,
+        -9,
+        -6,
+        -3,
+        0,
+        3,
+        6,
+        9,
+        12
+      ],
+      "origin": [
+        2549.1574924537654,
+        5572.142507471398
+      ],
+      "normal": [
+        -0.9874641723258201,
+        0.15784330322469423
+      ],
+      "tangent": [
+        0.15784330322469423,
+        0.9874641723258201
+      ],
+      "bedRiseAtOneMetre": [
+        0.105,
+        0.107,
+        0.111,
+        0.112,
+        0.107,
+        0.101,
+        0.123,
+        0.099,
+        0.101
+      ],
+      "stepS": 0.12,
+      "stepM": 0.04,
+      "totalS": 24,
+      "furthestLandwardM": -0.04,
+      "furthestChannelwardM": 0.04,
+      "maxExcursionAtOneStationM": 0,
+      "medianConcurrentWidthDifferenceM": 0,
+      "samplesWithSimultaneousAdvanceAndRetreat": 0,
+      "eligibleDryControlSites": 991,
+      "highGroundFloodedReadings": 0,
+      "nearbyParcelLegs": 0,
+      "parcelMedianMps": 0,
+      "parcelP10P90Mps": null,
+      "meanTriangles": 51756,
+      "extraMarginTriangles": 0
+    }
+  ],
+  "packageComparison": {
+    "uniqueOldOwnersRetired": 300,
+    "uniqueNewOwners": 133,
+    "newResidentPages": 133,
+    "oldOwnerHitsInCatalogOrPaths": 0,
+    "testUserHits": 0,
+    "districts": 61,
+    "activeDistricts": 10,
+    "originalFrozenEcologySurveyHydraulicsAndWalkArtFilesCompared": 4078,
+    "existingFilesIdenticalInThoseGroups": true,
+    "resourceBalancesUnchanged": true,
+    "oldAPKBytes": 53822118,
+    "apkBytes": 60496810,
+    "previousApkSha256": "3dded2db2135312d8a8413cc9c515af78e19b891283c7911e1087f30d053493e",
+    "apkSha256": "5fac6087dda197e49a4f29991a6c60de95402dbcb997f646d5cfd1a8df166b5e",
+    "apkGrowthBytes": 6674692,
+    "additionalAssetBytesPositiveOnly": 7779085,
+    "newAssetPathBytes": 7760418,
+    "currentPageGzipBytes": 6663503
+  },
+  "localCleanRebuild": {
+    "download_apk_sha256": "5fac6087dda197e49a4f29991a6c60de95402dbcb997f646d5cfd1a8df166b5e",
+    "rebuilt_apk_sha256": "4c304c9d37281dd1255b2cf0812ab29a159c4ea927d86fcd842f6e0c166a5786",
+    "same_uncompressed_entries": 4756,
+    "source": "independent extraction of both ZIPs",
+    "manual_workflow_shell_steps_executed_locally": [
+      "content, tiles, home layouts/terraces/fences, freshwater margin/pace and littoral/streamline checks, motion, stones, swimming, fitted banks, basin levels, moving jumps, active precipitation in four seasons, raised, shoreward crests and swash return time, matched rainfall, wet widths, fill→spill→recession, moving window and terrain/boot contact checks",
+      "fresh Hugo render, compile, sign, verify"
+    ],
+    "hosted_ci_run": false,
+    "temporary_signer_removed": true
+  },
+  "clip": {
+    "seconds": 6.8505,
+    "twoActualRenderSamples": [
+      {
+        "view": "river",
+        "renderFramesRecorded": 79,
+        "elapsedS": 6.86930000000447,
+        "displayRateInCapture": 11.354868763913244
+      },
+      {
+        "view": "foot",
+        "renderFramesRecorded": 29,
+        "elapsedS": 6.8505,
+        "displayRateInCapture": 4.087292898328589
+      }
+    ],
+    "generatedInterpolation": false,
+    "clipBytes": 358318
+  },
+  "evidenceSHA256": {
+    "Village-homes-and-their-fields.jpg": "1a7746ba371720293a96933e73f6b0f02174b759b5c4f0db669a15fd2ca8aec7",
+    "River-at-332m.mp4": "95ded81a3b6de5b434c77ce2570589722ad2b50f68a31c9a2752f0c8528a159c",
+    "My-acre-in-Telugu.png": "b8c5bc0daf8ef1b985b3a3eccfc992657a3b95f4e0735b7a3e21d65c37190b29"
+  },
+  "physicalHandsetTest": false,
+  "hostedCI": false
+}

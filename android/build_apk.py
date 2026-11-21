@@ -1,7 +1,7 @@
 """Build the offline field APK with stock Android SDK tools; no Maven/Gradle or web server required.
 
 Python 3.11+, JDK 11+, SDK Platform 35 and Build Tools 35.0.0. Set ANDROID_HOME,
-JAVA_HOME and ATLAS_SIGN_PASS. A private review keystore is required; none is distributed.
+JAVA_HOME and ATLAS_SIGN_PASS. Supply your own signing keystore; none is distributed.
 """
 
 import argparse
@@ -13,13 +13,9 @@ import subprocess
 import tempfile
 import zipfile
 from pathlib import Path
+from verify_web import verify
 
 ROOT = Path(__file__).resolve().parent
-EXPECTED = {
-    "sha256": "a631d39b6c3cdd36c18b16ea6c73be71b33d8dd39874ca4f79724d7fcb9961ce",
-    "files": 2041,
-    "bytes": 77605082
-}
 
 
 def files(p):
@@ -29,10 +25,6 @@ def files(p):
     )
 
 
-# Desktop-only authoring inputs and static-host markers. Do NOT filter terrain tiles, scene modules, licences, or home pages.
-# Keep the machine-readable ODbL district/state geometry and both the geography and ecology source receipts.
-EXACT_OMISSIONS = {"CNAME", ".nojekyll"}
-AUTHORING_PREFIXES = ("frozen/basis/", "frozen/village/", "data/roads/")
 TEXT_EXTENSIONS = {
     ".css",
     ".js",
@@ -44,10 +36,6 @@ TEXT_EXTENSIONS = {
     ".md",
     ".txt",
 }
-
-
-def mobile_includes(name):
-    return name not in EXACT_OMISSIONS and not name.startswith(AUTHORING_PREFIXES)
 
 
 def tree(p):
@@ -68,16 +56,20 @@ def run(args, **kwargs):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("--public", type=Path, required=True)
+    ap.add_argument(
+        "--site",
+        type=Path,
+        default=ROOT.parent / "Hugo-Project",
+        help="Extracted main Hugo project (not an old publication)",
+    )
     ap.add_argument("--keystore", type=Path, required=True)
     ap.add_argument("--alias", default="atlas-field")
-    ap.add_argument("--out", type=Path, required=True)
+    ap.add_argument("--out", type=Path, default=ROOT / "Telugu-States-Atlas.apk")
     args = ap.parse_args()
-    web = args.public.resolve()
+    site = args.site.resolve()
     out = args.out.resolve()
-    source = tree(web)
-    if source != EXPECTED:
-        raise SystemExit(f"Wrong input publication: {source!r}")
+    if not (site / "hugo.toml").is_file() or not (site / "content" / "houses").is_dir():
+        raise SystemExit("Pass --site /path/to/extracted/Hugo-Project")
     sdk = Path(os.environ["ANDROID_HOME"])
     bt = sdk / "build-tools/35.0.0"
     api = sdk / "platforms/android-35/android.jar"
@@ -87,6 +79,18 @@ def main():
         raise SystemExit("Set ATLAS_SIGN_PASS. Do not commit signing credentials.")
     with tempfile.TemporaryDirectory(prefix="atlas-android-build-") as td:
         w = Path(td)
+        web = w / "publication"
+        run(["hugo", "--source", site, "--destination", web, "--minify"])
+        catalog = json.loads((web / "catalog.json").read_bytes())
+        rows = catalog["houses"]
+        uids = [r["u"] for r in rows]
+        cells = [tuple(r["c"]) for r in rows]
+        assert len(set(uids)) == len(uids) and len(set(cells)) == len(cells), (
+            "Duplicate resident or reserved acre"
+        )
+        homes = {tuple(r["homeLocation"]) for r in rows}
+        assert len(homes) == len(rows) and all(r["acreLocation"] == r["c"] and r["villageId"] and r["court"]["c"] == r["c"] for r in rows), "Incomplete or conflicting village assignments"
+        source = tree(web)
         cl = w / "classes"
         dx = w / "dex"
         cl.mkdir()
@@ -149,7 +153,7 @@ def main():
             ]:
                 for f in files(folder):
                     name = f.relative_to(folder).as_posix()
-                    if folder == web and not mobile_includes(name):
+                    if folder == web and name in (".nojekyll", "CNAME"):
                         continue
                     compress = (
                         zipfile.ZIP_DEFLATED
@@ -193,11 +197,13 @@ def main():
             [bt / "apksigner", "verify", "--verbose", "--print-certs", w / "signed.apk"]
         )
         run([bt / "zipalign", "-c", "4", w / "signed.apk"])
+        receipt = verify(w / "signed.apk", web)
         shutil.copyfile(w / "signed.apk", out)
     print(
         json.dumps(
             {
                 "publication": source,
+                **receipt,
                 "apk": out.name,
                 "bytes": out.stat().st_size,
                 "sha256": hashlib.sha256(out.read_bytes()).hexdigest(),
