@@ -614,34 +614,77 @@ export function makeHouse(s, h, u, distance, tier, put) {
       fixture("yard-" + g, g, lx + a, lz + b, y, sw, sh, sd, col, rot, rx, rz);
     if (prop === "shade-tree" || prop === "banana-clump") {
       const banana = prop === "banana-clump",
-        ht = banana ? 3.8 : 5.4 + (seed % 4);
-      obj(
-        "trunk",
-        0,
-        0,
-        ht * 0.32,
-        banana ? 0.43 : 0.64,
-        ht * 0.64,
-        banana ? 0.43 : 0.64,
-        "#927953",
-      );
-      let count = banana ? 6 : 4;
-      for (let k = 0; k < count; k++) {
-        let a = k * 2.4 + (seed % 32) * 0.1,
-          rad = banana ? 0.75 : 1.11,
-          col = ["#669053", "#749b54", "#568154", "#92a65e"][k % 4];
+        ht = banana ? 3.6 : 5.4 + (seed % 4);
+      if (banana) {
+        const stemTop = ht * 0.8;
+        obj("trunk", 0, 0, stemTop * 0.5, 0.44, stemTop, 0.44, "#8a734f");
+        obj("canopy", 0, 0, stemTop - 0.08, 0.5, 0.46, 0.5, "#678f4e");
         obj(
           "canopy",
-          Math.sin(a) * rad,
-          Math.cos(a) * rad,
-          ht * 0.76 + k * 0.08,
-          banana ? 0.92 : 3.5,
-          banana ? 0.49 : 2.66,
-          banana ? 3.3 : 3.7,
-          col,
-          a,
-          banana ? 0.37 : 0,
+          0,
+          0,
+          stemTop + 0.24,
+          0.34,
+          0.88,
+          0.4,
+          "#7aa558",
+          (seed % 7) * 0.9,
+          0.12,
         );
+        for (let k = 0; k < 7; k++) {
+          const a = k * 0.8976 + (seed % 32) * 0.1,
+            tilt = 0.26 + (k % 2) * 0.08,
+            rad = 0.88,
+            col = ["#669053", "#749b54", "#568154", "#89a159"][k % 4];
+          obj(
+            "canopy",
+            Math.sin(a) * rad,
+            Math.cos(a) * rad,
+            stemTop - 0.06 - rad * Math.tan(tilt) + (k % 3) * 0.035,
+            0.94,
+            0.46,
+            2.58,
+            col,
+            a,
+            tilt,
+          );
+        }
+      } else {
+        const stemTop = ht * 0.78,
+          forkY = ht * 0.52,
+          bLen = 1.95,
+          tilt = 0.64;
+        obj("trunk", 0, 0, stemTop * 0.5, 0.62, stemTop, 0.62, "#89704c");
+        obj("canopy", 0, 0, ht * 0.8, 3.6, 2.75, 3.6, "#628c50");
+        for (let k = 0; k < 5; k++) {
+          const a = k * 1.2566 + (seed % 32) * 0.1,
+            bRad = 0.5 * bLen * Math.sin(tilt),
+            rad = 1.18,
+            col = ["#669053", "#749b54", "#568154", "#8ca25b"][k % 4];
+          obj(
+            "trunk",
+            Math.sin(a) * bRad,
+            Math.cos(a) * bRad,
+            forkY + 0.5 * bLen * Math.cos(tilt),
+            0.28,
+            bLen,
+            0.28,
+            "#836947",
+            a,
+            tilt,
+          );
+          obj(
+            "canopy",
+            Math.sin(a) * rad,
+            Math.cos(a) * rad,
+            ht * 0.73 + (k % 2) * 0.14,
+            3.25,
+            2.45,
+            3.35,
+            col,
+            a,
+          );
+        }
       }
       continue;
     }

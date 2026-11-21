@@ -1,89 +1,61 @@
-// Shared packed-earth clearing, a neem shade platform, small domestic courtyards and chalk muggu at the thresholds.
+// Shared packed-earth clearing and a neem shade platform at the village hub.
 import { roomPlan } from "./home-volume.js";
 import * as T from "../vendor/three.module.min.js";
 import { ACRE as M, localPoint } from "./metres.js";
 const scale = (p, x, y) => [p[0] + x / M, p[1] + y / M];
 export function hamletScene(s, rows, commons, focus, tier) {
   const g = new T.Group(),
-    ink = [],
     shapes = new Map(),
     obj = new T.Object3D(),
     solids = [],
     range = tier ? 280 : 160;
   const add = (k, p, height, xyz, rotation, color) => {
     const a = shapes.get(k) || shapes.set(k, []).get(k);
+    obj.rotation.order = "YXZ";
     obj.position.set(...s.xyz(...p, s.ground(...p) + height));
     obj.scale.set(...xyz);
     obj.rotation.set(...rotation);
     obj.updateMatrix();
     a.push([obj.matrix.clone(), new T.Color(color)]);
   };
-  for (const row of rows) {
-    const h = row[5],
-      y = h.yard;
-    if (
-      !y ||
-      Math.hypot(h.centre[0] - focus.x, h.centre[1] - focus.y) * M > range
-    )
-      continue;
-    if (Math.hypot(h.centre[0] - focus.x, h.centre[1] - focus.y) * M < 46) {
-      for (let k = 0; k < 4; k++)
-        for (let i = 0; i < 16; i++) {
-          const pt = (t) => {
-            let a = (k * Math.PI) / 2 + t * 0.392699,
-              r = 0.38 + 0.22 * Math.cos(4 * a),
-              p = localPoint(
-                h,
-                h.door_x + Math.sin(a) * r,
-                y.d / 2 + 1.1 + Math.cos(a) * r,
-              );
-            return s.xyz(...p, s.ground(...p) + 0.076);
-          };
-          ink.push(...pt(i), ...pt(i + 1));
-        }
-    }
-  }
   for (const v of commons) {
     const p = v.hub;
     if (Math.hypot(p[0] - focus.x, p[1] - focus.y) * M > range) continue;
     // Earth clearing is blended into the same ground surface as lanes.
     if (!v.shade) continue;
     const z = v.shade;
-    add("trunk", z, 2.05, [0.46, 4.1, 0.48], [0, 0.8, 0.025], 0x806647);
+    add("trunk", z, 2.35, [0.48, 4.7, 0.5], [0, 0.8, 0.02], 0x806647);
     add("bench", z, 0.23, [2.65, 0.5, 2.5], [0, 0.22, 0], 0x9a876c);
     add("seat", z, 0.5, [2.9, 0.14, 2.7], [0, 0.22, 0], 0xc4aa85);
     for (let k = 0; k < 6; k++) {
       const a = k * 2.4,
+        leafH = 4.08 + (k ? Math.sin(k * 0.8) * 0.45 : 1.15),
         b = scale(
           z,
           Math.cos(a) * (k ? 1.35 : 0),
           Math.sin(a) * (k ? 1.35 : 0),
         );
+      if (k) {
+        const limb = scale(z, Math.cos(a) * 0.68, Math.sin(a) * 0.68);
+        add(
+          "trunk",
+          limb,
+          (3.05 + leafH) * 0.5,
+          [0.24, 1.85, 0.24],
+          [0.68, Math.atan2(Math.cos(a), -Math.sin(a)), 0],
+          0x7a6042,
+        );
+      }
       add(
         "leaf",
         b,
-        4.08 + (k ? Math.sin(k * 0.8) * 0.45 : 1.15),
+        leafH,
         [3.9, 2.8, 3.8],
         [0.12 * k, a, 0.09 * k],
         [0x58764b, 0x708b50, 0x77925a, 0x4e7046][k % 4],
       );
     }
     solids.push([z[0], z[1], 1.55 / M]);
-  }
-  function geo(p, c) {
-    const b = new T.BufferGeometry();
-    b.setAttribute("position", new T.Float32BufferAttribute(p, 3));
-    if (c) b.setAttribute("color", new T.Float32BufferAttribute(c, 3));
-    b.computeVertexNormals();
-    return b;
-  }
-  if (ink.length) {
-    const a = new T.LineSegments(
-      geo(ink),
-      new T.LineBasicMaterial({ color: 0xf8ecce }),
-    );
-    a.userData.disposableMaterial = true;
-    g.add(a);
   }
   for (const [k, arr] of shapes) {
     const b =
