@@ -10,7 +10,7 @@ import { beachFace, tidalBed, seaLift } from "./surf-zone.js";
 import { soilField } from "./soil-field.js";
 import { headAt } from "./hydraulic-stage.js";
 import { bankBuilder, bankSample } from "./bank-mesh.js";
-import { refineTread, subContact } from "./tread.js";
+import { emitTreadCells, subContact } from "./tread.js";
 import { benchAt } from "./house-ground.js";
 import * as T from "../vendor/three.module.min.js";
 import { ACRE as U, RELIEF as V } from "./metres.js";
@@ -673,7 +673,7 @@ export class Surface {
   waterContact(x, y, h) {
     if (this.liquidTime == null) return h;
     if (!(h.sea > 0.05)) {
-      if (!h.drawn || !h.margin || h.w < -0.043) return h;
+      if (!h.drawn || !h.margin || h.w < -0.056) return h;
       const dh = contactLift(h.margin, this.liquidTime),
         d = h.marginBed ?? shelfDepth(h);
       return { ...h, line: h.line + dh, depth: Math.max(0, d + dh) };
@@ -846,7 +846,7 @@ function* chunkRows(s, cx, cy, step, mat, light = false) {
     if (
       V0.some((v) => v.sea > 0.016 || v.w > 0) ||
       !V0.some((v) => v.w < 0) ||
-      !V0.some((v) => v.w > -0.043 && shelfDepth(v) > -0.22)
+      !V0.some((v) => v.w > -0.056 && shelfDepth(v) > -0.3)
     )
       return;
     for (const v of V0) wetVertex(v);
@@ -971,6 +971,7 @@ function* chunkRows(s, cx, cy, step, mat, light = false) {
       sheet(wiFor(V[a], a, true), wiFor(V[b], b, true), wiFor(V[d], d, true));
     else freshwaterApron(a, b, d);
   }
+  const extraDry = [];
   for (let j = 0; j < Y.length - 1; j++) {
     yield;
     for (let i = 0; i < n - 1; i++) {
@@ -992,15 +993,19 @@ function* chunkRows(s, cx, cy, step, mat, light = false) {
         banks.set(cell, fit);
         continue;
       }
-      if (
-        !s.tread ||
-        !refineTread(s, s.tread, cuts, X, Y, V, n, i, j, p, c, wear, ix)
-      )
-        ix.push(a, b, d, b, e, d);
       water(a, b, d);
       water(b, e, d);
     }
   }
+  const pushTreadVert = (gx, gy, gz, mix, wVal, dryVal) => {
+    const idx = p.length / 3;
+    p.push(...s.xyz(gx, gy, gz));
+    c.push(mix[0], mix[1], mix[2], mix[3]);
+    wear.push(wVal);
+    extraDry.push([idx, dryVal]);
+    return idx;
+  };
+  emitTreadCells(s, s.tread, cuts, X, Y, V, n, used, banks, pushTreadVert, ix);
   const build = (pos, idx) => {
     const g = new T.BufferGeometry();
     g.setAttribute("position", new T.Float32BufferAttribute(pos, 3));
@@ -1012,16 +1017,17 @@ function* chunkRows(s, cx, cy, step, mat, light = false) {
   const group = new T.Group(),
     land = build(p, ix);
   const dry = new Float32Array(p.length / 3).fill(0.385);
-  for (let i = 0; i < V.length; i++) dry[index(i)] = -V[i].w; // tread only refines fully dry triangles
+  for (let i = 0; i < V.length; i++) dry[index(i)] = -V[i].w;
+  for (const [idx, dVal] of extraDry) dry[idx] = dVal;
   const cob = new Float32Array(p.length / 3).fill(-8);
   for (let i = 0; i < V.length; i++)
     if (V[i].sea > 0.05) cob[index(i)] = Math.max(-8, tidalBed(V[i], datum));
   // Four bytes per ground vertex. The exposed dirt remembers recent *local* overtopping; not a universal band and not rainwater.
   const stamp = new Int8Array((p.length / 3) * 4);
+  for (let k = 3; k < stamp.length; k += 4) stamp[k] = -127;
   for (let i = 0; i < V.length; i++) {
     const v = V[i],
       k = index(i) * 4;
-    stamp[k + 3] = -127;
     if (!v.margin) continue;
     stamp[k] = Math.round((v.margin[2] / 2.12) * 127);
     stamp[k + 1] = Math.round((v.margin[3] / 2.12) * 127);

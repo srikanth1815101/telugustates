@@ -57,14 +57,17 @@ vec3 broadSkin(vec2 q,vec2 d){float phase=atan(d.y,d.x)*1.2732395,k=floor(phase)
  vec2 a=vec2(dot(q,ax),dot(q,bx)),b=vec2(dot(q,az),dot(q,bz));float w=smoothstep(.0,1.,fract(phase));float bow=texture2D(currentGrain,q/163.).g-.5;
  return 2.*(mix(texture2D(currentGrain,a*vec2(.009,.012)+vec2(.017,.11*bow)).rgb,texture2D(currentGrain,b*vec2(.009,.012)+vec2(.24,.13*bow)).rgb,w)-.5);}
 void main(){vec2 local=P.xz,p=local+hydroOffset;float tm=liquidTime,sea=smoothstep(.18,.8,F.w),speed=max(0.,F.z),river=(1.-sea)*smoothstep(.025,.20,speed),pixel=max(length(dFdx(local)),length(dFdy(local))),fine=1.-smoothstep(.12,.64,pixel),middle=1.-smoothstep(.7,3.7,pixel),wide=1.-smoothstep(3.,15.,pixel);
- if((sea>.5||shelf>0.||depth<0.)&&wetM<=0.)discard;
+ float ew=wetM,lip=0.,edgeBand=river*(1.-smoothstep(.04,.46,abs(wetM)));
+ if(edgeBand>.002){vec2 ed=normalize(F.xy+vec2(.00001,.00002)),es=vec2(-ed.y,ed.x),vAdv=ed*(.35+1.15*speed);float c1=mod(tm*1.35,12.),c2=mod(c1+6.,12.),cw=smoothstep(.14,.86,abs(c1-6.)/6.);float tongue=mix(fieldNoise((p-vAdv*c1)*.28+es*.4),fieldNoise((p-vAdv*c2)*.28+es*.4),cw),scallop=mix(fieldNoise((p-vAdv*c1)*.74-5.3),fieldNoise((p-vAdv*c2)*.74-5.3),cw);float slosh=.62*sin(dot(p,ed*.44+es*.68)-tm*1.95+1.3*tongue)+.38*cos(dot(p,ed*.81-es*.52)-tm*1.28);ew+=edgeBand*(.054*tongue+.028*scallop+.046*slosh-.016);lip=edgeBand*smoothstep(0.,.055,ew)*(1.-smoothstep(.035,.15,ew))*smoothstep(-.12,.56,tongue+.5*slosh);}
+ float ewf=fwidth(ew),wmf=fwidth(wetM);
+ if((sea>.5||shelf>0.||depth<0.||river>.02)&&ew<=0.)discard;
  // Distant water should not compile or shade boot-scale capillaries per pixel. Use travelling pressure fields in the entire wet silhouette.
  if(sea<.005 && river>.04 && (fogD>74. || pixel>.43)){
- vec2 dir=normalize(F.xy+vec2(.00001,.00002));vec2 vel=dir*(speed+smoothstep(.06,.52,speed)*(.88+.64*sqrt(clamp(wetM,0.,4.))));float a=mod(tm,26.),b=mod(a+13.,26.),swap=smoothstep(.1,.90,abs(a-13.)/13.);
+ vec2 dir=normalize(F.xy+vec2(.00001,.00002));vec2 vel=dir*(speed+smoothstep(.06,.52,speed)*(.88+.64*sqrt(clamp(ew,0.,4.))));float a=mod(tm,26.),b=mod(a+13.,26.),swap=smoothstep(.1,.90,abs(a-13.)/13.);
  vec3 surf=mix(broadSkin(p-vel*a,dir),broadSkin(p-vel*b,dir),swap);float g=surf.x*.83+surf.z*.29,front=smoothstep(.14,.61,g+.40*surf.y);
- float d=max(0.,wetM),edge=1.-smoothstep(.07,1.32,d),deep=smoothstep(.04,2.3,d);vec3 body=mix(vec3(.144,.274,.196),vec3(.064,.208,.199),deep);vec3 n=normalize(vec3(dir.x*.11*g-dir.y*surf.x*.18,1.,dir.y*.11*g+dir.x*surf.x*.18)),V=normalize(cameraInPatch-P);float refl=.12+.56*pow(1.-clamp(dot(n,V),0.,1.),2.8);
- vec3 col=mix(body,mix(uHor,uZen,.27),refl)*(.88+.73*g+.24*surf.y);col+=vec3(.071,.093,.087)*front;
- float fold=(.42+.58*smoothstep(-.16,.42,surf.z+surf.x*.5))*edge*smoothstep(.02,.28,speed);col=mix(col,vec3(.39,.51,.423),.50*fold);col*=mix(.43,1.,uDay);col=mix(col,uHor,1.-exp(-pow(max(0.,fogD)*uFog,2.)));float alpha=mix(.47,.946,deep)+.075*fold;alpha*=smoothstep(-.001,max(.014,.6*fwidth(wetM)),wetM);gl_FragColor=vec4(col,clamp(alpha,0.,.995));
+ float d=max(0.,ew),edge=1.-smoothstep(.07,1.32,d),deep=smoothstep(.04,2.3,d);vec3 body=mix(vec3(.144,.274,.196),vec3(.064,.208,.199),deep);vec3 n=normalize(vec3(dir.x*.11*g-dir.y*surf.x*.18,1.,dir.y*.11*g+dir.x*surf.x*.18)),V=normalize(cameraInPatch-P);float refl=.12+.56*pow(1.-clamp(dot(n,V),0.,1.),2.8);
+ vec3 col=mix(body,mix(uHor,uZen,.27),refl)*(.88+.73*g+.24*surf.y);col+=vec3(.071,.093,.087)*front+vec3(.085,.11,.095)*lip;
+ float fold=(.42+.58*smoothstep(-.16,.42,surf.z+surf.x*.5))*edge*smoothstep(.02,.28,speed);col=mix(col,vec3(.39,.51,.423),.50*fold);col*=mix(.43,1.,uDay);col=mix(col,uHor,1.-exp(-pow(max(0.,fogD)*uFog,2.)));float alpha=mix(.47,.946,deep)+.075*fold;alpha*=smoothstep(-.001,max(.02,.8*ewf),ew);gl_FragColor=vec4(col,clamp(alpha,0.,.995));
 #include <colorspace_fragment>
  return;}
  vec2 wind=vec2(.814,.581),wt=vec2(-wind.y,wind.x),rd=normalize(F.xy+vec2(.00001,.00002));float area=fieldNoise(p*.016+vec2(4.71,-43.)),wavelet=0.,scum=0.;vec2 grad=vec2(0.);
@@ -93,9 +96,9 @@ void main(){vec2 local=P.xz,p=local+hydroOffset;float tm=liquidTime,sea=smoothst
  float tip=(1.-smoothstep(.025,.136+pixel*.021,wetM))*(.64+.19*wool);float residue=(1.-smoothstep(.76,1.78,depth))*smoothstep(.15,.66,sin(swashPhase(p,tm,depth)+.86))*smoothstep(-.045,.28,wetM);
  scum+=sea*(tip+.84*cap+.26*residue*smoothstep(.15,.68,.54*wool+.49*lace+.31*wr))*wide;
  grad=mix(grad,seaNormal+grad*1.09+wind*(.081*gr*middle+.043*small*fine),sea);wavelet+=sea*.12*surfSlope.w*wide;}
- vec3 drop=ringsAt(p*1.37,tm,uRain,fogD);grad+=drop.xy*.17*fine;float foam=scum+drop.z*.24*fine;
+ vec3 drop=ringsAt(p*1.37,tm,uRain,fogD);grad+=drop.xy*.17*fine;float foam=scum+lip*.22+drop.z*.24*fine;
  if(fogD<52.)for(int i=0;i<${lite ? 3 : 6};i++){float age=wakeClock-wakes[i].z;if(age>=0.&&age<2.85&&wakes[i].w>.001){vec2 d=local-wakes[i].xy-rd*(.18*age*speed);float r=length(d),e=r-(.13+age*1.07),pulse=exp(-abs(e)*9.)*(1.-age/2.85)*wakes[i].w;grad+=.24*pulse*sin(e*20.)*d/(r+.03);foam+=.24*pulse;}}
- grad*=1.-(.32-.29*sea)*calmWater;foam-=drop.z*.08*fine*calmWater;float d=max(0.,wetM),deep=smoothstep(.06,2.7,d);vec3 bedLight=mix(vec3(.133,.345,.266),vec3(.034,.147,.162),deep),salt=mix(vec3(.109,.43,.35),vec3(.030,.179,.247),deep);vec3 n=normalize(vec3(grad.x,1.,grad.y)),eye=normalize(cameraInPatch-P);float fres=.07+.64*pow(1.-clamp(dot(eye,n),0.,1.),3.3);vec3 col=mix(mix(bedLight,salt,sea),mix(vec3(.197,.34,.41),uZen,.31),fres);col*=1.+.19*wavelet+.045*area*wide;
+ grad*=1.-(.32-.29*sea)*calmWater;foam-=drop.z*.08*fine*calmWater;float d=max(0.,ew),deep=smoothstep(.06,2.7,d);vec3 bedLight=mix(vec3(.133,.345,.266),vec3(.034,.147,.162),deep),salt=mix(vec3(.109,.43,.35),vec3(.030,.179,.247),deep);vec3 n=normalize(vec3(grad.x,1.,grad.y)),eye=normalize(cameraInPatch-P);float fres=.07+.64*pow(1.-clamp(dot(eye,n),0.,1.),3.3);vec3 col=mix(mix(bedLight,salt,sea),mix(vec3(.197,.34,.41),uZen,.31),fres);col*=1.+.19*wavelet+.045*area*wide;
  if(river>.002){vec3 refl=reflect(-eye,n);float horizon=1.-smoothstep(.015,.41,refl.y);vec3 sky=mix(mix(uZen,uHor,.25),uHor,.32+.61*horizon);vec3 bankTone=mix(vec3(.072,.147,.125),uHor,.24);
  float height=0.;if(bankStation.w>.5){float hor=max(.015,length(refl.xz));vec2 dir=refl.xz/hor;vec3 h=texture2D(bankSky,vec2(atan(dir.y,dir.x)*.15915494,.5)).rgb;float metres=12.*exp2(9.*h.g);height=clamp(((h.r*.82-.02)*metres-(P.y-bankStation.y))/max(12.,metres-dot(local-bankStation.xz,dir)),-.035,.75);
  bankTone=mix(mix(vec3(.139,.197,.102),vec3(.065,.149,.102),h.b),uHor,.18+.26*smoothstep(90.,2100.,metres));}sky=mix(bankTone,sky,smoothstep(height-.062,height+.075,refl.y/max(.11,length(refl.xz))));float rf=.105+.72*pow(1.-clamp(dot(eye,n),0.,1.),2.50);
@@ -107,7 +110,7 @@ void main(){vec2 local=P.xz,p=local+hydroOffset;float tm=liquidTime,sea=smoothst
  vec3 facet=mix(seaBody,waterSky,.075+.68*pow(1.-clamp(dot(eye,n),0.,1.),2.6));
  facet*=1.+.085*wr*wide+.056*gr*middle;facet=mix(facet,mix(vec3(.098,.239,.292),uHor,.18),smoothstep(108.,520.,fogD)*.74);col=mix(col,facet,sea);}
  float gl=pow(max(0.,dot(reflect(-eye,n),uSun)),57.);col+=vec3(.30,.287,.205)*gl*uDay*(.42+.58*middle);col=mix(col,vec3(.80,.89,.84),clamp(foam,0.,.87));col*=mix(.42,1.,uDay);col=mix(col,uHor,1.-exp(-pow(max(0.,fogD)*uFog,2.)));
- float alpha=.32+.49*deep+.18*fres+.41*foam;alpha=mix(alpha,max(alpha,.72+.23*deep+.12*foam),river*smoothstep(.028,.51,d));alpha=mix(alpha,max(alpha,.57+.42*smoothstep(.38,1.85,d)),sea*smoothstep(.12,.85,d));if(shelf>.001){float shallow=1.-smoothstep(.025,.33,wetM);col=mix(col,vec3(.066,.181,.147)*(1.+.28*wavelet)+vec3(.45,.58,.58)*fres*.70,shallow*(.40+.18*shelf));alpha=mix(alpha,.32+.46*fres+.07*wavelet,shallow);alpha*=smoothstep(0.,max(.014,.68*fwidth(wetM)),wetM);}
- alpha*=mix(1.,smoothstep(0.,max(.030,.65*fwidth(wetM)),wetM),sea);gl_FragColor=vec4(col,clamp(alpha,0.,.995));
+ float alpha=.32+.49*deep+.18*fres+.41*foam;alpha=mix(alpha,max(alpha,.72+.23*deep+.12*foam),river*smoothstep(.028,.51,d));alpha=mix(alpha,max(alpha,.57+.42*smoothstep(.38,1.85,d)),sea*smoothstep(.12,.85,d));if(shelf>.001||edgeBand>.002){float shallow=1.-smoothstep(.025,.35,ew);col=mix(col,vec3(.066,.181,.147)*(1.+.28*wavelet)+vec3(.45,.58,.58)*fres*.70,shallow*(.40+.18*max(shelf,edgeBand)));alpha=mix(alpha,.30+.46*fres+.08*wavelet,shallow);alpha*=smoothstep(0.,max(.02,.82*ewf),ew);}
+ alpha*=mix(1.,smoothstep(0.,max(.030,.65*wmf),wetM),sea);gl_FragColor=vec4(col,clamp(alpha,0.,.995));
 #include <colorspace_fragment>
 }`;

@@ -189,15 +189,26 @@ export function bankBuilder(s, cx, cy, V, emit, X, Y, outer) {
       const X0 = mx / T,
         Y0 = my / T,
         r = ACRE * Math.hypot(X0 - s.focus[0], Y0 - s.focus[1]);
-      if (r < 60 && L < 0.26 && (s.ec?.at(X0, Y0)?.coast ?? 300) > 1) {
+      if (r < 85 && L < 0.26 && (s.ec?.at(X0, Y0)?.coast ?? 300) > 1) {
         const span = 0.8 * L,
           wm = value(mx, my);
         if (
-          wm > -0.047 - span &&
-          wm < 0.115 + span &&
-          s.reachCurrent(X0, Y0, 1, false)[2] > 0.48
+          wm > -0.062 - span &&
+          wm < 0.125 + span &&
+          s.reachCurrent(X0, Y0, 1, false)[2] > 0.12
         )
-          size = Math.min(size, r < 28 ? 0.0127 : 0.0252);
+          size = Math.min(
+            size,
+            s.mobileMesh
+              ? r < 45
+                ? 0.0252
+                : 0.0504
+              : r < 28
+                ? 0.0127
+                : r < 56
+                  ? 0.0252
+                  : 0.0504,
+          );
       }
     }
     if (
