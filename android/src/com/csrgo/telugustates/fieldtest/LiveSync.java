@@ -144,7 +144,6 @@ final class LiveSync {
             if (houseTemplateHtml == null || houseTemplateSlug == null) return null;
             String rendered = houseTemplateHtml
                     .replace("data-record=\"" + houseTemplateSlug + "\"", "data-record=\"" + slug + "\"")
-                    .replace("@" + houseTemplateSlug, "@" + slug)
                     .replace("/u/" + houseTemplateSlug, "/u/" + slug)
                     .replace("/acre/" + houseTemplateSlug, "/acre/" + slug)
                     .replace("/plot/" + houseTemplateSlug, "/plot/" + slug);

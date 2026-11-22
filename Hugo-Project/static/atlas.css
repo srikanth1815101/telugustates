@@ -219,13 +219,32 @@ html[lang="te"] .lang span:first-child {
   gap: 22px;
   margin: 0;
 }
-.metrics > div + div {
+.metrics > div + div,
+.metrics > a + a {
   padding-left: 24px;
   border-left: 1px solid var(--line);
+}
+.metrics .metric-resource {
+  color: inherit;
+  text-decoration: none;
+  transition: opacity 0.16s ease;
+}
+.metrics .metric-resource:hover {
+  opacity: 0.78;
+}
+.metrics .metric-food strong {
+  color: #36563b;
+}
+.metrics .metric-currency strong {
+  color: #6d552b;
+}
+.metrics .metric-gold strong {
+  color: #846520;
 }
 .metrics strong {
   font: 520 32px/0.95 var(--head);
   letter-spacing: -1.1px;
+  font-variant-numeric: tabular-nums;
   display: block;
 }
 .metrics small {
@@ -802,7 +821,8 @@ html[lang="te"] .eyebrow {
   .metrics {
     gap: 15px;
   }
-  .metrics > div + div {
+  .metrics > div + div,
+  .metrics > a + a {
     padding-left: 15px;
   }
   .metrics strong {
@@ -893,7 +913,8 @@ html[lang="te"] .eyebrow {
     border: 1px solid #d1dac9;
     border-radius: 11px;
   }
-  .metrics > div {
+  .metrics > div,
+  .metrics > a {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -915,7 +936,8 @@ html[lang="te"] .eyebrow {
     text-overflow: ellipsis;
     max-width: 100%;
   }
-  .metrics > div + div {
+  .metrics > div + div,
+  .metrics > a + a {
     padding-left: 11px;
     border-left: 1px solid #dce2d4;
   }

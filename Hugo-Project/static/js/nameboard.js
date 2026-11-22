@@ -1,5 +1,6 @@
 import * as T from "../vendor/three.module.min.js";
 import { basis, localPoint } from "./metres.js";
+import { houseLabel } from "./resident-id.js";
 // A real wayside object, not a screen label. Rest it beside the gateway behind the low compound wall, never across the opening.
 export function nameboardSpot(h) {
   const [w, d] = h.size_m,
@@ -36,12 +37,7 @@ export function nameboard(group, s, h, u, put) {
   const b = basis(h),
     { gx, gy, boardW } = nameboardSpot(h),
     base = s.xyz(gx, gy, s.ground(gx, gy)),
-    caption = String(h.sign?.label || ""),
-    label = (caption.match(/@?[a-z0-9_.]+/gi) || []).some(
-      (token) => token.replace(/^@/, "").toLowerCase() === u.toLowerCase(),
-    )
-      ? caption
-      : "@" + u,
+    label = houseLabel(h),
     wood = h.sign?.wood || "#523424",
     trim = h.sign?.trim || "#d3ba7e";
   const c = document.createElement("canvas");
@@ -61,12 +57,13 @@ export function nameboard(group, s, h, u, put) {
   a.textAlign = "center";
   // One high-contrast inscription, painted directly onto the face. No screen-space duplicate.
   a.fillStyle = "#fff7df";
-  a.font = "bold 102px sans-serif";
+  const fontStack = '"Fraunces", "Noto Sans Telugu", Georgia, sans-serif';
+  a.font = `bold 96px ${fontStack}`;
   let px = Math.min(
-    102,
-    Math.floor((102 * 572) / Math.max(1, a.measureText(label).width)),
+    96,
+    Math.floor((96 * 572) / Math.max(1, a.measureText(label).width)),
   );
-  a.font = `bold ${px}px sans-serif`;
+  a.font = `bold ${px}px ${fontStack}`;
   a.textBaseline = "middle";
   a.fillText(label, 320, 106, 576);
   const tex = new T.CanvasTexture(c);

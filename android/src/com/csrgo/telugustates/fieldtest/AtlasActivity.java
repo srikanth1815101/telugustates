@@ -275,7 +275,7 @@ public final class AtlasActivity extends Activity {
         @Override public boolean shouldOverrideUrlLoading(WebView w, WebResourceRequest req) {
             Uri u = req.getUrl();
             if (local(u)) {
-                if("/_field/resident".equals(u.getPath())){String n=u.getQueryParameter("name");if(req.isForMainFrame()&&req.hasGesture()&&safeLocal(w.getUrl())&&!hub(w.getUrl())&&n!=null&&n.matches("[a-z0-9._]{1,30}")){try{startActivity(Intent.createChooser(new Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT,"@"+n+" · Telugu States\nhttps://telugustates.csrgo.com/#/u/"+n),"Share virtual house"));}catch(RuntimeException e){toast("No sharing app available.");}}return true;}
+                if("/_field/resident".equals(u.getPath())){String n=u.getQueryParameter("name");String lbl=u.getQueryParameter("label");String cleanLbl=(lbl!=null?lbl.replaceAll("[\\r\\n\\t]+"," ").trim():"");if(cleanLbl.length()>40)cleanLbl=cleanLbl.substring(0,40);if(req.isForMainFrame()&&req.hasGesture()&&safeLocal(w.getUrl())&&!hub(w.getUrl())&&n!=null&&n.matches("h[0-9a-f]{24}")){try{startActivity(Intent.createChooser(new Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT,(cleanLbl.isEmpty()?"Virtual house":cleanLbl)+" · Telugu States\nhttps://telugustates.csrgo.com/#/u/"+n),"Share virtual house"));}catch(RuntimeException e){toast("No sharing app available.");}}return true;}
                 if("/_field/photo".equals(u.getPath())){if(req.isForMainFrame()&&req.hasGesture()&&safeLocal(w.getUrl())&&!hub(w.getUrl()))savePhoto(w);return true;}
                 return AssetRoute.key(u.getPath()) == null;
             }

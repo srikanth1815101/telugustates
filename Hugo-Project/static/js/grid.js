@@ -83,6 +83,7 @@ export async function get(p) {
     return {
       ...a,
       home: c.home,
+      resources: c.resources,
       recordStats: c.recordStats,
       total: c.active.length,
       plots: Object.keys(c.plots),

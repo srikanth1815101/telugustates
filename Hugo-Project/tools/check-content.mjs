@@ -8,11 +8,61 @@ import assert from "node:assert/strict";
 import crypto from "node:crypto";
 import { residentDesign } from "../static/js/resident-design.js";
 import { decodeAcre } from "../static/js/acre-codec.js";
+import {
+  RESIDENT_ID_RE,
+  isResidentId,
+  normalizeUsername,
+  residentId,
+  sha256Bytes,
+  shardKey,
+} from "../static/js/resident-id.js";
 const root = fileURLToPath(new URL("../", import.meta.url)),
   tmp = await fs.mkdtemp(path.join(os.tmpdir(), "atlas-content-")),
   json = async (f) => JSON.parse(await fs.readFile(f));
 try {
+  for (const vec of [
+    "",
+    "abc",
+    "a".repeat(55),
+    "a".repeat(56),
+    "a".repeat(64),
+    "తెలుగు రాష్ట్రాలు",
+  ]) {
+    assert.equal(
+      Buffer.from(sha256Bytes(Buffer.from(vec, "utf8"))).toString("hex"),
+      crypto.createHash("sha256").update(vec, "utf8").digest("hex"),
+    );
+  }
+  assert.equal(
+    residentId("@Palnadu_Demo01"),
+    residentId("https://www.instagram.com/palnadu_demo01/"),
+  );
+  assert.equal(normalizeUsername("https://instagram.com/reel/xyz"), "");
+  for (const f of await fs.readdir(path.join(root, "content/houses"))) {
+    if (!f.endsWith(".md")) continue;
+    assert(
+      /^h[0-9a-f]{24}\.md$/.test(f),
+      "House file must use one-way hashed ID: " + f,
+    );
+    const mdText = await fs.readFile(
+      path.join(root, "content/houses", f),
+      "utf8",
+    );
+    assert(
+      !/^username\s*:/im.test(mdText),
+      "House file must never store raw username: " + f,
+    );
+  }
   execFileSync("hugo", ["--source", root, "--destination", tmp, "--minify"]);
+  const homeHtml = await fs.readFile(path.join(tmp, "index.html"), "utf8");
+  assert(
+    homeHtml.includes('id="res-food"') &&
+      homeHtml.includes('id="res-currency"') &&
+      homeHtml.includes('id="res-gold"') &&
+      !homeHtml.includes('id="nr"') &&
+      !homeHtml.includes(">02<"),
+    "Home page header must show resources instead of 2 States / house count",
+  );
   const all = await json(path.join(tmp, "catalog.json")),
     atlas = await json(path.join(tmp, "data/atlas.json"));
   atlas.districts = all.districts;
@@ -21,7 +71,14 @@ try {
     ids = new Set(atlas.districts.map((d) => d.id));
   for (const r of all.houses) {
     residentDesign(r);
-    assert(!names.has(r.u) && /^[a-z0-9_.]{1,30}$/.test(r.u), r.u);
+    assert(!names.has(r.u) && RESIDENT_ID_RE.test(r.u), r.u);
+    assert(
+      r.name &&
+        !r.name.startsWith("@") &&
+        !isResidentId(r.name) &&
+        r.house.sign?.label === r.name,
+      "House board must use nickname or house name for " + r.u,
+    );
     names.add(r.u);
     assert(!cells.has(r.c.join(",")) && r.c.every(Number.isInteger), r.u);
     cells.add(r.c.join(","));
@@ -67,12 +124,16 @@ try {
     )
   ).flat();
   assert.equal(flattened.length, names.size);
-  for (const [u, , href] of directory) {
+  for (const [u, , href, label] of directory) {
     assert(names.has(u));
-    assert(
-      await fs.stat(path.join(tmp, decodeURIComponent(href), "index.html")),
-    );
+    assert(label && !label.startsWith("@") && !isResidentId(label));
+    const pagePath = path.join(tmp, decodeURIComponent(href), "index.html"),
+      pageHtml = await fs.readFile(pagePath, "utf8");
+    assert(!pageHtml.includes("@" + u), "Record page leaked @" + u);
   }
+  const demoId = residentId("palnadu_demo01"),
+    demoShard = await get("data/search/" + shardKey(demoId) + ".json");
+  assert(demoShard[demoId]?.u === demoId, "One-way search shard lookup failed");
   assert.deepEqual(Object.keys(all.resources).sort(), [
     "currency",
     "food",

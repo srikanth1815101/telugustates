@@ -8,14 +8,8 @@ const el = (tag, text) => {
 };
 export async function mountTreasury() {
   const computeRows = async () => {
-    const [state, atlas] = await Promise.all([
-      get("living/resources.json"),
-      get("data/atlas.json"),
-    ]);
-    return ["food", "currency", "gold", "homes"].map((k) => [
-      k,
-      k === "homes" ? atlas.total : (state[k] ?? 0),
-    ]);
+    const state = await get("living/resources.json");
+    return ["food", "currency", "gold"].map((k) => [k, state[k] ?? 0]);
   };
   let rows = await computeRows();
   const paint = () => {
