@@ -60,7 +60,8 @@ export function residents(s, rows, p, tier) {
   const group = new T.Group(),
     bins = new Map(),
     o = new T.Object3D(),
-    col = new T.Color();
+    col = new T.Color(),
+    me = o.matrix.elements;
   let drawn = 0;
   const put = (
     kind,
@@ -79,13 +80,18 @@ export function residents(s, rows, p, tier) {
   ) => {
     if (!forms[shape]) throw Error("Unknown resident form " + shape);
     const key = kind.startsWith("window-") ? kind + ":" + shape : shape;
-    const bin = bins.get(key) || [];
-    bins.set(key, bin);
+    let bin = bins.get(key);
+    if (!bin) {
+      bin = { m: [], c: [] };
+      bins.set(key, bin);
+    }
     o.rotation.set(rx, ry, rz, "YXZ");
     o.position.set(X, Y, Z);
     o.scale.set(sx, sy, sz);
     o.updateMatrix();
-    bin.push([o.matrix.clone(), col.set(c).clone()]);
+    for (let k = 0; k < 16; k++) bin.m.push(me[k]);
+    col.set(c);
+    bin.c.push(col.r, col.g, col.b);
   };
   for (const [, , u, , , h] of rows) {
     if (!h) continue;
@@ -101,15 +107,19 @@ export function residents(s, rows, p, tier) {
     if (d < (tier ? 105 : 62) && typeof document !== "undefined")
       nameboard(group, s, h, u, put);
   }
-  for (const [key, arr] of bins) {
+  for (const [key, bin] of bins) {
+    const count = bin.c.length / 3;
+    if (!count) continue;
     const shape = key.split(":").at(-1);
     const geo = forms[shape].clone(),
       mat = new T.MeshLambertMaterial(),
-      mesh = new T.InstancedMesh(geo, mat, arr.length);
-    for (let i = 0; i < arr.length; i++) {
-      mesh.setMatrixAt(i, arr[i][0]);
-      mesh.setColorAt(i, arr[i][1]);
-    }
+      mesh = new T.InstancedMesh(geo, mat, count);
+    mesh.instanceMatrix.array.set(bin.m);
+    mesh.instanceMatrix.needsUpdate = true;
+    mesh.instanceColor = new T.InstancedBufferAttribute(
+      new Float32Array(bin.c),
+      3,
+    );
     mesh.computeBoundingSphere();
     mesh.castShadow = mesh.receiveShadow = tier === 2;
     mesh.userData = {

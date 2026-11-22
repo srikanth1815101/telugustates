@@ -89,9 +89,9 @@ export function makeHouse(s, h, u, distance, tier, put) {
     cell = s.t.at(...h.centre),
     z = s.ground(...h.centre),
     seed = h.seed,
-    near = distance < (tier ? 78 : 36),
-    mid = distance < (tier ? 310 : 155),
-    hi = near || (tier > 0 && distance < 128);
+    near = distance < (tier ? 84 : 40),
+    mid = distance < (tier ? 345 : 175),
+    hi = near || (tier > 0 && distance < 135);
   const [cx, , cz] = s.xyz(...h.centre, z),
     cc = Math.cos(yaw),
     ss = Math.sin(yaw),
@@ -579,8 +579,6 @@ export function makeHouse(s, h, u, distance, tier, put) {
     }
     first = false;
   }
-  // Only yard features named in this house record are added to its timber-fenced plot.
-  if (!mid) return;
   function fixture(
     k,
     g,
@@ -595,21 +593,165 @@ export function makeHouse(s, h, u, distance, tier, put) {
     rx = 0,
     rz = 0,
   ) {
-    let [x, yy] = localPoint(h, lx, lz);
-    const [X, H, Z] = s.xyz(x, yy, s.ground(x, yy));
+    const [x, yy] = localPoint(h, lx, lz),
+      [X, H, Z] = s.xyz(x, yy, s.ground(x, yy));
     put(k, g, X, H + y, Z, wid, ht, dep, col, undefined, yaw + rot, rx, rz);
   }
-  // Personal yard furnishings stay in the front courtyard, on the dry shoulder of the entrance path.
   const side = h.door_x > 0 ? -1 : 1,
-    plots = [
-      [side * (w / 2 - 1.6), d / 2 + 1.55],
-      [-side * (w / 2 - 1.6), d / 2 + 1.52],
-      [side * (w / 2 - 1.55), d / 2 + Math.max(2.65, h.setback_m - 1.0)],
-    ];
+    yard = h.yard,
+    lotW = yard ? yard.lot[0] : w + 2.4,
+    frontSpan = yard ? yard.front : 4.2,
+    backSpan = yard ? yard.back : 2.2,
+    halfW = lotW * 0.5 - 0.16,
+    frontExt = d * 0.5 + frontSpan - 0.16,
+    rearExt = -d * 0.5 - backSpan + 0.16;
+
+  // Low village compound wall (prahari) and street-facing gate piers define cohesive neighborly courtyards even from orbit.
+  if (yard) {
+    const kerbPalette = ["#d8c8a8", "#ceb995", "#c7af8c", "#dfd3b7"],
+      kerbCol = kerbPalette[seed & 3],
+      capCol = seed % 3 === 0 ? "#b56345" : lime,
+      kH = 0.54,
+      kT = 0.22,
+      yEmbed = kH * 0.5 - 0.08,
+      hEmbed = kH + 0.16,
+      spanD = frontExt - rearExt,
+      midZ = (frontExt + rearExt) * 0.5,
+      gapLo = Math.max(-halfW + 0.42, h.door_x - 1.75),
+      gapHi = Math.min(halfW - 0.42, h.door_x + 1.75);
+    fixture("yard-slab", "slab", 0, rearExt, yEmbed, halfW * 2 + kT, hEmbed, kT, kerbCol);
+    fixture("yard-slab", "slab", -halfW, midZ, yEmbed, kT, hEmbed, spanD, kerbCol);
+    fixture("yard-slab", "slab", halfW, midZ, yEmbed, kT, hEmbed, spanD, kerbCol);
+    const leftSeg = gapLo - -halfW,
+      rightSeg = halfW - gapHi;
+    if (leftSeg > 0.34)
+      fixture(
+        "yard-slab",
+        "slab",
+        -halfW + leftSeg * 0.5,
+        frontExt,
+        yEmbed,
+        leftSeg,
+        hEmbed,
+        kT,
+        kerbCol,
+      );
+    if (rightSeg > 0.34)
+      fixture(
+        "yard-slab",
+        "slab",
+        gapHi + rightSeg * 0.5,
+        frontExt,
+        yEmbed,
+        rightSeg,
+        hEmbed,
+        kT,
+        kerbCol,
+      );
+    for (const gx of [gapLo, gapHi]) {
+      fixture("yard-slab", "slab", gx, frontExt, 0.42, 0.36, 1.0, 0.36, lime);
+      fixture("yard-slab", "slab", gx, frontExt, 0.95, 0.44, 0.1, 0.44, capCol);
+    }
+  }
+
+  // Far-LOD homestead tree crown keeps villages shaded and alive when viewed from high orbit (>345 m).
+  const rearTreeX = side * Math.max(1.8, halfW - 1.15),
+    rearTreeZ = rearExt + 1.05;
+  if (!mid) {
+    const ht = 5.4 + (seed % 3) * 0.8;
+    fixture("yard-trunk", "trunk", rearTreeX, rearTreeZ, ht * 0.36, 0.56, ht * 0.72, 0.56, "#866d4a");
+    fixture(
+      "yard-farCrown",
+      "farCrown",
+      rearTreeX,
+      rearTreeZ,
+      ht * 0.78,
+      3.9,
+      3.0,
+      3.9,
+      ["#5e8a4e", "#6d9652", "#557f4d"][seed % 3],
+    );
+    return;
+  }
+
+  // Swept front-courtyard threshold muggu (chalk rangoli) welcoming visitors from the village street.
+  if (frontSpan >= 2.8) {
+    const mz = d * 0.5 + Math.min(2.15, frontSpan * 0.52);
+    fixture("yard-slab", "slab", h.door_x, mz, 0.012, 1.18, 0.02, 1.18, "#b25b3f", Math.PI / 4);
+    fixture("yard-slab", "slab", h.door_x, mz, 0.021, 0.92, 0.02, 0.92, "#f5f1e3");
+    fixture("yard-slab", "slab", h.door_x, mz, 0.027, 0.64, 0.02, 0.64, "#f7f4e8", Math.PI / 4);
+  }
+
+  // Sacred Tulasi Kota (Vrindavanam) in the sunny front courtyard away from the entrance walk.
+  if (near || tier > 0) {
+    const tx = -side * Math.max(1.85, Math.min(halfW - 1.05, w * 0.36)),
+      tz = d * 0.5 + Math.min(2.35, frontSpan * 0.58),
+      tPt = localPoint(h, tx, tz);
+    if (!s.ways || s.ways.clear(...tPt, 1.05)) {
+      fixture("yard-slab", "slab", tx, tz, 0.11, 0.68, 0.22, 0.68, lime);
+      fixture("yard-slab", "slab", tx, tz, 0.46, 0.48, 0.52, 0.48, lime);
+      fixture("yard-slab", "slab", tx, tz, 0.73, 0.54, 0.08, 0.54, "#b45b3e");
+      fixture("yard-canopy", "canopy", tx, tz, 0.98, 0.52, 0.56, 0.52, "#5b8948");
+    }
+  }
+
+  // Everyday rural courtyard life: alternating sun-drying harvest mat or golden paddy hayrick in side/rear compound.
+  if (near || tier > 0) {
+    const lx2 = -rearTreeX,
+      lz2 = rearExt + 1.15,
+      rPt = localPoint(h, lx2, lz2);
+    if (!s.ways || s.ways.clear(...rPt, 1.1)) {
+      if (seed % 2 === 0) {
+        // Golden paddy hayrick (gaddi vaamu) on raised stone base
+        fixture("yard-disc", "disc", lx2, lz2, 0.12, 1.65, 0.24, 1.65, "#8f8372");
+        fixture("yard-disc", "disc", lx2, lz2, 0.72, 1.58, 1.02, 1.58, "#caa65c");
+        fixture("yard-cone", "cone", lx2, lz2, 1.68, 1.68, 0.96, 1.68, "#d5b368");
+      } else {
+        // Woven palm mat drying red chillies or golden turmeric/paddy in courtyard sun
+        const sunX = side * Math.max(1.95, halfW - 1.35),
+          sunZ = d * 0.5 + Math.min(2.6, frontSpan * 0.66),
+          sPt = localPoint(h, sunX, sunZ);
+        if (!s.ways || s.ways.clear(...sPt, 1.15)) {
+          fixture("yard-slab", "slab", sunX, sunZ, 0.018, 1.62, 0.03, 1.18, "#cbb483", 0.08);
+          fixture(
+            "yard-slab",
+            "slab",
+            sunX,
+            sunZ,
+            0.036,
+            1.36,
+            0.035,
+            0.94,
+            seed % 4 === 1 ? "#b6402e" : "#d49b35",
+            0.08,
+          );
+        }
+      }
+    }
+  }
+
+  // Personal yard furnishings placed in spacious front-shoulder and backyard pockets clear of the doorway path.
+  const hasTreeProp = h.props.some(
+    (pr) => pr === "shade-tree" || pr === "banana-clump",
+  );
+  if (!hasTreeProp) {
+    const ht = 5.2 + (seed % 3) * 0.7,
+      stemTop = ht * 0.76;
+    fixture("yard-trunk", "trunk", rearTreeX, rearTreeZ, stemTop * 0.5, 0.54, stemTop, 0.54, "#866d4a");
+    fixture("yard-canopy", "canopy", rearTreeX, rearTreeZ, ht * 0.8, 3.4, 2.55, 3.4, "#618b4f");
+  }
+  const plots = [
+    [side * Math.max(1.9, Math.min(halfW - 1.25, w * 0.38)), d * 0.5 + Math.min(1.65, frontSpan * 0.42)],
+    [rearTreeX, rearTreeZ],
+    [-side * Math.max(1.9, Math.min(halfW - 1.25, w * 0.38)), d * 0.5 + Math.min(1.55, frontSpan * 0.38)],
+  ];
   for (const [j, prop] of h.props.entries()) {
-    let [lx, lz] = plots[(j + (seed % 3)) % plots.length];
-    const nearYard = localPoint(h, lx, lz);
-    if (j > 1 || (s.ways && !s.ways.clear(...nearYard, 1.55))) continue;
+    const [lx, lz] =
+        prop === "shade-tree" || prop === "banana-clump"
+          ? [rearTreeX, rearTreeZ]
+          : plots[(j + (seed % 3)) % plots.length],
+      nearYard = localPoint(h, lx, lz);
+    if (j > 2 || (s.ways && !s.ways.clear(...nearYard, 1.15))) continue;
     const obj = (g, a, b, y, sw, sh, sd, col, rot = 0, rx = 0, rz = 0) =>
       fixture("yard-" + g, g, lx + a, lz + b, y, sw, sh, sd, col, rot, rx, rz);
     if (prop === "shade-tree" || prop === "banana-clump") {

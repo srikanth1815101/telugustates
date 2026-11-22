@@ -1,8 +1,8 @@
 // One local wear map on the actual terrain. No overlapping road polygons, even at a four-way junction.
 import * as T from "../vendor/three.module.min.js";
 import { ACRE as M, localPoint } from "./metres.js";
-export function laneSoil(s, rows, sets) {
-  const N = 1024,
+export function laneSoil(s, rows, sets, tier = 2) {
+  const N = tier >= 2 ? 1024 : 512,
     side = 678,
     at = s.xyz(...s.focus, 0),
     ox = at[0] - side / 2,
@@ -21,44 +21,62 @@ export function laneSoil(s, rows, sets) {
       Math.max(Math.abs(p[0] - s.focus[0]), Math.abs(p[1] - s.focus[1])) * M <
       side * 0.55;
   let any = false;
+
+  // Oriented swept-earth household courtyards (vakili) aligned to each compound's exact walls and street gate.
+  g.lineJoin = "round";
   for (const row of rows) {
     const h = row[5];
-    if (!h.yard || !near(h.centre)) continue;
+    if (!h?.yard || !near(h.centre)) continue;
     any = true;
-    const [w, d] = h.size_m;
-    const yc = d * 0.27;
-    const p = pt(localPoint(h, h.door_x, yc + 1.8));
-    const radius = (Math.max(w, d) * 0.68 * N) / side,
-      gradient = g.createRadialGradient(p[0], p[1], 0.4, p[0], p[1], radius);
-    gradient.addColorStop(0, "rgb(103,103,103)");
-    gradient.addColorStop(0.45, "rgb(91,91,91)");
-    gradient.addColorStop(1, "rgba(0,0,0,0)");
-    g.fillStyle = gradient;
-    g.fillRect(p[0] - radius, p[1] - radius, 2 * radius, 2 * radius);
+    const [, d] = h.size_m,
+      hw = h.yard.lot[0] * 0.5,
+      rear = -d * 0.5 - h.yard.back,
+      front = d * 0.5 + h.yard.front,
+      corners = [
+        [-hw, rear],
+        [hw, rear],
+        [hw, front],
+        [-hw, front],
+      ].map(([lx, lz]) => pt(localPoint(h, lx, lz)));
+    g.beginPath();
+    corners.forEach(([x, y], i) => (i ? g.lineTo(x, y) : g.moveTo(x, y)));
+    g.closePath();
+    g.strokeStyle = "rgb(78,78,78)";
+    g.lineWidth = (2.1 * N) / side;
+    g.stroke();
+    g.fillStyle = "rgb(126,126,126)";
+    g.fill();
   }
+
+  g.globalCompositeOperation = "lighten";
   for (const v of s.commons) {
     if (!near(v.hub)) continue;
     any = true;
-    const [x, y] = pt(v.hub),
-      r = (4.9 * N) / side,
-      gr = g.createRadialGradient(x, y, 0, x, y, r);
-    gr.addColorStop(0, "#9b9b9b");
-    gr.addColorStop(0.48, "#858585");
-    gr.addColorStop(1, "rgba(0,0,0,0)");
-    g.fillStyle = gr;
-    g.fillRect(x - r, y - r, 2 * r, 2 * r);
+    for (const [spot, radM, peak] of [
+      [v.hub, 9.5, 148],
+      ...(v.shade ? [[v.shade, 9.2, 162]] : []),
+    ]) {
+      const [x, y] = pt(spot),
+        r = (radM * N) / side,
+        gr = g.createRadialGradient(x, y, 0, x, y, r);
+      gr.addColorStop(0, `rgb(${peak},${peak},${peak})`);
+      gr.addColorStop(0.58, `rgb(112,112,112)`);
+      gr.addColorStop(1, "rgba(0,0,0,0)");
+      g.fillStyle = gr;
+      g.fillRect(x - r, y - r, 2 * r, 2 * r);
+    }
   }
-  g.lineCap = g.lineJoin = "round";
-  g.globalCompositeOperation = "lighten";
+
+  g.lineCap = "round";
   for (const p of sets.flatMap((v) => v.paths)) {
     if (!p.xy.some(near)) continue;
     any = true;
     g.beginPath();
     p.xy.forEach((a, i) => (i ? g.lineTo : g.moveTo).call(g, ...pt(a)));
     for (const [width, grey] of [
-      [1.9, 49],
-      [1.36, 125],
-      [0.83, 226],
+      [2.05, 62],
+      [1.42, 138],
+      [0.86, 232],
     ]) {
       g.strokeStyle = `rgb(${grey},${grey},${grey})`;
       g.lineWidth = ((p.w || 1.3) * width * N) / side;
@@ -69,7 +87,12 @@ export function laneSoil(s, rows, sets) {
   const tex = new T.CanvasTexture(c);
   tex.flipY = false;
   tex.colorSpace = T.NoColorSpace;
-  tex.minFilter = T.LinearMipmapLinearFilter;
+  if (tier >= 2) {
+    tex.minFilter = T.LinearMipmapLinearFilter;
+  } else {
+    tex.generateMipmaps = false;
+    tex.minFilter = T.LinearFilter;
+  }
   tex.magFilter = T.LinearFilter;
   wrap[3] = 1;
   return { tex, wrap };
