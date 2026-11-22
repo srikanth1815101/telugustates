@@ -1,9 +1,17 @@
 import { residentDesign } from "./resident-design.js";
 import { curvedPoints } from "./curves.js";
-let cache;
+let cache,
+  bypassHttpCache = false;
+export function resetCatalogCache() {
+  cache = null;
+  bypassHttpCache = true;
+}
 export async function records(url, ll, project) {
   return (cache ??= (async () => {
-    const res = await fetch(url("catalog.json"));
+    const res = await fetch(
+      url("catalog.json"),
+      bypassHttpCache ? { cache: "no-store" } : undefined,
+    );
     if (!res.ok) throw Error("Hugo content catalog unavailable");
     const j = await res.json(),
       rows = j.houses.map(residentDesign),
@@ -93,6 +101,7 @@ export async function records(url, ll, project) {
       return { ...p, point, lon, lat, yaw: p.yaw || 0 };
     });
     return {
+      home: j.home || null,
       districts: j.districts,
       resources: j.resources,
       world: j.world,

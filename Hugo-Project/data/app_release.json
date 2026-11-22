@@ -1,0 +1,12 @@
+{
+  "appId": "com.csrgo.telugustates.fieldtest",
+  "versionCode": 71500,
+  "versionName": "7.15.0",
+  "engineHash": "2261affca34e5bc0e495301f2ae497c9f9c9105db8e349b5fce87aa320e357ce",
+  "apkUrl": "https://github.com/srikanth1815101/telugustates/releases/latest/download/Telugu-States-Atlas.apk",
+  "releaseMetaUrl": "https://github.com/srikanth1815101/telugustates/releases/latest/download/app-version.json",
+  "domains": [
+    "https://telugustates.csrgo.com",
+    "https://telugustates.netlify.app"
+  ]
+}

@@ -7,6 +7,10 @@ export function loadMessages() {
     tables = { en, te };
   }));
 }
+export function reloadMessages() {
+  loading = null;
+  return loadMessages();
+}
 export function msg(id, args = {}) {
   const lang = document.documentElement.lang === "te" ? "te" : "en";
   const s = tables?.[lang]?.[id];

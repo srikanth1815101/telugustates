@@ -8,9 +8,14 @@ unsafe = false
 
 # All runtime data is local. No mounts outside this project and no network modules.
 [outputs]
-  home = ['HTML','Catalog']
+  home = ['HTML','Catalog','AppVersion']
 [outputFormats.Catalog]
   mediaType = 'application/json'
   baseName = 'catalog'
+  isPlainText = true
+  notAlternative = true
+[outputFormats.AppVersion]
+  mediaType = 'application/json'
+  baseName = 'app-version'
   isPlainText = true
   notAlternative = true

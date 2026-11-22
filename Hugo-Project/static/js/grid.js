@@ -82,6 +82,7 @@ export async function get(p) {
   if (p === "data/atlas.json") {
     return {
       ...a,
+      home: c.home,
       recordStats: c.recordStats,
       total: c.active.length,
       plots: Object.keys(c.plots),

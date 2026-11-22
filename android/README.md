@@ -1,6 +1,6 @@
-# Telugu States Atlas · Android 7.14.0 (71400)
+# Telugu States Atlas · Android 7.15.0 (71500)
 
-**Install:** open `Telugu-States-Atlas.apk` in this folder on Android 8.0 or later. This field build has the same application ID and signing certificate as 7.13.0, with a higher version code. It can be installed over that build without clearing its local data. The application does not request Internet, location, or storage permissions. Use an up-to-date Android System WebView for interactive 3D; the bilingual 2D map is the fallback.
+**Install:** download the latest `Telugu-States-Atlas.apk` from the **Download Android App** button on the Hugo home page (or GitHub Releases `latest`) on Android 8.0 or later. Offline terrain, houses, and 3D assets remain bundled locally, while `INTERNET` permission is used strictly to check `telugustates.csrgo.com` / `telugustates.netlify.app` for live `catalog.json` content updates (applied without requiring an APK update) and engine/model/animation updates (which surface **Update available** inside the installed app). Use an up-to-date Android System WebView for interactive 3D; the bilingual 2D map is the fallback.
 
 **Files:** `src/` is the native WebView host and local asset router; `res/` contains launcher resources; `console/` is a small offline return-to-map page. The manifest and build scripts are here. All atlas content and terrain are edited in the sibling [`Hugo-Project/`](../Hugo-Project/) folder, not in a duplicate web tree inside this wrapper.
 
@@ -23,7 +23,7 @@ Start at the workspace root. `Hugo-Project/`, `Android/` and `.github/workflows/
 ```sh
 # Run at the common parent. Set JAVA_HOME and ANDROID_HOME to the installed toolchains.
 read -rsp 'Keystore password: ' ATLAS_SIGN_PASS; echo; export ATLAS_SIGN_PASS
-python3 Android/build_apk.py --site Hugo-Project \
+python3 android/build_apk.py --site Hugo-Project \
   --keystore /private/path/atlas-signing.p12 --alias atlas-field \
   --out /tmp/Telugu-States-Atlas.apk
 unset ATLAS_SIGN_PASS
@@ -33,9 +33,14 @@ The script renders Hugo into a temporary directory, compiles Java/resources/DEX,
 
 Supply a PKCS12 keystore whose key and store passwords match. For a **new, separately signed installation**, generate your own private key with `keytool -genkeypair -storetype PKCS12 -keystore /private/path/atlas-signing.p12 -alias atlas-field -keyalg RSA -keysize 3072 -validity 10000`. A new key cannot upgrade the distributed APK. Do not uninstall a previous build merely to test a new signer if you need its local data; use a separate test device/profile or application ID. No signing secret is included in this workspace.
 
-### Optional manual workflow
+### Automated GitHub Actions deployment & two-tier updates
 
-The manual workflow is already at [`.github/workflows/build-android.yml`](../.github/workflows/build-android.yml). Keep `.github/` at the **repository root**, beside `Hugo-Project/` and `Android/`. Add repository secrets `ATLAS_KEYSTORE_B64` (base64 of your private keystore) and `ATLAS_SIGN_PASS`. If needed, set repository variable `ATLAS_KEY_ALIAS` (default `atlas-field`). Run **Build offline atlas APK** manually. The workflow builds only on request, has read-only repository permissions, uploads one one-day artifact and never deploys or commits binaries. `Android/.gitignore` excludes APKs and signing files. Leave the delivered APK out of source control; use `Android/Telugu-States-Atlas.apk` from this workspace for a local installation.
+The workflow at [`.github/workflows/build-android.yml`](../.github/workflows/build-android.yml) runs automatically on every push to `main` (and via `workflow_dispatch`):
+1. Runs all content, terrain, village, hydrology, and rig verification checks.
+2. Computes separate SHA-256 digests via `android/release_meta.py`:
+   - **Engine digest (`engineHash`)** — functionality, JS, shaders, 3D models, animations, CSS, layouts, and native Android code. When `engineHash` changes, already-installed apps display **Update available** with a direct link to install the updated APK.
+   - **Content digest (`contentHash`)** — houses, settlements, districts, places, trails, treasury resources, and bilingual copy in `catalog.json`. When only content changes, already-installed apps fetch and cache the updated `catalog.json` from `https://telugustates.csrgo.com` (falling back to `https://telugustates.netlify.app`) without requiring an APK update.
+3. Publishes `Telugu-States-Atlas.apk` and `app-version.json` to GitHub Releases (`latest`), powering the **Download Android App** button on the Hugo home page. Configure `ATLAS_KEYSTORE_B64` and `ATLAS_SIGN_PASS` secrets (and optional `ATLAS_KEY_ALIAS` variable) to sign with a custom keystore.
 
 ### Identify this installer
 

@@ -3,6 +3,7 @@ import { get, url, Tiles, key } from "./grid.js";
 import { loadMessages, bindMessages, msg } from "./messages.js";
 import { mountMap } from "./map.js";
 import { mountTreasury } from "./treasury-view.js";
+import { initAppSync } from "./app-sync.js";
 const $ = (s) => document.querySelector(s),
   home = $("#public-home"),
   dlg = $("#dialog"),
@@ -51,10 +52,29 @@ document.addEventListener("click", (e) => {
     translate();
   }
 });
+const esc = (s) =>
+  String(s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
 function paint() {
   if (!home) return;
   $("#nd").textContent = a.districts.length;
   $("#nr").textContent = a.total;
+  if (a.home) {
+    const t = $("#home-title"),
+      p = $("#home-intro");
+    if (t && a.home.title) {
+      t.dataset.en = esc(a.home.title) + "<span>.</span>";
+      if (a.home.title_te) t.dataset.te = esc(a.home.title_te) + ".";
+      t.innerHTML = lang === "te" ? t.dataset.te : t.dataset.en;
+    }
+    if (p && a.home.intro) {
+      p.dataset.en = esc(a.home.intro);
+      if (a.home.intro_te) p.dataset.te = esc(a.home.intro_te);
+      p.innerHTML = lang === "te" ? p.dataset.te : p.dataset.en;
+    }
+  }
   document.dispatchEvent(new Event("living:home-painted"));
 }
 async function showDialog(k) {
@@ -305,6 +325,28 @@ if (recordPage) {
   }
 }
 if (home || $("#economy-page")) await mountTreasury();
+initAppSync();
+window.addEventListener("atlas:content-updated", async () => {
+  try {
+    if (home) {
+      const [nextAtlas, nextStops, nextDir, nextRoutes] = await Promise.all([
+        get("data/atlas.json"),
+        get("living/public/places.json"),
+        get("data/directory.json"),
+        get("living/routes.json"),
+      ]);
+      a = nextAtlas;
+      stops = nextStops;
+      directory = nextDir;
+      paint();
+      if (map) map.reloadAtlas(a, stops, nextRoutes);
+    } else {
+      directory = await get("data/directory.json");
+    }
+  } catch (err) {
+    console.warn("Live content refresh skipped:", err);
+  }
+});
 if (home) {
   try {
     [a, stops, directory] = await Promise.all([
