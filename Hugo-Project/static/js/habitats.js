@@ -96,7 +96,7 @@ export function generate(input) {
       j = c.y,
       env = habitat(c),
       r = Math.hypot(i + 0.5 - centre[0], j + 0.5 - centre[1]);
-    if (!c.d || r > lim.radius) continue;
+    if (!c.d || c.seaCell || r > lim.radius) continue;
     const wet = isWet(c),
       shore = adjWet(i, j),
       hd = hdist(i + 0.5, j + 0.5),

@@ -173,7 +173,7 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
       alpha: false,
       antialias: !matchMedia("(pointer:coarse)").matches,
       powerPreference: "high-performance",
-      stencil: false,
+      depth: true,
       preserveDrawingBuffer: false,
     });
   } catch {}
@@ -2756,7 +2756,7 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
             ? 15000
             : 42000
           : clamp(P.r * 3 + 45000, 45000, 4800000),
-      near = mode === "ground" ? 0.1 : clamp(P.r / 800, 0.075, 200);
+      near = mode === "ground" ? 0.14 : clamp(P.r / 800, 0.075, 200);
     const fov = roomOwner
       ? cam.aspect < 0.8
         ? 81

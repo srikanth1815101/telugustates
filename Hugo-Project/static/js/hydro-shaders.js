@@ -25,7 +25,7 @@ void main(){shelf=marginGain;P=position;depth=depthM;F=vec4(flow.w>.5?flow.xy:fl
  // Smooth slope of the SAME displacement used by the vertex. Include the bed-depth derivative when the breaker shoals.
  if(range<445.){float dx=(seaLift(p+vec2(.375,0.),liquidTime,depth)-h)/.375,dz=(seaLift(p+vec2(0.,.375),liquidTime,depth)-h)/.375,dd=(seaLift(p,liquidTime,depth+.016)-h)*62.5;surfSlope.xyz=vec3(dx,dz,dd)*F.w*draw;}}
  if(marginGain>.00001&&F.w<.001){float dh=marginLift(P.xz+hydroOffset,liquidTime,flow.xy*flow.z,marginGain);P.y+=dh;surfSlope.w=dh;}
- wetM=depth+surfSlope.w;vec4 eye=modelViewMatrix*vec4(P,1.);fogD=-eye.z;gl_Position=projectionMatrix*eye;}`;
+ wetM=depth+surfSlope.w;vec4 eye=modelViewMatrix*vec4(P,1.);fogD=-eye.z;float zBias=min(.085*fogD,.009+.016*(1.-smoothstep(0.,.30,max(0.,wetM)))+.00038*fogD);eye.xyz*=max(.25,(fogD-zBias)/max(.25,fogD));gl_Position=projectionMatrix*eye;}`;
 export const waterFrag = (
   lite,
 ) => `varying float shelf;uniform sampler2D bankSky,currentGrain;uniform vec4 bankStation;varying vec4 surfSlope;uniform vec3 cameraInPatch,uSun,uZen,uHor;uniform float uFog,uDay,uRain,liquidTime,wakeClock,calmWater;uniform vec2 hydroOffset;uniform vec4 wakes[6];varying float depth,wetM,fogD;varying vec4 F;varying vec3 P;
@@ -60,8 +60,8 @@ void main(){vec2 local=P.xz,p=local+hydroOffset;float tm=liquidTime,sea=smoothst
  float eddy=.56*fieldNoise(p*.052+vec2(-tm*.038,3.1))+.44*fieldNoise(p*.155+vec2(7.4,tm*.047));
  float spdEff=max(0.,speed*(1.+.36*eddy)+.042*eddy*smoothstep(.004,.085,speed));
  float river=(1.-sea)*smoothstep(.014,.46,spdEff),pace=(1.-sea)*smoothstep(.05,.62,spdEff);
- float ew=wetM,lip=0.,edgeBand=river*(1.-smoothstep(.04,.46,abs(wetM)));
- if(edgeBand>.002){vec2 ed=normalize(F.xy+vec2(.000001,.000002)),es=vec2(-ed.y,ed.x),vAdv=ed*(.35+1.15*speed);float c1=mod(tm*1.35,12.),c2=mod(c1+6.,12.),cw=smoothstep(.14,.86,abs(c1-6.)/6.);float tongue=mix(fieldNoise((p-vAdv*c1)*.28+es*.4),fieldNoise((p-vAdv*c2)*.28+es*.4),cw),scallop=mix(fieldNoise((p-vAdv*c1)*.74-5.3),fieldNoise((p-vAdv*c2)*.74-5.3),cw);float slosh=.62*sin(dot(p,ed*.44+es*.68)-tm*1.95+1.3*tongue)+.38*cos(dot(p,ed*.81-es*.52)-tm*1.28);ew+=edgeBand*(.054*tongue+.028*scallop+.046*slosh-.016);lip=edgeBand*smoothstep(0.,.055,ew)*(1.-smoothstep(.035,.15,ew))*smoothstep(-.12,.56,tongue+.5*slosh);}
+ float ew=wetM,lip=0.,edgeBand=river*smoothstep(0.,.12,shelf)*(1.-smoothstep(.04,.38,wetM));
+ if(edgeBand>.002&&wetM>0.){vec2 ed=normalize(F.xy+vec2(.000001,.000002)),es=vec2(-ed.y,ed.x),vAdv=ed*(.35+1.15*speed);float c1=mod(tm*1.35,12.),c2=mod(c1+6.,12.),cw=smoothstep(.14,.86,abs(c1-6.)/6.);float tongue=mix(fieldNoise((p-vAdv*c1)*.28+es*.4),fieldNoise((p-vAdv*c2)*.28+es*.4),cw),scallop=mix(fieldNoise((p-vAdv*c1)*.72-5.3),fieldNoise((p-vAdv*c2)*.72-5.3),cw);float slosh=.62*sin(dot(p,ed*.44+es*.68)-tm*1.95+1.3*tongue)+.38*cos(dot(p,ed*.81-es*.52)-tm*1.28);float dent=edgeBand*.028*(1.-smoothstep(-.42,.52,.58*tongue+.24*scallop+.42*slosh));ew=wetM-dent;lip=edgeBand*smoothstep(.004,.052,ew)*(1.-smoothstep(.045,.16,ew))*smoothstep(-.08,.58,tongue+.45*slosh);}
  float ewf=fwidth(ew),wmf=fwidth(wetM);
  if((sea>.5||shelf>0.||depth<0.||river>.02)&&ew<=0.)discard;
  vec2 wind=vec2(.814,.581),wt=vec2(-wind.y,wind.x),rd=normalize(F.xy+vec2(.000001,.000002));float area=fieldNoise(p*.016+vec2(4.71,-43.)),wavelet=0.,scum=0.;vec2 grad=vec2(0.);
@@ -75,11 +75,12 @@ void main(){vec2 local=P.xz,p=local+hydroOffset;float tm=liquidTime,sea=smoothst
  if(farFlow<.995){float a=mod(tm+1.9*area,7.2),b2=mod(a+3.6,7.2),w=smoothstep(.14,.86,abs(a-3.6)/3.6);
  vec4 skin=mix(movingSkin(p-velNear*a,rd,ax0,ax1,turn,pixel,depth),movingSkin(p-velNear*b2,rd,ax0,ax1,turn,pixel,depth),w);
  nearGrad=skin.xy*middle*1.13;nearWave=(1.09*skin.z+.28*skin.w)*wide;
- // Narrow bending ripples ride a moving pressure packet on the shallow shelf. The signed sheet depth, NOT a white outline, decides where ground is wet.
- if(shelf>.001&&pixel<.57){vec2 crossRun=vec2(-rd.y,rd.x);float k=mod(tm,6.4),j=mod(k+3.2,6.4),fade=smoothstep(.12,.88,abs(k-3.2)/3.2);float ripple=0.;
- for(int l=0;l<2;l++){vec2 q=p-velNear*(l==0?k:j);float pocket=.5+.5*fieldNoise(q*.48+vec2(7.1,-4.2));float wrinkle=3.9*fieldNoise(q*.55)+2.16*fieldNoise(q*.93+9.5);float crest=mix(sin(dot(q,ax0)*7.3+wrinkle),sin(dot(q,ax1)*7.3+wrinkle),turn);
- float r=crest*smoothstep(.31,.73,pocket)*(l==0?1.-fade:fade);ripple+=r;}
- float lift=smoothstep(-.024,.106,surfSlope.w);nearGrad+=rd*(.135+.105*lift)*ripple*shelf*fine+crossRun*.051*skin.w*shelf;nearScum=shelf*.12*lift*smoothstep(.36,.85,ripple)*fine;}}
+ // Aperiodic band-limited shelf ripples ride the moving pressure packet; no periodic sine grating at shallow margins.
+ if(shelf>.001&&pixel<.22){float shFine=1.-smoothstep(.07,.22,pixel);vec2 crossRun=vec2(-rd.y,rd.x);float k=mod(tm,6.4),j=mod(k+3.2,6.4),fade=smoothstep(.12,.88,abs(k-3.2)/3.2);
+ vec2 q0=p-velNear*k,q1=p-velNear*j,u0=vec2(dot(q0,rd),dot(q0,crossRun)),u1=vec2(dot(q1,rd),dot(q1,crossRun));
+ float r0=fieldNoise(u0*vec2(1.32,.50)+vec2(3.1,-2.4)),r1=fieldNoise(u1*vec2(1.32,.50)+vec2(3.1,-2.4));
+ float ripple=mix(r0,r1,fade)*(.5+.5*fieldNoise(p*.36+vec2(7.1,-4.2)));
+ float lift=smoothstep(-.02,.10,surfSlope.w);nearGrad+=(rd*(.082+.062*lift)*ripple+crossRun*.042*skin.w)*shelf*shFine;nearScum=shelf*.07*lift*smoothstep(.28,.76,ripple)*shFine;}}
  // Distant water uses bounded-celerity pressure fields in the same continuous shading model so velocity gradients never fold into contour stripes.
  if(farFlow>.005){float a3=mod(tm+2.4*area,9.6),b3=mod(a3+4.8,9.6),sw=smoothstep(.12,.88,abs(a3-4.8)/4.8);
  vec3 surf=mix(broadSkin(p-velFar*a3,rd),broadSkin(p-velFar*b3,rd),sw);float g=surf.x*.83+surf.z*.29;
@@ -121,7 +122,7 @@ void main(){vec2 local=P.xz,p=local+hydroOffset;float tm=liquidTime,sea=smoothst
  facet*=1.+.085*wr*wide+.056*gr*middle;facet=mix(facet,mix(vec3(.098,.239,.292),uHor,.18),smoothstep(108.,520.,fogD)*.74);col=mix(col,facet,sea);}
  float gl=pow(max(0.,dot(refl,uSun)),57.);col+=vec3(.30,.287,.205)*gl*uDay*(.42+.58*middle);col=mix(col,vec3(.80,.89,.84),clamp(foam,0.,.87));col*=mix(.42,1.,uDay);col=mix(col,uHor,1.-exp(-pow(max(0.,fogD)*uFog,2.)));
  float alpha=.35+.50*deep+.17*fres+.41*foam;alpha=mix(alpha,max(alpha,.55+.38*deep+.12*foam),pace*smoothstep(.08,.78,d));alpha=mix(alpha,max(alpha,.57+.42*smoothstep(.38,1.85,d)),sea*smoothstep(.12,.85,d));
- float shGain=smoothstep(0.,.18,max(shelf,edgeBand));if(shGain>.001){float shallow=(1.-smoothstep(.025,.35,ew))*shGain;col=mix(col,vec3(.066,.181,.147)*(1.+.26*wavelet)+vec3(.45,.58,.58)*fres*.70,shallow*.46);alpha=mix(alpha,.30+.46*fres+.08*wavelet,shallow);alpha*=mix(1.,smoothstep(0.,max(.02,.82*ewf),ew),shGain);}
- alpha*=mix(1.,smoothstep(0.,max(.030,.65*wmf),wetM),sea);gl_FragColor=vec4(col,clamp(alpha,0.,.995));
+ float shGain=smoothstep(0.,.18,max(shelf,river*(1.-smoothstep(.04,.38,ew))));if(shGain>.001){float shallow=(1.-smoothstep(.025,.35,ew))*shGain;col=mix(col,vec3(.066,.181,.147)*(1.+.24*wavelet)+vec3(.45,.58,.58)*fres*.68,shallow*.46);alpha=mix(alpha,.28+.44*fres+.07*wavelet,shallow);alpha*=mix(1.,smoothstep(0.,max(.034,1.15*ewf),ew),shGain);}
+ alpha*=mix(1.,smoothstep(0.,max(.034,1.05*wmf),wetM),sea);gl_FragColor=vec4(col,clamp(alpha,0.,.995));
 #include <colorspace_fragment>
 }`;
