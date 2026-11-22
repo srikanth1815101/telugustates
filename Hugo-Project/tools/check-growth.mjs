@@ -26,9 +26,10 @@ try {
     });
   let count = 0,
     firstId = "";
-  for (const districts of [
-    [17, 44],
-    [17, 44, 17, 44, 17, 44, 17, 44, 17, 44],
+  for (const [districts, addedVillages] of [
+    [[32, 32], 0],
+    [[32, 32, 32, 32, 32, 32, 32, 32], 0],
+    [[17, 17, 44, 44], 2],
   ]) {
     for (const d of districts) {
       const rawHandle =
@@ -61,7 +62,7 @@ try {
     const next = JSON.parse(await fs.readFile(ledger));
     assert.equal(
       next.villages.length,
-      prior.villages.length,
+      prior.villages.length + addedVillages,
       "Exhaust suitable existing hamlets first",
     );
     for (const old of prior.villages) {

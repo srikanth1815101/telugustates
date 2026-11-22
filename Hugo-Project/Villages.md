@@ -1,23 +1,10 @@
-# Ten villages • two destinations per household
+# Production villages • two destinations per household
 
-**7.14.0. This is a replacement roster.** The earlier demo houses, their owner-specific trails and their published pages are not part of this edition. All 61 districts remain on the map, but only the ten below have seed households. Five districts per state were drawn with fixed seed `0x714cc`. These are fictional households, not real Instagram accounts or property titles.
-
-| District | State | Households & individually assigned fields | Residential acres | Planned capacity |
-|---|---|---:|---:|---:|
-| Markapuram | AP | 13 | 9 | 27 |
-| Palnadu | AP | 14 | 9 | 25 |
-| Sri Potti Sriramulu Nellore | AP | 13 | 16 | 31 |
-| West Godavari | AP | 14 | 16 | 34 |
-| Y.S.R. Kadapa | AP | 11 | 9 | 29 |
-| Mahabubnagar | TG | 11 | 16 | 31 |
-| Mancherial | TG | 12 | 16 | 32 |
-| Medak | TG | 15 | 16 | 34 |
-| Mulugu | TG | 15 | 16 | 33 |
-| Vikarabad | TG | 15 | 9 | 22 |
+**Production launch.** All earlier demonstration seed households have been removed. All 61 districts across Telangana and Andhra Pradesh are live on `https://telugustates.csrgo.com`, opening with the founding community household (`Srikanth` in Hyderabad, `v32-01`, 16-acre residential square, planned capacity 34) and settling new villages automatically as followers join. These are purely fictional virtual homes and acres for entertainment, not property titles.
 
 ### Where to go
 
-Start with `@palnadu_demo01` or `@medak_demo08`. Search opens the named home. Its porch is **not** on its agricultural acre. **Settings • Home • Land** share the top row in 3D, including local orbit. Both destinations open a small north-up sketch and offer **Walk there** or **Teleport**. In a scenic visit with no active resident, choose a household on the card. Walking shows the next junction and distance; move with the stick or WASD. Teleport moves directly to that porch or just inside that field. `#/u/<handle>`, `#/acre/<handle>`, `#/plot/<handle>` and `/houses/<handle>/` refer to the new roster. Districts without households still have geographic records.
+Start with `@telugustates.csrgo` in Hyderabad. Search hashes the handle one-way on device and opens the named home (`Srikanth`). Its porch is **not** on its agricultural acre. **Settings • Home • Land** share the top row in 3D, including local orbit. Both destinations open a small north-up sketch and offer **Walk there** (only when a foot-trail connects your current location) or **Teleport**. In a scenic visit with no stored resident ID, Home and Land ask once for your Instagram username and remember only its converted ID locally. Walking shows the next junction and distance; move with the stick or WASD. Teleport moves directly to that porch or just inside that field. `#/u/<id>`, `#/acre/<id>`, `#/plot/<id>` and `/houses/<id>/` use only the hashed resident ID. Districts without households still have geographic records.
 
 ### What occupies the square
 

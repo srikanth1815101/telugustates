@@ -15,6 +15,7 @@ import {
   insideRoom,
   houseBlocked,
 } from "../static/js/home-volume.js";
+import { models, residentDesign } from "../static/js/resident-design.js";
 import { buildRoom, doorLeaf } from "../static/js/home-interior.js";
 import { pathIndex } from "../static/js/path-right-of-way.js";
 import { yards } from "../static/js/timber-yard.js";
@@ -492,7 +493,7 @@ try {
       for (let i = -1; i <= 1; i++) ks.add(key(x + i * 90, y + j * 90));
     await Promise.all([...ks].map((k) => tiles.load(k)));
     tiles.trim(ks);
-    const demoTarget = residentId("palnadu_demo01"),
+    const demoTarget = residentId("telugustates.csrgo"),
       detail =
         gr.find((r) => r[2] === demoTarget) || (!q.groundRays ? gr[0] : null);
     for (const [focus, survey, g, ray] of [
@@ -544,11 +545,46 @@ try {
   );
 
   q.profiles = Object.fromEntries([...byShell].map(([k, v]) => [k, v.size]));
+  const syntheticLayouts = new Set(),
+    syntheticByShell = new Map(),
+    facings = ["north", "east", "south", "west"];
+  for (let i = 0; i < 144; i++) {
+    const uid = residentId(`archetype_probe_${i}`),
+      arch = models[i % models.length],
+      designed = residentDesign({
+        u: uid,
+        c: [2344 + (i % 7), 7759 + Math.floor(i / 7)],
+        d: 32,
+        house: {
+          seed: ((i + 1) * 2654435761) >>> 0,
+          archetype: arch,
+          facing: facings[i % 4],
+          setback_m: 8.5,
+          path_width_m: 1.2,
+          wall_color: "#d8c3a5",
+          roof_color: "#b06b49",
+          size_m: [
+            9.6 + ((i * 7) % 19) * 0.14,
+            10.2 + ((i * 11) % 17) * 0.14,
+            3.9 + ((i * 5) % 13) * 0.18,
+          ],
+          props: ["shade-tree"],
+          sign: { label: `Probe${i}` },
+        },
+      }),
+      plan = roomPlan(designed.house),
+      set = syntheticByShell.get(arch) || new Set();
+    syntheticLayouts.add(plan.design.style);
+    set.add(plan.design.style);
+    syntheticByShell.set(arch, set);
+  }
   assert(
-    Object.keys(q.layouts).length === 11 &&
-      [...byShell.values()].every((v) => v.size >= 3) &&
+    rows.length >= 1 &&
       profiles.size === rows.length &&
-      q.furniturePieces === rows.length * 3,
+      q.furniturePieces === rows.length * 3 &&
+      syntheticLayouts.size === 11 &&
+      syntheticByShell.size === models.length &&
+      [...syntheticByShell.values()].every((v) => v.size >= 3),
   );
   q.uniquePlans = profiles.size;
   console.log(JSON.stringify(q, null, 1));

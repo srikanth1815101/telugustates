@@ -28,7 +28,7 @@ import javax.net.ssl.HttpsURLConnection;
  * Offline-first OTA content sync and engine update detector.
  *
  * - Content changes (`contentHash` in catalog.json) are downloaded from the live Hugo site
- *   (trying production `telugustates.csrgo.com` first, then `telugustates.netlify.app`) and
+ *   (`https://telugustates.csrgo.com`) and
  *   cached on device so new homes, villages, and treasury updates appear without an APK update.
  * - Functionality, animation, 3D model, and native host changes (`engineHash`) surface
  *   `updateAvailable = true` so installed apps prompt the user to install the latest APK.
@@ -164,7 +164,7 @@ final class LiveSync {
             if ("github.com".equals(host) && path.startsWith("/srikanth1815101/telugustates/releases/")) {
                 return true;
             }
-            if (("telugustates.csrgo.com".equals(host) || "telugustates.netlify.app".equals(host))
+            if ("telugustates.csrgo.com".equals(host)
                     && path.toLowerCase(Locale.ROOT).endsWith(".apk")) {
                 return true;
             }
@@ -176,7 +176,6 @@ final class LiveSync {
         if (host == null) return false;
         String h = host.toLowerCase(Locale.ROOT);
         return "telugustates.csrgo.com".equals(h)
-                || "telugustates.netlify.app".equals(h)
                 || "github.com".equals(h)
                 || "api.github.com".equals(h)
                 || h.endsWith(".githubusercontent.com");
@@ -281,7 +280,6 @@ final class LiveSync {
             }
         }
         if (!list.contains("https://telugustates.csrgo.com")) list.add("https://telugustates.csrgo.com");
-        if (!list.contains("https://telugustates.netlify.app")) list.add("https://telugustates.netlify.app");
         return list;
     }
 
