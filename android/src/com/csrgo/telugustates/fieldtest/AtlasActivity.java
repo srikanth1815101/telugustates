@@ -139,9 +139,19 @@ public final class AtlasActivity extends Activity {
             final WebView w = new WebView(this);
             atlas = w;
             w.setBackgroundColor(PAPER);
+            w.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+            w.setOverScrollMode(View.OVER_SCROLL_NEVER);
+            long vCode = installedVersionCode();
+            android.content.SharedPreferences sp = getSharedPreferences("atlas_host_cache", MODE_PRIVATE);
+            if (sp.getLong("apk_version_code", -1L) != vCode) {
+                w.clearCache(true);
+                sp.edit().putLong("apk_version_code", vCode).apply();
+            }
             WebSettings s = w.getSettings();
             s.setJavaScriptEnabled(true);
             s.setDomStorageEnabled(true);
+            s.setCacheMode(WebSettings.LOAD_DEFAULT);
+            s.setOffscreenPreRaster(false);
             s.setUseWideViewPort(true);
             s.setLoadWithOverviewMode(false);
             s.setSupportZoom(false); // the atlas handles two-finger gestures itself
@@ -160,9 +170,10 @@ public final class AtlasActivity extends Activity {
             w.setWebChromeClient(new WebChromeClient() {
                 @Override public void onPermissionRequest(PermissionRequest req) { req.deny(); }
             });
-            w.setWebViewClient(new Client());
+            w.setWebViewClient(new Client(vCode));
             root.addView(w, new FrameLayout.LayoutParams(-1,-1));
             last = address;
+            lastInsetsSent = "";
             w.loadUrl(address);
         } catch (RuntimeException | LinkageError e) {
             failure("Android System WebView is unavailable",
@@ -183,23 +194,41 @@ public final class AtlasActivity extends Activity {
         String p = Uri.parse(url).getPath();
         return AssetRoute.HUB_PATH.equals(p) || "/_field/".equals(p);
     }
-    private static WebResourceResponse response(int code, String reason, String mime, InputStream stream) {
+    private static boolean immutableAsset(String key) {
+        if (key == null) return false;
+        if (key.endsWith(".html") || "atlas/catalog.json".equals(key) || "atlas/app-version.json".equals(key)) return false;
+        return key.startsWith("atlas/js/") || key.startsWith("atlas/vendor/") || key.startsWith("atlas/fonts/")
+            || key.startsWith("atlas/frozen/") || key.startsWith("atlas/library/") || key.startsWith("atlas/assets/")
+            || key.startsWith("atlas/art/") || key.startsWith("atlas/current/") || key.startsWith("atlas/hydraulics/")
+            || key.startsWith("atlas/survey/") || key.startsWith("atlas/ecology/") || key.endsWith(".css");
+    }
+    private static WebResourceResponse response(int code, String reason, String mime, InputStream stream, boolean cacheable, long vCode) {
         Map<String,String> headers = new HashMap<>();
-        headers.put("Cache-Control", "no-store");
+        if (cacheable) {
+            headers.put("Cache-Control", "private, max-age=31536000, immutable");
+            headers.put("ETag", "\"apk-" + vCode + "\"");
+        } else {
+            headers.put("Cache-Control", "no-store");
+        }
         headers.put("X-Content-Type-Options", "nosniff");
         return new WebResourceResponse(mime, AssetRoute.text(mime) ? "UTF-8" : null, code, reason, headers, stream);
+    }
+    private static WebResourceResponse response(int code, String reason, String mime, InputStream stream) {
+        return response(code, reason, mime, stream, false, 0L);
     }
     private static WebResourceResponse status(int code, String reason) {
         return response(code, reason, "text/plain", new ByteArrayInputStream(reason.getBytes(StandardCharsets.UTF_8)));
     }
     private final class Client extends WebViewClient {
+        private final long apkCode;
+        Client(long apkCode) { this.apkCode = apkCode; }
         @Override public WebResourceResponse shouldInterceptRequest(WebView w, WebResourceRequest req) {
             Uri u = req.getUrl();
             if (!local(u)) return status(403,"Offline atlas only");
             if (!"GET".equals(req.getMethod()) && !"HEAD".equals(req.getMethod())) return status(405,"Method not allowed");
             if ("/_field/sync".equals(u.getPath())) {
                 if ("HEAD".equals(req.getMethod())) return response(200, "OK", "application/json", new ByteArrayInputStream(new byte[0]));
-                return liveSync.syncResponse(installedVersionCode(), installedVersionName());
+                return liveSync.syncResponse(apkCode, installedVersionName());
             }
             String key = AssetRoute.key(u.getPath());
             if (key == null) return status(404,"Not found");
@@ -213,7 +242,7 @@ public final class AtlasActivity extends Activity {
             try {
                 InputStream in = getAssets().open(key, AssetManager.ACCESS_STREAMING);
                 if ("HEAD".equals(req.getMethod())) { in.close(); in = new ByteArrayInputStream(new byte[0]); }
-                return response(200,"OK",AssetRoute.mime(key), in);
+                return response(200, "OK", AssetRoute.mime(key), in, immutableAsset(key), apkCode);
             } catch (IOException notFound) {
                 InputStream dynamicHouse = liveSync.openDynamicHousePage(key);
                 if (dynamicHouse != null) {
@@ -251,7 +280,7 @@ public final class AtlasActivity extends Activity {
         }
         @Override public void onPageFinished(WebView w, String url) {
             if (w != atlas || !safeLocal(url)) return;
-            last=url;if(hub(url))immersive(false);publishInsets(); if(!hub(url))wireHaptics(w);else closeHapticPort();
+            last=url;lastInsetsSent="";if(hub(url))immersive(false);publishInsets(); if(!hub(url))wireHaptics(w);else closeHapticPort();
             if (hub(url)) {
                 w.clearHistory();
             }
@@ -266,9 +295,12 @@ public final class AtlasActivity extends Activity {
             }
         }
     }
-    private int[] safe={0,0,0,0};private byte[] photoBytes;
+    private int[] safe={0,0,0,0};private String lastInsetsSent="";private byte[] photoBytes;
     private void publishInsets(){WebView w=atlas;if(w==null||!safeLocal(w.getUrl()))return;
-        String js="(function(){var r=document.documentElement;if(!r)return;var k=['t','r','b','l'],v=["+safe[0]+","+safe[1]+","+safe[2]+","+safe[3]+ "];k.forEach(function(x,i){r.style.setProperty('--native-'+x,(v[i]/(devicePixelRatio||1))+'px')})})()";
+        String sig=safe[0]+","+safe[1]+","+safe[2]+","+safe[3];
+        if(sig.equals(lastInsetsSent))return;
+        lastInsetsSent=sig;
+        String js="(function(){var r=document.documentElement;if(!r)return;var k=['t','r','b','l'],v=["+sig+"];k.forEach(function(x,i){r.style.setProperty('--native-'+x,(v[i]/(devicePixelRatio||1))+'px')})})()";
         w.evaluateJavascript(js,null);
     }
     // Save only a local canvas image, through the user's document picker; no storage permission.

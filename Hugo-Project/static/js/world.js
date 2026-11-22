@@ -1198,14 +1198,21 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
         1,
       );
       // Per streaming job: do not mutate the material identity of a half-built patch when a tier changes.
-      const inland = (eco.at(xx, yy)?.coast ?? 400) > 24;
+      const inland = (eco.at(xx, yy)?.coast ?? 400) > 24,
+        coarseTouch =
+          typeof matchMedia === "function" &&
+          matchMedia("(pointer:coarse)").matches;
       const lightLand = tier === 0 && inland && !env.weather.rain;
       const midSkin = farGrid && inland && !env.weather.rain;
       const groundMaterials = {
-        land: lightLand ? mats.fastLand : tier === 0 ? mats.landLow : landFull,
+        land: lightLand
+          ? mats.fastLand
+          : tier === 0 || (tier === 1 && coarseTouch)
+            ? mats.landLow
+            : landFull,
         water: midSkin
           ? mats.reach
-          : prefs.saver || tier === 0
+          : prefs.saver || tier === 0 || (tier === 1 && coarseTouch)
             ? mats.waterSaver
             : waterFull,
         surfDepth: mats.surfDepth,
@@ -1227,7 +1234,7 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
       };
       l.inland = inland;
       l.group.position.fromArray(s.offset);
-      l.lane = laneSoil(s, all, villages);
+      l.lane = laneSoil(s, all, villages, tier);
       for (let b = 0; b < plan.length; b++) {
         if (dead || job !== ver) {
           free(l);
@@ -1273,7 +1280,7 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
           await next();
         }
 
-        if (b % 4 === 1) await next();
+        if (tier <= 1 || b % 4 === 1) await next();
       }
       if (dead || job !== ver) {
         free(l);
@@ -1286,10 +1293,24 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
       }
       l.collar = collar(data, cut, s, env.uni, headWindow);
       l.group.add(l.collar);
+      if (tier <= 1) {
+        await next();
+        if (dead || ver !== job) {
+          free(l);
+          return;
+        }
+      }
       l.inset = hydraulicInset(data, l.collar.userData.cut, s, headWindow);
       l.group.add(l.inset);
       l.horizon = horizon(data, l.inset.userData.cut, s.relief, s.o);
       l.group.add(l.horizon);
+      if (tier <= 1) {
+        await next();
+        if (dead || ver !== job) {
+          free(l);
+          return;
+        }
+      }
       if (tier === 0) {
         for (const mat of [groundMaterials.land, groundMaterials.water]) {
           const found = [];
@@ -1328,7 +1349,7 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
       l.drain = new RunoffWindow(s, {
         renderer,
         uniforms: mats.uniforms,
-        lite: tier === 0 || prefs.saver,
+        lite: tier <= 1 || prefs.saver,
       });
       l.group.add(l.drain.group);
       // Build after the obstructing rocks are available; do not allocate a basin solver for the regional chart.
@@ -1337,6 +1358,13 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
         return;
       }
       nature(l);
+      if (tier <= 1) {
+        await next();
+        if (dead || ver !== job) {
+          free(l);
+          return;
+        }
+      }
       l.bio = new EcologyScene(s, eco, all, env.uni, tier, prefs, () => L?.bio);
       l.group.add(l.bio.group);
       await l.bio.build(xx, yy);
@@ -1346,6 +1374,13 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
       }
       l.cover = new FootCover(s, tier, mats.uniforms);
       l.group.add(l.cover.g);
+      if (tier <= 1) {
+        await next();
+        if (dead || job !== ver) {
+          free(l);
+          return;
+        }
+      }
       l.extras = new FieldExtras(
         s,
         eco,
@@ -1358,6 +1393,7 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
       );
       l.extras.syncRocks(l.bio.statics);
       l.drain.obstacles(l.bio.statics);
+      l.syncedStatics = l.bio.statics;
       if (L?.drain.net && Math.hypot(xx - L.fx, yy - L.fy) * U < 260)
         l.drain.inherit(L.drain);
       if (
@@ -2360,11 +2396,11 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
       !busy &&
       (L.cx !== Math.floor((x + (motor.vx * 2.4) / U) / 64) ||
         L.cy !== Math.floor((y + (motor.vy * 2.4) / U) / 64) ||
-        Math.abs(x - L.fx) > 2.25 ||
-        Math.abs(y - L.fy) > 2.25)
+        Math.abs(x - L.fx) > 3.35 ||
+        Math.abs(y - L.fy) > 3.35)
     )
       prepare(x + (motor.vx * 2.4) / U, y + (motor.vy * 2.4) / U);
-    else if (Math.hypot(x - L.nx, y - L.ny) > 0.94) nature(L);
+    else if (Math.hypot(x - L.nx, y - L.ny) > 1.65) nature(L);
     L.cover.update(x, y);
     L.cover.g.visible = true;
     tracks.reduced = reduced || prefs.saver;
@@ -2968,7 +3004,10 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
     if (L && localVisible) {
       const cx = mode === "ground" ? O.x + cam.position.x / U : P.x,
         cy = mode === "ground" ? O.y - cam.position.z / U : P.y;
-      L.drain.obstacles(L.bio.statics);
+      if (L.bio && L.syncedObsStatics !== L.bio.statics) {
+        L.drain.obstacles(L.bio.statics);
+        L.syncedObsStatics = L.bio.statics;
+      }
       L.drain.update(
         cx,
         cy,
@@ -3018,29 +3057,22 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
       localVisible ? L.inset.userData.cut : firstPatch?.cut || null,
       env.uni.uDetail.value,
     );
-    const cullPose = [
-      L?.id,
-      cam.position.x,
-      cam.position.y,
-      cam.position.z,
-      cam.quaternion.x,
-      cam.quaternion.y,
-      cam.quaternion.z,
-      cam.quaternion.w,
-      cam.aspect,
-    ].join("/");
     if (
-      cullPose !== L?.lastCullPose &&
       (mode === "ground" || (mode === "survey" && expanded)) &&
       L &&
       (now - stamp > (mode === "ground" ? 260 : 400) ||
         Math.abs(yaw - lastCullYaw) > 0.038 ||
-        Math.abs(pitch - lastCullPitch) > 0.038)
+        Math.abs(pitch - lastCullPitch) > 0.038 ||
+        Math.hypot(
+          cam.position.x - (L.lastCullX ?? 1e9),
+          cam.position.z - (L.lastCullZ ?? 1e9),
+        ) > 1.6)
     ) {
       cam.updateMatrixWorld(true);
       if (gov.tier === 0) cropDraws(L.group, cam);
       else if (L.sc) cropDraws(L.sc, cam);
-      L.lastCullPose = cullPose;
+      L.lastCullX = cam.position.x;
+      L.lastCullZ = cam.position.z;
       stamp = now;
       lastCullYaw = yaw;
       lastCullPitch = pitch;
@@ -3056,10 +3088,16 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
     else fx.group.visible = false;
     if (localVisible && L.bio) {
       L.bio.update(dt, P.x, P.y, cam, P.r, reduced);
-      L.extras?.syncRocks(L.bio.statics);
+      if (L.syncedRockStatics !== L.bio.statics) {
+        L.extras?.syncRocks(L.bio.statics);
+        L.syncedRockStatics = L.bio.statics;
+      }
       L.extras?.update(cam, P.x, P.y, P.r, reduced || prefs.saver);
     }
-    if (now - lastLabels > (mode === "ground" ? 500 : 55)) {
+    if (
+      now - lastLabels >
+      (mode === "ground" ? 500 : pointers.size > 0 ? 150 : 65)
+    ) {
       labels.draw(
         cam,
         P.r,

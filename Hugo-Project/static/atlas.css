@@ -206,12 +206,18 @@ html[lang="te"] .lang span:first-child {
 .titlebar p {
   font-size: 15px;
 }
+.titlebar-side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+  flex-shrink: 0;
+}
 .metrics {
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
   gap: 22px;
-  margin: 0 4px 4px 0;
+  margin: 0;
 }
 .metrics > div + div {
   padding-left: 24px;
@@ -817,67 +823,101 @@ html[lang="te"] .eyebrow {
     width: calc(100% - 28px);
   }
   .top {
-    height: 64px;
+    height: 60px;
   }
   .brand {
     gap: 8px;
+    min-width: 0;
   }
   .brand img {
-    width: 33px;
-    height: 33px;
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
   }
   .brand > span {
-    font-size: 19px;
+    font-size: 18px;
+    white-space: nowrap;
   }
   .brand small {
-    font-size: 8px;
+    font-size: 7.5px;
+    letter-spacing: 1.8px;
   }
   .bar nav {
-    gap: 0;
+    gap: 2px;
   }
   .bar nav .active,
   .bar nav span {
     display: none;
   }
   .bar nav button {
-    padding: 7px;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    display: grid;
+    place-items: center;
+    border-radius: 8px;
   }
   .bar {
-    gap: 5px;
+    gap: 6px;
   }
   .lang {
-    padding: 5px 7px;
+    padding: 6px 9px;
+    flex-shrink: 0;
   }
   .titlebar {
-    display: block;
-    padding: 25px 0 19px;
+    display: grid;
+    gap: 14px;
+    padding: 18px 0 15px;
   }
   .titlebar h1 {
-    font-size: 48px;
-    margin: 6px 0;
+    font-size: clamp(34px, 9.2vw, 44px);
+    letter-spacing: -1.8px;
+    margin: 5px 0 6px;
   }
   .titlebar p {
-    font-size: 13px;
+    font-size: 13.5px;
+    line-height: 1.45;
+  }
+  .titlebar-side {
+    width: 100%;
+    align-items: stretch;
+    gap: 10px;
   }
   .metrics {
-    margin: 17px 0 0;
-    gap: 14px;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0;
+    margin: 0;
+    padding: 10px 12px;
+    background: #fbfbf3;
+    border: 1px solid #d1dac9;
+    border-radius: 11px;
   }
   .metrics > div {
     display: flex;
-    align-items: baseline;
-    gap: 5px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 3px;
+    min-width: 0;
   }
   .metrics strong {
     font-size: 20px;
+    line-height: 1;
+    letter-spacing: -0.6px;
   }
   .metrics small {
     font-size: 8px;
-    letter-spacing: 0.8px;
+    letter-spacing: 0.75px;
+    line-height: 1.2;
     margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
   }
   .metrics > div + div {
-    padding-left: 13px;
+    padding-left: 11px;
+    border-left: 1px solid #dce2d4;
   }
   .atlas-layout {
     grid-template-columns: 1fr;
@@ -1230,39 +1270,45 @@ html[lang="te"] .eyebrow {
 .app-download-btn {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 14px;
-  border-radius: 9px;
-  background: var(--green);
-  border: 1px solid #1f3e33;
+  gap: 9px;
+  min-height: 40px;
+  padding: 9px 14px;
+  border-radius: 10px;
+  background: linear-gradient(120deg, #214536, #2d5946);
+  border: 1px solid #1b382c;
   color: #fffdf4;
-  font: 700 12px/1.2 var(--body);
-  box-shadow: 0 2px 8px #233f3518;
+  font: 700 12.5px/1.2 var(--body);
+  box-shadow: 0 3px 10px #1e3b3022;
   white-space: nowrap;
   transition: background 0.15s ease, transform 0.15s ease;
 }
 .app-download-btn:hover {
-  background: #214034;
+  background: linear-gradient(120deg, #1b392d, #254a3a);
 }
 .app-download-btn .ico {
   width: 15px;
   height: 15px;
   flex: none;
 }
+.app-download-btn .ico:last-child {
+  width: 13px;
+  height: 13px;
+  opacity: 0.78;
+}
 .app-download-btn small {
-  font: 700 9px/1 var(--mono);
-  letter-spacing: 0.5px;
-  padding: 3px 5px;
-  border-radius: 4px;
-  background: #ffffff21;
-  color: #eef5ea;
+  font: 700 9.5px/1 var(--mono);
+  letter-spacing: 0.4px;
+  padding: 4px 6px;
+  border-radius: 5px;
+  background: #ffffff24;
+  color: #f0f6ec;
 }
 .app-download-btn.is-update {
-  background: var(--terra);
+  background: linear-gradient(120deg, #a24e33, #b85d40);
   border-color: #8f432b;
 }
 .app-download-btn.is-update:hover {
-  background: #964830;
+  background: linear-gradient(120deg, #91442b, #a85236);
 }
 .app-update-banner {
   background: #f4efe2;
@@ -1354,19 +1400,35 @@ html[lang="te"] .eyebrow {
 .map-key span + span i {
   background: #68999d;
 }
+.treasury {
+  content-visibility: auto;
+  contain-intrinsic-size: 280px;
+}
 @media (max-width: 700px) {
   .app-download-btn {
-    margin-left: auto;
-    padding: 8px 11px;
-    font-size: 11px;
-    gap: 6px;
-  }
-  .metrics {
-    gap: 8px;
+    display: flex;
     width: 100%;
+    min-height: 46px;
+    margin: 0;
+    padding: 10px 14px;
+    border-radius: 11px;
+    font-size: 13px;
+    gap: 9px;
   }
-  .metrics > div + div {
-    padding-left: 8px;
+  .app-download-btn > span {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .app-download-btn small {
+    margin-left: auto;
+    font-size: 10px;
+    padding: 4px 7px;
+  }
+  .zoom button {
+    width: 38px;
+    height: 38px;
   }
   .map-key {
     left: 16px;

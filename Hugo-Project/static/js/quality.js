@@ -72,13 +72,14 @@ export class Governor {
 }
 // Budget fragments by AREA. A rotated display should not suddenly shade four times as many pixels.
 export function fieldRatio(w, h, dpr, tier, orbit, pixels) {
-  const cap =
-    tier === 2
-      ? 1.35
-      : tier === 1
-        ? 0.85
-        : orbit
-          ? Math.min(1, 750 / w)
-          : Math.min(0.95, Math.sqrt(pixels / (w * h)));
+  const area = Math.max(1, w * h),
+    cap =
+      tier === 2
+        ? 1.35
+        : tier === 1
+          ? Math.min(1.12, Math.sqrt(360000 / area))
+          : orbit
+            ? Math.min(1, 750 / Math.max(1, w))
+            : Math.min(0.95, Math.sqrt(pixels / area));
   return Math.min(dpr, cap);
 }

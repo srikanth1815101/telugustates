@@ -477,17 +477,19 @@ export async function mountMap(initialAtlas, tr, boundaries = get("frozen/map.js
         lab(lo, la, str, 10);
       }
     }
-    const delta =
-      [
-        0.0005, 0.001, 0.002, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2, 5,
-      ].find((d) => d * scale > 39) || 5;
+    const minTickPx = w < 700 ? 68 : 42,
+      delta =
+        [
+          0.0005, 0.001, 0.002, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2,
+          5,
+        ].find((d) => d * scale > minTickPx) || 5;
     for (
       let lon = Math.ceil((mid[0] - cx / scale / cos) / delta) * delta;
       sx(lon) < w;
       lon += delta
     ) {
-      let x = sx(lon);
-      if (x < 16 || x > w - 18) continue;
+      const x = sx(lon);
+      if (x < (w < 700 ? 118 : 28) || x > w - 48) continue;
       el("path", { d: `M${x} 0v5 M${x} ${h}v-4`, stroke: "#94a895" }, ticks);
       text(ticks, x, 12, `${+lon.toFixed(4)}°E`, {
         "font-size": 8,
@@ -500,7 +502,7 @@ export async function mountMap(initialAtlas, tr, boundaries = get("frozen/map.js
       lat += delta
     ) {
       const y = sy(lat);
-      if (y < 25 || y > h - 15) continue;
+      if (y < 48 || y > h - (w < 700 ? 72 : 42)) continue;
       el("path", { d: `M0 ${y}h5 M${w} ${y}h-4`, stroke: "#94a895" }, ticks);
       text(ticks, 8, y + 3, `${+lat.toFixed(4)}°N`, {
         "text-anchor": "start",
@@ -681,7 +683,15 @@ export async function mountMap(initialAtlas, tr, boundaries = get("frozen/map.js
   const pts = new Map();
   let moved = false,
     down,
-    pressedFeature = null;
+    pressedFeature = null,
+    drawRaf = 0;
+  function scheduleDraw() {
+    if (drawRaf) return;
+    drawRaf = requestAnimationFrame(() => {
+      drawRaf = 0;
+      draw();
+    });
+  }
   svg.onpointerdown = (e) => {
     locked = null;
     pts.set(e.pointerId, [e.clientX, e.clientY]);
@@ -703,11 +713,11 @@ export async function mountMap(initialAtlas, tr, boundaries = get("frozen/map.js
     }
     down = [e.clientX, e.clientY, +e.target.getAttribute("data-d")];
     svg.setPointerCapture(e.pointerId);
-    report(e);
+    if (e.pointerType !== "touch") report(e);
   };
   svg.onpointermove = (e) => {
     if (!pts.has(e.pointerId)) {
-      report(e);
+      if (e.pointerType !== "touch") report(e);
       return;
     }
     const old = pts.get(e.pointerId),
@@ -726,7 +736,7 @@ export async function mountMap(initialAtlas, tr, boundaries = get("frozen/map.js
       ox = mp[0] - w / 2 - (lon - mid[0]) * cos * sc;
       oy = mp[1] - h / 2 - (mid[1] - lat) * sc;
       if (zoom === 1) ox = oy = 0;
-      draw();
+      scheduleDraw();
       pendingMap =
         !dev && zoom > pinch.zoom && zoom >= 1.52 && !window.__atlasMapFallback
           ? pinch.anchor
@@ -741,10 +751,9 @@ export async function mountMap(initialAtlas, tr, boundaries = get("frozen/map.js
       ox += next[0] - old[0];
       oy += next[1] - old[1];
       moved ||= Math.hypot(next[0] - down[0], next[1] - down[1]) > 3;
-      draw();
+      scheduleDraw();
     }
     pts.set(e.pointerId, next);
-    report(e);
   };
   svg.onpointerup = (e) => {
     pts.delete(e.pointerId);

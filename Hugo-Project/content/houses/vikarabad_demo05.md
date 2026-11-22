@@ -29,7 +29,7 @@ building:
   weathering: 0.456
   path_width_m: 1.19
 cell: [1132,7340]
-homeLocation: [1129.9299019,7341.0736442]
+homeLocation: [1129.7993008,7341.7093314]
 acreLocation: [1132,7340]
 villageId: "v58-01"
 lat: 17.2571315

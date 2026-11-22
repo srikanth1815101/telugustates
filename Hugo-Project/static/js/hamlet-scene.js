@@ -7,71 +7,167 @@ export function hamletScene(s, rows, commons, focus, tier) {
   const g = new T.Group(),
     shapes = new Map(),
     obj = new T.Object3D(),
+    col = new T.Color(),
+    me = obj.matrix.elements,
     solids = [],
-    range = tier ? 280 : 160;
+    range = tier ? 540 : 285,
+    midRange = tier ? 360 : 185;
+  obj.rotation.order = "YXZ";
   const add = (k, p, height, xyz, rotation, color) => {
-    const a = shapes.get(k) || shapes.set(k, []).get(k);
-    obj.rotation.order = "YXZ";
+    let bin = shapes.get(k);
+    if (!bin) {
+      bin = { m: [], c: [] };
+      shapes.set(k, bin);
+    }
     obj.position.set(...s.xyz(...p, s.ground(...p) + height));
     obj.scale.set(...xyz);
     obj.rotation.set(...rotation);
     obj.updateMatrix();
-    a.push([obj.matrix.clone(), new T.Color(color)]);
+    for (let i = 0; i < 16; i++) bin.m.push(me[i]);
+    col.set(color);
+    bin.c.push(col.r, col.g, col.b);
   };
+  const clearSpot = (p, radM) =>
+    (!s.ways || s.ways.clear(p[0], p[1], radM)) &&
+    !rows.some(
+      (r) => r[5] && Math.hypot(r[5].centre[0] - p[0], r[5].centre[1] - p[1]) * M < 8.5,
+    );
+
   for (const v of commons) {
     const p = v.hub;
-    if (Math.hypot(p[0] - focus.x, p[1] - focus.y) * M > range) continue;
-    // Earth clearing is blended into the same ground surface as lanes.
-    if (!v.shade) continue;
-    const z = v.shade;
-    add("trunk", z, 2.35, [0.48, 4.7, 0.5], [0, 0.8, 0.02], 0x806647);
-    add("bench", z, 0.23, [2.65, 0.5, 2.5], [0, 0.22, 0], 0x9a876c);
-    add("seat", z, 0.5, [2.9, 0.14, 2.7], [0, 0.22, 0], 0xc4aa85);
-    for (let k = 0; k < 6; k++) {
-      const a = k * 2.4,
-        leafH = 4.08 + (k ? Math.sin(k * 0.8) * 0.45 : 1.15),
-        b = scale(
-          z,
-          Math.cos(a) * (k ? 1.35 : 0),
-          Math.sin(a) * (k ? 1.35 : 0),
-        );
-      if (k) {
-        const limb = scale(z, Math.cos(a) * 0.68, Math.sin(a) * 0.68);
+    const distM = Math.hypot(p[0] - focus.x, p[1] - focus.y) * M;
+    if (distM > range || !v.shade) continue;
+    const z = v.shade,
+      inMid = distM < midRange;
+
+    // 1. Sacred Banyan / Peepal Rachabanda (రచ్చబండ) chabutra platform & elder canopy
+    add("cyl", z, 0.12, [4.2, 0.24, 4.2], [0, 0.2, 0], 0x9b896f);
+    add("cyl", z, 0.36, [3.55, 0.34, 3.55], [0, 0.2, 0], 0xede2c4);
+    add("cyl", z, 0.37, [3.6, 0.14, 3.6], [0, 0.2, 0], 0xb4573c);
+    add("cyl", z, 0.56, [3.75, 0.1, 3.75], [0, 0.2, 0], 0xcab693);
+    add("trunk", z, 2.55, [0.68, 5.1, 0.68], [0, 0.8, 0.02], 0x7a6042);
+
+    for (let k = 0; k < (inMid ? 7 : 4); k++) {
+      const a = k * 2.094,
+        rad = k ? 1.65 : 0,
+        leafH = 4.55 + (k ? Math.sin(k * 0.9) * 0.45 : 1.25),
+        b = scale(z, Math.cos(a) * rad, Math.sin(a) * rad);
+      if (k && inMid) {
+        const limb = scale(z, Math.cos(a) * 0.85, Math.sin(a) * 0.85);
         add(
           "trunk",
           limb,
-          (3.05 + leafH) * 0.5,
-          [0.24, 1.85, 0.24],
+          (3.2 + leafH) * 0.5,
+          [0.26, 2.05, 0.26],
           [0.68, Math.atan2(Math.cos(a), -Math.sin(a)), 0],
-          0x7a6042,
+          0x765c3f,
         );
+        if (k % 2 === 1) {
+          const rootPt = scale(z, Math.cos(a) * 1.25, Math.sin(a) * 1.25);
+          add("trunk", rootPt, 2.15, [0.09, 3.1, 0.09], [0.03, a, 0], 0x876c4d);
+        }
       }
       add(
         "leaf",
         b,
         leafH,
-        [3.9, 2.8, 3.8],
-        [0.12 * k, a, 0.09 * k],
-        [0x58764b, 0x708b50, 0x77925a, 0x4e7046][k % 4],
+        k ? [4.25, 3.0, 4.15] : [4.9, 3.35, 4.9],
+        [0.11 * k, a, 0.08 * k],
+        [0x547848, 0x6b894e, 0x739057, 0x4b6e44][k % 4],
       );
     }
-    solids.push([z[0], z[1], 1.55 / M]);
+    solids.push([z[0], z[1], 1.85 / M]);
+
+    if (!inMid) continue;
+
+    // 2. Traditional Stone-Ringed Village Well (గ్రామ బావి) with pulley crossbeam & terracotta pots
+    let wellPt = null;
+    for (let i = 0; i < 12; i++) {
+      const a = i * ((Math.PI * 2) / 12) + 0.55,
+        cand = scale(z, Math.cos(a) * 5.3, Math.sin(a) * 5.3);
+      if (clearSpot(cand, 2.1)) {
+        wellPt = cand;
+        break;
+      }
+    }
+    if (wellPt) {
+      add("cyl", wellPt, 0.05, [2.85, 0.1, 2.85], [0, 0, 0], 0x999080);
+      add("cyl", wellPt, 0.42, [2.05, 0.78, 2.05], [0, 0, 0], 0xb2a58e);
+      add("cyl", wellPt, 0.82, [2.18, 0.1, 2.18], [0, 0, 0], 0xd9ceb6);
+      add("cyl", wellPt, 0.62, [1.62, 0.42, 1.62], [0, 0, 0], 0x264648);
+      for (const sgn of [-1, 1]) {
+        const post = scale(wellPt, sgn * 0.92, 0);
+        add("box", post, 1.32, [0.16, 1.82, 0.16], [0, 0, 0], 0x8f8371);
+      }
+      add("box", wellPt, 2.22, [2.06, 0.14, 0.16], [0, 0, 0], 0x6b4b35);
+      add("cyl", wellPt, 2.04, [0.34, 0.08, 0.34], [0, 0, Math.PI / 2], 0x4d463f);
+      const potA = scale(wellPt, 1.15, 0.52),
+        potB = scale(wellPt, 0.95, 0.84);
+      add("cyl", potA, 0.24, [0.42, 0.42, 0.42], [0, 0, 0], 0xa96548);
+      add("cyl", potB, 0.21, [0.36, 0.36, 0.36], [0, 0, 0], 0xb57150);
+      solids.push([wellPt[0], wellPt[1], 1.15 / M]);
+    }
+
+    // 3. Resting Wooden Bullock Cart (ఎడ్ల బండి) & Village Chowk Lantern Post
+    for (let i = 0; i < 12; i++) {
+      const a = i * ((Math.PI * 2) / 12) + 2.65,
+        cartPt = scale(z, Math.cos(a) * 5.6, Math.sin(a) * 5.6);
+      if (
+        (!wellPt || Math.hypot(cartPt[0] - wellPt[0], cartPt[1] - wellPt[1]) * M > 4.2) &&
+        clearSpot(cartPt, 2.3)
+      ) {
+        const yaw = a + 0.6,
+          cy = Math.cos(yaw),
+          sy = Math.sin(yaw);
+        add("box", cartPt, 0.62, [1.26, 0.12, 2.25], [-0.14, yaw, 0], 0x7d5a3e);
+        for (const sgn of [-1, 1]) {
+          const rail = scale(cartPt, sgn * 0.58 * cy, -sgn * 0.58 * sy);
+          add("box", rail, 0.82, [0.08, 0.34, 2.2], [-0.14, yaw, 0], 0x936e4b);
+          const wh = scale(cartPt, sgn * 0.72 * cy, -sgn * 0.72 * sy);
+          add("cyl", wh, 0.56, [1.12, 0.1, 1.12], [0, yaw, Math.PI / 2], 0x62442f);
+          add("cyl", wh, 0.56, [0.28, 0.16, 0.28], [0, yaw, Math.PI / 2], 0x4b3526);
+        }
+        const yoke = scale(cartPt, sy * 1.65, cy * 1.65);
+        add("box", yoke, 0.34, [0.1, 0.1, 1.55], [-0.28, yaw, 0], 0x6d4d35);
+        add("box", yoke, 0.16, [1.35, 0.1, 0.12], [0, yaw, 0], 0x6d4d35);
+        solids.push([cartPt[0], cartPt[1], 1.18 / M]);
+        break;
+      }
+    }
+
+    const lampPt = scale(z, 2.25, -1.65);
+    if (!s.ways || s.ways.clear(lampPt[0], lampPt[1], 1.1)) {
+      add("trunk", lampPt, 1.65, [0.14, 3.3, 0.14], [0, 0, 0], 0x4c534b);
+      add("box", lampPt, 3.32, [0.34, 0.32, 0.34], [0, 0.4, 0], 0xf2ca78);
+    }
   }
-  for (const [k, arr] of shapes) {
+
+  for (const [k, bin] of shapes) {
+    const count = bin.c.length / 3;
+    if (!count) continue;
     const b =
         k === "leaf"
           ? new T.IcosahedronGeometry(0.5, 1)
-          : new T.CylinderGeometry(0.5, 0.5, 1, k === "trunk" ? 6 : 10),
+          : k === "box"
+            ? new T.BoxGeometry(1, 1, 1)
+            : new T.CylinderGeometry(0.5, 0.5, 1, k === "trunk" ? 6 : 12),
       m = new T.InstancedMesh(
         b,
-        new T.MeshLambertMaterial({ flatShading: true }),
-        arr.length,
+        new T.MeshLambertMaterial({ flatShading: k !== "cyl" }),
+        count,
       );
-    arr.forEach(([mat, c], i) => {
-      m.setMatrixAt(i, mat);
-      m.setColorAt(i, c);
-    });
-    m.userData = { role: "commons-" + k, disposableMaterial: true };
+    m.instanceMatrix.array.set(bin.m);
+    m.instanceMatrix.needsUpdate = true;
+    m.instanceColor = new T.InstancedBufferAttribute(
+      new Float32Array(bin.c),
+      3,
+    );
+    m.computeBoundingSphere();
+    m.userData = {
+      role: "commons-" + k,
+      cullable: true,
+      disposableMaterial: true,
+    };
     g.add(m);
   }
   g.userData.solids = solids;
