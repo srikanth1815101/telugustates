@@ -23,7 +23,6 @@ const channelWater = (ch) =>
     ? (ch.seg.width ? 0.91 : 0.66) *
       (1 - smooth(0.12, 1.58, ch.dist / ch.seg.half))
     : 0;
-const signedWetEdge = (s, x, y) => s.mask(x, y)[0] > 0.3;
 export class Surface {
   constructor(tiles, origin, focus = null) {
     this.t = tiles;
@@ -311,49 +310,38 @@ export class Surface {
     if (sea) {
       return [-0.938, 0.347, 0, 1, 0];
     }
-    const c = this.t.at(x, y),
-      q = this.channel(x, y),
-      lake =
-        !!((c?.head || 0) & 32768) || (!c?.head && headAt(this, x, y)?.pool);
-    const wide = () => velocityAt(this.t, x, y);
-    if (
-      (lake && c?.c === 4) ||
-      (!q && (c?.c === 4 || (!lake && signedWetEdge(this, x, y))))
-    ) {
-      const baked = wide();
-      if (baked) {
-        baked[2] *= wet;
-        return baked;
+    const i0 = Math.floor(x - 0.5),
+      j0 = Math.floor(y - 0.5),
+      u0 = x - i0 - 0.5,
+      v0 = y - j0 - 0.5;
+    let reach = 0,
+      pool = 0;
+    for (let dy = 0; dy < 2; dy++)
+      for (let dx = 0; dx < 2; dx++) {
+        const ax = i0 + dx,
+          ay = j0 + dy,
+          w = (dx ? u0 : 1 - u0) * (dy ? v0 : 1 - v0),
+          ca = this.t.at(ax, ay);
+        if (ca?.c === 4) reach += w;
+        if (
+          (ca?.head || 0) & 32768 ||
+          (!ca?.head && headAt(this, ax + 0.5, ay + 0.5)?.pool)
+        )
+          pool += w;
       }
-    }
-    if (lake) {
-      // Still head controls elevation, not the presence of a mapped inflowing thread. No current on open standing water.
-      if (!q || wet <= 0 || q.dist > q.seg.half * 1.35 + 0.32)
-        return [0, 0, 0, 0, 0];
-      const i = Math.floor(x - 0.5),
-        j = Math.floor(y - 0.5),
-        u = x - i - 0.5,
-        v = y - j - 0.5;
-      const bit = (i, j) => +(this.t.at(i, j)?.c === 4);
-      const reach =
-        (1 - v) * ((1 - u) * bit(i, j) + u * bit(i + 1, j)) +
-        v * ((1 - u) * bit(i, j + 1) + u * bit(i + 1, j + 1));
-      const k = q.seg,
-        pace =
-          wet *
-          reach *
-          0.38 *
-          (1 - smooth(k.half * 0.48, k.half * 1.35 + 0.32, q.dist));
-      return [
-        (k.sign * k.dx) / k.L,
-        (-k.sign * k.dy) / k.L,
-        pace,
-        0,
-        q.frac * k.L * U,
-      ];
-    }
-    if (!q && c?.c !== 4) return [0, 0, 0, 0, 0];
-    if (!q) {
+    const q = this.channel(x, y);
+    const ambient = () => {
+      const openGate = Math.max(reach, smooth(0.18, 0.42, this.mask(x, y)[0])),
+        gate = openGate * (1 - pool) + smooth(0, 0.55, reach) * pool;
+      if (gate > 0.001) {
+        const baked = velocityAt(this.t, x, y);
+        if (baked) {
+          baked[2] *= wet * gate;
+          return baked;
+        }
+      }
+      const openReach = reach * (1 - pool);
+      if (openReach <= 0.001) return [0, 0, 0, 0, 0];
       let gx =
           (this.waterLevel(x - 0.5, y) - this.waterLevel(x + 0.5, y)) /
           (U * this.relief),
@@ -376,9 +364,10 @@ export class Surface {
         }
       }
       return grade > 0.00001
-        ? [gx / grade, gz / grade, runPace(grade) * wet, 0, 0]
+        ? [gx / grade, gz / grade, runPace(grade) * wet * openReach, 0, 0]
         : [0, 0, 0, 0, 0];
-    }
+    };
+    if (!q || wet <= 0) return ambient();
     const { seg: k, dist, frac } = q;
     if (!k.hydro) {
       const dx = k.dx / k.L,
@@ -394,14 +383,29 @@ export class Surface {
         grade = Math.abs(dh) / (2 * d * U);
       k.hydro = [sg * dx, -sg * dy, runPace(grade), grade];
     }
-    const [dx, dz, pace] = k.hydro;
-    return [
-      dx,
-      dz,
-      pace * (0.82 + 0.18 * Math.max(0, 1 - dist / k.R)) * wet,
-      0,
-      frac * k.L * U,
-    ];
+    const [dx, dz, pace] = k.hydro,
+      alongM = frac * k.L * U,
+      qOpen = pace * (0.82 + 0.18 * Math.max(0, 1 - dist / k.R)) * wet,
+      qPool =
+        wet *
+        reach *
+        0.38 *
+        (1 - smooth(k.half * 0.48, k.half * 1.35 + 0.32, dist)),
+      qSpd = qOpen * (1 - pool) + qPool * pool,
+      rim = smooth(Math.min(k.R * 0.52, k.half * 0.95), k.R, dist),
+      ambGate = Math.max(rim, pool * smooth(0.05, 0.65, reach));
+    if (ambGate <= 0.001) return [dx, dz, qSpd, 0, alongM];
+    const amb = ambient(),
+      wAmb = Math.max(
+        rim,
+        smooth(0, 0.08, amb[2] - qSpd) * pool * smooth(0.05, 0.65, reach),
+      ),
+      vx = dx * qSpd * (1 - wAmb) + amb[0] * amb[2] * wAmb,
+      vz = dz * qSpd * (1 - wAmb) + amb[1] * amb[2] * wAmb,
+      sp = Math.hypot(vx, vz);
+    return sp > 0.0001
+      ? [vx / sp, vz / sp, sp, 0, alongM * (1 - wAmb) + amb[4] * wAmb]
+      : [dx, dz, 0, 0, alongM];
   }
   sharp(x, y) {
     const a = Math.floor((x - 1) / 2) * 2,
