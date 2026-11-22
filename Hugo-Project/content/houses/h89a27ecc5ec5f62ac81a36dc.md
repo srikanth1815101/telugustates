@@ -1,6 +1,6 @@
 ---
-title: "Swarnamukhi Illu"
-house_name: "Swarnamukhi Illu"
+title: "Vivek"
+house_name: "Vivek"
 type: house
 state: Andhra Pradesh
 district: Sri Potti Sriramulu Nellore
@@ -22,7 +22,7 @@ props:
 - banana-clump
 - shade-tree
 sign:
-  label: "Swarnamukhi Illu"
+  label: "Vivek"
   wood: '#65513d'
   trim: '#c5a477'
 building:

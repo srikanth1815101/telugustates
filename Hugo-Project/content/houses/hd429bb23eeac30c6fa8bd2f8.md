@@ -1,6 +1,6 @@
 ---
-title: "Sharada Nilayam"
-house_name: "Sharada Nilayam"
+title: "Sushma"
+house_name: "Sushma"
 type: house
 state: Andhra Pradesh
 district: Markapuram
@@ -22,7 +22,7 @@ props:
 - banana-clump
 - kitchen-garden
 sign:
-  label: "Sharada Nilayam"
+  label: "Sushma"
   wood: '#65513d'
   trim: '#c5a477'
 building:

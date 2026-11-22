@@ -1,6 +1,6 @@
 ---
-title: "Nandana Illu"
-house_name: "Nandana Illu"
+title: "Akhil"
+house_name: "Akhil"
 type: house
 state: Andhra Pradesh
 district: Palnadu
@@ -22,7 +22,7 @@ props:
 - banana-clump
 - kitchen-garden
 sign:
-  label: "Nandana Illu"
+  label: "Akhil"
   wood: '#65513d'
   trim: '#c5a477'
 building:

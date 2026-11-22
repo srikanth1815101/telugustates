@@ -1,6 +1,6 @@
 ---
-title: "Ratna Nivasam"
-house_name: "Ratna Nivasam"
+title: "Lakshmi"
+house_name: "Lakshmi"
 type: house
 state: Andhra Pradesh
 district: West Godavari
@@ -22,7 +22,7 @@ props:
 - banana-clump
 - flower-bed
 sign:
-  label: "Ratna Nivasam"
+  label: "Lakshmi"
   wood: '#65513d'
   trim: '#c5a477'
 building:

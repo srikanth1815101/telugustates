@@ -47,8 +47,8 @@ function usage() {
   console.error(
     [
       "Usage:",
-      '  node tools/add-house.mjs --username "<handle>" --district "<district>" --name "<house or nickname>" [--kind community|demo] [--date YYYY-MM-DD] [--update-name] [--settle]',
-      '  node tools/add-house.mjs "<handle>" "<district>" "<house or nickname>" [--settle]',
+      '  node tools/add-house.mjs --username "<handle>" --district "<district>" --name "<name>" [--kind community|demo] [--date YYYY-MM-DD] [--update-name] [--settle]',
+      '  node tools/add-house.mjs "<handle>" "<district>" "<name>" [--settle]',
     ].join("\n"),
   );
   process.exit(1);

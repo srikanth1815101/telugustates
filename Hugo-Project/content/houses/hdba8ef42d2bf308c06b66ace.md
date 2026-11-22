@@ -1,6 +1,6 @@
 ---
-title: "Sandhya Illu"
-house_name: "Sandhya Illu"
+title: "Shiva"
+house_name: "Shiva"
 type: house
 state: Telangana
 district: Mulugu
@@ -22,7 +22,7 @@ props:
 - flower-bed
 - kitchen-garden
 sign:
-  label: "Sandhya Illu"
+  label: "Shiva"
   wood: '#65513d'
   trim: '#c5a477'
 building:

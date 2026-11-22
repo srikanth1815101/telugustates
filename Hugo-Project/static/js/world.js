@@ -866,7 +866,7 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
       select.add(new Option(msg("holding.pick"), ""));
       for (const [u, d, , name] of await get("data/directory.json"))
         select.add(
-          new Option((name || "Illu") + " · " + (ds.get(d)?.name || ""), u),
+          new Option((name || "Resident") + " · " + (ds.get(d)?.name || ""), u),
         );
     }
     if (mark !== menuSerial) return;

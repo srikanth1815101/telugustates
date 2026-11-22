@@ -1,6 +1,6 @@
 ---
-title: "Pallavi Nivasam"
-house_name: "Pallavi Nivasam"
+title: "Ajay"
+house_name: "Ajay"
 type: house
 state: Andhra Pradesh
 district: West Godavari
@@ -22,7 +22,7 @@ props:
 - kitchen-garden
 - shade-tree
 sign:
-  label: "Pallavi Nivasam"
+  label: "Ajay"
   wood: '#65513d'
   trim: '#c5a477'
 building:

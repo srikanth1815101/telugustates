@@ -1,6 +1,6 @@
 ---
-title: "Vennela Illu"
-house_name: "Vennela Illu"
+title: "Sirisha"
+house_name: "Sirisha"
 type: house
 state: Telangana
 district: Medak
@@ -22,7 +22,7 @@ props:
 - flower-bed
 - kitchen-garden
 sign:
-  label: "Vennela Illu"
+  label: "Sirisha"
   wood: '#65513d'
   trim: '#c5a477'
 building:

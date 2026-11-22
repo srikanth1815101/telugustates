@@ -1,6 +1,6 @@
 ---
-title: "Haritha Illu"
-house_name: "Haritha Illu"
+title: "Sai"
+house_name: "Sai"
 type: house
 state: Telangana
 district: Medak
@@ -22,7 +22,7 @@ props:
 - banana-clump
 - kitchen-garden
 sign:
-  label: "Haritha Illu"
+  label: "Sai"
   wood: '#65513d'
   trim: '#c5a477'
 building:

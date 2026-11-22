@@ -1,6 +1,6 @@
 ---
-title: "Siri Illu"
-house_name: "Siri Illu"
+title: "Himaja"
+house_name: "Himaja"
 type: house
 state: Telangana
 district: Medak
@@ -22,7 +22,7 @@ props:
 - kitchen-garden
 - flower-bed
 sign:
-  label: "Siri Illu"
+  label: "Himaja"
   wood: '#65513d'
   trim: '#c5a477'
 building:

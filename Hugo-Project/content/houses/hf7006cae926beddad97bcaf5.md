@@ -1,6 +1,6 @@
 ---
-title: "Tungabhadra Nivasam"
-house_name: "Tungabhadra Nivasam"
+title: "Jagadeesh"
+house_name: "Jagadeesh"
 type: house
 state: Andhra Pradesh
 district: Y.S.R. Kadapa
@@ -22,7 +22,7 @@ props:
 - flower-bed
 - kitchen-garden
 sign:
-  label: "Tungabhadra Nivasam"
+  label: "Jagadeesh"
   wood: '#65513d'
   trim: '#c5a477'
 building:

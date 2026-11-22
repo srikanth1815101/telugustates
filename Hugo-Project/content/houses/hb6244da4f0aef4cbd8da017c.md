@@ -1,6 +1,6 @@
 ---
-title: "Siri Nilayam"
-house_name: "Siri Nilayam"
+title: "Vinay"
+house_name: "Vinay"
 type: house
 state: Telangana
 district: Mahabubnagar
@@ -22,7 +22,7 @@ props:
 - kitchen-garden
 - flower-bed
 sign:
-  label: "Siri Nilayam"
+  label: "Vinay"
   wood: '#65513d'
   trim: '#c5a477'
 building:

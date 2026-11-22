@@ -1,6 +1,6 @@
 ---
-title: "Vennela Nilayam"
-house_name: "Vennela Nilayam"
+title: "Prudvi"
+house_name: "Prudvi"
 type: house
 state: Telangana
 district: Mahabubnagar
@@ -22,7 +22,7 @@ props:
 - flower-bed
 - shade-tree
 sign:
-  label: "Vennela Nilayam"
+  label: "Prudvi"
   wood: '#65513d'
   trim: '#c5a477'
 building:
