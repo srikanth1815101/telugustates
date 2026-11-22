@@ -39,7 +39,7 @@ try {
   );
   assert.equal(normalizeUsername("https://instagram.com/reel/xyz"), "");
   for (const f of await fs.readdir(path.join(root, "content/houses"))) {
-    if (!f.endsWith(".md")) continue;
+    if (!f.endsWith(".md") || f === "_index.md") continue;
     assert(
       /^h[0-9a-f]{24}\.md$/.test(f),
       "House file must use one-way hashed ID: " + f,
@@ -56,10 +56,10 @@ try {
   execFileSync("hugo", ["--source", root, "--destination", tmp, "--minify"]);
   const homeHtml = await fs.readFile(path.join(tmp, "index.html"), "utf8");
   assert(
-    homeHtml.includes('id="res-food"') &&
-      homeHtml.includes('id="res-currency"') &&
-      homeHtml.includes('id="res-gold"') &&
-      !homeHtml.includes('id="nr"') &&
+    /id=["']?res-food["'\s>]/.test(homeHtml) &&
+      /id=["']?res-currency["'\s>]/.test(homeHtml) &&
+      /id=["']?res-gold["'\s>]/.test(homeHtml) &&
+      !/id=["']?nr["'\s>]/.test(homeHtml) &&
       !homeHtml.includes(">02<"),
     "Home page header must show resources instead of 2 States / house count",
   );

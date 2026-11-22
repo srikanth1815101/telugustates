@@ -11,7 +11,8 @@
 {{- $houses := slice -}}{{- range sort $homes "File.Path" -}}{{- $p := .Params -}}
   {{- if isset $p "username" -}}{{ errorf "Real usernames must not be stored in %s; create records with node tools/add-house.mjs" .File.Path }}{{- end -}}
   {{- $u := lower (trim .File.ContentBaseName " ") -}}{{- if or (not (findRE `^h[0-9a-f]{24}$` $u)) ($names.Get $u) -}}{{ errorf "Invalid or duplicate one-way house id %s (%s)" $u .File.Path }}{{- end -}}{{- $names.Set $u true -}}
-  {{- $label := trim (printf "%v" ($p.house_name | default ($p.sign.label | default .Title))) " " -}}
+  {{- $signIn := $p.sign | default dict -}}
+  {{- $label := trim (printf "%v" ($p.house_name | default ($signIn.label | default .Title))) " " -}}
   {{- $did := $p.district_id | default 32 -}}{{- if and (not $p.district_id) $p.district -}}{{- $found := false -}}{{- range $districts -}}{{- if eq (lower .name) (lower $p.district) -}}{{- $did = .id -}}{{- $found = true -}}{{- break -}}{{- end -}}{{- end -}}{{- if not $found -}}{{ errorf "Unrecognized district on %s: %s" .File.Path $p.district }}{{- end -}}{{- end -}}{{- $pool := index $pools (string $did) -}}{{- if not $pool -}}{{ errorf "Unknown house district: %s" .File.Path }}{{- end -}}
   {{- $cell := $p.cell -}}{{- $z := $p.elevation_m -}}{{- if not $cell -}}
     {{- $seed := int (crypto.FNV32a $u) -}}{{- range $i, $v := $pool -}}{{- $v = index $pool (mod (add $seed $i) (len $pool)) -}}{{- $xy := first 2 $v -}}{{- $key := printf "%v,%v" (index $xy 0) (index $xy 1) -}}
@@ -21,7 +22,7 @@
   {{- $pin := $pins.Get $u | default dict -}}{{- $vid := $hamlet.Get $u | default "" -}}
   {{- if $pin -}}{{- if or (ne (jsonify $cell) (jsonify $pin.c)) (ne $vid ($p.villageid | default "")) (ne (jsonify $pin.p) (jsonify $p.homelocation)) (ne (jsonify $cell) (jsonify $p.acrelocation)) -}}{{ errorf "Conflicting pinned residence/acre for %s" $u }}{{- end -}}
   {{- else if ne hugo.Environment "planning" -}}{{ errorf "Unsettled resident %s: run node tools/settle.mjs and commit its reservations" $u }}{{- end -}}
-  {{- $sign := merge ($p.sign | default dict) (dict "label" $label) -}}
+  {{- $sign := merge $signIn (dict "label" $label) -}}
   {{- $h := merge (dict "setback_m" 9 "lateral_m" 0 "path_width_m" 1.3 "weathering" 0.35 "seed" (crypto.FNV32a $u)) ($p.building | default dict) -}}
   {{- $h = merge $h (dict "archetype" ($p.archetype | default "pillared-tile") "size_m" ($p.size_m | default (slice 11 9 4.2)) "facing" ($p.facing | default "south") "wall_color" ($p.wall_color | default "#dec99e") "roof_color" ($p.roof_color | default "#a45e42") "road_side" ($p.road_side | default ($p.facing | default "south")) "props" ($p.props | default slice) "sign" $sign ) -}}
   {{- $houses = $houses | append (dict "u" $u "name" $label "approved" ($p.approved | default false) "href" .RelPermalink "c" $cell "acreLocation" $cell "homeLocation" $pin.p "villageId" $vid "court" $pin "d" $did "z" $z "lat" $p.lat "lon" $p.lon "corners" $p.corners "record_kind" ($p.record_kind | default "unreviewed") "added" (string ($p.added | default "")) "house" $h) -}}
