@@ -1,6 +1,13 @@
 import { driftMesh } from "./current-flecks.js";
 import { fieldNoise } from "./ground-weave.js";
-import { rockWater, findFall, cascade, disposeWater } from "./moving-water.js";
+import {
+  rockWater,
+  findFall,
+  findStageFalls,
+  cascade,
+  fallRocks,
+  disposeWater,
+} from "./moving-water.js";
 import * as T from "../vendor/three.module.min.js";
 import { staticModel } from "./art-library.js";
 import { noise, U } from "./habitats.js";
@@ -209,12 +216,21 @@ uniform vec2 hydroOffset;uniform float liquidTime,uDay,uFog;uniform vec3 uHor;va
     }
 
     for (const f of eco.falls) {
-      if (Math.hypot(f.cell[0] + 0.5 - x, f.cell[1] + 0.5 - y) > 6.1) continue;
+      if (Math.hypot(f.cell[0] + 0.5 - x, f.cell[1] + 0.5 - y) > 10.5)
+        continue;
       const site = findFall(s, f);
       if (site) {
         this.sites.push(site);
         this.g.add(cascade(s, site, u));
+        const rocks = fallRocks(s, site, u);
+        if (rocks) this.g.add(rocks);
       }
+    }
+    for (const site of findStageFalls(s, x, y, this.sites)) {
+      this.sites.push(site);
+      this.g.add(cascade(s, site, u));
+      const rocks = fallRocks(s, site, u);
+      if (rocks) this.g.add(rocks);
     }
     this.fall = this.sites.length > 0;
   }

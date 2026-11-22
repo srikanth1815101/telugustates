@@ -102,7 +102,14 @@ void main(){vec2 local=P.xz,p=local+hydroOffset;float tm=liquidTime,sea=smoothst
  vec3 drop=ringsAt(p*1.37,tm,uRain,fogD);grad+=drop.xy*.17*fine;float foam=scum+lip*.22+drop.z*.24*fine;
  if(fogD<52.)for(int i=0;i<${lite ? 3 : 6};i++){float age=wakeClock-wakes[i].z;if(age>=0.&&age<2.85&&wakes[i].w>.001){vec2 d=local-wakes[i].xy-rd*(.18*age*speed);float r=length(d),e=r-(.13+age*1.07),pulse=exp(-abs(e)*9.)*(1.-age/2.85)*wakes[i].w;grad+=.24*pulse*sin(e*20.)*d/(r+.03);foam+=.24*pulse;}}
  grad*=1.-(.32-.29*sea)*calmWater;foam-=drop.z*.08*fine*calmWater;float d=max(0.,ew),deep=smoothstep(.06,2.7,d);
- vec3 n=normalize(vec3(grad.x,1.,grad.y)),eye=normalize(cameraInPatch-P),refl=reflect(-eye,n);
+ vec3 geoCross=cross(dFdx(P),dFdy(P));float geoLen=length(geoCross);vec3 geoN=geoLen>1e-8?geoCross/geoLen:vec3(0.,1.,0.);if(geoN.y<0.)geoN=-geoN;
+ float chute=sea<.5?smoothstep(.065,.28,length(geoN.xz)/max(.12,geoN.y)):0.;
+ if(chute>.002){vec2 downDir=normalize(geoN.xz+vec2(1e-6,2e-6));float sCoord=dot(p,downDir)-P.y*1.35,xCoord=dot(p,vec2(-downDir.y,downDir.x));
+ float cA=mod(tm*2.6,6.),cB=mod(cA+3.,6.),cW=smoothstep(.15,.85,abs(cA-3.)/3.);
+ float rush=mix(fieldNoise(vec2(xCoord*1.85,(sCoord-cA*2.2)*.55)),fieldNoise(vec2(xCoord*1.85,(sCoord-cB*2.2)*.55)),cW);
+ float lace=fieldNoise(vec2(xCoord*3.9,sCoord*.95-tm*4.4));
+ foam+=chute*(.34+.48*smoothstep(-.18,.52,rush*.68+lace*.32));grad+=downDir*chute*(.22*rush);}
+ vec3 n=normalize(vec3(grad.x+geoN.x*.85,max(.25,geoN.y),grad.y+geoN.z*.85)),eye=normalize(cameraInPatch-P),refl=reflect(-eye,n);
  float fres=.07+.64*pow(1.-clamp(dot(eye,n),0.,1.),3.3);
  // Unified inland freshwater body & sky reflection so flowing channels and adjacent still pools share one continuous optical medium.
  float horizon=1.-smoothstep(.015,.42,refl.y);vec3 freshSky=mix(mix(uZen,uHor,.26),uHor,.30+.62*horizon);

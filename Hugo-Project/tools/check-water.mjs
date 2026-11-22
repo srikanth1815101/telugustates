@@ -10,7 +10,9 @@ import { U } from "../static/js/habitats.js";
 import { RunoffWindow, TILE, CORE, SPACING } from "../static/js/rain-ground.js";
 import {
   findFall,
+  findStageFalls,
   cascade,
+  fallRocks,
   bedStones,
   rockWater,
   disposeWater,
@@ -303,14 +305,79 @@ try {
         s,
         ec.falls.find((x) => x.name === "Talakona Waterfalls"),
       ),
-      fx = cascade(s, site, uniforms);
-    assert(site.drop > 4 && site.top > site.bottom && fx.children.length === 3);
+      fx = cascade(s, site, uniforms),
+      rk = fallRocks(s, site, uniforms);
+    assert(
+      site.drop > 4 &&
+        site.top > site.bottom &&
+        site.feeder?.length >= 2 &&
+        fx.children.length === 3 &&
+        rk?.userData.role === "waterfall-rocks",
+    );
+    rk.geometry.dispose();
+    rk.material.dispose();
+    disposeWater(fx);
+    // Verify plunge-pool mapped waterfalls (e.g. Etthipothala) also resolve before chunk() runs, and Nagarkurnool 66 m stage jump has zero vertical water walls.
+    const et = ec.falls.find((x) => x.name === "Etthipothala Waterfalls"),
+      tEt = new Tiles(a);
+    await Promise.all(
+      Array.from({ length: 9 }, (_, i) =>
+        tEt.load(
+          key(
+            et.cell[0] + ((i % 3) - 1) * 256,
+            et.cell[1] + (((i / 3) | 0) - 1) * 256,
+          ),
+        ),
+      ),
+    );
+    const sEt = new Surface(
+      tEt,
+      { x: a.project.cols / 2, y: a.project.rows / 2, z: 0 },
+      [et.cell[0] + 0.5, et.cell[1] + 0.5],
+    );
+    sEt.ec = ec;
+    const etSite = findFall(sEt, et);
+    assert(etSite && etSite.drop > 12 && etSite.feeder?.length >= 2);
+    const [sNag, gNag] = await surface(3371.5, 5812.5),
+      wNag = gNag.children.find(
+        (o) => o.userData.role === "continuous-water",
+      )?.geometry,
+      spills = findStageFalls(sNag, 3371.5, 5812.5, []);
+    let maxTiltDeg = 0;
+    if (wNag) {
+      const p = wNag.attributes.position,
+        id = wNag.index.array;
+      for (let k = 0; k < id.length; k += 3) {
+        const i0 = id[k],
+          i1 = id[k + 1],
+          i2 = id[k + 2],
+          v1 = new T.Vector3(
+            p.getX(i1) - p.getX(i0),
+            p.getY(i1) - p.getY(i0),
+            p.getZ(i1) - p.getZ(i0),
+          ),
+          v2 = new T.Vector3(
+            p.getX(i2) - p.getX(i0),
+            p.getY(i2) - p.getY(i0),
+            p.getZ(i2) - p.getZ(i0),
+          ),
+          n = new T.Vector3().crossVectors(v1, v2);
+        if (n.lengthSq() > 1e-10)
+          maxTiltDeg = Math.max(
+            maxTiltDeg,
+            (Math.atan2(Math.hypot(n.x, n.z), Math.abs(n.y)) * 180) / Math.PI,
+          );
+      }
+    }
+    assert(maxTiltDeg < 12 && spills.length >= 1 && spills[0].drop > 10);
     q.fall = {
       name: site.name,
       modelDropM: site.drop,
+      etthipothalaDropM: etSite.drop,
+      nagarkurnoolMaxWaterTiltDeg: maxTiltDeg,
+      nagarkurnoolSpillways: spills.length,
       effects: fx.children.map((o) => o.userData.role),
     };
-    disposeWater(fx);
   }
   await loadPeople();
   q.rigs = {};
