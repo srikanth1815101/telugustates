@@ -28,7 +28,7 @@ public final class AssetRoute {
         }
         if (path.contains("//")) return null;
         if (path.endsWith("/")) path += "index.html";
-        if (path.equals("/_field/share")||path.equals("/_field/photo")||path.equals("/_field/resident")||path.equals("/_field/sync")) return null; // native action, not an asset
+        if (path.equals("/_field/share")||path.equals("/_field/photo")||path.equals("/_field/resident")||path.equals("/_field/sync")||path.equals("/_field/my-id")) return null; // native action, not an asset
         if (path.startsWith("/_field/")) return "console/" + path.substring(8);
         return "atlas/" + path.substring(1);
     }

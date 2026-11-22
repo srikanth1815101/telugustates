@@ -4,27 +4,25 @@ import { reloadMessages, bindMessages, msg } from "./messages.js";
 
 const DEFAULT_APK_URL =
   "https://github.com/srikanth1815101/telugustates/releases/latest/download/Telugu-States-Atlas.apk";
-const MIN_RECHECK_MS = 45_000;
+const MIN_RECHECK_MS = 60_000;
 
 let latestSync = null,
   dismissedCode = 0,
   lastCheckAt = 0,
   inflight = null,
   pollTimer = 0,
-  lastStatus = null;
+  lastStatus = null,
+  userInitiatedUpdate = false;
 
 function formatMb(bytes) {
   return (bytes / (1024 * 1024)).toFixed(1);
 }
 
-function setUpdateGate(active) {
-  if (location.hostname !== "appassets.androidplatform.net") return;
-  document.body.classList.remove("app-boot-sync");
-  if (active && !document.body.classList.contains("walking")) {
-    document.body.classList.add("app-update-gate");
-  } else if (!active) {
-    document.body.classList.remove("app-update-gate");
-  }
+function hideUpdateBanner() {
+  const banner = document.querySelector("#app-update-banner"),
+    prog = document.querySelector("#app-update-progress");
+  if (prog) prog.hidden = true;
+  if (banner) banner.hidden = true;
 }
 
 function renderProgress(st) {
@@ -40,17 +38,27 @@ function renderProgress(st) {
     btnLabel = document.querySelector("#app-download-label"),
     btnSub = document.querySelector("#app-download-sub");
 
-  if (!st || st.state === "idle") {
+  if (!st || st.state === "idle" || st.state === "up_to_date") {
+    userInitiatedUpdate = false;
     if (prog) prog.hidden = true;
-    if (skip) skip.hidden = false;
     cta?.classList.remove("is-busy");
     btn?.classList.remove("is-busy");
+    if (st?.state === "up_to_date") {
+      latestSync = { ...(latestSync || {}), updateAvailable: false };
+      hideUpdateBanner();
+      if (btn) btn.hidden = true;
+      return;
+    }
     renderUpdateUi();
     return;
   }
 
+  // Never show post-install / stale state unless an update was started in this session
+  if (!userInitiatedUpdate && st.state !== "downloading" && st.state !== "verifying") {
+    return;
+  }
+
   if (banner) banner.hidden = false;
-  setUpdateGate(true);
 
   if (st.state === "downloading" || st.state === "verifying") {
     const pct = Math.max(0, Math.min(100, st.percent || 0)),
@@ -105,7 +113,7 @@ function renderProgress(st) {
     return;
   }
 
-  if (st.state === "installing" || st.state === "installed") {
+  if (st.state === "installing") {
     if (prog && bar) {
       prog.hidden = false;
       bar.style.width = "100%";
@@ -128,14 +136,9 @@ function renderProgress(st) {
     return;
   }
 
-  if (st.state === "up_to_date") {
-    if (prog) prog.hidden = true;
-    if (skip) skip.hidden = false;
-    cta?.classList.remove("is-busy");
-    btn?.classList.remove("is-busy");
-    setUpdateGate(false);
-    if (banner) banner.hidden = true;
-    if (btn) btn.hidden = true;
+  if (st.state === "installed") {
+    userInitiatedUpdate = false;
+    hideUpdateBanner();
     return;
   }
 
@@ -169,8 +172,17 @@ function renderUpdateUi() {
     cta = document.querySelector("#app-update-cta"),
     ctaLabel = document.querySelector("#app-update-cta-label"),
     skip = document.querySelector("#app-update-skip");
-  if (!latestSync?.updateAvailable) return;
+
+  if (!latestSync?.updateAvailable) {
+    hideUpdateBanner();
+    if (location.hostname === "appassets.androidplatform.net" && btn) {
+      btn.hidden = true;
+    }
+    return;
+  }
+
   if (
+    userInitiatedUpdate &&
     lastStatus &&
     (lastStatus.state === "downloading" ||
       lastStatus.state === "verifying" ||
@@ -180,6 +192,7 @@ function renderUpdateUi() {
     renderProgress(lastStatus);
     return;
   }
+
   const apkUrl = latestSync.apkUrl || DEFAULT_APK_URL,
     tag = latestSync.latestVersionName ? "v" + latestSync.latestVersionName : "";
   if (btn && label) {
@@ -197,23 +210,20 @@ function renderUpdateUi() {
   if (banner && cta) {
     cta.href = apkUrl;
     if (ver) ver.textContent = tag;
-    if (!lastStatus || lastStatus.state === "idle") {
-      if (note) {
-        note.setAttribute("data-msg", "home.updateAppNote");
-        note.textContent = msg("home.updateAppNote");
-      }
-      if (ctaLabel) {
-        ctaLabel.setAttribute("data-msg", "home.updateAppCta");
-        ctaLabel.textContent = msg("home.updateAppCta");
-      }
-      if (skip) {
-        skip.setAttribute("data-msg", "home.updateSkip");
-        skip.textContent = msg("home.updateSkip");
-      }
+    if (note) {
+      note.setAttribute("data-msg", "home.updateAppNote");
+      note.textContent = msg("home.updateAppNote");
+    }
+    if (ctaLabel) {
+      ctaLabel.setAttribute("data-msg", "home.updateAppCta");
+      ctaLabel.textContent = msg("home.updateAppCta");
+    }
+    if (skip) {
+      skip.setAttribute("data-msg", "home.updateSkip");
+      skip.textContent = msg("home.updateSkip");
     }
     if (latestSync.latestVersionCode !== dismissedCode) {
       banner.hidden = false;
-      setUpdateGate(true);
     }
   }
 }
@@ -228,14 +238,16 @@ export async function applySyncState(sync) {
       new CustomEvent("atlas:content-updated", { detail: sync }),
     );
   }
+  latestSync = sync;
   if (sync.updateAvailable) {
-    latestSync = sync;
     renderUpdateUi();
-  } else if (!sync.cached) {
-    latestSync = sync;
-    setUpdateGate(false);
-    const banner = document.querySelector("#app-update-banner");
-    if (banner) banner.hidden = true;
+  } else {
+    userInitiatedUpdate = false;
+    hideUpdateBanner();
+    const btn = document.querySelector("#app-download");
+    if (location.hostname === "appassets.androidplatform.net" && btn) {
+      btn.hidden = true;
+    }
   }
 }
 
@@ -249,10 +261,10 @@ function pollInAppUpdate() {
       if (
         st.state === "downloading" ||
         st.state === "verifying" ||
-        st.state === "installing" ||
-        st.state === "permission"
+        (userInitiatedUpdate &&
+          (st.state === "installing" || st.state === "permission"))
       ) {
-        pollTimer = setTimeout(pollInAppUpdate, 380);
+        pollTimer = setTimeout(pollInAppUpdate, 420);
       }
     })
     .catch(() => {});
@@ -260,6 +272,7 @@ function pollInAppUpdate() {
 
 function startInAppUpdate(e) {
   if (e) e.preventDefault();
+  userInitiatedUpdate = true;
   const apkUrl = latestSync?.apkUrl || DEFAULT_APK_URL,
     endpoint = "/_field/update-start?url=" + encodeURIComponent(apkUrl);
   fetch(endpoint, { cache: "no-store" })
@@ -284,7 +297,6 @@ export function initAppSync() {
   const closeBanner = () => {
     if (latestSync?.latestVersionCode)
       dismissedCode = latestSync.latestVersionCode;
-    setUpdateGate(false);
     if (banner) banner.hidden = true;
   };
   if (dismiss) dismiss.addEventListener("click", closeBanner);
@@ -302,9 +314,8 @@ export function initAppSync() {
     return;
   }
 
-  const bootRelease = setTimeout(() => {
-    document.body.classList.remove("app-boot-sync");
-  }, 1150);
+  if (btn) btn.hidden = true;
+  hideUpdateBanner();
 
   if (cta) cta.addEventListener("click", startInAppUpdate);
   if (btn) {
@@ -314,52 +325,36 @@ export function initAppSync() {
       }
     });
   }
-  window.addEventListener("atlas:update-started", pollInAppUpdate);
+  window.addEventListener("atlas:update-started", () => {
+    userInitiatedUpdate = true;
+    pollInAppUpdate();
+  });
 
-  if (btn && !latestSync?.updateAvailable) btn.hidden = true;
-
-  fetch("/_field/sync-cached", { cache: "no-store" })
-    .then((r) => (r.ok ? r.json() : null))
-    .then((cached) => {
-      if (cached?.updateAvailable) {
-        clearTimeout(bootRelease);
-        applySyncState(cached);
-      }
-    })
-    .catch(() => {});
-
-  const check = (force = false) => {
+  // Purely silent background check — nothing shown unless an actual newer APK is confirmed
+  const checkInBackground = (force = false) => {
     const now = Date.now();
     if (!force && now - lastCheckAt < MIN_RECHECK_MS) return inflight;
     if (inflight) return inflight;
     lastCheckAt = now;
     inflight = fetch("/_field/sync", { cache: "no-store" })
       .then((r) => (r.ok ? r.json() : null))
-      .then((sync) => {
-        clearTimeout(bootRelease);
-        document.body.classList.remove("app-boot-sync");
-        return applySyncState(sync);
-      })
-      .catch(() => {
-        clearTimeout(bootRelease);
-        document.body.classList.remove("app-boot-sync");
-      })
+      .then((sync) => applySyncState(sync))
+      .catch(() => {})
       .finally(() => {
         inflight = null;
       });
     return inflight;
   };
 
-  check(true);
-  pollInAppUpdate();
+  setTimeout(() => checkInBackground(true), 250);
   window.addEventListener("atlas:host-resume", () => {
-    pollInAppUpdate();
-    check(false);
+    if (userInitiatedUpdate) pollInAppUpdate();
+    checkInBackground(false);
   });
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "visible") {
-      pollInAppUpdate();
-      check(false);
+      if (userInitiatedUpdate) pollInAppUpdate();
+      checkInBackground(false);
     }
   });
 }

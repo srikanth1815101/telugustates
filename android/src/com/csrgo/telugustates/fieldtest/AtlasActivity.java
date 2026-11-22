@@ -110,6 +110,7 @@ public final class AtlasActivity extends Activity {
         activeInstance = this;
         liveSync = new LiveSync(this);
         apkUpdater = ApkUpdater.get(this);
+        apkUpdater.reconcileInstalledVersion(installedVersionCode());
         setVolumeControlStream(android.media.AudioManager.STREAM_MUSIC);
         root = new FrameLayout(this);
         root.setBackgroundColor(PINE);
@@ -225,6 +226,26 @@ public final class AtlasActivity extends Activity {
     private static WebResourceResponse status(int code, String reason) {
         return response(code, reason, "text/plain", new ByteArrayInputStream(reason.getBytes(StandardCharsets.UTF_8)));
     }
+    private WebResourceResponse residentIdResponse(Uri u) {
+        android.content.SharedPreferences sp = getSharedPreferences("atlas_resident_prefs", MODE_PRIVATE);
+        String toSet = u.getQueryParameter("set");
+        if (toSet != null) {
+            String trimmed = toSet.trim().toLowerCase( java.util.Locale.ROOT );
+            if (trimmed.matches("h[0-9a-f]{24}")) {
+                sp.edit().putString("resident_id", trimmed).apply();
+            }
+        }
+        String saved = sp.getString("resident_id", "");
+        if (saved == null || !saved.matches("h[0-9a-f]{24}")) {
+            saved = "";
+        }
+        JSONObject obj = new JSONObject();
+        try {
+            obj.put("id", saved);
+        } catch (Exception ignored) {}
+        byte[] bytes = obj.toString().getBytes(StandardCharsets.UTF_8);
+        return response(200, "OK", "application/json", new ByteArrayInputStream(bytes));
+    }
     private final class Client extends WebViewClient {
         private final long apkCode;
         Client(long apkCode) { this.apkCode = apkCode; }
@@ -232,6 +253,10 @@ public final class AtlasActivity extends Activity {
             Uri u = req.getUrl();
             if (!local(u)) return status(403,"Offline atlas only");
             if (!"GET".equals(req.getMethod()) && !"HEAD".equals(req.getMethod())) return status(405,"Method not allowed");
+            if ("/_field/my-id".equals(u.getPath())) {
+                if ("HEAD".equals(req.getMethod())) return response(200, "OK", "application/json", new ByteArrayInputStream(new byte[0]));
+                return residentIdResponse(u);
+            }
             if ("/_field/sync-cached".equals(u.getPath())) {
                 if ("HEAD".equals(req.getMethod())) return response(200, "OK", "application/json", new ByteArrayInputStream(new byte[0]));
                 return liveSync.cachedSyncResponse(apkCode, installedVersionName());
@@ -244,7 +269,7 @@ public final class AtlasActivity extends Activity {
                 if ("HEAD".equals(req.getMethod())) return response(200, "OK", "application/json", new ByteArrayInputStream(new byte[0]));
                 String qUrl = u.getQueryParameter("url");
                 String target = (qUrl != null && LiveSync.trustedApkUrl(qUrl)) ? qUrl : liveSync.resolvedApkUrl();
-                return apkUpdater.startResponse(target, apkCode);
+                return apkUpdater.startResponse(target, apkCode, liveSync.resolvedTargetVersionCode());
             }
             if ("/_field/update-status".equals(u.getPath())) {
                 if ("HEAD".equals(req.getMethod())) return response(200, "OK", "application/json", new ByteArrayInputStream(new byte[0]));
@@ -282,7 +307,7 @@ public final class AtlasActivity extends Activity {
             if (req.isForMainFrame() && req.hasGesture() && u.getHost() != null && u.getUserInfo() == null
                     && ("https".equals(u.getScheme()) || "http".equals(u.getScheme()))) {
                 if (LiveSync.trustedApkUrl(u.toString())) {
-                    apkUpdater.startUpdate(u.toString(), installedVersionCode());
+                    apkUpdater.startUpdate(u.toString(), installedVersionCode(), liveSync.resolvedTargetVersionCode());
                     if (w == atlas && safeLocal(w.getUrl())) {
                         w.evaluateJavascript("dispatchEvent(new Event('atlas:update-started'))", null);
                     }
@@ -366,7 +391,11 @@ public final class AtlasActivity extends Activity {
     @Override public void onResume() {
         super.onResume();
         activeInstance = this;
-        if (apkUpdater != null) apkUpdater.resumeIfPermitted(installedVersionCode());
+        if (apkUpdater != null) {
+            long vCode = installedVersionCode();
+            apkUpdater.reconcileInstalledVersion(vCode);
+            apkUpdater.resumeIfPermitted(vCode);
+        }
         if (atlas != null) { atlas.onResume(); if(safeLocal(atlas.getUrl())) atlas.evaluateJavascript("dispatchEvent(new Event('atlas:host-resume'))",null); }
     }
     @Override public void onDestroy() {

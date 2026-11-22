@@ -39,6 +39,8 @@ final class LiveSync {
             "https://github.com/srikanth1815101/telugustates/releases/latest/download/Telugu-States-Atlas.apk";
     private static final String DEFAULT_RELEASE_META_URL =
             "https://github.com/srikanth1815101/telugustates/releases/latest/download/app-version.json";
+    private static final String GITHUB_LATEST_API_URL =
+            "https://api.github.com/repos/srikanth1815101/telugustates/releases/latest";
     private static final int MAX_META_BYTES = 256 * 1024;
     private static final int MAX_CATALOG_BYTES = 16 * 1024 * 1024;
 
@@ -48,6 +50,7 @@ final class LiveSync {
     private String houseTemplateHtml;
     private String houseTemplateSlug;
     private volatile String latestApkUrl = DEFAULT_APK_URL;
+    private volatile long latestTargetVersionCode = 0L;
 
     LiveSync(Context context) {
         this.context = context.getApplicationContext();
@@ -175,11 +178,42 @@ final class LiveSync {
         return "telugustates.csrgo.com".equals(h)
                 || "telugustates.netlify.app".equals(h)
                 || "github.com".equals(h)
+                || "api.github.com".equals(h)
                 || h.endsWith(".githubusercontent.com");
     }
 
     String resolvedApkUrl() {
         return latestApkUrl != null && !latestApkUrl.isEmpty() ? latestApkUrl : DEFAULT_APK_URL;
+    }
+
+    long resolvedTargetVersionCode() {
+        return latestTargetVersionCode;
+    }
+
+    private static String[] fetchPinnedReleaseAssetUrls() {
+        try {
+            byte[] raw = fetchHttps(GITHUB_LATEST_API_URL, MAX_META_BYTES);
+            JSONObject rel = new JSONObject(new String(raw, StandardCharsets.UTF_8));
+            JSONArray assets = rel.optJSONArray("assets");
+            if (assets == null) return null;
+            String metaUrl = null;
+            String apkAssetUrl = null;
+            for (int i = 0; i < assets.length(); i++) {
+                JSONObject a = assets.optJSONObject(i);
+                if (a == null) continue;
+                String name = a.optString("name", "");
+                String dl = a.optString("browser_download_url", "");
+                if ("app-version.json".equals(name) && !dl.isEmpty()) {
+                    metaUrl = dl;
+                } else if ("Telugu-States-Atlas.apk".equals(name) && trustedApkUrl(dl)) {
+                    apkAssetUrl = dl;
+                }
+            }
+            if (metaUrl != null || apkAssetUrl != null) {
+                return new String[]{metaUrl, apkAssetUrl};
+            }
+        } catch (IOException | JSONException ignored) {}
+        return null;
     }
 
     private static byte[] fetchHttps(String urlString, int maxBytes) throws IOException {
@@ -387,20 +421,28 @@ final class LiveSync {
             }
         }
 
-        String releaseMetaUrl = bundled.optString("releaseMetaUrl", DEFAULT_RELEASE_META_URL);
-        JSONObject releaseMeta = fetchValidMeta(releaseMetaUrl + "?t=" + stamp);
+        String[] pinned = fetchPinnedReleaseAssetUrls();
+        String releaseMetaUrl = (pinned != null && pinned[0] != null)
+                ? pinned[0]
+                : bundled.optString("releaseMetaUrl", DEFAULT_RELEASE_META_URL);
+        JSONObject releaseMeta = fetchValidMeta(
+                releaseMetaUrl + (releaseMetaUrl.contains("?") ? "&t=" : "?t=") + stamp);
         JSONObject engineSource = releaseMeta != null ? releaseMeta : siteMeta;
 
         boolean updateAvailable = false;
         long latestVersionCode = installedVersionCode;
         String latestVersionName = installedVersionName;
-        String apkUrl = bundled.optString("apkUrl", DEFAULT_APK_URL);
+        String apkUrl = (pinned != null && pinned[1] != null)
+                ? pinned[1]
+                : bundled.optString("apkUrl", DEFAULT_APK_URL);
 
         if (engineSource != null) {
             String remoteEngineHash = engineSource.optString("engineHash", "");
             long remoteCode = engineSource.optLong("versionCode", installedVersionCode);
             String remoteName = engineSource.optString("versionName", installedVersionName);
-            String remoteApk = engineSource.optString("apkUrl", apkUrl);
+            String remoteApk = (pinned != null && pinned[1] != null)
+                    ? pinned[1]
+                    : engineSource.optString("apkUrl", apkUrl);
             if (!remoteApk.isEmpty()) apkUrl = remoteApk;
             SharedPreferences sp = context.getSharedPreferences(SYNC_PREFS, Context.MODE_PRIVATE);
             if (!remoteEngineHash.isEmpty()
@@ -410,6 +452,7 @@ final class LiveSync {
                 updateAvailable = true;
                 latestVersionCode = remoteCode;
                 latestVersionName = remoteName;
+                latestTargetVersionCode = remoteCode;
                 sp.edit()
                         .putLong("latestVersionCode", remoteCode)
                         .putString("latestVersionName", remoteName)
@@ -417,8 +460,12 @@ final class LiveSync {
                         .putString("apkUrl", apkUrl)
                         .apply();
             } else {
+                latestTargetVersionCode = 0L;
                 sp.edit().clear().apply();
+                ApkUpdater.get(context).reconcileInstalledVersion(installedVersionCode);
             }
+        } else {
+            ApkUpdater.get(context).reconcileInstalledVersion(installedVersionCode);
         }
 
         if (!apkUrl.isEmpty() && trustedApkUrl(apkUrl)) {

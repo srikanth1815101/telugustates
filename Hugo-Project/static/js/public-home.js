@@ -8,8 +8,10 @@ import {
   houseLabel,
   isResidentId,
   normalizeUsername,
+  readStoredResidentId,
   residentId,
   shardKey,
+  writeStoredResidentId,
 } from "./resident-id.js";
 const $ = (s) => document.querySelector(s),
   home = $("#public-home"),
@@ -180,60 +182,307 @@ function paint() {
   renderDistrictBoard();
   document.dispatchEvent(new Event("living:home-painted"));
 }
-async function showDialog(k) {
+let activeDialogTab = "";
+function dialogDocs() {
+  const isTe = lang === "te";
+  const houseTotal = directory.length || 0;
+  const distTotal = a?.districts?.length || 61;
+  return {
+    guide: {
+      tab: isTe ? "ఎలా పనిచేస్తుంది" : "How It Works",
+      title: isTe
+        ? "మన తెలుగు రాష్ట్రాలను మన శైలిలో నిర్మిద్దాం"
+        : "How Telugu States Works",
+      lead: isTe
+        ? "ప్రతి ఫాలోవర్‌కు ఒక వర్చువల్ ఇల్లు మరియు 1 ఎకరం భూమి లభిస్తుంది — మరియు మన కమ్యూనిటీ వనరులతో ప్రపంచం అభివృద్ధి చెందుతుంది."
+        : "Every follower gets a virtual village home and 1 acre of land — and community resources help develop our shared 3D world.",
+      cards: [
+        {
+          pill: isTe ? "1 · ఇల్లు & 1 ఎకరం భూమి" : "1 · 1 Home + 1 Acre Plot",
+          heading: isTe
+            ? "ప్రతి ఫాలోవర్‌కు వర్చువల్ ఇల్లు"
+            : "Every follower gets a home & 1 acre",
+          items: isTe
+            ? [
+                "అధికారిక పేజీని అనుసరించి నమోదైన ప్రతి సభ్యుడికి తమ జిల్లాలో ఒక 3D వర్చువల్ పల్లె ఇల్లు మరియు 1 ఎకరం పొలం కేటాయించబడుతుంది.",
+                "మీ ఇన్‌స్టాగ్రామ్ పేరును ఒక్కసారి నమోదు చేస్తే చాలు — మీ పరికరంలో ఏకముఖ ఐడి సేవ్ అవుతుంది, మళ్లీ మళ్లీ అడగదు మరియు ఇతరుల ఇళ్లను ఎంచుకోలేరు.",
+                `ప్రస్తుతం ${distTotal} జిల్లాల్లో ${houseTotal} వర్చువల్ ఇళ్లు సిద్ధంగా ఉన్నాయి.`
+              ]
+            : [
+                "Every follower who joins gets a stylized 3D village home and a connected 1-acre plot inside their chosen district.",
+                "Enter your Instagram username once — its one-way ID is stored locally in your app/browser so you never have to type it again, and no one can select another person’s home.",
+                `Currently ${houseTotal} virtual homes are settled across ${distTotal} mapped districts.`
+              ],
+        },
+        {
+          pill: isTe ? "2 · ఉమ్మడి వనరులు" : "2 · Community Resources",
+          heading: isTe
+            ? "1 లైక్ = 1 ఆహారం · 1 కామెంట్ = 1 నాణెం · 1 షేర్ = 1 బంగారం"
+            : "1 Like = 1 Food · 1 Comment = 1 Currency · 1 Share = 1 Gold",
+          items: isTe
+            ? [
+                "అధికారిక పోస్టులపై వచ్చే ధృవీకరించిన లైక్‌లు ఆహారాన్ని, కామెంట్లు నాణేలను, షేర్లు బంగారాన్ని పెంచుతాయి.",
+                "ఈ వర్చువల్ వనరులు మన తెలుగు రాష్ట్రాల 3D ప్రపంచంలో కొత్త నిర్మాణాలు, సదుపాయాలు, అభివృద్ధి పనుల కోసం ఉపయోగపడతాయి.",
+                "ఇవి కేవలం వినోద కమ్యూనిటీ పాయింట్లు మాత్రమే — నిజమైన డబ్బు లేదా ఆర్థిక విలువ కాదు."
+              ]
+            : [
+                "Verified engagement on official community posts adds shared resources: 1 like = 1 Food, 1 comment = 1 Currency, and 1 share = 1 Gold.",
+                "Shared Food, Currency, and Gold unlock new community landmarks, upgrades, and world development across both states.",
+                "Resources are purely fictional world-building counters with zero monetary or real-world value."
+              ],
+        },
+        {
+          pill: isTe ? "3 · 3D ప్రపంచ అన్వేషణ" : "3 · Explore Freely in 3D",
+          heading: isTe
+            ? "పటంపై జూమ్ చేసి నడవండి"
+            : "Zoom into the map & walk anywhere",
+          items: isTe
+            ? [
+                "ప్రాంతీయ పటంపై ఎక్కడైనా జూమ్ చేసి కొండలు, నదులు, అడవులు, పల్లెలను 3Dలో స్వేచ్ఛగా అన్వేషించవచ్చు.",
+                "3Dలో 'నా ఇల్లు' లేదా 'నా ఎకరం' బటన్ నొక్కి మీ సొంత ఇంటికి నడిచి వెళ్లవచ్చు లేదా నేరుగా వెళ్లవచ్చు."
+              ]
+            : [
+                "Pinch or scroll anywhere on the map of Telangana and Andhra Pradesh to descend into the 3D terrain and explore rivers, hills, forests, and villages freely.",
+                "Tap My Home or My Acre in 3D to walk along the village footpath or teleport straight to your own plot."
+              ],
+        },
+      ],
+    },
+    about: {
+      tab: isTe ? "వివరాలు" : "About",
+      title: isTe ? "తెలుగు రాష్ట్రాలు · ప్రాజెక్ట్ వివరాలు" : "About Telugu States by CSRGO",
+      lead: isTe
+        ? "తెలంగాణ మరియు ఆంధ్రప్రదేశ్ భౌగోళిక స్వరూపంతో రూపొందించిన స్వతంత్ర, కాల్పనిక 3D కమ్యూనిటీ ప్రపంచం."
+        : "An independent, interactive 3D fictional community landscape inspired by the geography of Telangana and Andhra Pradesh.",
+      cards: [
+        {
+          pill: isTe ? "భౌగోళిక డేటా vs కల్పన" : "Open Geography vs Fiction",
+          heading: isTe
+            ? "నిజమైన భౌగోళిక ఎత్తులు — కాల్పనిక 3D పల్లెలు"
+            : "Real terrain relief, fictional 3D villages",
+          items: isTe
+            ? [
+                "రాష్ట్ర, జిల్లా సరిహద్దులు, ఎత్తులు, నదులు బహిరంగ భౌగోళిక డేటా నుండి తీసుకోబడ్డాయి.",
+                "ఇళ్లు, వీధులు, పొలాలు, చెట్లు, వాతావరణం పూర్తిగా కంప్యూటర్ ద్వారా సృష్టించిన 3D కళాత్మక అనుకరణలు మాత్రమే — అసలు నివాసాలు లేదా చిరునామాలు కావు."
+              ]
+            : [
+                "District boundaries, terrain elevations, and major waterways are derived from open public geographic data.",
+                "All village streets, houses, courtyards, crops, trees, wildlife, and weather are procedural 3D artwork — not real addresses, real buildings, or real land parcels."
+              ],
+        },
+        {
+          pill: isTe ? "స్వతంత్ర వేదిక" : "Independent & Transparent",
+          heading: isTe
+            ? "స్పామ్ లేని, పారదర్శక వినోద వేదిక"
+            : "Zero spam, zero fees, pure entertainment",
+          items: isTe
+            ? [
+                "ఇది పూర్తిగా ఉచిత వినోద ప్రాజెక్ట్. ఇందులో ఎటువంటి రుసుములు, పెట్టుబడులు, బెట్టింగ్ లేదా లాటరీలు లేవు.",
+                "Instagram / Meta లేదా ఏ ప్రభుత్వ సంస్థతోనూ ఈ ప్రాజెక్ట్‌కు ఎటువంటి అధికారిక సంబంధం లేదు."
+              ]
+            : [
+                "Participation is 100% free with no payments, purchases, tokens, sweepstakes, or commercial solicitation.",
+                "Independent creator project by CSRGO — not affiliated with, endorsed by, or sponsored by Instagram, Meta, or any government body."
+              ],
+        },
+      ],
+    },
+    legal: {
+      tab: isTe ? "నిబంధనలు & వివరణ" : "Legal & Disclaimer",
+      title: isTe
+        ? "చట్టపరమైన వివరణ & నిష్పక్షపాత ప్రకటన"
+        : "Legal Disclaimer & Neutrality Notice",
+      lead: isTe
+        ? "ఈ వెబ్‌సైట్ మరియు ఆండ్రాయిడ్ యాప్ కేవలం వినోదం కోసం మాత్రమే రూపొందించబడ్డాయి."
+        : "This website and Android application are created strictly for harmless entertainment and artistic simulation.",
+      cards: [
+        {
+          pill: isTe ? "వినోదం మాత్రమే" : "Entertainment Only",
+          heading: isTe
+            ? "భూమి హక్కులు లేదా ఆర్థిక విలువ కాదు"
+            : "Not real land ownership or money",
+          items: isTe
+            ? [
+                "ఇక్కడి 'ఇల్లు', '1 ఎకరం భూమి', 'ఆహారం', 'నాణేలు', 'బంగారం' అన్నీ పూర్తిగా కాల్పనిక డిజిటల్ ఆట అంశాలు మాత్రమే.",
+                "ఇవి ఎటువంటి చట్టపరమైన భూ యాజమాన్యం, సర్వే హక్కులు, డబ్బు, క్రిప్టో లేదా ఆర్థిక విలువను కల్పించవు."
+              ]
+            : [
+                "Every 'home', '1 acre plot', 'Food', 'Currency', and 'Gold' counter is 100% fictional digital illustration inside an entertainment world.",
+                "Nothing here constitutes real property title, cadastral claim, legal ownership, currency, financial instrument, or redeemable value."
+              ],
+        },
+        {
+          pill: isTe ? "పూర్తి నిష్పక్షపాతం" : "Strict Neutrality",
+          heading: isTe
+            ? "మతం, కులం, రాజకీయాలకు అతీతం"
+            : "No religion, caste, or political representation",
+          items: isTe
+            ? [
+                "ఈ ప్రాజెక్ట్ ఏ మతం, కులం, వర్గం, రాజకీయ పార్టీ, రాజకీయ నాయకులు లేదా ప్రభుత్వ సంస్థకు ప్రాతినిధ్యం వహించదు మరియు ఎవరినీ ప్రోత్సహించదు.",
+                "రాష్ట్రాలు, జిల్లాలు, నదుల పేర్లు కేవలం భౌగోళిక పరిచయం కోసం మాత్రమే ఉపయోగించబడ్డాయి."
+              ]
+            : [
+                "This project does NOT represent, endorse, or affiliate with any religion, caste, community group, political party, political ideology, or government authority.",
+                "Real-world state, district, and river names are used strictly for geographic familiarity from public open data."
+              ],
+        },
+        {
+          pill: isTe ? "స్పామ్ నిరోధక విధానం" : "Anti-Spam & Fair Use",
+          heading: isTe
+            ? "సహజ భాగస్వామ్యం మాత్రమే"
+            : "Respectful engagement & instant takedown",
+          items: isTe
+            ? [
+                "బాట్ కామెంట్లు, స్పామ్ లేదా అసభ్యకర ప్రవర్తనను అనుమతించము మరియు వనరుల లెక్కల్లో చేర్చము.",
+                "ఎవరైనా తమ ఇంటి పేరును మార్చాలన్నా లేదా తొలగించాలన్నా @telugustates.csrgo కు సందేశం పంపి వెంటనే తొలగించుకోవచ్చు."
+              ]
+            : [
+                "Automated bots, repetitive spam comments, or artificial engagement are strictly discouraged and never counted.",
+                "Any user may request immediate correction or removal of a display name or virtual house via @telugustates.csrgo."
+              ],
+        },
+      ],
+    },
+    privacy: {
+      tab: isTe ? "గోప్యత" : "Privacy",
+      title: isTe ? "గోప్యత & వ్యక్తిగత సమాచార రక్షణ" : "Privacy & Zero-PII Policy",
+      lead: isTe
+        ? "మేము ఎటువంటి వ్యక్తిగత సమాచారాన్ని లేదా అసలు ఇన్‌స్టాగ్రామ్ పేర్లను నిల్వ చేయము."
+        : "We collect zero personal data and never store raw social usernames.",
+      cards: [
+        {
+          pill: isTe ? "ఏకముఖ హ్యాష్ ఐడి" : "One-Way Hashed ID",
+          heading: isTe
+            ? "మీ పరికరంలోనే సురక్షిత మార్పిడి"
+            : "Local-only anonymous resident ID",
+          items: isTe
+            ? [
+                "మీరు నమోదు చేసే ఇన్‌స్టాగ్రామ్ పేరు మీ ఫోన్/బ్రౌజర్‌లోనే 256-రౌండ్ల SHA-256 హ్యాష్ (h + 24 అక్షరాలు) గా మారుతుంది; అసలు పేరు ఎక్కడా సేవ్ కాదు.",
+                "మళ్లీ మళ్లీ పేరు అడగకుండా ఉండేందుకు ఆ అజ్ఞాత ఐడి మాత్రమే మీ యాప్ డేటా లేదా బ్రౌజర్ నిల్వలో సేవ్ అవుతుంది.",
+                "ఇంటి బోర్డులపై కేవలం సాధారణ పేరు (ఉదా. Kiran, Vennela) మాత్రమే కనిపిస్తుంది."
+              ]
+            : [
+                "When you type your username, your device locally computes an irreversible 256-round SHA-256 hash (`h` + 24 hex characters) and immediately discards the raw text.",
+                "Only that anonymous ID and display settings are stored locally in Android app preferences or browser `localStorage` so you are never asked again.",
+                "3D wooden signboards display plain names/nicknames only — never `@handles`."
+              ],
+        },
+        {
+          pill: isTe ? "అనుమతులు లేవు" : "Zero Tracking",
+          heading: isTe
+            ? "లొకేషన్, కెమెరా, కుకీల సేకరణ లేదు"
+            : "No GPS, contacts, camera, or ad trackers",
+          items: isTe
+            ? [
+                "ఈ యాప్ లేదా వెబ్‌సైట్ GPS లొకేషన్, కాంటాక్ట్స్, కెమెరా, మైక్రోఫోన్, ఇమెయిల్, ఫోన్ నంబర్ లేదా ప్రకటన ట్రాకర్లను సేకరించదు."
+              ]
+            : [
+                "Neither the website nor the Android app accesses GPS location, contacts, camera, microphone, email, phone numbers, or third-party advertising trackers."
+              ],
+        },
+      ],
+    },
+    credits: {
+      tab: isTe ? "డేటా & మూలాలు" : "Credits",
+      title: isTe ? "ఓపెన్ డేటా, కళ & సాఫ్ట్‌వేర్ మూలాలు" : "Data, Artwork & Software Credits",
+      lead: isTe
+        ? "ఈ ప్రాజెక్ట్‌లో ఉపయోగించిన బహిరంగ డేటాసెట్‌లు మరియు ఓపెన్-సోర్స్ లైసెన్సుల వివరాలు."
+        : "Full attribution for every open geographic dataset, 3D asset library, font, and software package.",
+      cards: [
+        {
+          pill: isTe ? "భౌగోళిక మూలాలు" : "Geographic Datasets",
+          heading: isTe ? "పట మరియు భూభాగ లైసెన్సులు" : "Map, Elevation & Water Sources",
+          items: [
+            "OpenStreetMap: © OpenStreetMap contributors — Open Database License (ODbL 1.0).",
+            "District Directory: Local Government Directory (LGD), Ministry of Panchayati Raj — Government Open Data License–India.",
+            "Elevation (DEM): Copernicus WorldDEM-30 (GLO-30) © DLR e.V. 2010–2014 & © Airbus Defence and Space GmbH 2014–2018 under COPERNICUS by the EU & ESA (no official endorsement or liability).",
+            "Land Cover & Lakes: © ESA WorldCover 2021 v200 (CC BY 4.0) · HydroLAKES v1.0, Messager et al. (CC BY 4.0).",
+          ],
+        },
+        {
+          pill: isTe ? "సాఫ్ట్‌వేర్ & కళ" : "Software, Fonts & Art",
+          heading: isTe ? "ఓపెన్ సోర్స్ లైబ్రరీలు" : "Open-Source Code & Assets",
+          items: [
+            "3D Engine & Compression: Three.js r177 (MIT) · fzstd 0.1.1 & fflate (MIT).",
+            "Typography: Fraunces, Manrope & Noto Sans Telugu (SIL Open Font License 1.1).",
+          ],
+        },
+      ],
+    },
+  };
+}
+async function showDialog(rawKey) {
+  const keyName =
+    rawKey === "residents" || rawKey === "economy" ? "guide" : rawKey;
+  const docs = dialogDocs();
+  const activeKey = docs[keyName] ? keyName : "about";
+  activeDialogTab = activeKey;
+  const sec = docs[activeKey];
   const body = $("#dialog-body");
   body.replaceChildren();
-  const h = document.createElement("h2"),
-    p = document.createElement("p");
-  h.textContent = msg(
-    k === "about"
-      ? "nav.about"
-      : k === "privacy"
-        ? "nav.privacy"
-        : k === "economy"
-          ? "home.resources"
-          : "nav.residents",
-  );
-  p.textContent = msg(
-    k === "about"
-      ? "home.about"
-      : k === "privacy"
-        ? "home.privacy"
-        : k === "economy"
-          ? "home.resources"
-          : directory.length
-            ? "home.count"
-            : "home.empty",
-    { n: directory.length },
-  );
-  body.append(h, p);
-  if (k === "about") {
-    for (const [href, id] of [
-      ["frozen/credits.md", "nav.data"],
-      ["library/CREDITS.html", "home.credits"],
-    ]) {
-      const l = document.createElement("a");
-      l.href = url(href);
-      l.textContent = msg(id);
-      body.append(l, document.createElement("br"));
-    }
+
+  const tabs = document.createElement("div");
+  tabs.className = "doc-tabs";
+  tabs.setAttribute("role", "tablist");
+  for (const id of ["guide", "about", "legal", "privacy", "credits"]) {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "doc-tab" + (id === activeKey ? " is-active" : "");
+    b.setAttribute("role", "tab");
+    b.setAttribute("aria-selected", String(id === activeKey));
+    b.textContent = docs[id].tab;
+    b.onclick = () => showDialog(id);
+    tabs.append(b);
   }
-  if (k === "residents") {
-    const byId = new Map((a?.districts || []).map((d) => [d.id, d]));
-    for (const [, d, href, name] of directory) {
-      const l = document.createElement("a"),
-        ds = byId.get(d);
-      l.href = url(href);
-      l.textContent =
-        (name || "Resident") +
-        (ds ? " · " + tr(ds.name, ds.te || ds.name) : "");
-      body.append(l);
+  body.append(tabs);
+
+  const h = document.createElement("h2");
+  h.textContent = sec.title;
+  const lead = document.createElement("p");
+  lead.className = "doc-lead";
+  lead.textContent = sec.lead;
+  body.append(h, lead);
+
+  const stack = document.createElement("div");
+  stack.className = "doc-stack";
+  for (const c of sec.cards) {
+    const card = document.createElement("section");
+    card.className = "doc-card";
+    const pill = document.createElement("span");
+    pill.className = "doc-pill";
+    pill.textContent = c.pill;
+    const ch = document.createElement("h3");
+    ch.textContent = c.heading;
+    const ul = document.createElement("ul");
+    ul.className = "doc-list";
+    for (const line of c.items) {
+      const li = document.createElement("li");
+      li.textContent = line;
+      ul.append(li);
     }
+    card.append(pill, ch, ul);
+    stack.append(card);
   }
-  if (k === "economy")
-    document.dispatchEvent(new CustomEvent("living:economy", { detail: body }));
+  body.append(stack);
+
+  const links = document.createElement("div");
+  links.className = "doc-links";
+  const legalLink = document.createElement("a");
+  legalLink.className = "secondary-cta";
+  legalLink.href = url("legal/");
+  legalLink.textContent = msg("nav.legalPage");
+  const artLink = document.createElement("a");
+  artLink.className = "secondary-cta";
+  artLink.href = url("library/CREDITS.html");
+  artLink.textContent = msg("home.credits");
+  links.append(legalLink, artLink);
+  body.append(links);
+
   if (!dlg.open) dlg.showModal();
 }
+window.addEventListener("languagechange-atlas", () => {
+  if (dlg?.open && activeDialogTab) showDialog(activeDialogTab);
+});
 document.addEventListener("click", (e) => {
   const action = e.target.closest("[data-open]")?.dataset.open;
   if (action) showDialog(action);
@@ -340,17 +589,33 @@ async function route() {
   let r, s;
   if (match) {
     const rawTarget = match[2],
-      id = resolveResidentId(rawTarget);
-    r = await lookup(id);
+      requestedId = resolveResidentId(rawTarget),
+      savedId = await readStoredResidentId();
+    if (token !== seq) return;
+    if (!savedId) {
+      const targetRec = requestedId ? await lookup(requestedId) : null;
+      if (token !== seq) return;
+      if (targetRec) {
+        const exploreHash =
+          "#/at/" +
+          targetRec.lat.toFixed(8) +
+          "," +
+          targetRec.lon.toFixed(8);
+        history.replaceState(
+          null,
+          "",
+          location.pathname + location.search + exploreHash,
+        );
+        return route();
+      }
+      paper(true);
+      return;
+    }
+    const effectiveId = savedId;
+    r = await lookup(effectiveId);
     if (token !== seq) return;
     if (!r) {
       paper(true);
-      tell(
-        $("#search-msg"),
-        msg("home.missing", {
-          name: normalizeUsername(rawTarget) || rawTarget.slice(0, 30),
-        }),
-      );
       return;
     }
     if (rawTarget !== r.u) {
@@ -498,6 +763,47 @@ if (home) {
         location.hash = retryHash || lastMapHash;
       else map.enter();
     };
+    async function syncSavedHomeUi() {
+      const findForm = $("#find"),
+        savedBox = $("#saved-home-box"),
+        leadEl = $("#find-lead");
+      if (!findForm || !savedBox || !a) return;
+      const myId = await readStoredResidentId();
+      const myRec = myId ? await lookup(myId) : null;
+      if (!myRec) {
+        findForm.hidden = false;
+        savedBox.hidden = true;
+        if (leadEl) leadEl.textContent = msg("walk.lookup");
+        return;
+      }
+      findForm.hidden = true;
+      savedBox.hidden = false;
+      if (leadEl) leadEl.textContent = msg("home.savedLead");
+      const ds = a.districts.find((d) => d.id === myRec.d);
+      $("#saved-home-name").textContent = houseLabel(myRec);
+      $("#saved-home-district").textContent = ds
+        ? tr(ds.name, ds.te || ds.name) +
+          " · " +
+          msg(ds.state === "Telangana" ? "geo.tg" : "geo.ap")
+        : "";
+      $("#go-saved-home").onclick = () => {
+        cold = null;
+        requestFull();
+        const target = "#/u/" + myRec.u;
+        if (location.hash === target) route();
+        else location.hash = "/u/" + myRec.u;
+      };
+      $("#go-saved-acre").onclick = () => {
+        cold = null;
+        requestFull();
+        const target = "#/acre/" + myRec.u;
+        if (location.hash === target) route();
+        else location.hash = "/acre/" + myRec.u;
+      };
+    }
+    await syncSavedHomeUi();
+    window.addEventListener("atlas:resident-bound", syncSavedHomeUi);
+    window.addEventListener("languagechange-atlas", syncSavedHomeUi);
     $("#find").onsubmit = async (e) => {
       e.preventDefault();
       cold = null;
@@ -517,6 +823,8 @@ if (home) {
       }
       $("#handle").value = "";
       tell($("#search-msg"), "");
+      await writeStoredResidentId(found.u);
+      await syncSavedHomeUi();
       if (location.hash === "#/u/" + found.u) route();
       else location.hash = "/u/" + found.u;
     };

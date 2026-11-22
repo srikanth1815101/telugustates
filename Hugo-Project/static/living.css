@@ -840,7 +840,7 @@ a.scenic-card small {
 }
 #world .holding-icon:focus-visible,
 #holding-menu button:focus-visible,
-#holding-menu select:focus-visible {
+#holding-menu input:focus-visible {
   outline: 3px solid #ffda87;
   outline-offset: 2px;
 }
@@ -849,7 +849,7 @@ a.scenic-card small {
   z-index: 12;
   top: calc(var(--pad-t, 0px) + 60px);
   left: calc(var(--pad-l, 0px) + 10px);
-  width: min(268px, calc(100% - 22px));
+  width: min(296px, calc(100% - 22px));
   max-height: calc(100% - 100px);
   overflow: auto;
   color: #fcf8e7;
@@ -857,7 +857,7 @@ a.scenic-card small {
   border: 1px solid #cfcaa880;
   border-radius: 15px;
   box-shadow: 0 6px 24px #20372a40;
-  padding: 12px;
+  padding: 14px;
   box-sizing: border-box;
 }
 #holding-menu header {
@@ -886,13 +886,62 @@ a.scenic-card small {
   min-width: 34px;
   min-height: 34px;
 }
-#holding-menu select {
-  max-width: 100%;
-  width: 100%;
-  height: 38px;
-  margin: 4px 0 10px;
-  border-radius: 6px;
+#holding-claim {
+  margin: 2px 0 10px;
+}
+#holding-claim label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+.holding-input-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #f8f5e6;
+  color: #19382b;
+  border: 1px solid #d5ceaf;
+  border-radius: 9px;
+  padding: 4px 5px 4px 10px;
+}
+.holding-input-row > span {
+  font-weight: 800;
+  color: #6b7666;
   font-size: 14px;
+}
+.holding-input-row input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  color: #19382b;
+  font: 600 13.5px system-ui;
+  height: 32px;
+  outline: none;
+}
+.holding-input-row input::placeholder {
+  color: #878e7f;
+  font-weight: 500;
+}
+#holding-verify {
+  border: 0;
+  border-radius: 7px;
+  background: #285140;
+  color: #fffdf5;
+  font: 700 12px system-ui;
+  padding: 7px 11px;
+  min-height: 32px;
+  white-space: nowrap;
+}
+#holding-status {
+  margin: 7px 0 0;
+  font-size: 11.5px;
+  line-height: 1.4;
+  color: #ffd599;
+}
+#holding-distance {
+  display: block;
+  line-height: 1.4;
 }
 #holding-chart {
   display: block;

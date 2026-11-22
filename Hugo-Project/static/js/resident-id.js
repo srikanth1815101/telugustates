@@ -216,3 +216,85 @@ export function houseLabel(item, fallback = "Resident") {
     "";
   return cleanHouseName(candidate, fallback);
 }
+
+export const RESIDENT_STORAGE_KEY = "atlas-resident-id-v1";
+const LEGACY_HOUSE_KEY = "atlas-chosen-house-v714";
+let cachedResidentId = "";
+
+function isAndroidHost() {
+  return (
+    typeof location !== "undefined" &&
+    location.hostname === "appassets.androidplatform.net"
+  );
+}
+
+export function readStoredResidentIdSync() {
+  if (cachedResidentId && RESIDENT_ID_RE.test(cachedResidentId))
+    return cachedResidentId;
+  if (typeof localStorage === "undefined") return "";
+  try {
+    localStorage.removeItem(LEGACY_HOUSE_KEY);
+    const saved = String(localStorage.getItem(RESIDENT_STORAGE_KEY) || "")
+      .trim()
+      .toLowerCase();
+    if (RESIDENT_ID_RE.test(saved)) {
+      cachedResidentId = saved;
+      return saved;
+    }
+  } catch {}
+  return "";
+}
+
+export async function readStoredResidentId() {
+  const local = readStoredResidentIdSync();
+  if (!isAndroidHost() || typeof fetch !== "function") return local;
+  try {
+    const res = await fetch("/_field/my-id", { cache: "no-store" });
+    if (res.ok) {
+      const data = await res.json();
+      const nativeId = String(data?.id || "")
+        .trim()
+        .toLowerCase();
+      if (RESIDENT_ID_RE.test(nativeId)) {
+        cachedResidentId = nativeId;
+        try {
+          localStorage.setItem(RESIDENT_STORAGE_KEY, nativeId);
+        } catch {}
+        return nativeId;
+      }
+      if (local) {
+        await fetch("/_field/my-id?set=" + encodeURIComponent(local), {
+          cache: "no-store",
+        }).catch(() => {});
+        return local;
+      }
+    }
+  } catch {}
+  return local;
+}
+
+export async function writeStoredResidentId(rawOrId) {
+  const trimmed = String(rawOrId || "").trim().toLowerCase();
+  const id = RESIDENT_ID_RE.test(trimmed) ? trimmed : residentId(rawOrId);
+  if (!RESIDENT_ID_RE.test(id)) return "";
+  cachedResidentId = id;
+  if (typeof localStorage !== "undefined") {
+    try {
+      localStorage.removeItem(LEGACY_HOUSE_KEY);
+      localStorage.setItem(RESIDENT_STORAGE_KEY, id);
+    } catch {}
+  }
+  if (isAndroidHost() && typeof fetch === "function") {
+    try {
+      await fetch("/_field/my-id?set=" + encodeURIComponent(id), {
+        cache: "no-store",
+      });
+    } catch {}
+  }
+  if (typeof window !== "undefined" && typeof CustomEvent === "function") {
+    window.dispatchEvent(
+      new CustomEvent("atlas:resident-bound", { detail: id }),
+    );
+  }
+  return id;
+}

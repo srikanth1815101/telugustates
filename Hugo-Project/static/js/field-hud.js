@@ -265,8 +265,9 @@ export function fieldHUD(host, deck, on, tr, api) {
   on(panel.querySelector(".dismiss"), "click", () => (panel.hidden = true));
   on(panel.querySelector(".walk"), "click", () => {
     panel.hidden = true;
-    api.visit(card.u);
+    api.visit(card.u, card.x, card.y);
   });
+  panel.querySelector(".share").hidden = true;
   on(panel.querySelector(".share"), "click", async () => {
     if (location.hostname === "appassets.androidplatform.net") {
       location.href =
