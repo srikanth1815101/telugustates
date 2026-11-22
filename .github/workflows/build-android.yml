@@ -3,6 +3,8 @@ on:
   push:
     branches:
       - main
+  schedule:
+    - cron: '0 4 * * 1'
   workflow_dispatch:
 
 permissions:
@@ -32,7 +34,10 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.atlas-keystore
-          key: atlas-auto-keystore-v1
+          key: atlas-auto-keystore-v1-${{ github.run_number }}
+          restore-keys: |
+            atlas-auto-keystore-v1-
+            atlas-auto-keystore-v1
 
       - name: Install Hugo and the pinned Android platform
         shell: bash
@@ -137,6 +142,7 @@ jobs:
           if-no-files-found: error
 
       - name: Publish latest APK and release metadata to GitHub Releases
+        if: github.event_name != 'schedule'
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

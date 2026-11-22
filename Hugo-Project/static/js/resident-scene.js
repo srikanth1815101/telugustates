@@ -4,7 +4,11 @@ import { registerTerraces } from "./house-ground.js";
 import { nameboard } from "./nameboard.js";
 // Restore the original resident's exterior as the visible collision target; never create new plot records here.
 import * as T from "../vendor/three.module.min.js";
-import { addForms, makeHouse } from "./resident-forms.js";
+import {
+  addForms,
+  compoundWallSegments,
+  makeHouse,
+} from "./resident-forms.js";
 import { ACRE, basis } from "./metres.js";
 const forms = {
   wall: new T.BoxGeometry(),
@@ -59,6 +63,7 @@ export function preparePads(s, rows) {
 export function residents(s, rows, p, tier) {
   const group = new T.Group(),
     bins = new Map(),
+    walls = [],
     o = new T.Object3D(),
     col = new T.Color(),
     me = o.matrix.elements;
@@ -99,12 +104,13 @@ export function residents(s, rows, p, tier) {
     if (d > (tier ? 540 : 285)) continue;
     drawn++;
     makeHouse(s, h, u, d, tier, put);
+    if (d < 185) walls.push(...compoundWallSegments(s, h));
     if (d < (tier ? 310 : 155)) {
       const leaf = doorLeaf(s, h, u);
       group.add(leaf);
       (group.userData.doors ??= new Map()).set(u, leaf);
     }
-    if (d < (tier ? 105 : 62) && typeof document !== "undefined")
+    if (d < (tier ? 185 : 150) && typeof document !== "undefined")
       nameboard(group, s, h, u, put);
   }
   for (const [key, bin] of bins) {
@@ -135,6 +141,7 @@ export function residents(s, rows, p, tier) {
     group.add(mesh);
   }
   group.userData.houses = drawn;
+  group.userData.walls = walls;
   return group;
 }
 

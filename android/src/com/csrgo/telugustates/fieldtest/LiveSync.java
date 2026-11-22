@@ -34,7 +34,7 @@ import javax.net.ssl.HttpsURLConnection;
  */
 final class LiveSync {
     static final String APP_ID = "com.csrgo.telugustates.fieldtest";
-    private static final String DEFAULT_APK_URL =
+    static final String DEFAULT_APK_URL =
             "https://github.com/srikanth1815101/telugustates/releases/latest/download/Telugu-States-Atlas.apk";
     private static final String DEFAULT_RELEASE_META_URL =
             "https://github.com/srikanth1815101/telugustates/releases/latest/download/app-version.json";
@@ -46,6 +46,7 @@ final class LiveSync {
     private JSONObject cachedBundledMeta;
     private String houseTemplateHtml;
     private String houseTemplateSlug;
+    private volatile String latestApkUrl = DEFAULT_APK_URL;
 
     LiveSync(Context context) {
         this.context = context.getApplicationContext();
@@ -168,13 +169,17 @@ final class LiveSync {
         return false;
     }
 
-    private static boolean allowedHost(String host) {
+    static boolean allowedHost(String host) {
         if (host == null) return false;
         String h = host.toLowerCase(Locale.ROOT);
         return "telugustates.csrgo.com".equals(h)
                 || "telugustates.netlify.app".equals(h)
                 || "github.com".equals(h)
                 || h.endsWith(".githubusercontent.com");
+    }
+
+    String resolvedApkUrl() {
+        return latestApkUrl != null && !latestApkUrl.isEmpty() ? latestApkUrl : DEFAULT_APK_URL;
     }
 
     private static byte[] fetchHttps(String urlString, int maxBytes) throws IOException {
@@ -355,6 +360,10 @@ final class LiveSync {
                 latestVersionCode = remoteCode;
                 latestVersionName = remoteName;
             }
+        }
+
+        if (!apkUrl.isEmpty() && trustedApkUrl(apkUrl)) {
+            latestApkUrl = apkUrl;
         }
 
         JSONObject reply = new JSONObject();

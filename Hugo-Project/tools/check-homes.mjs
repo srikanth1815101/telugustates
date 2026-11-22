@@ -24,6 +24,8 @@ import { WalkMotor } from "../static/js/walk-motor.js";
 import { Surface, chunk } from "../static/js/terrain.js";
 import { ecology } from "../static/js/ecodata.js";
 import { preparePads } from "../static/js/resident-scene.js";
+import { compoundWallSegments } from "../static/js/resident-forms.js";
+import { nameboardSpot } from "../static/js/nameboard.js";
 import { Tread } from "../static/js/tread.js";
 const root = fileURLToPath(new URL("../", import.meta.url)),
   tmp = await fs.mkdtemp(path.join(os.tmpdir(), "atlas-homes-")),
@@ -317,6 +319,66 @@ try {
       peak,
       landed: !!m.lands,
     });
+  }
+  // Verify every home gets a valid @username nameboard spot and real compound walls block walking, jump cleanly, and leave the gate open.
+  for (const [, , u, , , h] of rows) {
+    const nb = nameboardSpot(h);
+    assert(
+      nb && Number.isFinite(nb.gx) && Number.isFinite(nb.gy) && nb.boardW >= 1.84,
+      u + " missing nameboard spot",
+    );
+  }
+  const walledHome = rows.find((r) => r[5]?.yard)?.[5];
+  assert(walledHome, "expected walled village home");
+  {
+    const { fx, fy } = basis(walledHome),
+      [, d] = walledHome.size_m,
+      halfW = walledHome.yard.lot[0] * 0.5 - 0.16,
+      frontExt = d * 0.5 + walledHome.yard.front - 0.16,
+      gapLo = Math.max(-halfW + 0.42, walledHome.door_x - 1.75),
+      gapHi = Math.min(halfW - 0.42, walledHome.door_x + 1.75),
+      wingX =
+        halfW - gapHi >= gapLo - -halfW
+          ? (gapHi + halfW) * 0.5
+          : (-halfW + gapLo) * 0.5,
+      flatSim = {
+        ...ff,
+        ground: () => 0,
+        sample: () => ({ z: 0, depth: 0, drawn: true, line: 0, m: [0, 0, 0, 0] }),
+      },
+      cWalls = compoundWallSegments(flatSim, walledHome),
+      allowWall = (...v) => passes(flatSim, cWalls, [], [], ...v);
+    assert(cWalls.length >= 5, "compound wall segments");
+    for (const [label, lx, jump] of [
+      ["compound wall blocks walking", wingX, false],
+      ["compound wall jump", wingX, true],
+      ["compound gate open", walledHome.door_x, false],
+    ]) {
+      const [sx, sy] = localPoint(walledHome, lx, frontExt + 1.9),
+        m = new WalkMotor();
+      m.reset(sx, sy, flatSim);
+      for (let i = 0; i < 200; i++) {
+        const distToWall =
+          ((m.x - walledHome.centre[0]) * fx +
+            (m.y - walledHome.centre[1]) * fy) *
+            M -
+          frontExt;
+        if (jump && !m.jumps && distToWall < 1.32) {
+          m.jump();
+          m.releaseJump();
+        }
+        m.advance(1 / 60, -fx, -fy, 2.5, flatSim, allowWall, 0.92);
+      }
+      const finalZ =
+        ((m.x - walledHome.centre[0]) * fx +
+          (m.y - walledHome.centre[1]) * fy) *
+        M;
+      if (label === "compound wall blocks walking") {
+        assert(finalZ > frontExt + 0.35 && m.blocked, label + " " + finalZ);
+      } else {
+        assert(finalZ < frontExt - 1.2, label + " " + finalZ);
+      }
+    }
   }
   const tiles = new Tiles(a),
     eco = await ecology(),

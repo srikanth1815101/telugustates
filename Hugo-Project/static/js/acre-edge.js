@@ -14,12 +14,13 @@ export function acreEntry(
 // Horizontal capsule plus a finite, slope-following top. Walking still stops at timber, but not at an invisible wall over it.
 export function fenceTop(blocks, x, y) {
   let top = -Infinity;
+  const r = 0.43 / U;
   for (const [a, b, c, d, h, H] of blocks || []) {
     if (
-      x < a - 0.43 / U ||
-      x > c + 0.43 / U ||
-      y < b - 0.43 / U ||
-      y > d + 0.43 / U
+      x < Math.min(a, c) - r ||
+      x > Math.max(a, c) + r ||
+      y < Math.min(b, d) - r ||
+      y > Math.max(b, d) + r
     )
       continue;
     const dx = c - a,

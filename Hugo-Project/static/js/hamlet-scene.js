@@ -291,11 +291,11 @@ function sampleRouteArc(xy) {
 
 const ZERO_MAT = new T.Matrix4().makeScale(0, 0, 0),
   LEAF_PALETTE = [
-    0xdfad46, // warm dry golden leaf
-    0xd37a32, // sun-toasted mango/teak amber
-    0xc15a2d, // autumn russet terracotta
-    0xa4b442, // freshly wind-dropped olive-lime leaf
-    0xe4c66d, // pale sunlit straw-gold leaf
+    0xf0be42, // sunlit golden mango leaf
+    0xe8892c, // warm amber palash leaf
+    0xd65328, // vibrant flame-russet leaf
+    0xb5cc3e, // fresh wind-dropped lime-gold leaf
+    0xf5d46e, // bright straw-gold leaf
   ];
 
 export function updateRouteLeaves(route, progress) {
@@ -402,29 +402,48 @@ export function marks(s, r, kind, route) {
         hintArcs = [...(route.forks || []), ...bends].sort((u, v) => u - v),
         arcList = [];
 
-      // 1. Gentle 2-3 leaf hints right after road splits/forks & sharp turns so the chosen branch is unmistakable.
+      // 1. Rich multi-leaf clusters right after road splits/forks & sharp turns so every turn is unmistakable.
       for (const fArc of hintArcs) {
-        for (const off of [1.0, 2.35, 3.85]) {
+        for (const off of [0.55, 1.15, 1.85, 2.65, 3.55]) {
           const a0 = fArc + off;
-          if (a0 < 2.0 || a0 > total - 0.8) continue;
-          if (arcList.every((q) => Math.abs(q.arc - a0) > 0.95)) {
-            arcList.push({ arc: a0, forkHint: true });
+          if (a0 < 1.2 || a0 > total - 0.6) continue;
+          if (arcList.every((q) => Math.abs(q.arc - a0) > 0.42)) {
+            arcList.push({ arc: a0, forkHint: true, sideBias: 0 });
+            arcList.push({
+              arc: Math.min(total - 0.5, a0 + 0.18),
+              forkHint: true,
+              sideBias: off % 1 > 0.5 ? 0.22 : -0.22,
+            });
           }
         }
       }
 
-      // 2. Very sparse single fallen leaves along open stretches (~1 leaf every 6.8 - 8.6 m) so the dirt trail stays clean.
-      let cursor = 2.8,
+      // 2. Continuous natural wind-drifted leaf trail (~every 1.45 - 2.1 m with 2-3 leaves per station) so the path is effortless to follow.
+      let cursor = 1.4,
         stepIdx = 0;
-      while (cursor < total - 1.0) {
-        if (arcList.every((q) => Math.abs(q.arc - cursor) > 2.6)) {
-          arcList.push({ arc: cursor, forkHint: false });
-          // Occasional natural 2-leaf wind pair (~1 in 4 spots)
-          if (hash01(stepIdx * 13.7 + 5.1) > 0.76 && cursor + 0.45 < total - 1.0) {
-            arcList.push({ arc: cursor + 0.42, forkHint: false });
+      while (cursor < total - 0.7) {
+        if (arcList.every((q) => Math.abs(q.arc - cursor) > 0.75)) {
+          arcList.push({ arc: cursor, forkHint: false, sideBias: 0 });
+          const sideSign = stepIdx % 2 === 0 ? 1 : -1;
+          if (cursor + 0.28 < total - 0.6) {
+            arcList.push({
+              arc: cursor + 0.26,
+              forkHint: false,
+              sideBias: sideSign * (0.18 + hash01(stepIdx * 11.3 + 3.7) * 0.22),
+            });
+          }
+          if (
+            hash01(stepIdx * 13.7 + 5.1) > 0.35 &&
+            cursor + 0.56 < total - 0.6
+          ) {
+            arcList.push({
+              arc: cursor + 0.52,
+              forkHint: false,
+              sideBias: -sideSign * (0.15 + hash01(stepIdx * 17.9 + 1.3) * 0.24),
+            });
           }
         }
-        cursor += 6.6 + hash01(stepIdx * 7.3 + 1.9) * 2.2;
+        cursor += 1.45 + hash01(stepIdx * 7.3 + 1.9) * 0.65;
         stepIdx++;
       }
       arcList.sort((u, v) => u.arc - v.arc);
@@ -434,9 +453,11 @@ export function marks(s, r, kind, route) {
           leafMat = new T.MeshLambertMaterial({
             vertexColors: true,
             side: T.DoubleSide,
+            emissive: 0x3b2408,
+            emissiveIntensity: 0.25,
             polygonOffset: true,
-            polygonOffsetFactor: -1,
-            polygonOffsetUnits: -1,
+            polygonOffsetFactor: -2,
+            polygonOffsetUnits: -2,
           }),
           mesh = new T.InstancedMesh(leafGeo, leafMat, arcList.length),
           colorTmp = new T.Color(),
@@ -451,15 +472,15 @@ export function marks(s, r, kind, route) {
           scaleV = new T.Vector3(),
           items = [];
 
-        arcList.forEach(({ arc, forkHint }, idxL) => {
+        arcList.forEach(({ arc, forkHint, sideBias = 0 }, idxL) => {
           const sp = atArc(arc),
             r1 = hash01(idxL * 19.3 + arc * 0.7),
             r2 = hash01(idxL * 31.7 + 2.3),
             r3 = hash01(idxL * 47.1 + 8.9),
-            latM = (r1 - 0.5) * (forkHint ? 0.38 : 0.56),
+            latM = sideBias + (r1 - 0.5) * (forkHint ? 0.36 : 0.48),
             lx = sp.x + (sp.nx * latM) / M,
             ly = sp.y + (sp.ny * latM) / M,
-            lift = 0.016 + r2 * 0.005;
+            lift = 0.032 + r2 * 0.014;
 
           p0.set(...s.xyz(lx, ly, s.ground(lx, ly) + lift));
           px.set(...s.xyz(lx + eps, ly, s.ground(lx + eps, ly) + lift)).sub(p0);
@@ -468,7 +489,7 @@ export function marks(s, r, kind, route) {
           if (upV.y < 0) upV.negate();
 
           // Point leaf generally along the trail breeze with natural organic yaw variation.
-          const yawJitter = (r2 - 0.5) * (forkHint ? 0.65 : 1.35),
+          const yawJitter = (r2 - 0.5) * (forkHint ? 0.62 : 1.25),
             aheadPt = s.xyz(
               lx + (sp.tx * 0.5) / M,
               ly + (sp.ty * 0.5) / M,
@@ -483,7 +504,7 @@ export function marks(s, r, kind, route) {
           rightV.crossVectors(upV, fwdV).normalize();
           fwdV.crossVectors(rightV, upV).normalize();
 
-          const sc = (forkHint ? 1.04 : 0.92) * (0.85 + r3 * 0.34);
+          const sc = (forkHint ? 1.52 : 1.36) * (0.88 + r3 * 0.34);
           scaleV.set(sc * (0.92 + r1 * 0.18), sc, sc * (0.94 + r2 * 0.16));
           basisM.makeBasis(rightV, upV, fwdV);
           basisM.scale(scaleV);
