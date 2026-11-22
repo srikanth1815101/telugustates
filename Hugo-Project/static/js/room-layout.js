@@ -56,35 +56,77 @@ function generator(n) {
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
 }
-export function furnish(h, p) {
-  const rand = generator(h.seed),
+export function furnish(h, p, variant = 0, options = null) {
+  const seedBase =
+      variant === 0
+        ? h.seed >>> 0
+        : ((h.seed ^ Math.imul(variant + 1, 0x9e3779b1)) >>> 0),
+    rand = generator(seedBase),
     int = (n) => Math.floor(rand() * n),
     pick = (a) => a[int(a.length)],
-    style = pick(
-      Object.keys(layouts).slice(...(h.style === 10 ? [8] : [0, 8])),
-    ),
-    palette = pick(schemes),
+    basePool =
+      options?.styles?.length
+        ? options.styles
+        : Object.keys(layouts).slice(
+            ...(h.style === 10 && variant === 0 ? [8] : [0, 8]),
+          ),
+    filteredPool =
+      options?.avoid?.length && basePool.length > 1
+        ? basePool.filter((s) => !options.avoid.includes(s))
+        : basePool,
+    style = pick(filteredPool.length ? filteredPool : basePool),
+    palette = options?.palette || pick(schemes),
     mirror = rand() < 0.5 ? 1 : -1,
     objects = [],
-    { cx, cz, w, d, a, b, door, front, round } = p;
+    { cx, cz, w, d, a, b, door, front, round, openings = [] } = p;
   const shell = (x, z) =>
     round
       ? ((x - cx) / (a - 0.23)) ** 2 + ((z - cz) / (b - 0.23)) ** 2 < 0.96
-      : Math.abs(x - cx) < a - 0.22 && Math.abs(z - cz) < b - 0.22;
+      : Math.abs(x - cx) < a - 0.2 && Math.abs(z - cz) < b - 0.2;
+  function clearOfDoors(x, z, A, B) {
+    for (const op of openings) {
+      const half = (op.dw || 1.2) * 0.5 + 0.34,
+        depthClear = op.swingIn ? 1.48 : 0.96;
+      if (op.axis === "x") {
+        // Door on a horizontal wall (front/back/partition at z = op.z)
+        if (
+          x + A > op.x - half &&
+          x - A < op.x + half &&
+          z + B > op.z - depthClear &&
+          z - B < op.z + depthClear
+        )
+          return false;
+      } else {
+        // Door on a vertical wall (left/right/partition at x = op.x)
+        if (
+          z + B > op.z - half &&
+          z - B < op.z + half &&
+          x + A > op.x - depthClear &&
+          x - A < op.x + depthClear
+        )
+          return false;
+      }
+    }
+    return true;
+  }
   function fits(x, z, W, D) {
     const A = W / 2,
       B = D / 2;
     for (const s of [-1, 1])
       for (const t of [-1, 1]) if (!shell(x + s * A, z + t * B)) return false;
-    // A boot-width aisle from the hinge to the middle; also keep a turning circle at the centre and the saved arrival point empty.
-    const l = Math.min(door, cx) - 0.71,
-      r = Math.max(door, cx) + 0.71;
-    if (x + A > l && x - A < r && z + B > Math.min(cz - 0.55, front - 1.85))
-      return false;
+    if (variant === 0 && door !== undefined && front !== undefined) {
+      // A boot-width aisle from the hinge to the middle; also keep a turning circle at the centre and the saved arrival point empty.
+      const l = Math.min(door, cx) - 0.71,
+        r = Math.max(door, cx) + 0.71;
+      if (x + A > l && x - A < r && z + B > Math.min(cz - 0.55, front - 1.85))
+        return false;
+    }
+    if (!clearOfDoors(x, z, A, B)) return false;
+    const gap = variant === 0 ? 0.45 : 0.36;
     return objects.every(
       (o) =>
-        Math.abs(o.x - x) >= (o.w + W) / 2 + 0.45 ||
-        Math.abs(o.z - z) >= (o.d + D) / 2 + 0.45,
+        Math.abs(o.x - x) >= (o.w + W) / 2 + gap ||
+        Math.abs(o.z - z) >= (o.d + D) / 2 + gap,
     );
   }
   const composition = int(5),
@@ -116,8 +158,6 @@ export function furnish(h, p) {
       [-mirror * 0.73, 0.36 + j()],
     ],
   ][composition];
-  // Some residents keep their tools together; others split work and seating between opposite walls.
-  // Put at least two silhouettes in the arrival sightline on the workroom plans, not three isolated objects in distant corners.
   if (
     ["weaving", "reading", "kitchen", "pottery", "music", "garden"].includes(
       style,
@@ -131,6 +171,7 @@ export function furnish(h, p) {
       Math.max(-0.76, z - 0.04 + rand() * 0.12),
     ];
   }
+  const scaleSteps = variant === 0 ? [1, 0.84, 0.74] : [0.92, 0.8, 0.68];
   for (const [n, kind] of layouts[style].entries()) {
     const [W, D] = dims[kind],
       sz = 0.88 + rand() * 0.2,
@@ -138,7 +179,6 @@ export function furnish(h, p) {
       [ux, uz] = desired[n];
     let best = null,
       score = Infinity;
-    // A back-wall item faces the doorway. Side-wall pieces can turn ninety degrees; their capsule volumes turn with them.
     for (const [ori, pen] of uz < -0.62
       ? [
           [0, 0],
@@ -149,8 +189,9 @@ export function furnish(h, p) {
           [0, 0.52],
           [2, 0.86],
         ])
-      for (const sc of [sz, sz * 0.84]) {
-        const odd = Math.abs(ori) === 1,
+      for (const mul of scaleSteps) {
+        const sc = sz * mul,
+          odd = Math.abs(ori) === 1,
           W0 = (odd ? D : W) * sc,
           D0 = (odd ? W : D) * sc;
         for (let j = 0; j < 10; j++)

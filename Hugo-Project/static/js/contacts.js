@@ -1,5 +1,5 @@
 import { homesAt } from "./home-index.js";
-import { houseBlocked, thresholdFloor } from "./home-volume.js";
+import { ceilingFloor, houseBlocked, thresholdFloor } from "./home-volume.js";
 import { ACRE as U } from "./metres.js";
 import { fenceTop } from "./acre-edge.js";
 // Fit the lower trunk, not the nominal asset pivot. Several palms lean away from that pivot.
@@ -181,13 +181,16 @@ export function passes(
   actor = null,
 ) {
   if (!s.traversable(px, py) || !s.sample(px, py).drawn) return false;
-  for (const home of homesAt(s, px, py))
+  for (const home of homesAt(s, px, py)) {
+    if (!home) continue;
+    const doorState = s.doorAngles?.get(home) ?? (s.openHome === home),
+      baseZ = s.ground ? s.ground(...home.centre) : 0;
     if (
-      home &&
-      houseBlocked(home, px, py, s.openHome === home) &&
-      !houseBlocked(home, ox, oy, s.openHome === home)
+      houseBlocked(home, px, py, doorState, 0.34, actor?.root, baseZ) &&
+      !houseBlocked(home, ox, oy, doorState, 0.34, actor?.root, baseZ)
     )
       return false;
+  }
   const timber = fenceTop(fences, px, py);
   if (
     timber > -Infinity &&
@@ -259,7 +262,7 @@ export function topAt(o, x, y) {
   }
   return h === -Infinity ? null : o.base + h;
 }
-export function support(s, x, y, objects) {
+export function support(s, x, y, objects, refZ = undefined) {
   const bed = s.sample(x, y),
     sea = s.waterContact ? s.waterContact(x, y, bed) : bed,
     h = s.rainStage ? s.rainStage(x, y, sea) : sea;
@@ -268,13 +271,17 @@ export function support(s, x, y, objects) {
     const y0 = topAt(o, x, y);
     if (y0 != null) z = Math.max(z, y0);
   }
-  let houseZ = null;
-  for (const h of homesAt(s, x, y)) {
-    const z0 = thresholdFloor(s, x, y, h);
-    if (z0 != null && (houseZ == null || z0 > houseZ)) houseZ = z0;
+  let houseZ = null,
+    ceiling = null;
+  for (const home of homesAt(s, x, y)) {
+    const z0 = thresholdFloor(s, x, y, home, refZ);
+    if (z0 != null && (houseZ == null || z0 > houseZ)) {
+      houseZ = z0;
+      ceiling = ceilingFloor(s, x, y, home, refZ ?? z0);
+    }
   }
   if (houseZ != null && houseZ >= z - 0.001)
-    return { ...h, z: houseZ, depth: 0, support: "floor" };
+    return { ...h, z: houseZ, depth: 0, support: "floor", ceiling };
   return z === h.z
     ? h
     : { ...h, z, depth: Math.max(0, h.depth - (z - h.z)), support: "rock" };

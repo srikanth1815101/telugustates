@@ -1,5 +1,5 @@
 import { buildRoom } from "./home-interior.js";
-import { wallHeight } from "./home-volume.js";
+import { roomPlan, wallHeight } from "./home-volume.js";
 // Stylized buildings only. Envelopes, entries, road sides and paint come from the resident Markdown.
 import * as T from "../vendor/three.module.min.js";
 import { ACRE, basis, localPoint, GATE_POST_OFFSET } from "./metres.js";
@@ -168,6 +168,56 @@ export function makeHouse(s, h, u, distance, tier, put) {
   const foundation = 0.23;
   const wallH = wallHeight(h);
   const top = foundation + wallH;
+  const plan = mid ? roomPlan(h) : null;
+  const renderStairFlight = (st) => {
+    const sx = (st.x0 + st.x1) * 0.5,
+      sw = st.x1 - st.x0,
+      botLen = st.z1 - st.botZ,
+      topLen = st.topZ - st.z0,
+      span = st.botZ - st.topZ;
+    // Approach step at front of stair
+    box(sx, 0.07, st.z1 + 0.26, sw, 0.14, 0.52, tint(sill, -0.06));
+    // Bottom landing at ground-floor height y0
+    if (botLen > 0.05) {
+      box(sx, st.y0 * 0.5, (st.botZ + st.z1) * 0.5, sw, st.y0, botLen, sill);
+    }
+    // Walkable stepped masonry flight (exact match with stairLiftAt in home-volume.js)
+    const treadD = span / st.steps;
+    for (let k = 0; k < st.steps; k++) {
+      const yTop = st.y0 + ((k + 1) / st.steps) * (st.y1 - st.y0),
+        yBot = Math.max(0, yTop - 0.42 - k * 0.06),
+        czStep = st.botZ - (k + 0.5) * treadD;
+      box(sx, (yTop + yBot) * 0.5, czStep, sw, yTop - yBot, treadD + 0.015, sill);
+      if (hi) {
+        box(sx, yTop - 0.018, czStep + treadD * 0.42, sw + 0.02, 0.036, 0.07, lime);
+      }
+    }
+    // Top landing & support piers at upper-floor height y1
+    if (topLen > 0.05) {
+      const topMidZ = (st.z0 + st.topZ) * 0.5;
+      box(sx, st.y1 - 0.11, topMidZ, sw, 0.22, topLen + 0.02, sill);
+      box(st.x1 - 0.14, (st.y1 - 0.2) * 0.5, st.z0 + 0.16, 0.24, st.y1 - 0.2, 0.24, tint(wall, -0.08));
+      box(st.x0 + 0.14, (st.y1 - 0.2) * 0.5, st.z0 + 0.16, 0.24, st.y1 - 0.2, 0.24, tint(wall, -0.08));
+    }
+    // Outer & rear safety handrail + balusters
+    const railX = st.x1 - 0.055;
+    // Sloped outer rail along flight + horizontal top/bottom rail segments
+    const midFlightY = (st.y0 + st.y1) * 0.5 + 0.88,
+      flightSlope = Math.atan2(st.y1 - st.y0, span),
+      flightHyp = Math.hypot(span, st.y1 - st.y0);
+    paint("stair-rail", "slab", railX, midFlightY, (st.botZ + st.topZ) * 0.5, 0.08, 0.08, flightHyp, wood, 0, -flightSlope, 0);
+    if (topLen > 0.08) {
+      box(railX, st.y1 + 0.88, (st.z0 + st.topZ) * 0.5, 0.08, 0.08, topLen, wood);
+      box(sx, st.y1 + 0.88, st.z0 + 0.055, sw, 0.08, 0.08, wood);
+      box(sx, st.y1 + 0.44, st.z0 + 0.055, sw - 0.06, 0.84, 0.07, lime);
+    }
+    for (let bIdx = 0; bIdx <= 6; bIdx++) {
+      const f = bIdx / 6,
+        bz = st.botZ - f * span,
+        by = st.y0 + f * (st.y1 - st.y0);
+      box(railX, by + 0.44, bz, 0.065, 0.88, 0.065, lime);
+    }
+  };
   const clad = (x, b, bw, bd, roofStyle, base, ht, colour) => {
     paint(
       "roof-shell",
@@ -206,26 +256,16 @@ export function makeHouse(s, h, u, distance, tier, put) {
     const coreH =
       role === "shed" ? wallH * 0.83 : S === 7 ? sheetLow - foundation : wallH;
     if (role === "stairs") {
-      if (hi) {
-        for (let k = 0; k < 9; k++) {
-          const sy = (wallH * 0.48 * (k + 1)) / 9;
-          box(
-            px,
-            sy / 2,
-            pz + bd / 2 - ((k + 0.5) * bd) / 9,
-            bw,
-            sy,
-            bd / 9 + 0.012,
-            sill,
-          );
-        }
-      } else box(px, wallH * 0.18, pz, bw, wallH * 0.36, bd, sill);
+      if (!mid) box(px, wallH * 0.18, pz, bw, wallH * 0.36, bd, sill);
       continue;
     }
-    const hollow = first && mid;
+    const hollow = mid && (first || role === "wing");
     if (!mid && !covered && role !== "round")
       box(px, 0.095, pz, bw, 0.31, bd, tint(wall, -0.14));
-    if (hollow) buildRoom(h, paint, !s.roomDetail || s.roomDetail.has(u));
+    if (first && mid) {
+      buildRoom(h, paint, !s.roomDetail || s.roomDetail.has(u));
+      for (const st of plan.stairs) renderStairFlight(st);
+    }
     if (role === "round") {
       if (!hollow) drum(px, foundation + coreH / 2, pz, bw, coreH, bd, wall);
       if (!hollow) drum(px, 0.16, pz, bw + 0.04, 0.3, bd + 0.04, earth);
@@ -344,11 +384,11 @@ export function makeHouse(s, h, u, distance, tier, put) {
       }
     } else {
       if (S === 5) {
-        // Keep the balcony INSIDE the covered footprint: recess the upper floor,
-        // rather than burying a railing in a full-height box.
-        const f = wallH * 0.5 + 0.13,
+        // Keep the balcony INSIDE the covered footprint: recess the upper floor.
+        // When mid/hollow is active, buildRoom() builds both hollow ground & upper floors!
+        const f = wallH * 0.5 + 0.15,
           cut = bd * 0.22;
-        if (!hollow)
+        if (!hollow) {
           (hi ? soft : box)(
             px,
             (f + foundation) / 2,
@@ -358,15 +398,16 @@ export function makeHouse(s, h, u, distance, tier, put) {
             bd - 0.1,
             wall,
           );
-        (hi ? soft : box)(
-          px,
-          (H - 0.48 + f) / 2,
-          pz - cut / 2,
-          bw - 0.12,
-          H - 0.48 - f,
-          bd - cut - 0.12,
-          tint(wall, 0.024),
-        );
+          (hi ? soft : box)(
+            px,
+            (H - 0.48 + f) / 2,
+            pz - cut / 2,
+            bw - 0.12,
+            H - 0.48 - f,
+            bd - cut - 0.12,
+            tint(wall, 0.024),
+          );
+        }
       } else if (!hollow)
         (hi ? soft : box)(
           px,
@@ -383,48 +424,51 @@ export function makeHouse(s, h, u, distance, tier, put) {
           box(px, top - 0.11, pz, bw, 0.2, bd, tint(wall, 0.08));
       }
       if (S === 4 || S === 5 || S === 10) {
-        const slabY = S === 5 ? H - 0.36 : coreH + 0.34;
-        box(px, slabY, pz, bw, 0.24, bd, roof);
+        const slabY = S === 5 ? H - 0.36 : coreH + 0.34,
+          ter = plan?.terrace,
+          rx = ter ? (ter.x0 + ter.x1) * 0.5 : px,
+          rw = ter ? ter.x1 - ter.x0 : bw;
+        if (!ter) box(rx, slabY, pz, rw, 0.24, bd, roof);
         if (mid) {
-          for (let side of [-1, 1])
-            box(
-              px,
-              slabY + 0.19,
-              pz + side * (bd / 2 - 0.1),
-              bw,
-              0.34,
-              0.18,
-              lime,
-            );
+          if (ter) {
+            const pY = ter.floor + 0.42,
+              pH = 0.84,
+              stTopZ = plan.stairs[0]?.topZ ?? pz;
+            // Front, rear, left, and partial-right parapets leaving stair entry open
+            box(rx, pY, ter.z1 - 0.09, rw, pH, 0.16, lime);
+            box(rx, pY, ter.z0 + 0.09, rw, pH, 0.16, lime);
+            box(ter.x0 + 0.08, pY, pz, 0.16, pH, bd - 0.16, lime);
+            const rightSpan = ter.z1 - (stTopZ + 0.1);
+            if (rightSpan > 0.2) {
+              box(ter.x1 - 0.06, pY, (ter.z1 + stTopZ + 0.1) * 0.5, 0.14, pH, rightSpan, lime);
+            }
+          } else {
+            for (let side of [-1, 1])
+              box(
+                rx,
+                slabY + 0.19,
+                pz + side * (bd / 2 - 0.1),
+                rw,
+                0.34,
+                0.18,
+                lime,
+              );
+          }
         }
         if (S === 4 && first) {
-          let tank = H - slabY - 0.23;
-          drum(
-            px + bw * 0.21,
-            slabY + 0.14 + tank / 2,
-            pz - bd * 0.17,
-            2.38,
-            tank,
-            2.38,
-            "#657776",
-          );
+          const tank = H - slabY - 0.23,
+            tx = px + bw * (ter ? 0.12 : 0.21),
+            tz = pz - bd * 0.17;
+          drum(tx, slabY + 0.14 + tank / 2, tz, 2.28, tank, 2.28, "#657776");
           if (hi)
             for (const k of [0.13, 0.52, 0.87])
-              drum(
-                px + bw * 0.21,
-                slabY + 0.14 + tank * k,
-                pz - bd * 0.17,
-                2.44,
-                0.1,
-                2.44,
-                "#82918a",
-              );
+              drum(tx, slabY + 0.14 + tank * k, tz, 2.34, 0.1, 2.34, "#82918a");
         }
         if (S === 5 && first) {
-          const f = wallH * 0.5 + 0.13,
+          const f = wallH * 0.5 + 0.15,
             front = pz + bd / 2,
             back = front - bd * 0.22;
-          box(px, f, front - bd * 0.11, bw, 0.21, bd * 0.22, sill);
+          if (!hollow) box(px, f, front - bd * 0.11, bw, 0.21, bd * 0.22, sill);
           if (mid)
             for (const side of [-1, 1])
               box(
@@ -459,9 +503,13 @@ export function makeHouse(s, h, u, distance, tier, put) {
                 0.082,
                 lime,
               );
-            box(px - bw * 0.18, f + 0.95, back + 0.02, 1.04, 1.9, 0.13, teak);
-            box(px + bw * 0.2, f + 1.23, back + 0.03, 1.58, 1.1, 0.13, lime);
-            box(px + bw * 0.2, f + 1.23, back + 0.12, 1.37, 0.9, 0.09, night);
+            // Warm upper balcony lantern
+            paint("window-" + (seed % 4), "orb", px, slabY - 0.24, front - bd * 0.11, 0.2, 0.22, 0.2, "#ffe3a8");
+            if (!hollow) {
+              box(px - bw * 0.18, f + 0.95, back + 0.02, 1.04, 1.9, 0.13, teak);
+              box(px + bw * 0.2, f + 1.23, back + 0.03, 1.58, 1.1, 0.13, lime);
+              box(px + bw * 0.2, f + 1.23, back + 0.12, 1.37, 0.9, 0.09, night);
+            }
           }
         }
       } else if (S === 7) {
@@ -716,7 +764,80 @@ export function makeHouse(s, h, u, distance, tier, put) {
     return;
   }
 
-  // Keep the front courtyard open and natural; place only a rear homestead shade tree or banana clump behind the house.
+  // Lived-in homestead courtyard details (threshold muggu, warm porch lantern, clay water pots, courtyard planter, and kitchen garden)
+  if (plan) {
+    const mugguZ = d * 0.5 + 1.24;
+    if (mugguZ < frontExt - 0.55) {
+      fixture("muggu", "slab", plan.door, mugguZ, 0.014, 0.92, 0.012, 0.92, "#f6f2e4", Math.PI / 4);
+      fixture("muggu", "slab", plan.door, mugguZ, 0.018, 0.58, 0.012, 0.58, "#c86d49", 0);
+      fixture("muggu", "disc", plan.door, mugguZ, 0.022, 0.24, 0.012, 0.24, "#e7be58");
+    }
+    // Warm porch lantern beside front door
+    paint(
+      "window-" + (seed % 4),
+      "orb",
+      plan.door + (plan.dw * 0.5 + 0.34),
+      plan.floor + plan.dh - 0.14,
+      plan.front + 0.16,
+      0.18,
+      0.22,
+      0.18,
+      "#ffe2a2",
+    );
+    box(
+      plan.door + (plan.dw * 0.5 + 0.34),
+      plan.floor + plan.dh + 0.02,
+      plan.front + 0.1,
+      0.08,
+      0.08,
+      0.22,
+      wood,
+    );
+    // Stacked earthen water pots (kundalu) & stepped courtyard planter off the main walk approach
+    const courtX = side * Math.min(halfW - 1.15, Math.max(2.1, w * 0.36)),
+      courtZ = d * 0.5 + Math.min(1.85, frontSpan * 0.46),
+      courtPt = localPoint(h, courtX, courtZ);
+    if (!s.ways || s.ways.clear(...courtPt, 0.95)) {
+      fixture("yard-slab", "slab", courtX, courtZ, 0.14, 0.86, 0.28, 0.86, lime);
+      fixture("yard-slab", "slab", courtX, courtZ, 0.42, 0.58, 0.34, 0.58, "#efe6cc");
+      fixture("yard-slab", "slab", courtX, courtZ, 0.61, 0.64, 0.06, 0.64, "#b86446");
+      fixture("yard-orb", "orb", courtX, courtZ, 0.82, 0.52, 0.46, 0.52, "#4f7f44");
+    }
+    const potX = -side * Math.min(w * 0.42, 3.2),
+      potZ = d * 0.5 + 0.44;
+    if (Math.abs(potX - plan.door) > 1.35) {
+      fixture("yard-pot", "pot", potX, potZ, 0.22, 0.42, 0.42, 0.42, "#ad6648");
+      fixture("yard-pot", "pot", potX + 0.38 * side, potZ + 0.16, 0.17, 0.32, 0.32, 0.32, "#bc7453");
+    }
+    // Raised kitchen-garden vegetable beds in the side/rear yard
+    if (h.props.includes("kitchen-garden") || seed % 2 === 0) {
+      const gx = -rearTreeX * 0.68,
+        gz = rearExt + 0.98,
+        gPt = localPoint(h, gx, gz);
+      if (!s.ways || s.ways.clear(...gPt, 1.05)) {
+        for (const offZ of [-0.38, 0.38]) {
+          fixture("yard-slab", "slab", gx, gz + offZ, 0.08, 1.95, 0.16, 0.56, "#6f533b");
+          fixture("yard-slab", "slab", gx, gz + offZ, 0.15, 1.82, 0.06, 0.46, "#4d3b2b");
+          for (let vIdx = -2; vIdx <= 2; vIdx++) {
+            fixture(
+              "yard-orb",
+              "orb",
+              gx + vIdx * 0.34,
+              gz + offZ,
+              0.27,
+              0.3,
+              0.24,
+              0.3,
+              vIdx % 2 === 0 ? "#5a8b47" : "#6f9c51",
+            );
+          }
+          fixture("yard-orb", "orb", gx + 0.52, gz + offZ, 0.38, 0.12, 0.12, 0.12, offZ < 0 ? "#d95338" : "#e8b339");
+        }
+      }
+    }
+  }
+
+  // Keep the front courtyard open and natural; place a rear homestead shade tree or banana clump behind the house.
   const rearPt = localPoint(h, rearTreeX, rearTreeZ);
   if (s.ways && !s.ways.clear(...rearPt, 1.15)) return;
   const obj = (g, a, b, y, sw, sh, sd, col, rot = 0, rx = 0, rz = 0) =>

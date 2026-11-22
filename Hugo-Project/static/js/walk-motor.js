@@ -45,7 +45,7 @@ export class WalkMotor {
     });
   }
   recontact(s, H) {
-    const p = s.floor ? s.floor(this.x, this.y) : s.sample(this.x, this.y),
+    const p = s.floor ? s.floor(this.x, this.y, this.root) : s.sample(this.x, this.y),
       old = this.touch;
     if (this.swim && p.depth >= 0.99)
       this.root = Math.max(p.z, this.root + p.line - old.line);
@@ -252,7 +252,7 @@ export class WalkMotor {
         if (this.swim || m.depth > 0.65) return true;
         const len = Math.hypot(a - ox, b - oy) * U;
         if (len < 1e-8) return true;
-        const to = s.floor ? s.floor(a, b) : s.sample(a, b);
+        const to = s.floor ? s.floor(a, b, this.root) : s.sample(a, b);
         if (to.support === "rock" || to.support === "floor")
           return this.root + (this.grounded ? 0.375 : 0.085) >= to.z;
         if (
@@ -284,7 +284,7 @@ export class WalkMotor {
         this.blocked++;
       } else this.y = yy;
       const p = (this.touch = s.floor
-          ? s.floor(this.x, this.y)
+          ? s.floor(this.x, this.y, this.root)
           : s.sample(this.x, this.y)),
         d = Math.hypot(this.x - oldX, this.y - oldY) * U;
       if (d > 0.0005)
@@ -304,6 +304,10 @@ export class WalkMotor {
           (this.jumpHeld && this.up > 0 && this.launchAge < 0.17 ? 6.7 : 9.81) *
           h;
         this.root += this.up * h;
+        if (p.ceiling != null && this.root + 1.66 > p.ceiling) {
+          this.root = Math.max(p.z, p.ceiling - 1.66);
+          if (this.up > 0) this.up = 0;
+        }
         if (this.root <= p.z && this.up <= 0) {
           if (!this.grounded && this.up < -0.4) {
             this.impact = -this.up;
