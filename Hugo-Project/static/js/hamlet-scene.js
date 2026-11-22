@@ -77,134 +77,149 @@ export function hamletScene(s, rows, commons, focus, tier) {
   g.userData.solids = solids;
   return g;
 }
-function sampleTrail(xy) {
-  const clean = [];
+function fallenLeafGeometry() {
+  // Sculpted rural shade-tree leaf (pointed drip-tip, arched midrib, gently cupped margins, short petiole).
+  const verts = [
+      // 0-1: petiole stem base & join
+      [-0.004, 0.004, -0.138],
+      [0.004, 0.004, -0.138],
+      [0.0, 0.007, -0.098],
+      // 3-5: lower wide blade (left, midrib, right)
+      [-0.068, 0.017, -0.042],
+      [0.0, 0.011, -0.038],
+      [0.064, 0.014, -0.042],
+      // 6-8: upper mid blade (left, midrib, right)
+      [-0.054, 0.019, 0.034],
+      [0.0, 0.012, 0.038],
+      [0.051, 0.015, 0.034],
+      // 9-11: tapering drip-tip shoulders & apex
+      [-0.022, 0.014, 0.092],
+      [0.021, 0.012, 0.092],
+      [0.003, 0.018, 0.138],
+    ],
+    shades = [
+      0.72, 0.72, 0.78,
+      0.98, 0.84, 1.03,
+      1.02, 0.86, 1.05,
+      0.95, 0.96, 0.88,
+    ],
+    faces = [
+      [0, 1, 2],
+      [2, 4, 3],
+      [2, 5, 4],
+      [3, 4, 6],
+      [4, 7, 6],
+      [4, 5, 8],
+      [4, 8, 7],
+      [6, 7, 9],
+      [7, 8, 10],
+      [7, 10, 9],
+      [9, 10, 11],
+    ],
+    pos = [],
+    col = [],
+    idx = [];
+  verts.forEach((v, i) => {
+    pos.push(...v);
+    const s = shades[i];
+    col.push(s, s * 0.98, s * 0.9);
+  });
+  for (const f of faces) idx.push(...f);
+  const g = new T.BufferGeometry();
+  g.setAttribute("position", new T.Float32BufferAttribute(pos, 3));
+  g.setAttribute("color", new T.Float32BufferAttribute(col, 3));
+  g.setIndex(idx);
+  g.computeVertexNormals();
+  return g;
+}
+
+function hash01(n) {
+  const x = Math.sin(n * 127.1 + 311.7) * 43758.5453;
+  return x - Math.floor(x);
+}
+
+function sampleRouteArc(xy) {
+  const pts = [];
   for (const p of xy) {
-    if (!clean.length || Math.hypot(p[0] - clean.at(-1)[0], p[1] - clean.at(-1)[1]) * M > 0.05) {
-      clean.push(p);
+    if (
+      !pts.length ||
+      Math.hypot(p[0] - pts.at(-1)[0], p[1] - pts.at(-1)[1]) * M > 0.03
+    ) {
+      pts.push(p);
     }
   }
-  if (clean.length < 2) return [];
-  // Gentle corner fillet so bends read like an organically worn desire trail.
-  let cur = clean;
-  for (let pass = 0; pass < 2; pass++) {
-    if (cur.length < 3) break;
-    const next = [cur[0]];
-    for (let i = 1; i < cur.length - 1; i++) {
-      const a = cur[i - 1],
-        b = cur[i],
-        c = cur[i + 1],
-        da = Math.hypot(b[0] - a[0], b[1] - a[1]) * M,
-        dc = Math.hypot(c[0] - b[0], c[1] - b[1]) * M,
-        r = Math.min(2.4, da * 0.28, dc * 0.28);
-      if (r > 0.35) {
-        const ta = r / da,
-          tc = r / dc;
-        next.push(
-          [b[0] + (a[0] - b[0]) * ta, b[1] + (a[1] - b[1]) * ta],
-          [b[0] + (c[0] - b[0]) * tc, b[1] + (c[1] - b[1]) * tc],
-        );
-      } else {
-        next.push(b);
-      }
-    }
-    next.push(cur.at(-1));
-    cur = next;
+  if (pts.length < 2) return null;
+  const cum = [0];
+  for (let i = 1; i < pts.length; i++) {
+    cum.push(
+      cum[i - 1] + Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]) * M,
+    );
   }
-  const samples = [];
-  let arc = 0;
-  for (let i = 0; i < cur.length - 1; i++) {
-    const a = cur[i],
-      b = cur[i + 1],
-      segM = Math.hypot(b[0] - a[0], b[1] - a[1]) * M;
-    if (segM < 0.02) continue;
-    const steps = Math.max(1, Math.ceil(segM / 0.85));
-    for (let k = 0; k < steps; k++) {
-      const t = k / steps;
-      samples.push({
-        x: a[0] + (b[0] - a[0]) * t,
-        y: a[1] + (b[1] - a[1]) * t,
-        arc: arc + segM * t,
-      });
-    }
-    arc += segM;
-  }
-  const last = cur.at(-1);
-  samples.push({ x: last[0], y: last[1], arc });
-  for (let i = 0; i < samples.length; i++) {
-    const p0 = samples[Math.max(0, i - 1)],
-      p1 = samples[Math.min(samples.length - 1, i + 1)],
-      dx = (p1.x - p0.x) * M,
-      dy = (p1.y - p0.y) * M,
+  const total = cum.at(-1);
+  if (total < 1.2) return null;
+  const atArc = (arc) => {
+    const a = Math.max(0, Math.min(total, arc));
+    let k = 0;
+    while (k < pts.length - 2 && cum[k + 1] < a) k++;
+    const seg = Math.max(1e-6, cum[k + 1] - cum[k]),
+      t = (a - cum[k]) / seg,
+      x = pts[k][0] + (pts[k + 1][0] - pts[k][0]) * t,
+      y = pts[k][1] + (pts[k + 1][1] - pts[k][1]) * t,
+      dx = pts[k + 1][0] - pts[k][0],
+      dy = pts[k + 1][1] - pts[k][1],
       len = Math.hypot(dx, dy) || 1;
-    samples[i].nx = -dy / (len * M);
-    samples[i].ny = dx / (len * M);
-    samples[i].yaw = Math.atan2(dy, dx);
+    return {
+      x,
+      y,
+      arc: a,
+      tx: dx / len,
+      ty: dy / len,
+      nx: -dy / len,
+      ny: dx / len,
+    };
+  };
+  // Detect sharp bends as additional directional hint points alongside road forks.
+  const bends = [];
+  for (let i = 1; i < pts.length - 1; i++) {
+    const ux = pts[i][0] - pts[i - 1][0],
+      uy = pts[i][1] - pts[i - 1][1],
+      vx = pts[i + 1][0] - pts[i][0],
+      vy = pts[i + 1][1] - pts[i][1],
+      lu = Math.hypot(ux, uy) || 1,
+      lv = Math.hypot(vx, vy) || 1,
+      cosA = (ux * vx + uy * vy) / (lu * lv);
+    if (cosA < 0.84) bends.push(cum[i]);
   }
-  return samples;
+  return { total, atArc, bends };
 }
 
-const TRAIL_VERT = `
-attribute vec2 aTrail;
-varying float vSide;
-varying float vArc;
-varying float vFogD;
-void main() {
-  vSide = aTrail.x;
-  vArc = aTrail.y;
-  vec4 mv = modelViewMatrix * vec4(position, 1.0);
-  vFogD = length(mv.xyz);
-  gl_Position = projectionMatrix * mv;
+const ZERO_MAT = new T.Matrix4().makeScale(0, 0, 0),
+  LEAF_PALETTE = [
+    0xdfad46, // warm dry golden leaf
+    0xd37a32, // sun-toasted mango/teak amber
+    0xc15a2d, // autumn russet terracotta
+    0xa4b442, // freshly wind-dropped olive-lime leaf
+    0xe4c66d, // pale sunlit straw-gold leaf
+  ];
+
+export function updateRouteLeaves(route, progress) {
+  const st = route?.leafState;
+  if (!st) return;
+  let dirty = false;
+  for (let i = 0; i < st.items.length; i++) {
+    const it = st.items[i],
+      hide = it.arc < progress + 1.15;
+    if (hide !== it.hidden) {
+      it.hidden = hide;
+      st.mesh.setMatrixAt(i, hide ? ZERO_MAT : it.matrix);
+      dirty = true;
+    }
+  }
+  if (dirty) st.mesh.instanceMatrix.needsUpdate = true;
 }
-`;
 
-const TRAIL_FRAG = `
-uniform float uWalkProgress;
-uniform float uTotalArc;
-uniform float uDay;
-uniform vec3 uHor;
-uniform float uFog;
-uniform float uTime;
-varying float vSide;
-varying float vArc;
-varying float vFogD;
-void main() {
-  float ahead = smoothstep(uWalkProgress - 0.2, uWalkProgress + 2.3, vArc);
-  float camClear = smoothstep(1.35, 3.0, vFogD);
-  float endCap = smoothstep(0.0, 1.05, vArc) * smoothstep(uTotalArc + 0.25, uTotalArc - 0.85, vArc);
-  float vis = ahead * camClear * endCap;
-  if (vis < 0.005) discard;
-
-  float edgeWob = 0.12 * sin(vArc * 2.15 + 0.65) + 0.07 * cos(vArc * 5.6 - vSide * 2.3);
-  float w = abs(vSide) + edgeWob * (0.32 + 0.68 * abs(vSide));
-  if (w > 1.0) discard;
-
-  float tread = exp(-pow((abs(vSide) - 0.21) / 0.25, 2.0));
-  float grit = 0.5 + 0.5 * sin(vArc * 8.1 + cos(vSide * 8.7) * 1.7) * cos(vArc * 3.6 - vSide * 6.1);
-  float earthPatch = 0.5 + 0.5 * sin(vArc * 0.82 + 1.2) * cos(vArc * 2.05 - 0.35);
-  float sunlitWave = smoothstep(0.42, 0.98, sin(vArc * 0.68 - uTime * 1.75));
-
-  vec3 vergeHerb = vec3(0.26, 0.33, 0.19);
-  vec3 warmEarth = vec3(0.74, 0.66, 0.51);
-  vec3 sunLimestone = vec3(0.91, 0.86, 0.72);
-  vec3 coreCol = mix(warmEarth, sunLimestone, clamp(0.46 * tread + 0.34 * grit + 0.20 * earthPatch, 0.0, 1.0));
-  coreCol += vec3(0.065, 0.055, 0.028) * sunlitWave;
-
-  float coreMask = 1.0 - smoothstep(0.46, 0.80, w);
-  float vergeMask = 1.0 - smoothstep(0.60, 1.0, w);
-  vec3 col = mix(vergeHerb, coreCol, coreMask);
-  col *= mix(0.42, 1.02, clamp(uDay, 0.0, 1.0));
-
-  float fogF = clamp(1.0 - exp(-pow(vFogD * uFog, 2.0)), 0.0, 1.0);
-  col = mix(col, uHor, fogF);
-
-  float alpha = (0.50 * coreMask + 0.22 * vergeMask) * vis * (1.0 - 0.45 * fogF);
-  gl_FragColor = vec4(col, alpha);
-}
-`;
-
-// A single owner can be selected. The other fields have no outline. Guided walks render a natural worn earth-and-limestone trail with wayside cairn stones.
-export function marks(s, r, kind, route, envUniforms = null) {
+// A single owner can be selected. The other fields have no outline. Guided walks scatter very sparse fallen tree leaves along the footpath & road splits without covering the dirt track.
+export function marks(s, r, kind, route) {
   const g = new T.Group();
   if (!r) return g;
   const pts = [],
@@ -285,134 +300,113 @@ export function marks(s, r, kind, route, envUniforms = null) {
   g.add(a);
 
   if (route?.xy?.length > 1) {
-    const samples = sampleTrail(route.xy);
-    if (samples.length > 1) {
-      const totalArc = samples.at(-1).arc,
-        halfW = 0.55,
-        pos = new Float32Array(samples.length * 2 * 3),
-        uvAttr = new Float32Array(samples.length * 2 * 2),
-        idx = [];
-      for (let i = 0; i < samples.length; i++) {
-        const sp = samples[i],
-          taper =
-            0.68 +
-            0.32 *
-              Math.min(
-                1,
-                Math.min(sp.arc / 2.2, Math.max(0, totalArc - sp.arc) / 2.2),
-              ),
-          wM = halfW * taper;
-        for (let sideIdx = 0; sideIdx < 2; sideIdx++) {
-          const sgn = sideIdx === 0 ? -1 : 1,
-            ux = sp.x + sp.nx * wM * sgn,
-            uy = sp.y + sp.ny * wM * sgn,
-            [wx, wy, wz] = s.xyz(ux, uy, s.ground(ux, uy) + 0.022),
-            vi = i * 2 + sideIdx;
-          pos[vi * 3] = wx;
-          pos[vi * 3 + 1] = wy;
-          pos[vi * 3 + 2] = wz;
-          uvAttr[vi * 2] = sgn;
-          uvAttr[vi * 2 + 1] = sp.arc;
-        }
-        if (i < samples.length - 1) {
-          const b0 = i * 2;
-          idx.push(b0, b0 + 1, b0 + 2, b0 + 1, b0 + 3, b0 + 2);
+    const sampler = sampleRouteArc(route.xy);
+    if (sampler) {
+      const { total, atArc, bends } = sampler,
+        hintArcs = [...(route.forks || []), ...bends].sort((u, v) => u - v),
+        arcList = [];
+
+      // 1. Gentle 2-3 leaf hints right after road splits/forks & sharp turns so the chosen branch is unmistakable.
+      for (const fArc of hintArcs) {
+        for (const off of [1.0, 2.35, 3.85]) {
+          const a0 = fArc + off;
+          if (a0 < 2.0 || a0 > total - 0.8) continue;
+          if (arcList.every((q) => Math.abs(q.arc - a0) > 0.95)) {
+            arcList.push({ arc: a0, forkHint: true });
+          }
         }
       }
-      const ribbonGeo = new T.BufferGeometry();
-      ribbonGeo.setAttribute("position", new T.BufferAttribute(pos, 3));
-      ribbonGeo.setAttribute("aTrail", new T.BufferAttribute(uvAttr, 2));
-      ribbonGeo.setIndex(idx);
-      const progressUniform = (route.progressUniform ??= { value: 0 }),
-        ribbonMat = new T.ShaderMaterial({
-          uniforms: {
-            uWalkProgress: progressUniform,
-            uTotalArc: { value: totalArc },
-            uDay: envUniforms?.uDay || { value: 1 },
-            uHor: envUniforms?.uHor || { value: new T.Color(0xcbd8db) },
-            uFog: envUniforms?.uFog || { value: 0.00055 },
-            uTime: envUniforms?.liquidTime || { value: 0 },
-          },
-          vertexShader: TRAIL_VERT,
-          fragmentShader: TRAIL_FRAG,
-          transparent: true,
-          depthWrite: false,
-          side: T.DoubleSide,
-          polygonOffset: true,
-          polygonOffsetFactor: -2,
-          polygonOffsetUnits: -2,
-        }),
-        ribbon = new T.Mesh(ribbonGeo, ribbonMat);
-      ribbon.renderOrder = 2;
-      ribbon.userData = { role: "walking-waymarks", disposableMaterial: true };
-      g.add(ribbon);
 
-      // Natural wayside field-stone cairns & verge grass tufts along the trail margin + twin destination stones.
-      const placements = [];
-      let nextArc = 6.5,
-        sideToggle = 1;
-      for (let i = 1; i < samples.length - 1; i++) {
-        const sp = samples[i];
-        if (sp.arc < nextArc || totalArc - sp.arc < 3.5) continue;
-        placements.push({ sp, side: sideToggle, goal: false });
-        sideToggle = -sideToggle;
-        nextArc = sp.arc + 13.5 + ((i * 7) % 5) * 0.9;
+      // 2. Very sparse single fallen leaves along open stretches (~1 leaf every 6.8 - 8.6 m) so the dirt trail stays clean.
+      let cursor = 2.8,
+        stepIdx = 0;
+      while (cursor < total - 1.0) {
+        if (arcList.every((q) => Math.abs(q.arc - cursor) > 2.6)) {
+          arcList.push({ arc: cursor, forkHint: false });
+          // Occasional natural 2-leaf wind pair (~1 in 4 spots)
+          if (hash01(stepIdx * 13.7 + 5.1) > 0.76 && cursor + 0.45 < total - 1.0) {
+            arcList.push({ arc: cursor + 0.42, forkHint: false });
+          }
+        }
+        cursor += 6.6 + hash01(stepIdx * 7.3 + 1.9) * 2.2;
+        stepIdx++;
       }
-      const endSp = samples.at(-1);
-      placements.push(
-        { sp: endSp, side: -1, goal: true },
-        { sp: endSp, side: 1, goal: true },
-      );
+      arcList.sort((u, v) => u.arc - v.arc);
 
-      if (placements.length) {
-        const stoneGeo = new T.IcosahedronGeometry(0.5, 0),
-          tuftGeo = new T.ConeGeometry(0.11, 0.26, 4),
-          baseMesh = new T.InstancedMesh(
-            stoneGeo,
-            new T.MeshLambertMaterial({ color: 0x7c7365 }),
-            placements.length,
-          ),
-          capMesh = new T.InstancedMesh(
-            stoneGeo,
-            new T.MeshLambertMaterial({ color: 0xdad0b8 }),
-            placements.length,
-          ),
-          tuftMesh = new T.InstancedMesh(
-            tuftGeo,
-            new T.MeshLambertMaterial({ color: 0x58733e }),
-            placements.length,
-          ),
-          dummy = new T.Object3D();
-        placements.forEach(({ sp, side, goal }, idxP) => {
-          const offsetM = goal ? 0.76 : 0.66,
-            cx = sp.x + sp.nx * offsetM * side,
-            cy = sp.y + sp.ny * offsetM * side,
-            gz = s.ground(cx, cy),
-            hScale = goal ? 1.38 : 1.0;
-          dummy.position.set(...s.xyz(cx, cy, gz + 0.048 * hScale));
-          dummy.rotation.set(0.08 * side, sp.yaw + idxP * 1.1, -0.06 * side);
-          dummy.scale.set(0.22 * hScale, 0.12 * hScale, 0.17 * hScale);
-          dummy.updateMatrix();
-          baseMesh.setMatrixAt(idxP, dummy.matrix);
+      if (arcList.length) {
+        const leafGeo = fallenLeafGeometry(),
+          leafMat = new T.MeshLambertMaterial({
+            vertexColors: true,
+            side: T.DoubleSide,
+            polygonOffset: true,
+            polygonOffsetFactor: -1,
+            polygonOffsetUnits: -1,
+          }),
+          mesh = new T.InstancedMesh(leafGeo, leafMat, arcList.length),
+          colorTmp = new T.Color(),
+          eps = 0.25 / M,
+          p0 = new T.Vector3(),
+          px = new T.Vector3(),
+          pz = new T.Vector3(),
+          upV = new T.Vector3(),
+          fwdV = new T.Vector3(),
+          rightV = new T.Vector3(),
+          basisM = new T.Matrix4(),
+          scaleV = new T.Vector3(),
+          items = [];
 
-          dummy.position.set(...s.xyz(cx, cy, gz + 0.128 * hScale));
-          dummy.rotation.set(-0.07 * side, sp.yaw + idxP * 2.3 + 0.5, 0.09 * side);
-          dummy.scale.set(0.13 * hScale, 0.085 * hScale, 0.11 * hScale);
-          dummy.updateMatrix();
-          capMesh.setMatrixAt(idxP, dummy.matrix);
+        arcList.forEach(({ arc, forkHint }, idxL) => {
+          const sp = atArc(arc),
+            r1 = hash01(idxL * 19.3 + arc * 0.7),
+            r2 = hash01(idxL * 31.7 + 2.3),
+            r3 = hash01(idxL * 47.1 + 8.9),
+            latM = (r1 - 0.5) * (forkHint ? 0.38 : 0.56),
+            lx = sp.x + (sp.nx * latM) / M,
+            ly = sp.y + (sp.ny * latM) / M,
+            lift = 0.016 + r2 * 0.005;
 
-          const tx = cx - sp.nx * 0.08 * side,
-            ty = cy - sp.ny * 0.08 * side;
-          dummy.position.set(...s.xyz(tx, ty, s.ground(tx, ty) + 0.11));
-          dummy.rotation.set(0.12 * side, idxP * 1.7, 0.1 * side);
-          dummy.scale.set(1, goal ? 1.15 : 0.9, 0.7);
-          dummy.updateMatrix();
-          tuftMesh.setMatrixAt(idxP, dummy.matrix);
+          p0.set(...s.xyz(lx, ly, s.ground(lx, ly) + lift));
+          px.set(...s.xyz(lx + eps, ly, s.ground(lx + eps, ly) + lift)).sub(p0);
+          pz.set(...s.xyz(lx, ly - eps, s.ground(lx, ly - eps) + lift)).sub(p0);
+          upV.crossVectors(pz, px).normalize();
+          if (upV.y < 0) upV.negate();
+
+          // Point leaf generally along the trail breeze with natural organic yaw variation.
+          const yawJitter = (r2 - 0.5) * (forkHint ? 0.65 : 1.35),
+            aheadPt = s.xyz(
+              lx + (sp.tx * 0.5) / M,
+              ly + (sp.ty * 0.5) / M,
+              s.ground(lx, ly) + lift,
+            );
+          fwdV
+            .set(aheadPt[0] - p0.x, aheadPt[1] - p0.y, aheadPt[2] - p0.z)
+            .addScaledVector(upV, -fwdV.dot(upV))
+            .normalize();
+          if (fwdV.lengthSq() < 1e-6) fwdV.set(0, 0, 1);
+          fwdV.applyAxisAngle(upV, yawJitter);
+          rightV.crossVectors(upV, fwdV).normalize();
+          fwdV.crossVectors(rightV, upV).normalize();
+
+          const sc = (forkHint ? 1.04 : 0.92) * (0.85 + r3 * 0.34);
+          scaleV.set(sc * (0.92 + r1 * 0.18), sc, sc * (0.94 + r2 * 0.16));
+          basisM.makeBasis(rightV, upV, fwdV);
+          basisM.scale(scaleV);
+          basisM.setPosition(p0);
+
+          const matCopy = basisM.clone();
+          mesh.setMatrixAt(idxL, matCopy);
+          colorTmp.setHex(
+            LEAF_PALETTE[Math.floor(r3 * LEAF_PALETTE.length) % LEAF_PALETTE.length],
+          );
+          mesh.setColorAt(idxL, colorTmp);
+          items.push({ arc, matrix: matCopy, hidden: false });
         });
-        for (const im of [baseMesh, capMesh, tuftMesh]) {
-          im.userData = { role: "wayside-cairns", disposableMaterial: true };
-          g.add(im);
-        }
+
+        mesh.instanceMatrix.needsUpdate = true;
+        if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+        mesh.userData = { role: "walking-waymarks", disposableMaterial: true };
+        route.leafState = { mesh, items };
+        g.add(mesh);
       }
     }
   }

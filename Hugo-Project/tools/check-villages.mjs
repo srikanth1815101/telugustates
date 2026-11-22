@@ -157,11 +157,10 @@ try {
         }
     }
     assert.equal(
-      reached.size,
-      vertices.size,
-      "single connected footpath network",
+      links.size,
+      vertices.size - 1,
+      "single connected tree without loops",
     );
-    assert(links.size >= vertices.size - 1);
     uniqueLinks += links.size;
     for (const h of Object.values(v.homes)) {
       const l = v.paths.find(

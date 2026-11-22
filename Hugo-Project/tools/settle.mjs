@@ -126,7 +126,13 @@ function pattern(v) {
       offset = band % 2 ? -1 - (band >> 1) : band >> 1,
       row = head + offset,
       delta = east ? 1 : -1,
-      fy = row + 0.4 + 0.2 * random(v.id + ":gate:" + walk + ":" + row)(),
+      gateY = (r) => {
+        const u = random(
+          v.id + ":gate:" + walk + ":" + (outer ? "o:" : "i:") + r,
+        )();
+        return r < head ? r + 0.82 - 0.08 * u : r + 0.18 + 0.08 * u;
+      },
+      fy = gateY(row),
       junction = world(bx, fy),
       land = world(bx + (delta * 1.65) / M, fy),
       p = world((outer ? (east ? S + 1 : -2) : east ? S : -1) + 0.5, row + 0.5),
@@ -160,9 +166,8 @@ function pattern(v) {
     const fk = (y) => `${walk}/${outer ? "gate" : "inner"}/${y}`;
     for (let n = 0; n <= Math.abs(offset >= 0 ? offset : offset + 1); n++) {
       const row0 = offset >= 0 ? head + n : head - 1 - n,
-        r0 = (r) => r + 0.4 + 0.2 * random(v.id + ":gate:" + walk + ":" + r)(),
         end = n === 0 ? tip : fk(row0 + (offset >= 0 ? -1 : 1));
-      mk(fk(row0), end, world(bx, r0(row0)), nodes.get(end));
+      mk(fk(row0), end, world(bx, gateY(row0)), nodes.get(end));
     }
     field.push({ c, land, junction, tip: fk(row) });
   }

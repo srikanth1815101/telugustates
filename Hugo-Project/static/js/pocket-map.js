@@ -72,18 +72,18 @@ export class PocketMap {
         ahead = L.routeLine.slice(startIdx);
       if (ahead.length) {
         const pts = [[x, y], ...ahead];
+        c.save();
+        c.setLineDash([1.6, 6.4]);
         c.lineCap = "round";
         c.lineJoin = "round";
         c.beginPath();
         pts.forEach((p, i) =>
           i ? c.lineTo(...point(...p)) : c.moveTo(...point(...p)),
         );
-        c.strokeStyle = "#8b4e27";
-        c.lineWidth = 3.1;
+        c.strokeStyle = "#c97d2e";
+        c.lineWidth = 2.0;
         c.stroke();
-        c.strokeStyle = "#eddab2";
-        c.lineWidth = 1.45;
-        c.stroke();
+        c.restore();
       }
     }
     c.save();

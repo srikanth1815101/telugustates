@@ -3,27 +3,14 @@ const id = (p) => p.map((n) => n.toFixed(7)).join("/"),
   d = (a, b) => M * Math.hypot(a[0] - b[0], a[1] - b[1]),
   lerp = (a, b, t) => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
 
-function subdivide(a, b, stepM = 3.2) {
-  const len = d(a, b),
-    n = Math.max(1, Math.ceil(len / stepM)),
-    out = [];
-  for (let i = 0; i <= n; i++) out.push(i === 0 ? a : i === n ? b : lerp(a, b, i / n));
-  return out;
-}
-
 function withCum(xy) {
   const cum = [0];
   for (let i = 1; i < xy.length; i++) cum.push(cum[i - 1] + d(xy[i - 1], xy[i]));
   return cum;
 }
 
-// Dijkstra over surveyed lanes, plus obstacle-aware direct join & forward shortcutting for live walks.
-export function pathTo(paths, end, from, canWalk = null) {
-  if (canWalk && from && end && d(from, end) > 0.2 && canWalk(from, end)) {
-    const xy = subdivide(from, end, 3.0),
-      cum = withCum(xy);
-    return { xy, cum, metres: cum.at(-1) };
-  }
+// Dijkstra over the shared village footpath network: stays strictly on surveyed common lanes & bunds.
+export function pathTo(paths, end, from) {
   const nodes = new Map(),
     segs = [],
     node = (p) => {
@@ -85,16 +72,32 @@ export function pathTo(paths, end, from, canWalk = null) {
   }
   if (!nearestNode) return null;
 
+  const collectChain = (startNode, prefixPts = []) => {
+    const xy = [...prefixPts],
+      forkIndices = [];
+    for (let p = startNode; p; p = p.onward) {
+      if (!xy.length || d(xy.at(-1), p.p) > 1e-4) {
+        if (p.next.length >= 3) forkIndices.push(xy.length);
+        xy.push(p.p);
+      } else if (p.next.length >= 3) {
+        forkIndices.push(xy.length - 1);
+      }
+    }
+    const cum = withCum(xy),
+      forks = forkIndices.map((idx) => cum[idx]);
+    return { xy, cum, forks, metres: cum.at(-1) };
+  };
+
   // Exact vertex start (e.g. gate / hub survey queries) preserves exact endpoint identity.
-  if (!canWalk && nearNodeD < 0.05) {
-    const xy = [];
-    for (let p = nearestNode; p; p = p.onward) xy.push(p.p);
-    return { xy, cum: withCum(xy), metres: nearestNode.cost + nearNodeD };
+  if (nearNodeD < 0.05) {
+    const res = collectChain(nearestNode);
+    res.metres = nearestNode.cost + nearNodeD;
+    return res;
   }
 
-  // Project `from` onto reachable segments and minimize total distance (join + onward), never walking backward.
-  let minJoinD = nearNodeD;
-  const candidates = [];
+  // Live walk from off-vertex position: step onto the closest footpath segment and follow the road forward.
+  let minJoinD = nearNodeD,
+     segCandidates = [];
   for (const [a, b, len] of segs) {
     if (!a.done || !b.done || len < 1e-6) continue;
     const vx = b.p[0] - a.p[0],
@@ -114,58 +117,19 @@ export function pathTo(paths, end, from, canWalk = null) {
       rem = Math.min(viaB, viaA),
       next = viaB <= viaA ? b : a;
     if (dj < minJoinD) minJoinD = dj;
-    candidates.push({ proj, dj, rem, total: dj + rem, next });
+    segCandidates.push({ proj, dj, total: dj + rem, next });
   }
-
   let chosen = null;
-  for (const c of candidates) {
-    const allowed = canWalk
-      ? c.dj <= minJoinD + 1.8 || canWalk(from, c.proj)
-      : c.dj <= minJoinD + 6.5;
-    if (!allowed) continue;
+  for (const c of segCandidates) {
+    if (c.dj > minJoinD + 3.2) continue;
     if (!chosen || c.total < chosen.total) chosen = c;
   }
-  if (!chosen) {
-    const xy = [];
-    for (let p = nearestNode; p; p = p.onward) xy.push(p.p);
-    return { xy, cum: withCum(xy), metres: nearestNode.cost + nearNodeD };
-  }
+  if (!chosen) return collectChain(nearestNode);
 
-  let raw = [];
-  if (chosen.dj > 0.35) {
-    const joinPts = subdivide(from, chosen.proj, 3.0);
-    raw.push(...joinPts.slice(0, -1));
-  }
-  if (d(chosen.proj, chosen.next.p) > 0.2) raw.push(chosen.proj);
-  for (let p = chosen.next; p; p = p.onward) raw.push(p.p);
-
-  // Forward visibility shortcutting so live walks skip unnecessary lane wiggles when ground ahead is open & safe.
-  if (canWalk && raw.length > 2) {
-    const rcum = withCum(raw),
-      pulled = [raw[0]];
-    let i = 0;
-    while (i < raw.length - 1) {
-      let best = i + 1;
-      for (let j = raw.length - 1; j > i + 1; j--) {
-        const direct = d(raw[i], raw[j]),
-          along = rcum[j] - rcum[i];
-        if (along - direct > 2.0 && canWalk(raw[i], raw[j])) {
-          best = j;
-          break;
-        }
-      }
-      if (best > i + 1) {
-        pulled.push(...subdivide(raw[i], raw[best], 3.0).slice(1));
-      } else {
-        pulled.push(raw[best]);
-      }
-      i = best;
-    }
-    raw = pulled;
-  }
-
-  const cum = withCum(raw);
-  return { xy: raw, cum, metres: cum.at(-1) };
+  const prefix = [];
+  if (chosen.dj > 0.35) prefix.push(from);
+  if (d(chosen.proj, chosen.next.p) > 0.2) prefix.push(chosen.proj);
+  return collectChain(chosen.next, prefix);
 }
 
 export function guideStep(route, x, y) {
@@ -211,14 +175,17 @@ export function guideStep(route, x, y) {
     scan(0, xy.length - 2);
   }
   route.i = Math.min(xy.length - 1, bestT > 0.85 ? bestK + 1 : bestK);
-  const progress =
-    cum[bestK] + bestT * (cum[bestK + 1] - cum[bestK]);
+  const progress = cum[bestK] + bestT * (cum[bestK + 1] - cum[bestK]);
   const targetArc = Math.min(total, progress + 4.8);
   let point = xy.at(-1);
   for (let k = bestK; k < xy.length - 1; k++) {
     if (cum[k + 1] >= targetArc) {
       const seg = Math.max(1e-6, cum[k + 1] - cum[k]);
-      point = lerp(xy[k], xy[k + 1], Math.max(0, Math.min(1, (targetArc - cum[k]) / seg)));
+      point = lerp(
+        xy[k],
+        xy[k + 1],
+        Math.max(0, Math.min(1, (targetArc - cum[k]) / seg)),
+      );
       break;
     }
   }
