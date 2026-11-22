@@ -863,10 +863,56 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
     if (!r) return;
     preferred = r;
   }
+  let menuNet = null;
+  const MAX_FOOTPATH_JOIN_M = 95;
+  function currentGroundPos() {
+    return mode === "ground"
+      ? [x, y]
+      : orbitActor
+        ? [orbitActor.x, orbitActor.y]
+        : [P.x, P.y];
+  }
+  function footpathFromHere(record, kind, net) {
+    if (!record || !kind || !net?.paths || busy || mode === "flight")
+      return null;
+    const pg = currentGroundPos(),
+      dest = kind === "acre" ? record.court.land : record.court.porch;
+    if (!within(L, ...pg) || !within(L, ...dest)) return null;
+    if (mode !== "ground" && (P.r > 900 || !L.s.traversable(...pg)))
+      return null;
+    const r = pathTo(net.paths, dest, pg);
+    if (
+      !r ||
+      !Number.isFinite(r.joinMetres) ||
+      r.joinMetres > MAX_FOOTPATH_JOIN_M
+    )
+      return null;
+    return r;
+  }
+  function syncHoldingWalkButton() {
+    const walkBtn = q("#walk-acre"),
+      teleBtn = q("#teleport-acre");
+    if (!menuRecord || !landMenu) {
+      walkBtn.hidden = true;
+      walkBtn.disabled = true;
+      teleBtn.hidden = false;
+      teleBtn.disabled = true;
+      return false;
+    }
+    const canWalk = Boolean(footpathFromHere(menuRecord, landMenu, menuNet));
+    walkBtn.hidden = !canWalk;
+    walkBtn.disabled = !canWalk;
+    teleBtn.hidden = false;
+    teleBtn.disabled = false;
+    return canWalk;
+  }
   async function showMenu(kind, explicitRecord) {
     const mark = ++menuSerial;
     menus(kind);
+    menuNet = null;
+    q("#walk-acre").hidden = true;
     q("#walk-acre").disabled = q("#teleport-acre").disabled = true;
+    q("#teleport-acre").hidden = false;
     sheet.hidden = true;
     ui.close();
     neutral();
@@ -890,15 +936,18 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
       ? houseLabel(chosen) +
         (ds.get(chosen.d) ? " · " + tr(ds.get(chosen.d).name, ds.get(chosen.d).te) : "")
       : "";
-    q("#walk-acre").disabled = q("#teleport-acre").disabled = !chosen;
     q("#holding-chart").hidden = !chosen;
+    let canWalk = false;
     if (!chosen) {
+      syncHoldingWalkButton();
       q("#holding-distance").hidden = false;
       q("#holding-distance").textContent = msg("holding.lockedHint");
     } else {
       q("#holding-distance").hidden = false;
       const [net] = await villageData([chosen.d]);
       if (mark !== menuSerial) return;
+      menuNet = net;
+      canWalk = syncHoldingWalkButton();
       let rows = L?.all || [];
       if (!rows.some((z) => z[2] === chosen.u))
         rows = await get(
@@ -906,6 +955,7 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
             chosen.homeLocation.map((n) => Math.floor(n / 256)).join("_") +
             ".json",
         );
+      if (mark !== menuSerial) return;
       const route = drawHolding(
         q("#holding-chart"),
         rows,
@@ -921,7 +971,13 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
         msg("holding.byPath", { n: Math.round(route?.metres || 0) });
     }
     if (mark === menuSerial)
-      q(chosen ? "#walk-acre" : "#holding-handle").focus({
+      q(
+        !chosen
+          ? "#holding-handle"
+          : canWalk
+            ? "#walk-acre"
+            : "#teleport-acre",
+      ).focus({
         preventScroll: true,
       });
   }
@@ -996,25 +1052,12 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
       k = landMenu;
     if (!r || !k) return;
     remember(r);
-    const pg =
-      mode === "ground"
-        ? [x, y]
-        : orbitActor
-          ? [orbitActor.x, orbitActor.y]
-          : [P.x, P.y];
-    if (!within(L, ...pg) || busy || mode === "flight") {
-      ui.toast(msg("holding.landFirst"));
-      return;
-    }
-    if (mode !== "ground" && !L.s.traversable(...pg)) {
-      ui.toast(msg("holding.dryFirst"));
-      return;
-    }
-    const dest = k === "acre" ? r.court.land : r.court.porch,
-      [net] = await villageData([r.d]),
-      route = pathTo(net.paths, dest, pg);
+    const pg = currentGroundPos(),
+      dest = k === "acre" ? r.court.land : r.court.porch,
+      [net] = menuNet ? [menuNet] : await villageData([r.d]),
+      route = footpathFromHere(r, k, net);
     if (!route) {
-      ui.toast(msg("village.noRoute"));
+      syncHoldingWalkButton();
       return;
     }
     menus(false);
@@ -2712,6 +2755,7 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
           },
         );
     }
+    if (landMenu && menuRecord && menuNet) syncHoldingWalkButton();
     lastHud = now;
   }
   function cameraOrbit() {

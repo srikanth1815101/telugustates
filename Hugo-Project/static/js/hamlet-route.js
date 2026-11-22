@@ -92,6 +92,7 @@ export function pathTo(paths, end, from) {
   if (nearNodeD < 0.05) {
     const res = collectChain(nearestNode);
     res.metres = nearestNode.cost + nearNodeD;
+    res.joinMetres = nearNodeD;
     return res;
   }
 
@@ -124,12 +125,18 @@ export function pathTo(paths, end, from) {
     if (c.dj > minJoinD + 3.2) continue;
     if (!chosen || c.total < chosen.total) chosen = c;
   }
-  if (!chosen) return collectChain(nearestNode);
+  if (!chosen) {
+    const res = collectChain(nearestNode);
+    res.joinMetres = nearNodeD;
+    return res;
+  }
 
   const prefix = [];
   if (chosen.dj > 0.35) prefix.push(from);
   if (d(chosen.proj, chosen.next.p) > 0.2) prefix.push(chosen.proj);
-  return collectChain(chosen.next, prefix);
+  const res = collectChain(chosen.next, prefix);
+  res.joinMetres = chosen.dj;
+  return res;
 }
 
 export function guideStep(route, x, y) {

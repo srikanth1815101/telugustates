@@ -950,6 +950,9 @@ a.scenic-card small {
   margin: 3px 0 7px;
   border-radius: 7px;
 }
+#holding-menu [hidden] {
+  display: none !important;
+}
 #holding-menu .home-pair {
   display: flex;
   gap: 7px;

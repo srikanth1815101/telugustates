@@ -74,10 +74,13 @@ public final class AtlasActivity extends Activity {
     }
     private void immersive(boolean walk) {
         if(Build.VERSION.SDK_INT>=30){android.view.WindowInsetsController c=getWindow().getInsetsController();if(c==null)return;
+            int lightMask=android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS|android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
             c.setSystemBarsBehavior(android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+            c.setSystemBarsAppearance(walk?0:lightMask,lightMask);
             if(walk)c.hide(WindowInsets.Type.systemBars());else c.show(WindowInsets.Type.systemBars());
         }else {int flags=View.SYSTEM_UI_FLAG_LAYOUT_STABLE|View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN|View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
             if(walk)flags|=View.SYSTEM_UI_FLAG_FULLSCREEN|View.SYSTEM_UI_FLAG_HIDE_NAVIGATION|View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+            else {flags|=View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;if(Build.VERSION.SDK_INT>=26)flags|=View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;}
             getWindow().getDecorView().setSystemUiVisibility(flags);}
         if(root!=null)root.requestApplyInsets();
     }
@@ -130,6 +133,7 @@ public final class AtlasActivity extends Activity {
             publishInsets();return in;
         });
         setContentView(root);
+        immersive(false);
         if (Build.VERSION.SDK_INT >= 33) {
             getOnBackInvokedDispatcher().registerOnBackInvokedCallback(
                 android.window.OnBackInvokedDispatcher.PRIORITY_DEFAULT, this::back);
