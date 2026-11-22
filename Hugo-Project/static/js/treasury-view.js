@@ -7,14 +7,17 @@ const el = (tag, text) => {
   return n;
 };
 export async function mountTreasury() {
-  const [state, atlas] = await Promise.all([
-    get("living/resources.json"),
-    get("data/atlas.json"),
-  ]);
-  const rows = ["food", "currency", "gold", "homes"].map((k) => [
-    k,
-    k === "homes" ? atlas.total : (state[k] ?? 0),
-  ]);
+  const computeRows = async () => {
+    const [state, atlas] = await Promise.all([
+      get("living/resources.json"),
+      get("data/atlas.json"),
+    ]);
+    return ["food", "currency", "gold", "homes"].map((k) => [
+      k,
+      k === "homes" ? atlas.total : (state[k] ?? 0),
+    ]);
+  };
+  let rows = await computeRows();
   const paint = () => {
     const b = document.querySelector("#balances"),
       c = document.querySelector("#condition");
@@ -58,5 +61,10 @@ export async function mountTreasury() {
     draw();
     window.addEventListener("languagechange-atlas", draw);
   }
+  window.addEventListener("atlas:content-updated", async () => {
+    rows = await computeRows();
+    paint();
+    if (page) detail(page);
+  });
   paint();
 }

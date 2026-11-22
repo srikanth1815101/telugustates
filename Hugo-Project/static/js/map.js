@@ -2,7 +2,8 @@ import { dev } from "./edition.js";
 import { msg } from "./messages.js";
 import { recordCounts } from "./record-kinds.js";
 import { get, url, xy, ll, key, Tiles } from "./grid.js";
-export async function mountMap(a, tr, boundaries = get("frozen/map.json")) {
+export async function mountMap(initialAtlas, tr, boundaries = get("frozen/map.json")) {
+  let a = initialAtlas;
   const wrap = document.querySelector("#map-wrap"),
     svg = document.querySelector("#map"),
     tip = document.querySelector("#map-tip"),
@@ -61,22 +62,24 @@ export async function mountMap(a, tr, boundaries = get("frozen/map.json")) {
   });
   let features = [],
     trailLines = [];
-  const tileBoxes = a.sceneTiles.map((k) => {
-    const [i, j] = k.split("_").map(Number),
-      ps = [
-        [0, 0],
-        [1, 0],
-        [1, 1],
-        [0, 1],
-      ].map(([x, y]) => ll(a.project, (i + x) * 256, (j + y) * 256));
-    return [
-      k,
-      Math.min(...ps.map((v) => v[0])),
-      Math.min(...ps.map((v) => v[1])),
-      Math.max(...ps.map((v) => v[0])),
-      Math.max(...ps.map((v) => v[1])),
-    ];
-  });
+  const buildTileBoxes = (atlas) =>
+    atlas.sceneTiles.map((k) => {
+      const [i, j] = k.split("_").map(Number),
+        ps = [
+          [0, 0],
+          [1, 0],
+          [1, 1],
+          [0, 1],
+        ].map(([x, y]) => ll(atlas.project, (i + x) * 256, (j + y) * 256));
+      return [
+        k,
+        Math.min(...ps.map((v) => v[0])),
+        Math.min(...ps.map((v) => v[1])),
+        Math.max(...ps.map((v) => v[0])),
+        Math.max(...ps.map((v) => v[1])),
+      ];
+    });
+  let tileBoxes = buildTileBoxes(a);
   const palette = [
     "#b8c8a7",
     "#bac8ae",
@@ -833,6 +836,16 @@ export async function mountMap(a, tr, boundaries = get("frozen/map.json")) {
       aim(lon, lat, zoom);
     },
     setFeatures(items, lines = []) {
+      features = items;
+      trailLines = lines;
+      draw();
+    },
+    reloadAtlas(nextAtlas, items, lines = []) {
+      a = nextAtlas;
+      ds.clear();
+      for (const d of a.districts) ds.set(d.id, d);
+      tileBoxes = buildTileBoxes(a);
+      plotCache.clear();
       features = items;
       trailLines = lines;
       draw();

@@ -32,4 +32,5 @@
 {{- else if eq .Section "languages" -}}{{- $langs = merge $langs (dict $p.code (transform.Unmarshal (dict "format" "json") .RawContent)) -}}
 {{- else if eq .Section "resources" -}}{{- $resources = merge $resources (dict $p.resource $p.balance) -}}{{- end -}}{{- end -}}
 {{- range $v := $settlements -}}{{- $id := string $v.d -}}{{- $bundle := index $roads $id | default dict -}}{{- $paths := ($bundle.paths | default slice) | append $v.paths -}}{{- $sites := ($bundle.settlements | default slice) | append (dict "id" $v.id "hub" $v.hub "shade" $v.shade "count" (len $v.homes) "square" $v.square "capacity" $v.capacity) -}}{{- $roads = merge $roads (dict $id (merge $bundle (dict "paths" $paths "settlements" $sites))) -}}{{- end -}}
-{{- dict "houses" $houses "districts" $districts "roads" $roads "trails" $trails "places" $places "resources" $resources "world" $world "languages" $langs | jsonify -}}
+{{- $home := dict "title" .Home.Title "title_te" .Home.Params.title_te "intro" .Home.Params.intro "intro_te" .Home.Params.intro_te -}}
+{{- dict "home" $home "houses" $houses "districts" $districts "roads" $roads "trails" $trails "places" $places "resources" $resources "world" $world "languages" $langs | jsonify -}}

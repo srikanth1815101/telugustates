@@ -10,12 +10,26 @@ import json
 import os
 import shutil
 import subprocess
+import sys
 import tempfile
 import zipfile
 from pathlib import Path
-from verify_web import verify
 
 ROOT = Path(__file__).resolve().parent
+for _extra in (ROOT, ROOT.parent / "Android"):
+    if _extra.is_dir() and str(_extra) not in sys.path:
+        sys.path.insert(0, str(_extra))
+
+from release_meta import (  # noqa: E402
+    APP_ID,
+    DEFAULT_APK_URL,
+    DEFAULT_DOMAINS,
+    DEFAULT_RELEASE_META_URL,
+    compute_engine_hash,
+    patch_manifest_version,
+    read_manifest_version,
+)
+from verify_web import verify  # noqa: E402
 
 
 def files(p):
@@ -64,6 +78,9 @@ def main():
     )
     ap.add_argument("--keystore", type=Path, required=True)
     ap.add_argument("--alias", default="atlas-field")
+    ap.add_argument("--version-code", type=int, default=None)
+    ap.add_argument("--version-name", default=None)
+    ap.add_argument("--meta-out", type=Path, default=None)
     ap.add_argument("--out", type=Path, default=ROOT / "Telugu-States-Atlas.apk")
     args = ap.parse_args()
     site = args.site.resolve()
@@ -77,11 +94,19 @@ def main():
     os.environ["PATH"] = str(java) + os.pathsep + os.environ["PATH"]
     if not os.environ.get("ATLAS_SIGN_PASS"):
         raise SystemExit("Set ATLAS_SIGN_PASS. Do not commit signing credentials.")
+
+    manifest_src = ROOT / "AndroidManifest.xml"
+    default_code, default_name = read_manifest_version(manifest_src)
+    version_code = args.version_code if args.version_code is not None else default_code
+    version_name = args.version_name if args.version_name else default_name
+    engine_hash = compute_engine_hash(site.parent)
+
     with tempfile.TemporaryDirectory(prefix="atlas-android-build-") as td:
         w = Path(td)
         web = w / "publication"
         run(["hugo", "--source", site, "--destination", web, "--minify"])
-        catalog = json.loads((web / "catalog.json").read_bytes())
+        catalog_bytes = (web / "catalog.json").read_bytes()
+        catalog = json.loads(catalog_bytes)
         rows = catalog["houses"]
         uids = [r["u"] for r in rows]
         cells = [tuple(r["c"]) for r in rows]
@@ -89,7 +114,55 @@ def main():
             "Duplicate resident or reserved acre"
         )
         homes = {tuple(r["homeLocation"]) for r in rows}
-        assert len(homes) == len(rows) and all(r["acreLocation"] == r["c"] and r["villageId"] and r["court"]["c"] == r["c"] for r in rows), "Incomplete or conflicting village assignments"
+        assert len(homes) == len(rows) and all(
+            r["acreLocation"] == r["c"]
+            and r["villageId"]
+            and r["court"]["c"] == r["c"]
+            for r in rows
+        ), "Incomplete or conflicting village assignments"
+
+        meta_path = web / "app-version.json"
+        hugo_meta = (
+            json.loads(meta_path.read_bytes()) if meta_path.is_file() else {}
+        )
+        content_hash = hugo_meta.get("contentHash") or hashlib.sha256(
+            catalog_bytes
+        ).hexdigest()
+        release_meta = {
+            **hugo_meta,
+            "appId": APP_ID,
+            "versionCode": version_code,
+            "versionName": version_name,
+            "engineHash": engine_hash,
+            "contentHash": content_hash,
+            "houses": len(rows),
+            "apkUrl": hugo_meta.get("apkUrl") or DEFAULT_APK_URL,
+            "releaseMetaUrl": hugo_meta.get("releaseMetaUrl")
+            or DEFAULT_RELEASE_META_URL,
+            "domains": hugo_meta.get("domains") or DEFAULT_DOMAINS,
+            "catalogPath": "/catalog.json",
+        }
+        meta_bytes = json.dumps(
+            release_meta, separators=(",", ":"), ensure_ascii=False
+        ).encode("utf-8")
+        meta_path.write_bytes(meta_bytes)
+        if args.meta_out is not None:
+            args.meta_out.resolve().parent.mkdir(parents=True, exist_ok=True)
+            args.meta_out.resolve().write_bytes(
+                json.dumps(release_meta, indent=2, ensure_ascii=False).encode("utf-8")
+                + b"\n"
+            )
+
+        manifest_patched = w / "AndroidManifest.xml"
+        manifest_patched.write_text(
+            patch_manifest_version(
+                manifest_src.read_text(encoding="utf-8"),
+                version_code,
+                version_name,
+            ),
+            encoding="utf-8",
+        )
+
         source = tree(web)
         cl = w / "classes"
         dx = w / "dex"
@@ -104,7 +177,7 @@ def main():
                 "-o",
                 raw,
                 "--manifest",
-                ROOT / "AndroidManifest.xml",
+                manifest_patched,
                 "-I",
                 api,
                 w / "res.zip",
@@ -202,6 +275,10 @@ def main():
     print(
         json.dumps(
             {
+                "versionCode": version_code,
+                "versionName": version_name,
+                "engineHash": engine_hash,
+                "contentHash": content_hash,
                 "publication": source,
                 **receipt,
                 "apk": out.name,

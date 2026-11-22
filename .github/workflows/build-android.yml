@@ -1,18 +1,39 @@
 name: Build offline atlas APK
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
+
 permissions:
-  contents: read
+  contents: write
+
+concurrency:
+  group: android-apk-release-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   android:
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Restore automatic fallback signing keystore cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.atlas-keystore
+          key: atlas-auto-keystore-v1
+
       - name: Install Hugo and the pinned Android platform
         shell: bash
         run: |
@@ -22,10 +43,9 @@ jobs:
           curl -fsSLO "$base/$pkg"; curl -fsSLO "$base/hugo_${v}_checksums.txt"
           grep -F " $pkg" "hugo_${v}_checksums.txt" | sha256sum -c -
           mkdir -p atlas-tools; tar xzf "$pkg" -C atlas-tools hugo; echo "$RUNNER_TEMP/atlas-tools" >> "$GITHUB_PATH"
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null || true
           "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" 'platforms;android-35' 'build-tools;35.0.0'
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
+
       - name: Check the Markdown catalogs, offline acres and walking rig
         run: |
           node Hugo-Project/tools/check-content.mjs --tiles
@@ -45,22 +65,112 @@ jobs:
           node Hugo-Project/tools/check-water.mjs
           node Hugo-Project/tools/check-littoral.mjs
           node Hugo-Project/tools/check-scene-contact.mjs
-      - name: Render fresh Markdown, compile, sign and verify offline assets
+
+      - name: Plan version and detect engine vs. content changes
+        id: plan
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/prev"
+          gh release download --repo "$GITHUB_REPOSITORY" --pattern "app-version.json" --dir "$RUNNER_TEMP/prev" --clobber || true
+          python3 android/release_meta.py plan \
+            --prev "$RUNNER_TEMP/prev/app-version.json" \
+            --run-number "${GITHUB_RUN_NUMBER:-1}" \
+            --github-output "$GITHUB_OUTPUT"
+
+      - name: Render fresh Markdown, compile, sign and verify APK
         shell: bash
         env:
           SIGNING_KEY_B64: ${{ secrets.ATLAS_KEYSTORE_B64 }}
-          ATLAS_SIGN_PASS: ${{ secrets.ATLAS_SIGN_PASS }}
+          SECRET_SIGN_PASS: ${{ secrets.ATLAS_SIGN_PASS }}
           SIGNING_ALIAS: ${{ vars.ATLAS_KEY_ALIAS }}
         run: |
           set -euo pipefail; umask 077
-          test -n "$SIGNING_KEY_B64" && test -n "$ATLAS_SIGN_PASS" || { echo 'Set both signing secrets before building.'; exit 1; }
-          key="$RUNNER_TEMP/atlas-signing.p12"; trap 'rm -f "$key"' EXIT
-          printf '%s' "$SIGNING_KEY_B64" | base64 --decode > "$key"
-          python3 Android/build_apk.py --site Hugo-Project --keystore "$key" --alias "${SIGNING_ALIAS:-atlas-field}" --out "$RUNNER_TEMP/Telugu-States-Atlas.apk"
+          if [ -n "$SIGNING_KEY_B64" ] && [ -n "$SECRET_SIGN_PASS" ]; then
+            key="$RUNNER_TEMP/atlas-signing.p12"
+            trap 'rm -f "$key"' EXIT
+            printf '%s' "$SIGNING_KEY_B64" | base64 --decode > "$key"
+            export ATLAS_SIGN_PASS="$SECRET_SIGN_PASS"
+            alias_name="${SIGNING_ALIAS:-atlas-field}"
+          else
+            echo "::notice::ATLAS_KEYSTORE_B64 / ATLAS_SIGN_PASS not set; using cached persistent signing keystore."
+            mkdir -p "$HOME/.atlas-keystore"
+            key="$HOME/.atlas-keystore/auto-signing.p12"
+            pass_file="$HOME/.atlas-keystore/auto-signing.pass"
+            alias_name="atlas-field"
+            if [ ! -s "$key" ] || [ ! -s "$pass_file" ]; then
+              python3 -c "import secrets; print(secrets.token_hex(24))" > "$pass_file"
+              auto_pass="$(cat "$pass_file")"
+              keytool -genkeypair -v \
+                -storetype PKCS12 \
+                -keystore "$key" \
+                -alias "$alias_name" \
+                -keyalg RSA \
+                -keysize 2048 \
+                -validity 10000 \
+                -storepass "$auto_pass" \
+                -keypass "$auto_pass" \
+                -dname "CN=Telugu States Atlas, OU=Field Atlas, O=CSRGO, C=IN"
+            fi
+            export ATLAS_SIGN_PASS="$(cat "$pass_file")"
+          fi
+
+          python3 android/build_apk.py \
+            --site Hugo-Project \
+            --keystore "$key" \
+            --alias "$alias_name" \
+            --version-code "${{ steps.plan.outputs.version_code }}" \
+            --version-name "${{ steps.plan.outputs.version_name }}" \
+            --meta-out "$RUNNER_TEMP/app-version.json" \
+            --out "$RUNNER_TEMP/Telugu-States-Atlas.apk"
+
       - uses: actions/upload-artifact@v4
         with:
           name: Telugu-States-Atlas-APK
-          path: ${{ runner.temp }}/Telugu-States-Atlas.apk
-          retention-days: 1
+          path: |
+            ${{ runner.temp }}/Telugu-States-Atlas.apk
+            ${{ runner.temp }}/app-version.json
+          retention-days: 7
           compression-level: 0
           if-no-files-found: error
+
+      - name: Publish latest APK and release metadata to GitHub Releases
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION_NAME: ${{ steps.plan.outputs.version_name }}
+          VERSION_CODE: ${{ steps.plan.outputs.version_code }}
+          CHANGE_KIND: ${{ steps.plan.outputs.change_kind }}
+          ENGINE_HASH: ${{ steps.plan.outputs.engine_hash }}
+        run: |
+          set -euo pipefail
+          tag="v${VERSION_NAME}"
+          if [ "$CHANGE_KIND" = "engine" ]; then
+            summary="Engine / functionality / animation / 3D model update — installed apps will show **Update available**."
+          else
+            summary="Content refresh — already-installed apps sync updated content live without requiring an APK update."
+          fi
+          notes="$(printf '%s\n\n- Version: `%s` (`versionCode=%s`)\n- Engine SHA-256: `%s`\n- Commit: `%s`\n' "$summary" "$VERSION_NAME" "$VERSION_CODE" "$ENGINE_HASH" "$GITHUB_SHA")"
+          if gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload "$tag" \
+              "$RUNNER_TEMP/Telugu-States-Atlas.apk" \
+              "$RUNNER_TEMP/app-version.json" \
+              --repo "$GITHUB_REPOSITORY" \
+              --clobber
+            gh release edit "$tag" \
+              --repo "$GITHUB_REPOSITORY" \
+              --title "Telugu States Android v${VERSION_NAME}" \
+              --notes "$notes" \
+              --latest
+          else
+            gh release create "$tag" \
+              "$RUNNER_TEMP/Telugu-States-Atlas.apk" \
+              "$RUNNER_TEMP/app-version.json" \
+              --repo "$GITHUB_REPOSITORY" \
+              --target "$GITHUB_SHA" \
+              --title "Telugu States Android v${VERSION_NAME}" \
+              --notes "$notes" \
+              --latest
+          fi

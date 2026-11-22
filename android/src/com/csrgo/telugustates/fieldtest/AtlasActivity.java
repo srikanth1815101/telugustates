@@ -48,6 +48,25 @@ public final class AtlasActivity extends Activity {
     private String last = HOME;
     private android.webkit.WebMessagePort hapticPort;
     private long lastPulse;
+    private LiveSync liveSync;
+
+    private long installedVersionCode() {
+        try {
+            PackageInfo info = getPackageManager().getPackageInfo(getPackageName(), 0);
+            return Build.VERSION.SDK_INT >= 28 ? info.getLongVersionCode() : info.versionCode;
+        } catch (Exception ignored) {
+            return 0L;
+        }
+    }
+
+    private String installedVersionName() {
+        try {
+            PackageInfo info = getPackageManager().getPackageInfo(getPackageName(), 0);
+            return info.versionName != null ? info.versionName : "";
+        } catch (Exception ignored) {
+            return "";
+        }
+    }
     private void immersive(boolean walk) {
         if(Build.VERSION.SDK_INT>=30){android.view.WindowInsetsController c=getWindow().getInsetsController();if(c==null)return;
             c.setSystemBarsBehavior(android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
@@ -83,6 +102,7 @@ public final class AtlasActivity extends Activity {
 
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
+        liveSync = new LiveSync(this);
         setVolumeControlStream(android.media.AudioManager.STREAM_MUSIC);
         root = new FrameLayout(this);
         root.setBackgroundColor(PINE);
@@ -177,13 +197,31 @@ public final class AtlasActivity extends Activity {
             Uri u = req.getUrl();
             if (!local(u)) return status(403,"Offline atlas only");
             if (!"GET".equals(req.getMethod()) && !"HEAD".equals(req.getMethod())) return status(405,"Method not allowed");
+            if ("/_field/sync".equals(u.getPath())) {
+                if ("HEAD".equals(req.getMethod())) return response(200, "OK", "application/json", new ByteArrayInputStream(new byte[0]));
+                return liveSync.syncResponse(installedVersionCode(), installedVersionName());
+            }
             String key = AssetRoute.key(u.getPath());
             if (key == null) return status(404,"Not found");
+            if ("atlas/catalog.json".equals(key)) {
+                InputStream live = liveSync.openCatalogIfFresh();
+                if (live != null) {
+                    if ("HEAD".equals(req.getMethod())) { try { live.close(); } catch (IOException ignored) {} live = new ByteArrayInputStream(new byte[0]); }
+                    return response(200, "OK", "application/json", live);
+                }
+            }
             try {
                 InputStream in = getAssets().open(key, AssetManager.ACCESS_STREAMING);
                 if ("HEAD".equals(req.getMethod())) { in.close(); in = new ByteArrayInputStream(new byte[0]); }
                 return response(200,"OK",AssetRoute.mime(key), in);
-            } catch (IOException notFound) { return status(404,"Not found"); }
+            } catch (IOException notFound) {
+                InputStream dynamicHouse = liveSync.openDynamicHousePage(key);
+                if (dynamicHouse != null) {
+                    if ("HEAD".equals(req.getMethod())) { try { dynamicHouse.close(); } catch (IOException ignored) {} dynamicHouse = new ByteArrayInputStream(new byte[0]); }
+                    return response(200, "OK", "text/html", dynamicHouse);
+                }
+                return status(404,"Not found");
+            }
         }
         @Override public boolean shouldOverrideUrlLoading(WebView w, WebResourceRequest req) {
             Uri u = req.getUrl();
@@ -194,6 +232,11 @@ public final class AtlasActivity extends Activity {
             }
             if (req.isForMainFrame() && req.hasGesture() && u.getHost() != null && u.getUserInfo() == null
                     && ("https".equals(u.getScheme()) || "http".equals(u.getScheme()))) {
+                if (LiveSync.trustedApkUrl(u.toString())) {
+                    try { startActivity(new Intent(Intent.ACTION_VIEW, u).addCategory(Intent.CATEGORY_BROWSABLE)); }
+                    catch (RuntimeException e) { toast("No browser is available."); }
+                    return true;
+                }
                 new AlertDialog.Builder(AtlasActivity.this).setTitle("Leave the offline atlas?")
                     .setMessage("Open " + u.getHost() + " in your browser? This external link may need internet.")
                     .setNegativeButton("Stay here", null).setPositiveButton("Open browser", (d,id) -> {

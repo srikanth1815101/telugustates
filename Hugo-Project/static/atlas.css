@@ -208,7 +208,9 @@ html[lang="te"] .lang span:first-child {
 }
 .metrics {
   display: flex;
-  gap: 24px;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 22px;
   margin: 0 4px 4px 0;
 }
 .metrics > div + div {
@@ -1225,8 +1227,105 @@ html[lang="te"] .eyebrow {
   }
 }
 
-.mobile-find {
-  display: none;
+.app-download-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 9px;
+  background: var(--green);
+  border: 1px solid #1f3e33;
+  color: #fffdf4;
+  font: 700 12px/1.2 var(--body);
+  box-shadow: 0 2px 8px #233f3518;
+  white-space: nowrap;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+.app-download-btn:hover {
+  background: #214034;
+}
+.app-download-btn .ico {
+  width: 15px;
+  height: 15px;
+  flex: none;
+}
+.app-download-btn small {
+  font: 700 9px/1 var(--mono);
+  letter-spacing: 0.5px;
+  padding: 3px 5px;
+  border-radius: 4px;
+  background: #ffffff21;
+  color: #eef5ea;
+}
+.app-download-btn.is-update {
+  background: var(--terra);
+  border-color: #8f432b;
+}
+.app-download-btn.is-update:hover {
+  background: #964830;
+}
+.app-update-banner {
+  background: #f4efe2;
+  border-bottom: 1px solid #d5cab4;
+  color: var(--ink);
+  padding: 10px 0;
+}
+.walking .app-update-banner {
+  position: fixed;
+  left: 12px;
+  right: 12px;
+  bottom: max(76px, calc(env(safe-area-inset-bottom) + 64px));
+  z-index: 11;
+  border: 1px solid #cbbda4;
+  border-radius: 11px;
+  box-shadow: 0 6px 24px #233f3529;
+  padding: 10px 14px;
+}
+.walking .app-update-banner .shell {
+  width: 100%;
+}
+.app-update-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.app-update-copy {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  font-size: 12.5px;
+}
+.app-update-copy strong {
+  color: var(--terra);
+  font-weight: 750;
+}
+.app-update-copy b {
+  font: 600 11px var(--mono);
+  color: var(--ink);
+}
+.app-update-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+.app-update-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border-radius: 8px;
+  background: var(--terra);
+  color: #fffdf6;
+  font: 700 12px/1.2 var(--body);
+  white-space: nowrap;
+}
+.app-update-cta .ico {
+  width: 14px;
+  height: 14px;
 }
 .map-key {
   position: absolute;
@@ -1256,17 +1355,15 @@ html[lang="te"] .eyebrow {
   background: #68999d;
 }
 @media (max-width: 700px) {
-  .mobile-find {
-    display: inline-flex;
+  .app-download-btn {
     margin-left: auto;
-    align-self: center;
-    font-size: 10px;
-    font-weight: 750;
-    text-decoration: underline;
-    text-underline-offset: 3px;
+    padding: 8px 11px;
+    font-size: 11px;
+    gap: 6px;
   }
   .metrics {
     gap: 8px;
+    width: 100%;
   }
   .metrics > div + div {
     padding-left: 8px;
