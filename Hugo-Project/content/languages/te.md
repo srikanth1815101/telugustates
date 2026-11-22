@@ -109,6 +109,7 @@ code: te
  "home.updateInstalling": "ఇన్‌స్టాల్ చేసి మళ్లీ ప్రారంభిస్తోంది…",
  "home.updatePermission": "ఇన్‌స్టాల్ పూర్తి చేయడానికి సెట్టింగ్స్‌లో అనుమతించండి.",
  "home.updateRetry": "మళ్లీ ప్రయత్నించండి",
+ "home.updateSkip": "ప్రస్తుత వెర్షన్‌తో కొనసాగండి",
  "home.username": "Instagram వినియోగదారు పేరు",
  "house.area": "వర్చువల్ విస్తీర్ణం (ఎకరాలు)",
  "house.corners": "ప్లాట్ నాలుగు మూలలు",

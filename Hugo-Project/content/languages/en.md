@@ -109,6 +109,7 @@ code: en
  "home.updateInstalling": "Installing update & restarting…",
  "home.updatePermission": "Allow app updates in settings to finish installing.",
  "home.updateRetry": "Retry Update",
+ "home.updateSkip": "Continue to current version",
  "home.username": "Instagram username",
  "house.area": "Virtual area (acres)",
  "house.corners": "Four plot corners",

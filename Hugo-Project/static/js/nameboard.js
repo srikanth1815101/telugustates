@@ -34,7 +34,7 @@ export function nameboardSpot(h) {
 
 export function nameboard(group, s, h, u, put) {
   const b = basis(h),
-    { gx, gy, boardW } = nameboardSpot(h);
+    { gx, gy, boardW } = nameboardSpot(h),
     base = s.xyz(gx, gy, s.ground(gx, gy)),
     caption = String(h.sign?.label || ""),
     label = (caption.match(/@?[a-z0-9_.]+/gi) || []).some(

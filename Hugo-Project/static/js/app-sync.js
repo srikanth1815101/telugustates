@@ -17,6 +17,16 @@ function formatMb(bytes) {
   return (bytes / (1024 * 1024)).toFixed(1);
 }
 
+function setUpdateGate(active) {
+  if (location.hostname !== "appassets.androidplatform.net") return;
+  document.body.classList.remove("app-boot-sync");
+  if (active && !document.body.classList.contains("walking")) {
+    document.body.classList.add("app-update-gate");
+  } else if (!active) {
+    document.body.classList.remove("app-update-gate");
+  }
+}
+
 function renderProgress(st) {
   lastStatus = st;
   const banner = document.querySelector("#app-update-banner"),
@@ -25,12 +35,14 @@ function renderProgress(st) {
     bar = document.querySelector("#app-update-bar"),
     cta = document.querySelector("#app-update-cta"),
     ctaLabel = document.querySelector("#app-update-cta-label"),
+    skip = document.querySelector("#app-update-skip"),
     btn = document.querySelector("#app-download"),
     btnLabel = document.querySelector("#app-download-label"),
     btnSub = document.querySelector("#app-download-sub");
 
   if (!st || st.state === "idle") {
     if (prog) prog.hidden = true;
+    if (skip) skip.hidden = false;
     cta?.classList.remove("is-busy");
     btn?.classList.remove("is-busy");
     renderUpdateUi();
@@ -38,6 +50,7 @@ function renderProgress(st) {
   }
 
   if (banner) banner.hidden = false;
+  setUpdateGate(true);
 
   if (st.state === "downloading" || st.state === "verifying") {
     const pct = Math.max(0, Math.min(100, st.percent || 0)),
@@ -51,6 +64,7 @@ function renderProgress(st) {
       prog.hidden = false;
       bar.style.width = `${Math.max(4, pct)}%`;
     }
+    if (skip) skip.hidden = true;
     if (note) {
       note.removeAttribute("data-msg");
       note.textContent = msg("home.updateDownloading") + detail;
@@ -77,6 +91,7 @@ function renderProgress(st) {
       prog.hidden = false;
       bar.style.width = "100%";
     }
+    if (skip) skip.hidden = false;
     if (note) {
       note.setAttribute("data-msg", "home.updatePermission");
       note.textContent = msg("home.updatePermission");
@@ -95,6 +110,7 @@ function renderProgress(st) {
       prog.hidden = false;
       bar.style.width = "100%";
     }
+    if (skip) skip.hidden = true;
     if (note) {
       note.setAttribute("data-msg", "home.updateInstalling");
       note.textContent = msg("home.updateInstalling");
@@ -114,8 +130,10 @@ function renderProgress(st) {
 
   if (st.state === "up_to_date") {
     if (prog) prog.hidden = true;
+    if (skip) skip.hidden = false;
     cta?.classList.remove("is-busy");
     btn?.classList.remove("is-busy");
+    setUpdateGate(false);
     if (banner) banner.hidden = true;
     if (btn) btn.hidden = true;
     return;
@@ -123,6 +141,7 @@ function renderProgress(st) {
 
   if (st.state === "conflict" || st.state === "error") {
     if (prog) prog.hidden = true;
+    if (skip) skip.hidden = false;
     cta?.classList.remove("is-busy");
     btn?.classList.remove("is-busy");
     if (note && st.message) {
@@ -148,7 +167,8 @@ function renderUpdateUi() {
     ver = document.querySelector("#app-update-ver"),
     note = document.querySelector("#app-update-note"),
     cta = document.querySelector("#app-update-cta"),
-    ctaLabel = document.querySelector("#app-update-cta-label");
+    ctaLabel = document.querySelector("#app-update-cta-label"),
+    skip = document.querySelector("#app-update-skip");
   if (!latestSync?.updateAvailable) return;
   if (
     lastStatus &&
@@ -186,8 +206,15 @@ function renderUpdateUi() {
         ctaLabel.setAttribute("data-msg", "home.updateAppCta");
         ctaLabel.textContent = msg("home.updateAppCta");
       }
+      if (skip) {
+        skip.setAttribute("data-msg", "home.updateSkip");
+        skip.textContent = msg("home.updateSkip");
+      }
     }
-    if (latestSync.latestVersionCode !== dismissedCode) banner.hidden = false;
+    if (latestSync.latestVersionCode !== dismissedCode) {
+      banner.hidden = false;
+      setUpdateGate(true);
+    }
   }
 }
 
@@ -204,6 +231,11 @@ export async function applySyncState(sync) {
   if (sync.updateAvailable) {
     latestSync = sync;
     renderUpdateUi();
+  } else if (!sync.cached) {
+    latestSync = sync;
+    setUpdateGate(false);
+    const banner = document.querySelector("#app-update-banner");
+    if (banner) banner.hidden = true;
   }
 }
 
@@ -246,15 +278,17 @@ export function initAppSync() {
     btn = document.querySelector("#app-download"),
     banner = document.querySelector("#app-update-banner"),
     cta = document.querySelector("#app-update-cta"),
+    skip = document.querySelector("#app-update-skip"),
     dismiss = document.querySelector("#app-update-dismiss");
 
-  if (dismiss && banner) {
-    dismiss.addEventListener("click", () => {
-      if (latestSync?.latestVersionCode)
-        dismissedCode = latestSync.latestVersionCode;
-      banner.hidden = true;
-    });
-  }
+  const closeBanner = () => {
+    if (latestSync?.latestVersionCode)
+      dismissedCode = latestSync.latestVersionCode;
+    setUpdateGate(false);
+    if (banner) banner.hidden = true;
+  };
+  if (dismiss) dismiss.addEventListener("click", closeBanner);
+  if (skip) skip.addEventListener("click", closeBanner);
   window.addEventListener("languagechange-atlas", renderUpdateUi);
 
   if (!inApp) {
@@ -268,6 +302,10 @@ export function initAppSync() {
     return;
   }
 
+  const bootRelease = setTimeout(() => {
+    document.body.classList.remove("app-boot-sync");
+  }, 1150);
+
   if (cta) cta.addEventListener("click", startInAppUpdate);
   if (btn) {
     btn.addEventListener("click", (e) => {
@@ -280,6 +318,16 @@ export function initAppSync() {
 
   if (btn && !latestSync?.updateAvailable) btn.hidden = true;
 
+  fetch("/_field/sync-cached", { cache: "no-store" })
+    .then((r) => (r.ok ? r.json() : null))
+    .then((cached) => {
+      if (cached?.updateAvailable) {
+        clearTimeout(bootRelease);
+        applySyncState(cached);
+      }
+    })
+    .catch(() => {});
+
   const check = (force = false) => {
     const now = Date.now();
     if (!force && now - lastCheckAt < MIN_RECHECK_MS) return inflight;
@@ -287,8 +335,15 @@ export function initAppSync() {
     lastCheckAt = now;
     inflight = fetch("/_field/sync", { cache: "no-store" })
       .then((r) => (r.ok ? r.json() : null))
-      .then((sync) => applySyncState(sync))
-      .catch(() => {})
+      .then((sync) => {
+        clearTimeout(bootRelease);
+        document.body.classList.remove("app-boot-sync");
+        return applySyncState(sync);
+      })
+      .catch(() => {
+        clearTimeout(bootRelease);
+        document.body.classList.remove("app-boot-sync");
+      })
       .finally(() => {
         inflight = null;
       });

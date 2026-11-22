@@ -23,9 +23,10 @@ import { passes, support } from "../static/js/contacts.js";
 import { WalkMotor } from "../static/js/walk-motor.js";
 import { Surface, chunk } from "../static/js/terrain.js";
 import { ecology } from "../static/js/ecodata.js";
-import { preparePads } from "../static/js/resident-scene.js";
+import { preparePads, residents } from "../static/js/resident-scene.js";
 import { compoundWallSegments } from "../static/js/resident-forms.js";
 import { nameboardSpot } from "../static/js/nameboard.js";
+import { marks, updateRouteLeaves } from "../static/js/hamlet-scene.js";
 import { Tread } from "../static/js/tread.js";
 const root = fileURLToPath(new URL("../", import.meta.url)),
   tmp = await fs.mkdtemp(path.join(os.tmpdir(), "atlas-homes-")),
@@ -320,13 +321,77 @@ try {
       landed: !!m.lands,
     });
   }
-  // Verify every home gets a valid @username nameboard spot and real compound walls block walking, jump cleanly, and leave the gate open.
-  for (const [, , u, , , h] of rows) {
-    const nb = nameboardSpot(h);
+  // Verify every home gets a valid @username nameboard spot, full browser-side residents()/nameboard()/marks() build cleanly without throwing, and compound walls block walking, jump cleanly, and leave the gate open.
+  const prevDoc = globalThis.document;
+  globalThis.document = {
+    createElement(tag) {
+      assert.equal(tag, "canvas");
+      return {
+        width: 0,
+        height: 0,
+        getContext() {
+          return {
+            createLinearGradient: () => ({ addColorStop() {} }),
+            fillRect() {},
+            strokeRect() {},
+            measureText: (txt) => ({ width: String(txt).length * 36 }),
+            fillText() {},
+          };
+        },
+      };
+    },
+  };
+  try {
+    const domSim = {
+      ...ff,
+      t: { at: () => ({ z: 0 }) },
+      ground: () => 0,
+      xyz: (x, y, z) => [x * M, z, -y * M],
+    };
+    for (const r of rows) {
+      const h = r[5],
+        u = r[2],
+        nb = nameboardSpot(h);
+      assert(
+        nb && Number.isFinite(nb.gx) && Number.isFinite(nb.gy) && nb.boardW >= 1.84,
+        u + " missing nameboard spot",
+      );
+      const grp = residents(domSim, [r], { x: h.centre[0], y: h.centre[1] }, 0);
+      assert.equal(
+        grp.userData.names?.length,
+        1,
+        u + " did not render username nameboard",
+      );
+      grp.traverse((o) => {
+        o.geometry?.dispose();
+        o.material?.dispose?.();
+      });
+    }
+    const sampleRow = rows[0],
+      route = {
+        xy: [
+          sampleRow[5].centre,
+          [sampleRow[5].centre[0] + 0.4, sampleRow[5].centre[1] + 0.3],
+        ],
+        forks: [8],
+      },
+      mk = marks(
+        domSim,
+        { c: [sampleRow[0], sampleRow[1]], house: sampleRow[5] },
+        "home",
+        route,
+      );
     assert(
-      nb && Number.isFinite(nb.gx) && Number.isFinite(nb.gy) && nb.boardW >= 1.84,
-      u + " missing nameboard spot",
+      mk.children.some((c) => c.userData?.role === "walking-waymarks"),
+      "expected walking-waymarks leaf mesh",
     );
+    updateRouteLeaves(route, 0.5);
+    mk.traverse((o) => {
+      o.geometry?.dispose();
+      o.material?.dispose?.();
+    });
+  } finally {
+    globalThis.document = prevDoc;
   }
   const walledHome = rows.find((r) => r[5]?.yard)?.[5];
   assert(walledHome, "expected walled village home");

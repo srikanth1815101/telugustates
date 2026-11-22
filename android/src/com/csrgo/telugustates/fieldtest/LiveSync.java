@@ -1,6 +1,7 @@
 package com.csrgo.telugustates.fieldtest;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.res.AssetManager;
 import android.webkit.WebResourceResponse;
 import org.json.JSONArray;
@@ -292,6 +293,56 @@ final class LiveSync {
         }
     }
 
+    private static final String SYNC_PREFS = "atlas_sync_cache";
+
+    WebResourceResponse cachedSyncResponse(long installedVersionCode, String installedVersionName) {
+        JSONObject bundled = bundledMeta();
+        String bundledEngineHash = bundled.optString("engineHash", "");
+        String defaultApk = bundled.optString("apkUrl", DEFAULT_APK_URL);
+        SharedPreferences sp = context.getSharedPreferences(SYNC_PREFS, Context.MODE_PRIVATE);
+        long cachedCode = sp.getLong("latestVersionCode", 0L);
+        String cachedName = sp.getString("latestVersionName", "");
+        String cachedEngine = sp.getString("remoteEngineHash", "");
+        String cachedApk = sp.getString("apkUrl", defaultApk);
+
+        boolean updateAvailable = false;
+        if (cachedCode > installedVersionCode
+                && cachedEngine != null && !cachedEngine.isEmpty()
+                && !bundledEngineHash.isEmpty()
+                && !cachedEngine.equals(bundledEngineHash)) {
+            updateAvailable = true;
+            if (cachedApk != null && trustedApkUrl(cachedApk)) {
+                latestApkUrl = cachedApk;
+            }
+        } else if (cachedCode > 0L && cachedCode <= installedVersionCode) {
+            sp.edit().clear().apply();
+        }
+
+        JSONObject reply = new JSONObject();
+        try {
+            reply.put("inApp", true);
+            reply.put("cached", true);
+            reply.put("installedVersionCode", installedVersionCode);
+            reply.put("installedVersionName", installedVersionName);
+            reply.put("updateAvailable", updateAvailable);
+            reply.put("latestVersionCode", updateAvailable ? cachedCode : installedVersionCode);
+            reply.put("latestVersionName", updateAvailable ? cachedName : installedVersionName);
+            reply.put("apkUrl", (cachedApk != null && !cachedApk.isEmpty()) ? cachedApk : defaultApk);
+        } catch (JSONException ignored) {}
+
+        byte[] payload = reply.toString().getBytes(StandardCharsets.UTF_8);
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Cache-Control", "no-store");
+        headers.put("X-Content-Type-Options", "nosniff");
+        return new WebResourceResponse(
+                "application/json",
+                "UTF-8",
+                200,
+                "OK",
+                headers,
+                new ByteArrayInputStream(payload));
+    }
+
     WebResourceResponse syncResponse(long installedVersionCode, String installedVersionName) {
         JSONObject bundled = bundledMeta();
         String bundledContentHash = bundled.optString("contentHash", "");
@@ -352,6 +403,7 @@ final class LiveSync {
             String remoteName = engineSource.optString("versionName", installedVersionName);
             String remoteApk = engineSource.optString("apkUrl", apkUrl);
             if (!remoteApk.isEmpty()) apkUrl = remoteApk;
+            SharedPreferences sp = context.getSharedPreferences(SYNC_PREFS, Context.MODE_PRIVATE);
             if (!remoteEngineHash.isEmpty()
                     && !bundledEngineHash.isEmpty()
                     && !remoteEngineHash.equals(bundledEngineHash)
@@ -359,6 +411,14 @@ final class LiveSync {
                 updateAvailable = true;
                 latestVersionCode = remoteCode;
                 latestVersionName = remoteName;
+                sp.edit()
+                        .putLong("latestVersionCode", remoteCode)
+                        .putString("latestVersionName", remoteName)
+                        .putString("remoteEngineHash", remoteEngineHash)
+                        .putString("apkUrl", apkUrl)
+                        .apply();
+            } else {
+                sp.edit().clear().apply();
             }
         }
 
