@@ -2,6 +2,7 @@
 import * as T from "../vendor/three.module.min.js";
 import { U, noise } from "./habitats.js";
 import { solidFor, hull } from "./contacts.js";
+import { isStageCliff, headAt } from "./hydraulic-stage.js";
 const tau = Math.PI * 2,
   clamp = T.MathUtils.clamp;
 const level = (s, x, y) => {
@@ -86,28 +87,29 @@ const fss = {
     c=mix(deepCol,vec3(.89,.955,.945),clamp(crestFoam,0.,.88));
     a=edge*fadeIn*(.54+.32*lip+.12*crestFoam);
   } else {
-    // Natural downward-pouring waterfall plumes (band-limited <= 2.25 Hz so motion is strictly downward at 30-120 fps, zero vertical barcode stripes).
-    float fallProg=clamp(v.y,0.,1.),crest=1.-smoothstep(0.,.18,fallProg),footFade=1.-.22*smoothstep(.88,1.,fallProg);
-    float sMeters=fallProg*max(9.,spd*1.75);
-    float lobe=mwNoise(vec2(x*2.35,sMeters*.17-t*.94));
-    // Central water tongue falls slightly ahead of the edges, forming natural downward parabolic V-lobes.
-    float sWarp=sMeters+(lobe-.5)*2.6-ax*ax*1.15;
-    float plume=mwNoise(vec2(x*5.3+(lobe-.5)*.95,sWarp*.33-t*1.62));
+    // Chanson air-water nappe physics: glassy M2 emerald crest lip -> 20:1 vertically-stretched falling ribbons & aerated curtains (<= 2.05 Hz, strictly downward).
+    float fallProg=clamp(v.y,0.,1.),brink=1.-smoothstep(.02,.13,fallProg),footFade=1.-.18*smoothstep(.90,1.,fallProg);
+    float sMeters=fallProg*max(14.,spd*2.2);
+    float chuteCol=mwNoise(vec2(x*1.35,sMeters*.032-t*.38));
+    float sLead=sMeters+(chuteCol-.5)*4.2-ax*ax*1.6;
+    float rib1=mwNoise(vec2(x*3.6+(chuteCol-.5)*.7,sLead*.078-t*.96));
+    float rib2=mwNoise(vec2(x*8.8+(rib1-.5)*.6,sLead*.115-t*1.52));
     float nearDetail=1.-smoothstep(85.,250.,dist);
-    float fine=nearDetail*mwNoise(vec2(x*10.8-(plume-.5)*.7,sWarp*.56-t*2.22+3.7));
-    float body=lobe*.46+plume*.39+fine*.15;
-    float edge=1.-smoothstep(.56-.10*veil,.97,ax+.18*(lobe-.5)+.11*(plume-.5)*fallProg);
+    float threadF=nearDetail*mwNoise(vec2(x*17.5-(rib2-.5)*.5,sLead*.18-t*2.04+3.7));
+    float density=chuteCol*.38+rib1*.34+rib2*.18+threadF*.10;
+    float edge=1.-smoothstep(.56-.10*veil,.97,ax+.18*(chuteCol-.5)+.12*(rib1-.5)*fallProg);
     if(veil>.5){
-      float wisps=smoothstep(.32,.84,plume*.62+lobe*.38);
-      c=mix(vec3(.62,.82,.82),vec3(.93,.975,.965),.45+.55*wisps);
-      a=edge*wisps*.46*smoothstep(.04,.22,fallProg)*footFade;
+      float wisps=smoothstep(.30,.82,rib1*.58+rib2*.42);
+      c=mix(vec3(.64,.83,.84),vec3(.94,.98,.97),.45+.55*wisps);
+      a=edge*wisps*.48*smoothstep(.06,.22,fallProg)*footFade;
     } else {
-      float aerated=smoothstep(.22,.76,body+.22*fallProg+.20*crest*(1.-ax*.5));
-      vec3 coreWater=mix(vec3(.075,.285,.285),vec3(.18,.44,.43),lobe);
-      vec3 whiteWater=mix(vec3(.82,.92,.91),vec3(.95,.985,.975),smoothstep(.42,.88,body));
-      c=mix(coreWater,whiteWater,clamp(.22+.76*aerated,0.,.96));
-      c+=vec3(.13,.15,.14)*crest*smoothstep(.35,.85,1.-ax);
-      a=edge*footFade*clamp(.66+.30*aerated,0.,.96);
+      float whiteCurtain=smoothstep(.30,.76,density+.20*smoothstep(.10,.55,fallProg));
+      vec3 wetCore=mix(vec3(.042,.135,.148),vec3(.085,.265,.268),rib1);
+      vec3 whiteWater=mix(vec3(.76,.885,.89),vec3(.96,.988,.982),smoothstep(.45,.88,density+.15*rib2));
+      vec3 fallBody=mix(wetCore,whiteWater,whiteCurtain);
+      vec3 brinkBody=mix(vec3(.038,.19,.20),vec3(.12,.33,.32),rib1*.6+rib2*.4)+vec3(.18,.22,.22)*smoothstep(.45,.85,rib1)*(1.-ax*.5);
+      c=mix(fallBody,brinkBody,brink);
+      a=edge*footFade*clamp(mix(.66+.31*whiteCurtain,.82,brink),0.,.97);
     }
   }`,
   wash: `
@@ -170,8 +172,8 @@ function spray(points, u, role) {
       uniforms: u,
       transparent: true,
       depthWrite: false,
-      vertexShader: `uniform float liquidTime;attribute vec3 velocity;attribute vec3 cycle;varying float alpha;void main(){float ph=fract(liquidTime/cycle.x+cycle.y),t=ph*cycle.x;vec3 p=position+velocity*t;p.y-=4.9*t*t;vec4 eye=modelViewMatrix*vec4(p,1.);alpha=sin(3.14159*ph);float sz=(18.+18.*cycle.y)*cycle.z;gl_PointSize=clamp(sz/max(1.4,-eye.z),1.2,5.8);gl_Position=projectionMatrix*eye;}`,
-      fragmentShader: `uniform float uDay;varying float alpha;void main(){float d=length(gl_PointCoord-.5);if(d>.5)discard;float soft=(1.-smoothstep(.10,.5,d))*.68;vec3 c=vec3(.88,.96,.95)*(.48+.52*uDay);gl_FragColor=vec4(c,alpha*soft);\n#include <colorspace_fragment>\n}`,
+      vertexShader: `uniform float liquidTime;attribute vec3 velocity;attribute vec3 cycle;varying float alpha,mist;void main(){float ph=fract(liquidTime/cycle.x+cycle.y),t=ph*cycle.x;mist=step(3.5,cycle.z);vec3 p=position+velocity*t;if(mist>.5){p.x+=sin(liquidTime*.7+cycle.y*6.283)*.55*ph;p.z+=cos(liquidTime*.65+cycle.y*6.283)*.55*ph;}else{p.y-=4.9*t*t;}vec4 eye=modelViewMatrix*vec4(p,1.);alpha=sin(3.14159*ph);float sz=mist>.5?(110.+70.*cycle.y)*cycle.z*.15:(18.+18.*cycle.y)*cycle.z;gl_PointSize=clamp(sz/max(1.5,-eye.z),mist>.5?8.:1.2,mist>.5?56.:5.8);gl_Position=projectionMatrix*eye;}`,
+      fragmentShader: `uniform float uDay,uFog;uniform vec3 uHor;varying float alpha,mist;void main(){float d=length(gl_PointCoord-.5);if(d>.5)discard;float soft=mist>.5?pow(max(0.,1.-d*2.),2.6)*.14:(1.-smoothstep(.10,.5,d))*.68;vec3 c=vec3(.90,.965,.96)*(.48+.52*uDay);gl_FragColor=vec4(c,alpha*soft);\n#include <colorspace_fragment>\n}`,
     }),
   );
   g.computeBoundingSphere();
@@ -744,9 +746,100 @@ export function cascade(s, site, u) {
       ]);
     }
   }
+  // Low-lying plunge-pool mist billows drifting horizontally outward across the water (vy = 0, never rising up the cliff).
+  for (let j = 0; j < 26; j++) {
+    const r = noise(j, 61),
+      a = (r - 0.5) * 2,
+      c = noise(j, 73),
+      dSpot = span + fwdClear * 0.3 + c * 2.4,
+      [xx, yy] = xy(dSpot, a * width * 1.35),
+      baseZ = level(s, xx, yy) + 0.55 + 0.75 * noise(j, 83),
+      outSpd = 1.4 + 1.8 * c;
+    pts.push([
+      ...s.xyz(xx, yy, baseZ),
+      dx * outSpd - dy * a * 0.85,
+      0.03,
+      -dy * outSpd - dx * a * 0.85,
+      2.1 + 1.4 * r,
+      c,
+      5.5 + 3.5 * noise(j, 97),
+    ]);
+  }
   scene.add(spray(pts, u, "plunge-spray"));
   scene.userData.site = site;
   return scene;
+}
+// Volumetric low-lying plunge mist & falling spray along steep continuous hydraulic stage waterfalls (e.g. canyon spillways).
+export function stagePlungeMist(s, cx, cy, u) {
+  const ix0 = Math.floor(cx),
+    iy0 = Math.floor(cy),
+    cliffCells = [];
+  for (let j = iy0 - 8; j <= iy0 + 8; j++)
+    for (let i = ix0 - 8; i <= ix0 + 8; i++) {
+      if ((i + 0.5 - cx) ** 2 + (j + 0.5 - cy) ** 2 > 76) continue;
+      const h0 = s.node(i, j).head;
+      if (!h0) continue;
+      if (
+        isStageCliff(h0, s.node(i + 1, j).head) ||
+        isStageCliff(h0, s.node(i, j + 1).head)
+      )
+        cliffCells.push([i, j]);
+    }
+  if (!cliffCells.length) return null;
+  const pts = [];
+  let kSeed = 0;
+  for (const [ci, cj] of cliffCells) {
+    for (let sv = 0; sv < 5; sv++) {
+      for (let su = 0; su < 5; su++) {
+        const px = ci - 0.25 + (su + 0.5) * 0.3,
+          py = cj - 0.25 + (sv + 0.5) * 0.3;
+        if (s.wet(px, py) < 0.42) continue;
+        const hd = headAt(s, px, py);
+        if (!hd || hd.dropM < 5 || hd.sRim < -0.14 || hd.sRim > 0.01) continue;
+        const ox = hd.outX || 0,
+          oz = hd.outZ || 0;
+        if (ox * ox + oz * oz < 0.1) continue;
+        const sideX = -oz,
+          sideZ = ox,
+          zLo = (hd.hLo - s.o.z) * s.relief,
+          zHi = (hd.hHi - s.o.z) * s.relief;
+        for (let m = 0; m < 4; m++) {
+          kSeed++;
+          const r1 = noise(kSeed, 17),
+            r2 = noise(kSeed, 31),
+            lat = (r1 - 0.5) * 2,
+            outSpd = 1.6 + 2.2 * r2;
+          // Outward-rolling low plunge mist cloud over the lake (vy ~ 0, never rising up the cliff).
+          pts.push([
+            ...s.xyz(px, py, zLo + 0.65 + 1.15 * r1),
+            ox * outSpd + sideX * lat * 0.9,
+            0.04,
+            oz * outSpd + sideZ * lat * 0.9,
+            2.2 + 1.5 * r1,
+            r2,
+            6.2 + 4.2 * noise(kSeed, 53),
+          ]);
+          // Gravity-falling spray droplets on the lower half of the sheer cliff.
+          const zDrop = zLo + (zHi - zLo) * (0.18 + 0.36 * r2),
+            maxLife = Math.sqrt(Math.max(0.18, (zDrop - zLo) / 4.9));
+          pts.push([
+            ...s.xyz(px, py, zDrop),
+            ox * (1.1 + 1.2 * r1) + sideX * lat * 0.5,
+            -(2.2 + 2.8 * r2),
+            oz * (1.1 + 1.2 * r1) + sideZ * lat * 0.5,
+            clamp(0.45 + 0.45 * r1, 0.35, maxLife),
+            r1,
+            1.4 + 0.7 * r2,
+          ]);
+          if (pts.length >= 220) break;
+        }
+        if (pts.length >= 220) break;
+      }
+      if (pts.length >= 220) break;
+    }
+    if (pts.length >= 220) break;
+  }
+  return pts.length ? spray(pts, u, "stage-plunge-mist") : null;
 }
 export function disposeWater(g) {
   if (!g) return;

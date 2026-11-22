@@ -11,6 +11,7 @@ import { RunoffWindow, TILE, CORE, SPACING } from "../static/js/rain-ground.js";
 import {
   findFall,
   cascade,
+  stagePlungeMist,
   bedStones,
   rockWater,
   disposeWater,
@@ -338,8 +339,14 @@ try {
       )?.geometry,
       nagCenter = sNag.xyz(3371.5, 5812.5, 0);
     let spillTris = 0,
+      steepCliffTris = 0,
       maxLocalWaterY = -Infinity;
     assert(sNag.wet(3371.5, 5812.5) > 0.5);
+    assert(Math.abs(sNag.point(3372.4, 5812.8).line / sNag.relief - 328) < 0.05);
+    assert(Math.abs(sNag.point(3371.5, 5812.5).line / sNag.relief - 262) < 0.05);
+    assert(sNag.point(3371.85, 5812.8).plunge > 0.45);
+    const stMist = stagePlungeMist(sNag, 3371.5, 5812.5, uniforms);
+    assert(stMist && stMist.geometry.attributes.position.count >= 12);
     if (wNag) {
       const p = wNag.attributes.position,
         id = wNag.index.array;
@@ -367,15 +374,22 @@ try {
         if (n.lengthSq() > 1e-10) {
           const sinSlope = Math.hypot(n.x, n.z) / n.length();
           if (sinSlope > 0.22) spillTris++;
+          if (sinSlope > 0.96) steepCliffTris++;
         }
       }
     }
-    assert(spillTris > 20 && maxLocalWaterY / sNag.relief < 330);
+    assert(
+      spillTris > 20 &&
+        steepCliffTris > 400 &&
+        maxLocalWaterY / sNag.relief < 330,
+    );
     q.fall = {
       name: site.name,
       modelDropM: site.drop,
       etthipothalaDropM: etSite.drop,
       nagarkurnoolSpillTriangles: spillTris,
+      nagarkurnoolSteepCliffTriangles: steepCliffTris,
+      nagarkurnoolStageMistParticles: stMist.geometry.attributes.position.count,
       nagarkurnoolMaxDatumM: +(maxLocalWaterY / sNag.relief).toFixed(2),
       effects: fx.children.map((o) => o.userData.role),
     };

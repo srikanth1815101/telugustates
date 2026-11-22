@@ -1,5 +1,6 @@
 import { bankMix, shelfDepth } from "./river-margin.js";
 import { benchSplit } from "./house-ground.js";
+import { isStageCliff, headAt } from "./hydraulic-stage.js";
 // Conforming refinement of the simulated waterline. Both chunks take the union of the same edge vertices; load order never defines a shoreline.
 import { ACRE } from "./metres.js";
 // Map coordinates below are in 63.615 m cells; mesh positions remain in the floating-origin frame.
@@ -12,7 +13,8 @@ export function bankBuilder(s, cx, cy, V, emit, X, Y, outer) {
     oy = cy * 64 - pad,
     stride = span + 1,
     wet = new Uint16Array(stride * stride),
-    line = new Uint16Array(stride * stride);
+    line = new Uint16Array(stride * stride),
+    cliff = new Uint16Array(stride * stride);
   s.channel(cx * 64 + 32, cy * 64 + 32);
   const seen = new Set(),
     flags = new Uint8Array(span * span);
@@ -38,13 +40,28 @@ export function bankBuilder(s, cx, cy, V, emit, X, Y, outer) {
       }
   for (let j = 0; j < span; j++) {
     let w = 0,
-      l = 0;
+      l = 0,
+      cl = 0;
     for (let i = 0; i < span; i++) {
-      w += s.node(ox + i, oy + j).wet;
+      const nd = s.node(ox + i, oy + j),
+        h0 = nd.head;
+      let isCl = 0;
+      if (h0) {
+        for (let dj = -1; dj <= 1 && !isCl; dj++)
+          for (let di = -1; di <= 1 && !isCl; di++)
+            if (
+              (di || dj) &&
+              isStageCliff(h0, s.node(ox + i + di, oy + j + dj).head)
+            )
+              isCl = 1;
+      }
+      w += nd.wet;
       l += flags[j * span + i];
+      cl += isCl;
       const n = (j + 1) * stride + i + 1;
       wet[n] = w + wet[n - stride];
       line[n] = l + line[n - stride];
+      cliff[n] = cl + cliff[n - stride];
     }
   }
   // Integral images discover a lake inside a completely dry coarse triangle and streams narrower than one terrain edge.
@@ -53,6 +70,13 @@ export function bankBuilder(s, cx, cy, V, emit, X, Y, outer) {
     p[b * stride + c] -
     p[d * stride + a] +
     p[b * stride + a];
+  function cliffNear(x, y, d) {
+    const a = clamp(Math.floor(x - ox - d - 1.15), 0, span),
+      b = clamp(Math.floor(y - oy - d - 1.15), 0, span),
+      c = clamp(Math.ceil(x - ox + d + 1.15), 0, span),
+      e = clamp(Math.ceil(y - oy + d + 1.15), 0, span);
+    return sum(cliff, a, b, c, e);
+  }
   function hint(x, y, d) {
     const a = clamp(Math.floor(x - ox - d - 1.65), 0, span),
       b = clamp(Math.floor(y - oy - d - 1.65), 0, span),
@@ -180,6 +204,22 @@ export function bankBuilder(s, cx, cy, V, emit, X, Y, outer) {
               size = L > 1.32 ? 1.26 : bend > 0.085 ? 0.51 : 1.04;
             } else if (L > 1.45 && lo < 0.02 && hi > -0.16) size = 1.0;
           }
+        }
+      }
+    }
+    if (L > 0.032 && cliffNear(mx / T, my / T, L * 0.52) > 0) {
+      const X0 = mx / T,
+        Y0 = my / T,
+        r = ACRE * Math.hypot(X0 - s.focus[0], Y0 - s.focus[1]);
+      if (L > 0.26) size = Math.min(size, 0.25);
+      else {
+        const hd = headAt(s, X0, Y0);
+        if (hd && Math.abs(hd.sRim) < 0.24 + L * 0.75) {
+          const atShore = value(mx, my) < 0.14;
+          size = Math.min(
+            size,
+            atShore || (!s.surveyGrid && r < 220) ? 0.032 : 0.064,
+          );
         }
       }
     }
