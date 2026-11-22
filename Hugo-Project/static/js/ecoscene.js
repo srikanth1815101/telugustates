@@ -1,5 +1,6 @@
 import { inCourt } from "./home-index.js";
 import { bedStones } from "./moving-water.js";
+import { tidalBed } from "./surf-zone.js";
 import { trunkFootprint, meshShape } from "./contacts.js";
 import { padDistance, clearApproach } from "./resident-scene.js";
 import * as T from "../vendor/three.module.min.js";
@@ -154,7 +155,14 @@ export class EcologyScene {
     for (let j = Math.floor(y) - r; j <= Math.floor(y) + r; j++)
       for (let i = Math.floor(x) - r; i <= Math.floor(x) + r; i++) {
         let c = s.t.at(i, j);
-        if (c?.d) cells.push({ ...c, ...this.ec.at(i, j), x: i, y: j });
+        if (!c?.d) continue;
+        const seaCell =
+          s.ocean(i + 0.5, j + 0.5) &&
+          s.ocean(i, j) &&
+          s.ocean(i + 1, j) &&
+          s.ocean(i, j + 1) &&
+          s.ocean(i + 1, j + 1);
+        cells.push({ ...c, ...this.ec.at(i, j), x: i, y: j, seaCell });
       }
     const input = {
       cells,
@@ -251,7 +259,8 @@ export class EcologyScene {
     if (this.disposed || id !== this.serial) return;
     const bins = new Map(),
       pieces = [],
-      dyn = [];
+      dyn = [],
+      datum = -s.o.z * s.relief;
     let tick = performance.now();
     for (const v of [...patch.static, ...fauna]) {
       if (inCourt(s, v.x, v.y, v.kind === "tree" ? 2.6 : 1.4)) continue;
@@ -272,12 +281,43 @@ export class EcologyScene {
         continue;
       if (!hit.drawn || ((v.water || v.hab === "water") && hit.depth < 0.09))
         continue;
-      if (
-        (v.kind === "tree" || v.kind === "detail") &&
-        hit.depth > 0.16 &&
-        v.name !== "Mangrove"
-      )
-        continue;
+      if (v.kind !== "animal") {
+        const marine = hit.sea > 0.015 || s.ocean(v.x, v.y),
+          tBed = marine ? tidalBed(hit, datum) : -99;
+        if (marine) {
+          if (v.water || v.hab === "water") continue;
+          if (v.kind === "tree" || v.kind === "detail") {
+            if (
+              s.ocean(v.x, v.y) ||
+              hit.depth > 0 ||
+              hit.w > -0.12 ||
+              tBed > -0.88
+            )
+              continue;
+          } else if (
+            v.hab !== "riverbed" &&
+            (s.ocean(v.x, v.y) ||
+              hit.depth > 0 ||
+              hit.w > -0.095 ||
+              tBed > -0.68)
+          )
+            continue;
+        } else if (v.kind === "tree" && v.name === "Mangrove") {
+          if (hit.depth > 0.35 || hit.w > 0.08) continue;
+        } else if (
+          (v.kind === "tree" || v.kind === "detail") &&
+          (hit.depth > 0.08 || hit.w > 0.015)
+        )
+          continue;
+        else if (
+          v.kind === "plant" &&
+          !v.water &&
+          v.hab !== "water" &&
+          hit.depth >
+            (["Shore reed", "Marsh sedge"].includes(v.name) ? 0.22 : 0.05)
+        )
+          continue;
+      }
       if (v.kind === "animal" && !this.permitted(v, v.x, v.y)) continue;
       v.hx = v.x;
       v.hy = v.y;
@@ -481,12 +521,27 @@ export class EcologyScene {
     const s = this.s,
       c = s.t.at(x, y),
       i = Math.floor(x),
-      j = Math.floor(y);
-    if (!c?.d || !s.sample(x, y).drawn) return false;
-    if (v.hab === "shallow") return this.shallowOK(x, y);
+      j = Math.floor(y),
+      hit = s.sample(x, y);
+    if (!c?.d || !hit.drawn) return false;
+    if (v.hab === "shallow")
+      return !s.ocean(x, y) && hit.sea < 0.05 && this.shallowOK(x, y);
     if (v.hab === "water" || v.hab === "deep")
-      return this.waterOK(x, y, v.hab === "deep");
-    if (s.sample(x, y).depth > 0.12 && v.hab !== "air") return false;
+      return (
+        !s.ocean(x, y) &&
+        hit.sea < 0.05 &&
+        this.waterOK(x, y, v.hab === "deep")
+      );
+    const air = v.hab === "air" || ["Gull", "Tern"].includes(v.name);
+    if (
+      !air &&
+      (s.ocean(x, y) ||
+        hit.depth > 0.12 ||
+        (hit.sea > 0.02 &&
+          tidalBed(hit, -s.o.z * s.relief) >
+            (v.name === "Sand crab" ? -0.18 : -0.62)))
+    )
+      return false;
     if (v.hab === "shore")
       return [
         [1, 0],

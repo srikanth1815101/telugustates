@@ -32,10 +32,11 @@ export function bankGain(s, v, f, range) {
 // Moving tongues plus quicker local bank slosh: neighbouring shoals advance and pull back asynchronously. No common river level oscillation.
 function packet(x, z) {
   const u =
-    0.58 *
+    0.55 *
       Math.sin(0.47 * x + 0.26 * z + 0.86 * Math.sin(0.13 * x - 0.28 * z)) +
-    0.34 * Math.cos(-0.35 * x + 0.66 * z + 0.99) +
-    0.24 * Math.sin(0.85 * x - 0.12 * z - 1.6);
+    0.32 * Math.cos(-0.35 * x + 0.66 * z + 0.99) +
+    0.22 * Math.sin(0.85 * x - 0.12 * z - 1.6) +
+    0.15 * Math.cos(1.18 * x + 0.74 * z + 0.42);
   return ramp(-0.24, 0.72, u);
 }
 export function marginLift(x, z, t, vx, vz, g) {
@@ -72,7 +73,7 @@ export function marginLift(x, z, t, vx, vz, g) {
         );
   return g * site * (0.282 * wave - 0.09);
 }
-export const marginGLSL = `float marginPulse(vec2 q){float u=.58*sin(dot(q,vec2(.47,.26))+.86*sin(dot(q,vec2(.13,-.28))))+.34*cos(dot(q,vec2(-.35,.66))+.99)+.24*sin(dot(q,vec2(.85,-.12))-1.6);return smoothstep(-.24,.72,u);}
+export const marginGLSL = `float marginPulse(vec2 q){float u=.55*sin(dot(q,vec2(.47,.26))+.86*sin(dot(q,vec2(.13,-.28))))+.32*cos(dot(q,vec2(-.35,.66))+.99)+.22*sin(dot(q,vec2(.85,-.12))-1.6)+.15*cos(dot(q,vec2(1.18,.74))+.42);return smoothstep(-.24,.72,u);}
 float marginLift(vec2 p,float t,vec2 vel,float g){float a=mod(t,10.),b=mod(a+5.,10.),w=smoothstep(.14,.86,abs(a-5.)*.2);vec2 u=vel*1.32;float push=mix(marginPulse(p-u*a),marginPulse(p-u*b),w);float lap=smoothstep(-.78,.78,.64*sin(dot(p,vec2(.62,-.41))-t*1.65+.85*sin(dot(p,vec2(.19,.23))))+.36*cos(dot(p,vec2(-.29,.57))-t*1.08+1.3));float wave=.68*push+.32*lap;float site=.34+.66*smoothstep(-.64,.42,.65*cos(dot(p,vec2(.185,.24)))+.47*sin(dot(p,vec2(-.11,.31))+.7));return g*site*(.282*wave-.09);}`;
 // Barycentric, just like the *actual* production vertex sheet. Tests exercise both drawn/collidable faces, landward of the mean contour too.
 export function bankMix(a, b, c, u, v) {
