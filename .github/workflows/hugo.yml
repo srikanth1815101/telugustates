@@ -3,32 +3,41 @@ name: Deploy Hugo site to GitHub Pages
 on:
   push:
     branches: [main]
+  workflow_dispatch:
 
 permissions:
-  contents: write     # allow pushing branches / commits
-  pages: write        # allow Pages-related actions
+  contents: write
+  pages: write
+
+concurrency:
+  group: github-pages-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
+        uses: actions/checkout@v4
 
-      - name: Setup Hugo
-        uses: peaceiris/actions-hugo@v2
-        with:
-          hugo-version: 'latest'
+      - name: Install Hugo 0.147.8
+        shell: bash
+        run: |
+          set -euo pipefail
+          v=0.147.8; pkg="hugo_${v}_linux-amd64.tar.gz"; base="https://github.com/gohugoio/hugo/releases/download/v${v}"
+          cd "$RUNNER_TEMP"
+          curl -fsSLO "$base/$pkg"; curl -fsSLO "$base/hugo_${v}_checksums.txt"
+          grep -F " $pkg" "hugo_${v}_checksums.txt" | sha256sum -c -
+          mkdir -p hugo-bin; tar xzf "$pkg" -C hugo-bin hugo; echo "$RUNNER_TEMP/hugo-bin" >> "$GITHUB_PATH"
 
       - name: Build Hugo site
-        run: hugo --minify
+        run: hugo --source Hugo-Project --destination "$GITHUB_WORKSPACE/Hugo-Project/public" --minify
 
       - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
+        uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./public
+          publish_dir: ./Hugo-Project/public
           publish_branch: gh-pages
           cname: telugustates.csrgo.com
+          force_orphan: true
