@@ -81,6 +81,54 @@ const earth = "#a77c58",
   night = "#314c50",
   brass = "#b39a69";
 const tint = (c, v) => new T.Color(c).offsetHSL(0, 0, v);
+export const COMPOUND_WALL_H = 0.68;
+
+function compoundLayout(h) {
+  if (!h?.yard) return null;
+  const [w, d] = h.size_m,
+    lotW = h.yard.lot[0] || w + 2.4,
+    frontSpan = h.yard.front ?? 4.2,
+    backSpan = h.yard.back ?? 2.2,
+    halfW = lotW * 0.5 - 0.16,
+    frontExt = d * 0.5 + frontSpan - 0.16,
+    rearExt = -d * 0.5 - backSpan + 0.16,
+    gapLo = Math.max(-halfW + 0.42, h.door_x - 1.75),
+    gapHi = Math.min(halfW - 0.42, h.door_x + 1.75),
+    runs = [
+      [-halfW, rearExt, halfW, rearExt],
+      [-halfW, rearExt, -halfW, frontExt],
+      [halfW, rearExt, halfW, frontExt],
+    ];
+  if (gapLo - -halfW > 0.08) runs.push([-halfW, frontExt, gapLo, frontExt]);
+  if (halfW - gapHi > 0.08) runs.push([gapHi, frontExt, halfW, frontExt]);
+  return { halfW, frontExt, rearExt, gapLo, gapHi, runs };
+}
+
+export function compoundWallSegments(s, h) {
+  const layout = compoundLayout(h);
+  if (!layout) return [];
+  const segs = [];
+  for (const [x0, z0, x1, z1] of layout.runs) {
+    const len = Math.hypot(x1 - x0, z1 - z0),
+      steps = Math.max(1, Math.ceil(len / 3.4));
+    for (let i = 0; i < steps; i++) {
+      const t0 = i / steps,
+        t1 = (i + 1) / steps,
+        [ax, ay] = localPoint(h, x0 + (x1 - x0) * t0, z0 + (z1 - z0) * t0),
+        [bx, by] = localPoint(h, x0 + (x1 - x0) * t1, z0 + (z1 - z0) * t1);
+      segs.push([
+        ax,
+        ay,
+        bx,
+        by,
+        s.ground(ax, ay) + COMPOUND_WALL_H,
+        s.ground(bx, by) + COMPOUND_WALL_H,
+      ]);
+    }
+  }
+  return segs;
+}
+
 export function makeHouse(s, h, u, distance, tier, put) {
   if (!h) return;
   const { yaw } = basis(h),
@@ -606,51 +654,45 @@ export function makeHouse(s, h, u, distance, tier, put) {
     frontExt = d * 0.5 + frontSpan - 0.16,
     rearExt = -d * 0.5 - backSpan + 0.16;
 
-  // Low village compound wall (prahari) and street-facing gate piers define cohesive neighborly courtyards even from orbit.
-  if (yard) {
+  // Low village compound wall (prahari) and street-facing gate piers define cohesive neighborly courtyards.
+  const layout = compoundLayout(h);
+  if (layout) {
     const kerbPalette = ["#d8c8a8", "#ceb995", "#c7af8c", "#dfd3b7"],
       kerbCol = kerbPalette[seed & 3],
       capCol = seed % 3 === 0 ? "#b56345" : lime,
-      kH = 0.54,
-      kT = 0.22,
-      yEmbed = kH * 0.5 - 0.08,
-      hEmbed = kH + 0.16,
-      spanD = frontExt - rearExt,
-      midZ = (frontExt + rearExt) * 0.5,
-      gapLo = Math.max(-halfW + 0.42, h.door_x - 1.75),
-      gapHi = Math.min(halfW - 0.42, h.door_x + 1.75);
-    fixture("yard-slab", "slab", 0, rearExt, yEmbed, halfW * 2 + kT, hEmbed, kT, kerbCol);
-    fixture("yard-slab", "slab", -halfW, midZ, yEmbed, kT, hEmbed, spanD, kerbCol);
-    fixture("yard-slab", "slab", halfW, midZ, yEmbed, kT, hEmbed, spanD, kerbCol);
-    const leftSeg = gapLo - -halfW,
-      rightSeg = halfW - gapHi;
-    if (leftSeg > 0.34)
-      fixture(
-        "yard-slab",
-        "slab",
-        -halfW + leftSeg * 0.5,
-        frontExt,
-        yEmbed,
-        leftSeg,
-        hEmbed,
-        kT,
-        kerbCol,
-      );
-    if (rightSeg > 0.34)
-      fixture(
-        "yard-slab",
-        "slab",
-        gapHi + rightSeg * 0.5,
-        frontExt,
-        yEmbed,
-        rightSeg,
-        hEmbed,
-        kT,
-        kerbCol,
-      );
-    for (const gx of [gapLo, gapHi]) {
-      fixture("yard-slab", "slab", gx, frontExt, 0.42, 0.36, 1.0, 0.36, lime);
-      fixture("yard-slab", "slab", gx, frontExt, 0.95, 0.44, 0.1, 0.44, capCol);
+      kH = COMPOUND_WALL_H,
+      kT = 0.24,
+      yEmbed = kH * 0.5 - 0.12,
+      hEmbed = kH + 0.24;
+    for (const [x0, z0, x1, z1] of layout.runs) {
+      const alongX = Math.abs(x1 - x0) >= Math.abs(z1 - z0),
+        len = Math.hypot(x1 - x0, z1 - z0),
+        steps = Math.max(1, Math.ceil(len / 3.4)),
+        segLen = len / steps + 0.04;
+      for (let i = 0; i < steps; i++) {
+        const tm = (i + 0.5) / steps,
+          mx = x0 + (x1 - x0) * tm,
+          mz = z0 + (z1 - z0) * tm,
+          sx = alongX ? segLen : kT,
+          sz = alongX ? kT : segLen;
+        fixture("yard-slab", "slab", mx, mz, yEmbed, sx, hEmbed, sz, kerbCol);
+        if (mid)
+          fixture(
+            "yard-slab",
+            "slab",
+            mx,
+            mz,
+            kH - 0.02,
+            alongX ? segLen : kT + 0.05,
+            0.055,
+            alongX ? kT + 0.05 : segLen,
+            capCol,
+          );
+      }
+    }
+    for (const gx of [layout.gapLo, layout.gapHi]) {
+      fixture("yard-slab", "slab", gx, layout.frontExt, 0.44, 0.36, 1.06, 0.36, lime);
+      fixture("yard-slab", "slab", gx, layout.frontExt, 1.01, 0.44, 0.1, 0.44, capCol);
     }
   }
 
@@ -674,224 +716,97 @@ export function makeHouse(s, h, u, distance, tier, put) {
     return;
   }
 
-  // Swept front-courtyard threshold muggu (chalk rangoli) welcoming visitors from the village street.
-  if (frontSpan >= 2.8) {
-    const mz = d * 0.5 + Math.min(2.15, frontSpan * 0.52);
-    fixture("yard-slab", "slab", h.door_x, mz, 0.012, 1.18, 0.02, 1.18, "#b25b3f", Math.PI / 4);
-    fixture("yard-slab", "slab", h.door_x, mz, 0.021, 0.92, 0.02, 0.92, "#f5f1e3");
-    fixture("yard-slab", "slab", h.door_x, mz, 0.027, 0.64, 0.02, 0.64, "#f7f4e8", Math.PI / 4);
-  }
-
-  // Sacred Tulasi Kota (Vrindavanam) in the sunny front courtyard away from the entrance walk.
-  if (near || tier > 0) {
-    const tx = -side * Math.max(1.85, Math.min(halfW - 1.05, w * 0.36)),
-      tz = d * 0.5 + Math.min(2.35, frontSpan * 0.58),
-      tPt = localPoint(h, tx, tz);
-    if (!s.ways || s.ways.clear(...tPt, 1.05)) {
-      fixture("yard-slab", "slab", tx, tz, 0.11, 0.68, 0.22, 0.68, lime);
-      fixture("yard-slab", "slab", tx, tz, 0.46, 0.48, 0.52, 0.48, lime);
-      fixture("yard-slab", "slab", tx, tz, 0.73, 0.54, 0.08, 0.54, "#b45b3e");
-      fixture("yard-canopy", "canopy", tx, tz, 0.98, 0.52, 0.56, 0.52, "#5b8948");
-    }
-  }
-
-  // Everyday rural courtyard life: alternating sun-drying harvest mat or golden paddy hayrick in side/rear compound.
-  if (near || tier > 0) {
-    const lx2 = -rearTreeX,
-      lz2 = rearExt + 1.15,
-      rPt = localPoint(h, lx2, lz2);
-    if (!s.ways || s.ways.clear(...rPt, 1.1)) {
-      if (seed % 2 === 0) {
-        // Golden paddy hayrick (gaddi vaamu) on raised stone base
-        fixture("yard-disc", "disc", lx2, lz2, 0.12, 1.65, 0.24, 1.65, "#8f8372");
-        fixture("yard-disc", "disc", lx2, lz2, 0.72, 1.58, 1.02, 1.58, "#caa65c");
-        fixture("yard-cone", "cone", lx2, lz2, 1.68, 1.68, 0.96, 1.68, "#d5b368");
-      } else {
-        // Woven palm mat drying red chillies or golden turmeric/paddy in courtyard sun
-        const sunX = side * Math.max(1.95, halfW - 1.35),
-          sunZ = d * 0.5 + Math.min(2.6, frontSpan * 0.66),
-          sPt = localPoint(h, sunX, sunZ);
-        if (!s.ways || s.ways.clear(...sPt, 1.15)) {
-          fixture("yard-slab", "slab", sunX, sunZ, 0.018, 1.62, 0.03, 1.18, "#cbb483", 0.08);
-          fixture(
-            "yard-slab",
-            "slab",
-            sunX,
-            sunZ,
-            0.036,
-            1.36,
-            0.035,
-            0.94,
-            seed % 4 === 1 ? "#b6402e" : "#d49b35",
-            0.08,
-          );
-        }
-      }
-    }
-  }
-
-  // Personal yard furnishings placed in spacious front-shoulder and backyard pockets clear of the doorway path.
-  const hasTreeProp = h.props.some(
-    (pr) => pr === "shade-tree" || pr === "banana-clump",
-  );
-  if (!hasTreeProp) {
-    const ht = 5.2 + (seed % 3) * 0.7,
-      stemTop = ht * 0.76;
-    fixture("yard-trunk", "trunk", rearTreeX, rearTreeZ, stemTop * 0.5, 0.54, stemTop, 0.54, "#866d4a");
-    fixture("yard-canopy", "canopy", rearTreeX, rearTreeZ, ht * 0.8, 3.4, 2.55, 3.4, "#618b4f");
-  }
-  const plots = [
-    [side * Math.max(1.9, Math.min(halfW - 1.25, w * 0.38)), d * 0.5 + Math.min(1.65, frontSpan * 0.42)],
-    [rearTreeX, rearTreeZ],
-    [-side * Math.max(1.9, Math.min(halfW - 1.25, w * 0.38)), d * 0.5 + Math.min(1.55, frontSpan * 0.38)],
-  ];
-  for (const [j, prop] of h.props.entries()) {
-    const [lx, lz] =
-        prop === "shade-tree" || prop === "banana-clump"
-          ? [rearTreeX, rearTreeZ]
-          : plots[(j + (seed % 3)) % plots.length],
-      nearYard = localPoint(h, lx, lz);
-    if (j > 2 || (s.ways && !s.ways.clear(...nearYard, 1.15))) continue;
-    const obj = (g, a, b, y, sw, sh, sd, col, rot = 0, rx = 0, rz = 0) =>
-      fixture("yard-" + g, g, lx + a, lz + b, y, sw, sh, sd, col, rot, rx, rz);
-    if (prop === "shade-tree" || prop === "banana-clump") {
-      const banana = prop === "banana-clump",
-        ht = banana ? 3.6 : 5.4 + (seed % 4);
-      if (banana) {
-        const stemTop = ht * 0.8;
-        obj("trunk", 0, 0, stemTop * 0.5, 0.44, stemTop, 0.44, "#8a734f");
-        obj("canopy", 0, 0, stemTop - 0.08, 0.5, 0.46, 0.5, "#678f4e");
-        obj(
-          "canopy",
-          0,
-          0,
-          stemTop + 0.24,
-          0.34,
-          0.88,
-          0.4,
-          "#7aa558",
-          (seed % 7) * 0.9,
-          0.12,
-        );
-        for (let k = 0; k < 7; k++) {
-          const a = k * 0.8976 + (seed % 32) * 0.1,
-            tilt = 0.26 + (k % 2) * 0.08,
-            rad = 0.88,
-            col = ["#669053", "#749b54", "#568154", "#89a159"][k % 4];
-          obj(
-            "canopy",
-            Math.sin(a) * rad,
-            Math.cos(a) * rad,
-            stemTop - 0.06 - rad * Math.tan(tilt) + (k % 3) * 0.035,
-            0.94,
-            0.46,
-            2.58,
-            col,
-            a,
-            tilt,
-          );
-        }
-      } else {
-        const stemTop = ht * 0.78,
-          forkY = ht * 0.52,
-          bLen = 1.95,
-          tilt = 0.64;
-        obj("trunk", 0, 0, stemTop * 0.5, 0.62, stemTop, 0.62, "#89704c");
-        obj("canopy", 0, 0, ht * 0.8, 3.6, 2.75, 3.6, "#628c50");
-        for (let k = 0; k < 5; k++) {
-          const a = k * 1.2566 + (seed % 32) * 0.1,
-            bRad = 0.5 * bLen * Math.sin(tilt),
-            rad = 1.18,
-            col = ["#669053", "#749b54", "#568154", "#8ca25b"][k % 4];
-          obj(
-            "trunk",
-            Math.sin(a) * bRad,
-            Math.cos(a) * bRad,
-            forkY + 0.5 * bLen * Math.cos(tilt),
-            0.28,
-            bLen,
-            0.28,
-            "#836947",
-            a,
-            tilt,
-          );
-          obj(
-            "canopy",
-            Math.sin(a) * rad,
-            Math.cos(a) * rad,
-            ht * 0.73 + (k % 2) * 0.14,
-            3.25,
-            2.45,
-            3.35,
-            col,
-            a,
-          );
-        }
-      }
-      continue;
-    }
-    if (!near && !tier) continue;
-    if (
-      prop === "clay-pots" ||
-      prop === "water-urn" ||
-      prop === "tulsi-planter"
-    ) {
-      for (let k = 0; k < (prop === "clay-pots" ? 3 : 1); k++) {
-        obj(
-          prop === "tulsi-planter" ? "wall" : "pot",
-          k * 0.71,
-          0,
-          0.44,
-          0.73,
-          0.88,
-          0.7,
-          prop === "tulsi-planter" ? lime : "#a8694c",
-        );
-        if (prop !== "water-urn")
-          obj("canopy", k * 0.71, 0, 1.03, 0.54, 0.58, 0.49, "#6d8e52");
-      }
-    } else if (prop === "woven-cot" || prop === "wood-bench") {
+  // Keep the front courtyard open and natural; place only a rear homestead shade tree or banana clump behind the house.
+  const rearPt = localPoint(h, rearTreeX, rearTreeZ);
+  if (s.ways && !s.ways.clear(...rearPt, 1.15)) return;
+  const obj = (g, a, b, y, sw, sh, sd, col, rot = 0, rx = 0, rz = 0) =>
+    fixture(
+      "yard-" + g,
+      g,
+      rearTreeX + a,
+      rearTreeZ + b,
+      y,
+      sw,
+      sh,
+      sd,
+      col,
+      rot,
+      rx,
+      rz,
+    );
+  if (h.props.includes("banana-clump")) {
+    const ht = 3.6,
+      stemTop = ht * 0.8;
+    obj("trunk", 0, 0, stemTop * 0.5, 0.44, stemTop, 0.44, "#8a734f");
+    obj("canopy", 0, 0, stemTop - 0.08, 0.5, 0.46, 0.5, "#678f4e");
+    obj(
+      "canopy",
+      0,
+      0,
+      stemTop + 0.24,
+      0.34,
+      0.88,
+      0.4,
+      "#7aa558",
+      (seed % 7) * 0.9,
+      0.12,
+    );
+    for (let k = 0; k < 7; k++) {
+      const a = k * 0.8976 + (seed % 32) * 0.1,
+        tilt = 0.26 + (k % 2) * 0.08,
+        rad = 0.88,
+        col = ["#669053", "#749b54", "#568154", "#89a159"][k % 4];
       obj(
-        "slab",
-        0,
-        0,
-        0.56,
-        1.96,
-        0.14,
-        0.84,
-        prop === "woven-cot" ? "#b18e5b" : wood,
+        "canopy",
+        Math.sin(a) * rad,
+        Math.cos(a) * rad,
+        stemTop - 0.06 - rad * Math.tan(tilt) + (k % 3) * 0.035,
+        0.94,
+        0.46,
+        2.58,
+        col,
+        a,
+        tilt,
       );
-      for (let a of [-0.79, 0.79])
-        for (let b of [-0.32, 0.32])
-          obj("slab", a, b, 0.27, 0.1, 0.54, 0.1, wood);
-    } else if (prop === "drying-line") {
-      for (let a of [-1.7, 1.7])
-        obj("trunk", a, 0, 1.22, 0.15, 2.44, 0.15, wood);
-      obj("slab", 0, 0, 2.29, 3.45, 0.034, 0.036, teak);
-      for (let k = 0; k < 3; k++)
+    }
+  } else {
+    const ht = 5.4 + (seed % 4) * 0.65,
+      stemTop = ht * 0.78,
+      forkY = ht * 0.52,
+      bLen = 1.95,
+      tilt = 0.64;
+    obj("trunk", 0, 0, stemTop * 0.5, 0.58, stemTop, 0.58, "#89704c");
+    obj("canopy", 0, 0, ht * 0.8, 3.55, 2.7, 3.55, "#628c50");
+    if (near || tier > 0) {
+      for (let k = 0; k < 5; k++) {
+        const a = k * 1.2566 + (seed % 32) * 0.1,
+          bRad = 0.5 * bLen * Math.sin(tilt),
+          rad = 1.18,
+          col = ["#669053", "#749b54", "#568154", "#8ca25b"][k % 4];
         obj(
-          "slab",
-          k * 0.85 - 0.85,
-          0,
-          1.82,
-          0.69,
-          0.92,
-          0.052,
-          [lime, "#ad7f77", "#7f9da3"][k],
+          "trunk",
+          Math.sin(a) * bRad,
+          Math.cos(a) * bRad,
+          forkY + 0.5 * bLen * Math.cos(tilt),
+          0.26,
+          bLen,
+          0.26,
+          "#836947",
+          a,
+          tilt,
         );
-    } else {
-      obj("slab", 0, 0, 0.055, 3.4, 0.11, 2.65, "#987951");
-      for (let k = 0; k < 9; k++)
         obj(
           "canopy",
-          ((k % 3) - 1) * 0.9,
-          (Math.floor(k / 3) - 1) * 0.64,
-          0.28,
-          0.69,
-          0.49,
-          0.61,
-          prop === "flower-bed" && k % 3 === 0 ? "#bd8c7f" : "#7a9658",
+          Math.sin(a) * rad,
+          Math.cos(a) * rad,
+          ht * 0.73 + (k % 2) * 0.14,
+          3.15,
+          2.35,
+          3.25,
+          col,
+          a,
         );
+      }
     }
   }
 }

@@ -39,8 +39,12 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
-/** A local, hardware-accelerated Android host. No listening socket, JS bridge, or INTERNET permission. */
+/** A local, hardware-accelerated Android host with in-app OTA content sync and PackageInstaller APK updates. */
 public final class AtlasActivity extends Activity {
+    static final int REQ_INSTALL_PERMISSION = 83;
+    private static volatile AtlasActivity activeInstance;
+    static AtlasActivity currentActivity() { return activeInstance; }
+
     private static final int PINE = Color.rgb(25,60,50), PAPER = Color.rgb(244,242,232);
     private FrameLayout root;
     private WebView atlas;
@@ -49,6 +53,7 @@ public final class AtlasActivity extends Activity {
     private android.webkit.WebMessagePort hapticPort;
     private long lastPulse;
     private LiveSync liveSync;
+    private ApkUpdater apkUpdater;
 
     private long installedVersionCode() {
         try {
@@ -102,7 +107,9 @@ public final class AtlasActivity extends Activity {
 
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
+        activeInstance = this;
         liveSync = new LiveSync(this);
+        apkUpdater = ApkUpdater.get(this);
         setVolumeControlStream(android.media.AudioManager.STREAM_MUSIC);
         root = new FrameLayout(this);
         root.setBackgroundColor(PINE);
@@ -230,6 +237,16 @@ public final class AtlasActivity extends Activity {
                 if ("HEAD".equals(req.getMethod())) return response(200, "OK", "application/json", new ByteArrayInputStream(new byte[0]));
                 return liveSync.syncResponse(apkCode, installedVersionName());
             }
+            if ("/_field/update-start".equals(u.getPath())) {
+                if ("HEAD".equals(req.getMethod())) return response(200, "OK", "application/json", new ByteArrayInputStream(new byte[0]));
+                String qUrl = u.getQueryParameter("url");
+                String target = (qUrl != null && LiveSync.trustedApkUrl(qUrl)) ? qUrl : liveSync.resolvedApkUrl();
+                return apkUpdater.startResponse(target, apkCode);
+            }
+            if ("/_field/update-status".equals(u.getPath())) {
+                if ("HEAD".equals(req.getMethod())) return response(200, "OK", "application/json", new ByteArrayInputStream(new byte[0]));
+                return apkUpdater.statusResponse();
+            }
             String key = AssetRoute.key(u.getPath());
             if (key == null) return status(404,"Not found");
             if ("atlas/catalog.json".equals(key)) {
@@ -262,8 +279,10 @@ public final class AtlasActivity extends Activity {
             if (req.isForMainFrame() && req.hasGesture() && u.getHost() != null && u.getUserInfo() == null
                     && ("https".equals(u.getScheme()) || "http".equals(u.getScheme()))) {
                 if (LiveSync.trustedApkUrl(u.toString())) {
-                    try { startActivity(new Intent(Intent.ACTION_VIEW, u).addCategory(Intent.CATEGORY_BROWSABLE)); }
-                    catch (RuntimeException e) { toast("No browser is available."); }
+                    apkUpdater.startUpdate(u.toString(), installedVersionCode());
+                    if (w == atlas && safeLocal(w.getUrl())) {
+                        w.evaluateJavascript("dispatchEvent(new Event('atlas:update-started'))", null);
+                    }
                     return true;
                 }
                 new AlertDialog.Builder(AtlasActivity.this).setTitle("Leave the offline atlas?")
@@ -310,7 +329,17 @@ public final class AtlasActivity extends Activity {
             startActivityForResult(new Intent(Intent.ACTION_CREATE_DOCUMENT).addCategory(Intent.CATEGORY_OPENABLE).setType("image/png").putExtra(Intent.EXTRA_TITLE,"Telugu-States-landscape.png"),82);
         }catch(RuntimeException e){photoBytes=null;toast("Unable to open the picture picker.");}
     });}
-    @Override protected void onActivityResult(int request,int result,Intent data){super.onActivityResult(request,result,data);if(request!=82)return;byte[] bytes=photoBytes;photoBytes=null;if(result!=RESULT_OK||bytes==null||data==null||data.getData()==null)return;try(java.io.OutputStream out=getContentResolver().openOutputStream(data.getData(),"w")){if(out==null)throw new IOException();out.write(bytes);toast("Picture saved.");}catch(Exception e){toast("The picture could not be saved.");}}
+    @Override protected void onActivityResult(int request,int result,Intent data){
+        super.onActivityResult(request,result,data);
+        if (request == REQ_INSTALL_PERMISSION) {
+            if (apkUpdater != null) apkUpdater.resumeIfPermitted(installedVersionCode());
+            return;
+        }
+        if(request!=82)return;
+        byte[] bytes=photoBytes;photoBytes=null;
+        if(result!=RESULT_OK||bytes==null||data==null||data.getData()==null)return;
+        try(java.io.OutputStream out=getContentResolver().openOutputStream(data.getData(),"w")){if(out==null)throw new IOException();out.write(bytes);toast("Picture saved.");}catch(Exception e){toast("The picture could not be saved.");}
+    }
     private void toast(String text) { Toast.makeText(this, text, Toast.LENGTH_LONG).show(); }
     private void back() {
         final WebView w = atlas;
@@ -333,9 +362,15 @@ public final class AtlasActivity extends Activity {
     }
     @Override public void onResume() {
         super.onResume();
+        activeInstance = this;
+        if (apkUpdater != null) apkUpdater.resumeIfPermitted(installedVersionCode());
         if (atlas != null) { atlas.onResume(); if(safeLocal(atlas.getUrl())) atlas.evaluateJavascript("dispatchEvent(new Event('atlas:host-resume'))",null); }
     }
-    @Override public void onDestroy() { discard(); super.onDestroy(); }
+    @Override public void onDestroy() {
+        if (activeInstance == this) activeInstance = null;
+        discard();
+        super.onDestroy();
+    }
     private void discard() {
         closeHapticPort();
         WebView old = atlas;

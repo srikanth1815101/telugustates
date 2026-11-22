@@ -1039,6 +1039,8 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
     l.sc.add(stones);
     l.houses = homes.userData.houses;
     l.boards = homes.userData.names || [];
+    l.walls = homes.userData.walls || [];
+    l.solidCentre = null;
     l.sc.add(homes);
     l.doors = homes.userData.doors || new Map();
     const occupied = roomOwner && doorRow(l);
@@ -1868,7 +1870,7 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
       within(L, px, py) &&
       passes(
         L.s,
-        L.sc?.userData.blocks,
+        L.nearWalls || L.sc?.userData.blocks,
         L.solids,
         L.nearCover,
         px,
@@ -1957,10 +1959,14 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
           )
             setRoom(savedRoom.u);
         }
-        const free = (X, Y) =>
-          L.s.sample(X, Y).drawn &&
-          L.s.traversable(X, Y) &&
-          !fenceAt(L.sc?.userData.blocks, X, Y) &&
+        const allWalls = [
+            ...(L.sc?.userData.blocks || []),
+            ...(L.walls || []),
+          ],
+          free = (X, Y) =>
+            L.s.sample(X, Y).drawn &&
+            L.s.traversable(X, Y) &&
+            !fenceAt(allWalls, X, Y) &&
           !L.all.some(
             (r) =>
               r[5] && houseBlocked(r[5], X, Y, L.s.openHome === r[5], 0.34),
@@ -2152,6 +2158,16 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
       }
       if (L.gateRock) L.solids.push(L.gateRock);
       L.solids.push(...(L.communitySolids || []));
+      L.nearWalls = [
+        ...(L.sc?.userData.blocks || []),
+        ...(L.walls || []).filter(
+          ([a, b, c, d]) =>
+            x > Math.min(a, c) - 0.36 &&
+            x < Math.max(a, c) + 0.36 &&
+            y > Math.min(b, d) - 0.36 &&
+            y < Math.max(b, d) + 0.36,
+        ),
+      ];
     }
     if (L.coverPatch !== L.cover?.solids || L.coverCentre !== L.solidCentre) {
       L.coverPatch = L.cover?.solids;
@@ -3800,7 +3816,7 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
         .filter(Boolean);
       return passes(
         L.s,
-        L.sc.userData.blocks,
+        [...(L.sc.userData.blocks || []), ...(L.walls || [])],
         [...obs, ...(L.communitySolids || [])],
         L.cover?.solids,
         X,

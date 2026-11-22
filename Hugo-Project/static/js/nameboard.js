@@ -1,23 +1,40 @@
-import { beside } from "./path-right-of-way.js";
 import * as T from "../vendor/three.module.min.js";
 import { basis, localPoint } from "./metres.js";
-// A real wayside object, not a screen label. Rest it beside the gateway, never across the opening.
+// A real wayside object, not a screen label. Rest it beside the gateway behind the low compound wall, never across the opening.
+export function nameboardSpot(h) {
+  const [w, d] = h.size_m,
+    yard = h.yard,
+    lotW = yard ? yard.lot[0] : w + 2.4,
+    frontSpan = yard ? yard.front : h.setback_m,
+    halfW = lotW * 0.5 - 0.16,
+    frontExt = d * 0.5 + frontSpan - 0.16,
+    gapLo = Math.max(-halfW + 0.42, h.door_x - 1.75),
+    gapHi = Math.min(halfW - 0.42, h.door_x + 1.75),
+    leftWing = gapLo - -halfW,
+    rightWing = halfW - gapHi,
+    preferRight = rightWing >= leftWing,
+    primaryWing = preferRight ? rightWing : leftWing,
+    boardW = Math.min(2.92, Math.max(1.84, primaryWing - 0.24)),
+    halfBoard = (boardW + 0.12) * 0.5,
+    zIn = frontExt - 0.28,
+    xRight = Math.min(halfW - halfBoard - 0.06, gapHi + halfBoard + 0.22),
+    xLeft = Math.max(-halfW + halfBoard + 0.06, gapLo - halfBoard - 0.22),
+    candidates = [];
+  if (rightWing >= 1.9) candidates.push([xRight, zIn]);
+  if (leftWing >= 1.9) candidates.push([xLeft, zIn]);
+  if (!preferRight && candidates.length === 2) candidates.reverse();
+  const chosen =
+    candidates[0] || [
+      preferRight ? (gapHi + halfW) * 0.5 : (-halfW + gapLo) * 0.5,
+      zIn,
+    ];
+  const [gx, gy] = localPoint(h, chosen[0], chosen[1]);
+  return { gx, gy, boardW };
+}
+
 export function nameboard(group, s, h, u, put) {
   const b = basis(h),
-    [w, d] = h.size_m,
-    dx = h.door_x + 4.15,
-    dz = d / 2 + h.setback_m - 0.42,
-    spot = beside(
-      s,
-      [0, -0.7].flatMap((back) =>
-        [3.3,-3.3,4.3,-4.3].filter(side=>Math.abs(h.door_x+side)<(h.yard?.lot[0] || w)/2-1.56).map((side) =>
-          localPoint(h, h.door_x + side, dz + back),
-        ),
-      ),
-      1.55,
-    );
-  if (!spot) return;
-  const [gx, gy] = spot,
+    { gx, gy, boardW } = nameboardSpot(h);
     base = s.xyz(gx, gy, s.ground(gx, gy)),
     caption = String(h.sign?.label || ""),
     label = (caption.match(/@?[a-z0-9_.]+/gi) || []).some(
@@ -56,7 +73,8 @@ export function nameboard(group, s, h, u, put) {
   tex.colorSpace = T.SRGBColorSpace;
   tex.anisotropy = 2;
   const mat = new T.MeshBasicMaterial({ map: tex }),
-    m = new T.Mesh(new T.PlaneGeometry(2.92, 0.89), mat);
+    m = new T.Mesh(new T.PlaneGeometry(boardW, 0.89), mat),
+    postSpan = Math.min(0.91, boardW * 0.34);
   const [X, H, Z] = base;
   m.rotation.y = b.yaw;
   m.position.set(
@@ -73,14 +91,26 @@ export function nameboard(group, s, h, u, put) {
     disposableMaterial: true,
   };
   group.add(m);
-  put("sign", "slab", X, H + 1.42, Z, 3.03, 0.97, 0.16, wood, null, b.yaw);
+  put(
+    "sign",
+    "slab",
+    X,
+    H + 1.42,
+    Z,
+    boardW + 0.11,
+    0.97,
+    0.16,
+    wood,
+    null,
+    b.yaw,
+  );
   for (const j of [-1, 1])
     put(
       "sign",
       "slab",
-      X + j * 0.91 * Math.cos(b.yaw),
+      X + j * postSpan * Math.cos(b.yaw),
       H + 0.65,
-      Z - j * 0.91 * Math.sin(b.yaw),
+      Z - j * postSpan * Math.sin(b.yaw),
       0.11,
       1.62,
       0.12,
