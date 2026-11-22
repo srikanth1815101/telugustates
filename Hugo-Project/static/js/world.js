@@ -28,7 +28,14 @@ import { touchWalk } from "./touch-walk.js";
 import { fieldHUD } from "./field-hud.js";
 import { followCamera } from "./walk-camera.js";
 import { residents, preparePads } from "./resident-scene.js";
-import { houseLabel, shardKey } from "./resident-id.js";
+import {
+  houseLabel,
+  normalizeUsername,
+  readStoredResidentId,
+  residentId,
+  shardKey,
+  writeStoredResidentId,
+} from "./resident-id.js";
 import { basis, localPoint, SIDE } from "./metres.js";
 import * as T from "../vendor/three.module.min.js";
 import { Tiles, get, key, ll, url, xy } from "./grid.js";
@@ -241,7 +248,7 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
       `<button class="holding-icon" id="${id}" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="holding-menu" data-msg-aria="${k}" data-msg-title="${k}"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${ink}</svg></button>`,
     );
   }
-  cards.innerHTML = `<header><div><small class="resident-handle"></small><h3 id="destination-name"></h3></div><button type="button" id="close-holding" data-msg-aria="details.close">×</button></header><label id="holding-choose"><span data-msg="holding.household"></span><select id="holding-resident"></select></label><div id="acre-actions"><canvas id="holding-chart" data-msg-aria="village.map"></canvas><small id="holding-distance"></small><div class="home-pair"><button id="walk-acre" type="button" data-msg="village.walk"></button><button id="teleport-acre" type="button" data-msg="village.teleport"></button></div></div>`;
+  cards.innerHTML = `<header><div><small class="resident-handle"></small><h3 id="destination-name"></h3></div><button type="button" id="close-holding" data-msg-aria="details.close">×</button></header><form id="holding-claim" autocomplete="off"><label for="holding-handle" data-msg="holding.askUsername"></label><div class="holding-input-row"><span>@</span><input id="holding-handle" type="text" placeholder="your_username" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="180"><button id="holding-verify" type="submit" data-msg="holding.unlock"></button></div><p id="holding-status" role="status" hidden></p></form><div id="acre-actions"><canvas id="holding-chart" data-msg-aria="village.map" hidden></canvas><small id="holding-distance"></small><div class="home-pair"><button id="walk-acre" type="button" data-msg="village.walk" disabled></button><button id="teleport-acre" type="button" data-msg="village.teleport" disabled></button></div></div>`;
   host.append(cards);
   host.insertAdjacentHTML(
     "beforeend",
@@ -648,8 +655,22 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
         applyQuality();
       }
     },
-    visit: (u) =>
-      window.dispatchEvent(new CustomEvent("atlas:visit", { detail: u })),
+    visit: (u, gx, gy) => {
+      if (Number.isFinite(gx) && Number.isFinite(gy)) {
+        const [lon, lat] = ll(a.project, gx + 0.5, gy + 0.5);
+        history.replaceState(
+          null,
+          "",
+          location.pathname +
+            location.search +
+            "#/at/" +
+            lat.toFixed(8) +
+            "," +
+            lon.toFixed(8),
+        );
+        goCell([Math.floor(gx), Math.floor(gy)], false);
+      }
+    },
     startPhoto: () => {
       neutral();
       photo = {
@@ -841,44 +862,41 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
   function remember(r) {
     if (!r) return;
     preferred = r;
-    try {
-      localStorage.setItem("atlas-chosen-house-v714", r.u);
-    } catch {}
   }
-  async function showMenu(kind, record) {
+  async function showMenu(kind, explicitRecord) {
     const mark = ++menuSerial;
     menus(kind);
     q("#walk-acre").disabled = q("#teleport-acre").disabled = true;
     sheet.hidden = true;
     ui.close();
     neutral();
-    let chosen = record || v || preferred;
-    try {
-      if (!chosen)
-        chosen = await pinFromName(
-          localStorage.getItem("atlas-chosen-house-v714"),
-        );
-    } catch {}
-    if (mark !== menuSerial) return;
-    menuRecord = chosen;
-    const select = q("#holding-resident");
-    if (!select.options.length) {
-      select.add(new Option(msg("holding.pick"), ""));
-      for (const [u, d, , name] of await get("data/directory.json"))
-        select.add(
-          new Option((name || "Resident") + " · " + (ds.get(d)?.name || ""), u),
-        );
-    }
-    if (mark !== menuSerial) return;
-    select.options[0].text = msg("holding.pick");
-    select.value = chosen?.u || "";
-    q("#holding-choose").hidden = !!v;
     const en = kind === "acre" ? "village.acre" : "village.home";
     q("#destination-name").textContent = msg(en);
-    q(".resident-handle").textContent = chosen ? houseLabel(chosen) : "";
+    const statusEl = q("#holding-status");
+    statusEl.hidden = true;
+    statusEl.textContent = "";
+    let chosen = explicitRecord || preferred;
+    if (!chosen) {
+      const savedId = await readStoredResidentId();
+      if (savedId) {
+        chosen = await pinFromName(savedId);
+        if (chosen) preferred = chosen;
+      }
+    }
+    if (mark !== menuSerial) return;
+    menuRecord = chosen || null;
+    q("#holding-claim").hidden = !!chosen;
+    q(".resident-handle").textContent = chosen
+      ? houseLabel(chosen) +
+        (ds.get(chosen.d) ? " · " + tr(ds.get(chosen.d).name, ds.get(chosen.d).te) : "")
+      : "";
     q("#walk-acre").disabled = q("#teleport-acre").disabled = !chosen;
-    q("#holding-chart").hidden = q("#holding-distance").hidden = !chosen;
-    if (chosen) {
+    q("#holding-chart").hidden = !chosen;
+    if (!chosen) {
+      q("#holding-distance").hidden = false;
+      q("#holding-distance").textContent = msg("holding.lockedHint");
+    } else {
+      q("#holding-distance").hidden = false;
       const [net] = await villageData([chosen.d]);
       if (mark !== menuSerial) return;
       let rows = L?.all || [];
@@ -888,7 +906,13 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
             chosen.homeLocation.map((n) => Math.floor(n / 256)).join("_") +
             ".json",
         );
-      const route = drawHolding(q("#holding-chart"), rows, net.paths, chosen, net.settlements?.find(x=>x.id===chosen.villageId)?.square);
+      const route = drawHolding(
+        q("#holding-chart"),
+        rows,
+        net.paths,
+        chosen,
+        net.settlements?.find((x) => x.id === chosen.villageId)?.square,
+      );
       q("#holding-distance").textContent =
         (kind === "acre"
           ? msg("village.field", { code: chosen.c.join("–") })
@@ -897,7 +921,7 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
         msg("holding.byPath", { n: Math.round(route?.metres || 0) });
     }
     if (mark === menuSerial)
-      q(chosen ? "#walk-acre" : "#holding-resident").focus({
+      q(chosen ? "#walk-acre" : "#holding-handle").focus({
         preventScroll: true,
       });
   }
@@ -908,11 +932,38 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
     on(q(id), "click", () =>
       landMenu === kind ? menus(false) : showMenu(kind),
     );
-  on(q("#holding-resident"), "change", async (e) => {
-    const r = await pinFromName(e.target.value);
-    if (r) {
-      remember(r);
-      showMenu(landMenu || "home", r);
+  on(q("#holding-claim"), "submit", async (e) => {
+    e.preventDefault();
+    const input = q("#holding-handle"),
+      statusEl = q("#holding-status"),
+      raw = input.value,
+      clean = normalizeUsername(raw),
+      id = residentId(raw);
+    if (!clean || !id) {
+      statusEl.textContent = msg("holding.enterValid");
+      statusEl.hidden = false;
+      q("#walk-acre").disabled = q("#teleport-acre").disabled = true;
+      return;
+    }
+    const found = await pinFromName(id);
+    if (!found) {
+      statusEl.textContent = msg("home.missing", { name: clean });
+      statusEl.hidden = false;
+      q("#walk-acre").disabled = q("#teleport-acre").disabled = true;
+      return;
+    }
+    input.value = "";
+    statusEl.hidden = true;
+    statusEl.textContent = "";
+    await writeStoredResidentId(found.u);
+    preferred = found;
+    showMenu(landMenu || "home", found);
+  });
+  on(window, "atlas:resident-bound", async (e) => {
+    const id = e.detail;
+    if (id) {
+      const found = await pinFromName(id);
+      if (found) preferred = found;
     }
   });
   on(q("#close-holding"), "click", () => {
@@ -1522,8 +1573,6 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
     stopView = "ground";
     follow = 4.6;
     v = record;
-    menuRecord = record;
-    remember(record);
     language();
     goCell(
       kind === "acre" ? record.c : record.homeLocation.map(Math.floor),

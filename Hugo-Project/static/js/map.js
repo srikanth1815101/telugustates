@@ -256,11 +256,7 @@ export async function mountMap(initialAtlas, tr, boundaries = get("frozen/map.js
         label || (single ? houseName : `${n} village homes · zoom in`);
       const open = (e) => {
         e.stopPropagation();
-        if (single) {
-          window.dispatchEvent(
-            new CustomEvent("atlas:visit", { detail: rows[0].u }),
-          );
-        } else aim(lon, lat, Math.max(8, zoom * 5));
+        aim(lon, lat, Math.max(single ? 320 : 8, zoom * 5));
       };
       actions.set(group, open);
       group.addEventListener("click", (e) => {

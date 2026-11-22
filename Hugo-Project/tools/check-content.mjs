@@ -55,6 +55,12 @@ try {
   }
   execFileSync("hugo", ["--source", root, "--destination", tmp, "--minify"]);
   const homeHtml = await fs.readFile(path.join(tmp, "index.html"), "utf8");
+  const legalHtml = await fs.readFile(
+    path.join(tmp, "legal/index.html"),
+    "utf8",
+  );
+  const worldJs = await fs.readFile(path.join(tmp, "js/world.js"), "utf8");
+  const entryJs = await fs.readFile(path.join(tmp, "js/entry.js"), "utf8");
   assert(
     /id=["']?res-food["'\s>]/.test(homeHtml) &&
       /id=["']?res-currency["'\s>]/.test(homeHtml) &&
@@ -63,10 +69,27 @@ try {
       /#i-like/.test(homeHtml) &&
       /#i-comment/.test(homeHtml) &&
       /#i-share/.test(homeHtml) &&
+      homeHtml.includes("build Telugu States our way") &&
+      homeHtml.includes("Every follower gets a virtual home and 1 acre of land") &&
+      !homeHtml.includes("VOL. 01") &&
+      !homeHtml.includes("The land atlas") &&
       !/id=["']?economy["'\s>]/.test(homeHtml) &&
       !/id=["']?nr["'\s>]/.test(homeHtml) &&
       !homeHtml.includes(">02<"),
-    "Home page header must show icon resources + 1=1 icon rates without bottom #economy card",
+    "Home page header must show new heading, tagline, icon resources + 1=1 icon rates without bottom #economy card",
+  );
+  assert(
+    legalHtml.includes("entertainment") &&
+      legalHtml.includes("Non-Political, Non-Religious") &&
+      legalHtml.includes("OpenStreetMap") &&
+      legalHtml.includes("Copernicus"),
+    "Standalone /legal/ page must include entertainment disclaimer, neutrality statement, and open-data credits",
+  );
+  assert(
+    !worldJs.includes("holding-resident") &&
+      worldJs.includes("holding-claim") &&
+      !entryJs.includes("app-boot-sync"),
+    "3D holding menu must prompt for own username (no household dropdown) and Android boot must not blank screen",
   );
   const all = await json(path.join(tmp, "catalog.json")),
     atlas = await json(path.join(tmp, "data/atlas.json"));

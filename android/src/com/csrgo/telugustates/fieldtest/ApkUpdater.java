@@ -41,6 +41,8 @@ import javax.net.ssl.HttpsURLConnection;
 final class ApkUpdater {
     static final String PREFS = "atlas_updater";
     static final String KEY_RELAUNCH_DEADLINE = "relaunch_deadline_ms";
+    static final String KEY_TARGET_VERSION_CODE = "target_version_code";
+    static final String KEY_INSTALL_STARTED_MS = "install_started_ms";
     static final String ACTION_INSTALL_STATUS = "com.csrgo.telugustates.fieldtest.APK_INSTALL_STATUS";
     private static final long MAX_APK_BYTES = 220L * 1024L * 1024L;
 
@@ -80,9 +82,53 @@ final class ApkUpdater {
         return new File(updateDir(), "Telugu-States-Update.apk.part");
     }
 
-    WebResourceResponse startResponse(String apkUrl, long installedVersionCode) {
-        startUpdate(apkUrl, installedVersionCode);
+    WebResourceResponse startResponse(String apkUrl, long installedVersionCode, long expectedMinCode) {
+        startUpdate(apkUrl, installedVersionCode, expectedMinCode);
         return statusResponse();
+    }
+
+    void reconcileInstalledVersion(long installedVersionCode) {
+        SharedPreferences sp = appContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+        long target = sp.getLong(KEY_TARGET_VERSION_CODE, 0L);
+        long startedAt = sp.getLong(KEY_INSTALL_STARTED_MS, 0L);
+        long now = System.currentTimeMillis();
+        synchronized (lock) {
+            if (target > 0L && installedVersionCode >= target) {
+                // Silent background verification after update: clean up without UI banners
+                //noinspection ResultOfMethodCallIgnored
+                readyApkFile().delete();
+                //noinspection ResultOfMethodCallIgnored
+                partApkFile().delete();
+                sp.edit()
+                        .putLong(KEY_TARGET_VERSION_CODE, 0L)
+                        .putLong(KEY_RELAUNCH_DEADLINE, 0L)
+                        .putLong(KEY_INSTALL_STARTED_MS, 0L)
+                        .apply();
+                appContext.getSharedPreferences("atlas_sync_cache", Context.MODE_PRIVATE)
+                        .edit()
+                        .clear()
+                        .apply();
+                if (!running) {
+                    waitingPermission = false;
+                    state = "idle";
+                    message = "";
+                    percent = 0;
+                    downloadedBytes = 0L;
+                    totalBytes = 0L;
+                }
+                return;
+            }
+            if (!running) {
+                boolean staleInstall = "installing".equals(state)
+                        && (startedAt <= 0L || now - startedAt > 90_000L);
+                if ("installed".equals(state) || "up_to_date".equals(state) || staleInstall) {
+                    waitingPermission = false;
+                    state = "idle";
+                    message = "";
+                    percent = 0;
+                }
+            }
+        }
     }
 
     WebResourceResponse statusResponse() {
@@ -109,10 +155,16 @@ final class ApkUpdater {
                 new ByteArrayInputStream(bytes));
     }
 
-    void startUpdate(final String requestedUrl, final long installedVersionCode) {
+    void startUpdate(final String requestedUrl, final long installedVersionCode, final long expectedMinCode) {
         final String targetUrl = (requestedUrl != null && LiveSync.trustedApkUrl(requestedUrl))
                 ? requestedUrl
                 : LiveSync.DEFAULT_APK_URL;
+        if (expectedMinCode > installedVersionCode) {
+            appContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+                    .edit()
+                    .putLong(KEY_TARGET_VERSION_CODE, expectedMinCode)
+                    .apply();
+        }
         synchronized (lock) {
             if (running) return;
             File existing = readyApkFile();
@@ -146,7 +198,7 @@ final class ApkUpdater {
 
         Thread worker = new Thread(new Runnable() {
             @Override public void run() {
-                downloadAndInstall(targetUrl, installedVersionCode);
+                downloadAndInstall(targetUrl, installedVersionCode, expectedMinCode);
             }
         }, "atlas-apk-updater");
         worker.setDaemon(true);
@@ -202,7 +254,7 @@ final class ApkUpdater {
         } catch (RuntimeException ignored) {}
     }
 
-    private void downloadAndInstall(String urlString, long installedVersionCode) {
+    private void downloadAndInstall(String urlString, long installedVersionCode, long expectedMinCode) {
         File dir = updateDir();
         if (!dir.exists() && !dir.mkdirs()) {
             fail("error", "Could not allocate temporary storage for update.");
@@ -220,7 +272,7 @@ final class ApkUpdater {
                 percent = 100;
                 message = "Verifying update package…";
             }
-            String verifyErr = verifyArchive(part, installedVersionCode);
+            String verifyErr = verifyArchive(part, installedVersionCode, expectedMinCode);
             if (verifyErr != null) {
                 //noinspection ResultOfMethodCallIgnored
                 part.delete();
@@ -333,7 +385,7 @@ final class ApkUpdater {
     }
 
     @SuppressWarnings("deprecation")
-    private String verifyArchive(File apkFile, long installedVersionCode) {
+    private String verifyArchive(File apkFile, long installedVersionCode, long expectedMinCode) {
         try (ZipFile zf = new ZipFile(apkFile)) {
             if (zf.getEntry("AndroidManifest.xml") == null || zf.getEntry("classes.dex") == null) {
                 return "Downloaded package is incomplete. Tap Update to retry.";
@@ -354,9 +406,16 @@ final class ApkUpdater {
             return "Update package ID mismatch (" + arch.packageName + ").";
         }
         long archiveCode = Build.VERSION.SDK_INT >= 28 ? arch.getLongVersionCode() : arch.versionCode;
-        if (archiveCode < installedVersionCode) {
-            return "UPTODATE:Installed version is already newer.";
+        if (archiveCode <= installedVersionCode) {
+            return "UPTODATE:Installed version is already up to date.";
         }
+        if (expectedMinCode > installedVersionCode && archiveCode < expectedMinCode) {
+            return "UPTODATE:Installed version is already up to date.";
+        }
+        appContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+                .edit()
+                .putLong(KEY_TARGET_VERSION_CODE, archiveCode)
+                .apply();
 
         try {
             PackageInfo inst = pm.getPackageInfo(appContext.getPackageName(), flags);
@@ -455,8 +514,12 @@ final class ApkUpdater {
                 session.fsync(out);
             }
 
+            long now = System.currentTimeMillis();
             SharedPreferences sp = appContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
-            sp.edit().putLong(KEY_RELAUNCH_DEADLINE, System.currentTimeMillis() + 300_000L).commit();
+            sp.edit()
+                    .putLong(KEY_RELAUNCH_DEADLINE, now + 300_000L)
+                    .putLong(KEY_INSTALL_STARTED_MS, now)
+                    .commit();
 
             Intent callback = new Intent(appContext, ApkInstallReceiver.class);
             callback.setAction(ACTION_INSTALL_STATUS);
@@ -470,7 +533,7 @@ final class ApkUpdater {
                 running = false;
                 state = "installing";
                 percent = 100;
-                message = "Installing update & restarting…";
+                message = "Installing update…";
             }
             session.commit(pending.getIntentSender());
             session.close();
@@ -492,7 +555,7 @@ final class ApkUpdater {
             running = false;
             state = "installing";
             percent = 100;
-            message = "Confirm update to install and restart…";
+            message = "Confirm update to finish installing…";
         }
     }
 
@@ -502,9 +565,9 @@ final class ApkUpdater {
         synchronized (lock) {
             running = false;
             waitingPermission = false;
-            state = "installed";
-            percent = 100;
-            message = "Update installed. Restarting…";
+            state = "idle";
+            percent = 0;
+            message = "";
         }
         relaunchApp(appContext);
     }
