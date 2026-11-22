@@ -227,19 +227,95 @@ html[lang="te"] .lang span:first-child {
 .metrics .metric-resource {
   color: inherit;
   text-decoration: none;
-  transition: opacity 0.16s ease;
 }
-.metrics .metric-resource:hover {
-  opacity: 0.78;
+.metrics .metric-head {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.metrics .metric-ico {
+  display: inline-grid;
+  place-items: center;
+  color: #587151;
+}
+.metrics .metric-ico .ico {
+  width: 22px;
+  height: 22px;
+  stroke-width: 1.75;
+}
+.metrics .metric-currency .metric-ico {
+  color: #887041;
+}
+.metrics .metric-gold .metric-ico {
+  color: #937530;
 }
 .metrics .metric-food strong {
-  color: #36563b;
+  color: #233f35;
 }
 .metrics .metric-currency strong {
-  color: #6d552b;
+  color: #233f35;
 }
 .metrics .metric-gold strong {
-  color: #846520;
+  color: #233f35;
+}
+.resource-rates {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 7px 10px;
+  padding: 5px 11px;
+  border-radius: 999px;
+  background: #f3f5ea;
+  border: 1px solid #d7dfd0;
+  font: 650 11.5px/1 var(--body);
+  font-variant-numeric: tabular-nums;
+  color: #485b4d;
+}
+.resource-rates .rate-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 3.5px;
+}
+.resource-rates b {
+  font-weight: 750;
+  color: #263f35;
+}
+.resource-rates em {
+  font-style: normal;
+  opacity: 0.65;
+  margin: 0 1px;
+}
+.resource-rates .rate-dot {
+  opacity: 0.45;
+  font-weight: 700;
+}
+.resource-rates .rate-ico {
+  display: inline-grid;
+  place-items: center;
+}
+.resource-rates .rate-ico .ico {
+  width: 13.5px;
+  height: 13.5px;
+  stroke-width: 1.85;
+}
+.resource-rates .rate-like {
+  color: #ad573b;
+}
+.resource-rates .rate-comment {
+  color: #3f6356;
+}
+.resource-rates .rate-share {
+  color: #355a4b;
+}
+.resource-rates .rate-food {
+  color: #587151;
+}
+.resource-rates .rate-currency {
+  color: #887041;
+}
+.resource-rates .rate-gold {
+  color: #937530;
 }
 .metrics strong {
   font: 520 32px/0.95 var(--head);
@@ -940,6 +1016,24 @@ html[lang="te"] .eyebrow {
   .metrics > a + a {
     padding-left: 11px;
     border-left: 1px solid #dce2d4;
+  }
+  .metrics .metric-head {
+    gap: 5px;
+  }
+  .metrics .metric-ico .ico {
+    width: 17px;
+    height: 17px;
+  }
+  .resource-rates {
+    justify-content: center;
+    border-radius: 10px;
+    padding: 6px 10px;
+    gap: 6px 9px;
+    font-size: 11px;
+  }
+  .resource-rates .rate-ico .ico {
+    width: 13px;
+    height: 13px;
   }
   .atlas-layout {
     grid-template-columns: 1fr;

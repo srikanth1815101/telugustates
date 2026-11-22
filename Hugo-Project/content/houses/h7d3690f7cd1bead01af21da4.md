@@ -1,6 +1,6 @@
 ---
-title: "Sri Rama Illu"
-house_name: "Sri Rama Illu"
+title: "Pravalika"
+house_name: "Pravalika"
 type: house
 state: Telangana
 district: Medak
@@ -22,7 +22,7 @@ props:
 - flower-bed
 - shade-tree
 sign:
-  label: "Sri Rama Illu"
+  label: "Pravalika"
   wood: '#65513d'
   trim: '#c5a477'
 building:

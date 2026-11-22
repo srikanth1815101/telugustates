@@ -1,6 +1,6 @@
 ---
-title: "Haritha Nilayam"
-house_name: "Haritha Nilayam"
+title: "Supriya"
+house_name: "Supriya"
 type: house
 state: Telangana
 district: Mahabubnagar
@@ -22,7 +22,7 @@ props:
 - banana-clump
 - flower-bed
 sign:
-  label: "Haritha Nilayam"
+  label: "Supriya"
   wood: '#65513d'
   trim: '#c5a477'
 building:

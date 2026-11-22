@@ -1,6 +1,6 @@
 ---
-title: "Swathi Nivasam"
-house_name: "Swathi Nivasam"
+title: "Lasya"
+house_name: "Lasya"
 type: house
 state: Telangana
 district: Vikarabad
@@ -22,7 +22,7 @@ props:
 - kitchen-garden
 - shade-tree
 sign:
-  label: "Swathi Nivasam"
+  label: "Lasya"
   wood: '#65513d'
   trim: '#c5a477'
 building:

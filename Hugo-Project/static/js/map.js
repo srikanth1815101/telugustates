@@ -183,7 +183,7 @@ export async function mountMap(initialAtlas, tr, boundaries = get("frozen/map.js
       if (x < 8 || x > w - 8 || y < 12 || y > h - 12) return;
       const n = count ?? rows.length,
         single = !!rows && n === 1,
-        houseName = single ? rows[0].name || "Illu" : "",
+        houseName = single ? rows[0].name || "Resident" : "",
         group = el(
           "g",
           {

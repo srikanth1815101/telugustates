@@ -225,7 +225,8 @@ async function showDialog(k) {
         ds = byId.get(d);
       l.href = url(href);
       l.textContent =
-        (name || "Illu") + (ds ? " · " + tr(ds.name, ds.te || ds.name) : "");
+        (name || "Resident") +
+        (ds ? " · " + tr(ds.name, ds.te || ds.name) : "");
       body.append(l);
     }
   }
@@ -433,7 +434,7 @@ if (recordPage) {
     window.addEventListener("languagechange-atlas", fill);
   }
 }
-if (home || $("#economy-page")) await mountTreasury();
+if ($("#balances") || $("#economy-page")) await mountTreasury();
 initAppSync();
 window.addEventListener("atlas:content-updated", async () => {
   try {

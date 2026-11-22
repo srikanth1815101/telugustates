@@ -33,7 +33,7 @@ try {
     for (const d of districts) {
       const rawHandle =
           "test_join_" + (count < 2 ? "0_" + count : "1_" + (count - 2)),
-        houseName = `Palle Illu ${count + 1}`;
+        houseName = `Kiran${count + 1}`;
       count++;
       execFileSync(
         process.execPath,

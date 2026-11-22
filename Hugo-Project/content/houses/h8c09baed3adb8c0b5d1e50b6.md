@@ -1,6 +1,6 @@
 ---
-title: "Munneru Illu"
-house_name: "Munneru Illu"
+title: "Dinesh"
+house_name: "Dinesh"
 type: house
 state: Andhra Pradesh
 district: Sri Potti Sriramulu Nellore
@@ -22,7 +22,7 @@ props:
 - flower-bed
 - shade-tree
 sign:
-  label: "Munneru Illu"
+  label: "Dinesh"
   wood: '#65513d'
   trim: '#c5a477'
 building:

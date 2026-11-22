@@ -1,6 +1,6 @@
 ---
-title: "Manjeera Nilayam"
-house_name: "Manjeera Nilayam"
+title: "Uday"
+house_name: "Uday"
 type: house
 state: Andhra Pradesh
 district: Markapuram
@@ -22,7 +22,7 @@ props:
 - shade-tree
 - kitchen-garden
 sign:
-  label: "Manjeera Nilayam"
+  label: "Uday"
   wood: '#65513d'
   trim: '#c5a477'
 building:

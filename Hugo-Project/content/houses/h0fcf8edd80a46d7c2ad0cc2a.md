@@ -1,6 +1,6 @@
 ---
-title: "Ratna Nilayam"
-house_name: "Ratna Nilayam"
+title: "Ananda"
+house_name: "Ananda"
 type: house
 state: Andhra Pradesh
 district: Markapuram
@@ -22,7 +22,7 @@ props:
 - shade-tree
 - banana-clump
 sign:
-  label: "Ratna Nilayam"
+  label: "Ananda"
   wood: '#65513d'
   trim: '#c5a477'
 building:

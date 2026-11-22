@@ -59,9 +59,14 @@ try {
     /id=["']?res-food["'\s>]/.test(homeHtml) &&
       /id=["']?res-currency["'\s>]/.test(homeHtml) &&
       /id=["']?res-gold["'\s>]/.test(homeHtml) &&
+      /resource-rates/.test(homeHtml) &&
+      /#i-like/.test(homeHtml) &&
+      /#i-comment/.test(homeHtml) &&
+      /#i-share/.test(homeHtml) &&
+      !/id=["']?economy["'\s>]/.test(homeHtml) &&
       !/id=["']?nr["'\s>]/.test(homeHtml) &&
       !homeHtml.includes(">02<"),
-    "Home page header must show resources instead of 2 States / house count",
+    "Home page header must show icon resources + 1=1 icon rates without bottom #economy card",
   );
   const all = await json(path.join(tmp, "catalog.json")),
     atlas = await json(path.join(tmp, "data/atlas.json"));
@@ -76,8 +81,9 @@ try {
       r.name &&
         !r.name.startsWith("@") &&
         !isResidentId(r.name) &&
+        !/nilayam/i.test(r.name) &&
         r.house.sign?.label === r.name,
-      "House board must use nickname or house name for " + r.u,
+      "House board must use plain name for " + r.u,
     );
     names.add(r.u);
     assert(!cells.has(r.c.join(",")) && r.c.every(Number.isInteger), r.u);

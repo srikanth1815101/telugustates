@@ -192,7 +192,7 @@ export function shardKey(id) {
     .join("");
 }
 
-export function cleanHouseName(raw, fallback = "Illu") {
+export function cleanHouseName(raw, fallback = "Resident") {
   const cleaned = String(raw || "")
     .replace(/^@+/, "")
     .replace(/[\r\n\t]+/g, " ")
@@ -204,7 +204,7 @@ export function cleanHouseName(raw, fallback = "Illu") {
     : fallback;
 }
 
-export function houseLabel(item, fallback = "Illu") {
+export function houseLabel(item, fallback = "Resident") {
   if (!item) return fallback;
   if (typeof item === "string") return cleanHouseName(item, fallback);
   const candidate =

@@ -1,6 +1,6 @@
 ---
-title: "Pushpa Illu"
-house_name: "Pushpa Illu"
+title: "Vamsi"
+house_name: "Vamsi"
 type: house
 state: Andhra Pradesh
 district: Palnadu
@@ -22,7 +22,7 @@ props:
 - banana-clump
 - flower-bed
 sign:
-  label: "Pushpa Illu"
+  label: "Vamsi"
   wood: '#65513d'
   trim: '#c5a477'
 building:
