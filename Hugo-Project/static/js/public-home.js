@@ -154,6 +154,19 @@ $("#district-search")?.addEventListener("input", (e) => {
   districtQuery = e.target.value || "";
   renderDistrictBoard();
 });
+$("#hero-find-btn")?.addEventListener("click", () => {
+  const card = $("#find-card-section");
+  card?.scrollIntoView({ behavior: "smooth", block: "center" });
+  setTimeout(() => {
+    const saved = $("#saved-home-box");
+    const target =
+      saved && !saved.hidden ? $("#go-saved-home") : $("#handle");
+    target?.focus({ preventScroll: true });
+  }, 320);
+});
+$("#hero-map-btn")?.addEventListener("click", () => {
+  $("#atlas-chart")?.scrollIntoView({ behavior: "smooth", block: "center" });
+});
 function paint() {
   if (!home) return;
   const fmt = new Intl.NumberFormat(lang === "te" ? "te-IN" : "en-IN");
@@ -170,7 +183,8 @@ function paint() {
       p = $("#home-intro");
     if (t && a.home.title) {
       t.dataset.en = esc(a.home.title) + "<span>.</span>";
-      if (a.home.title_te) t.dataset.te = esc(a.home.title_te) + ".";
+      if (a.home.title_te)
+        t.dataset.te = esc(a.home.title_te) + "<span>.</span>";
       t.innerHTML = lang === "te" ? t.dataset.te : t.dataset.en;
     }
     if (p && a.home.intro) {

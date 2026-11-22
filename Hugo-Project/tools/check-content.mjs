@@ -69,14 +69,15 @@ try {
       /#i-like/.test(homeHtml) &&
       /#i-comment/.test(homeHtml) &&
       /#i-share/.test(homeHtml) &&
-      homeHtml.includes("build Telugu States our way") &&
-      homeHtml.includes("Every follower gets a virtual home and 1 acre of land") &&
+      homeHtml.includes("A living Telugu world, shaped together") &&
+      homeHtml.includes("1 Home + 1 Acre") &&
+      homeHtml.includes("treasury-card") &&
       !homeHtml.includes("VOL. 01") &&
       !homeHtml.includes("The land atlas") &&
       !/id=["']?economy["'\s>]/.test(homeHtml) &&
       !/id=["']?nr["'\s>]/.test(homeHtml) &&
       !homeHtml.includes(">02<"),
-    "Home page header must show new heading, tagline, icon resources + 1=1 icon rates without bottom #economy card",
+    "Home page header must show editorial hero card, 1 Home + 1 Acre pillar, treasury resources + 1=1 icon rates without bottom #economy card",
   );
   assert(
     legalHtml.includes("entertainment") &&
