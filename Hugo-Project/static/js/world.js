@@ -1,8 +1,8 @@
 import { laneSoil } from "./lane-soil.js";
-import { hamletScene, marks } from "./hamlet-scene.js";
+import { hamletScene, marks, updateRouteLeaves } from "./hamlet-scene.js";
 import { pathTo, guideStep, drawHolding } from "./hamlet-route.js";
 import { farms } from "./agriculture.js";
-import { homesAt, inCourt, yardDistance } from "./home-index.js";
+import { homesAt, inCourt } from "./home-index.js";
 import {
   roomLocal,
   roomPlan,
@@ -812,13 +812,8 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
         selectedKind === "acre" ||
         (selectedKind === "home" && performance.now() < flashUntil))
     ) {
-      l.selection = marks(
-        l.s,
-        owner,
-        selectedKind || journey?.kind,
-        journey,
-        mats.uniforms,
-      );
+      l.selection = marks(l.s, owner, selectedKind || journey?.kind, journey);
+      if (journey) updateRouteLeaves(journey, journey.lastProgress || 0);
       l.sc.add(l.selection);
     }
     dirty = true;
@@ -965,40 +960,7 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
     }
     const dest = k === "acre" ? r.court.land : r.court.porch,
       [net] = await villageData([r.d]),
-      canWalk = (a0, b0) => {
-        const s = L?.s;
-        if (!s) return false;
-        const lenM = Math.hypot(b0[0] - a0[0], b0[1] - a0[1]) * U,
-          steps = Math.max(1, Math.ceil(lenM / 1.15));
-        for (let i = 0; i <= steps; i++) {
-          const t = i / steps,
-            px = a0[0] + (b0[0] - a0[0]) * t,
-            py = a0[1] + (b0[1] - a0[1]) * t;
-          if (!within(L, px, py) || !s.traversable(px, py)) return false;
-          for (const H of homesAt(s, px, py)) {
-            if (houseBlocked(H, px, py, false, 0.55)) return false;
-            if (H !== r.house && yardDistance(H, px, py) < 0.85) return false;
-          }
-          if (
-            (s.commons || []).some(
-              (cm) =>
-                cm.shade &&
-                Math.hypot(cm.shade[0] - px, cm.shade[1] - py) * U < 1.85,
-            )
-          )
-            return false;
-          const cx = Math.floor(px),
-            cy = Math.floor(py);
-          if (
-            (cx !== r.c[0] || cy !== r.c[1]) &&
-            s.acres?.has(cx + "," + cy) &&
-            Math.min(px - cx, cx + 1 - px, py - cy, cy + 1 - py) * U > 1.35
-          )
-            return false;
-        }
-        return true;
-      },
-      route = pathTo(net.paths, dest, pg, canWalk);
+      route = pathTo(net.paths, dest, pg);
     if (!route) {
       ui.toast(msg("village.noRoute"));
       return;
@@ -2490,7 +2452,9 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
       line.hidden = !journey;
       if (journey) {
         const { remain, point, progress } = guideStep(journey, x, y);
-        if (journey.progressUniform) journey.progressUniform.value = progress;
+        const prevHidden = journey.leafState?.items.filter((it) => it.hidden).length || 0;
+        journey.lastProgress = progress;
+        updateRouteLeaves(journey, progress);
         L.routeIndex = journey.i || 0;
         if (Math.hypot(x - journey.end[0], y - journey.end[1]) * U < 2.2) {
           journey = null;
@@ -2505,7 +2469,8 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
             ] +
             "  " +
             msg("village.remaining", { n: Math.round(remain) });
-          dirty = true;
+          const curHidden = journey.leafState?.items.filter((it) => it.hidden).length || 0;
+          if (curHidden !== prevHidden) dirty = true;
         }
       }
       if (
