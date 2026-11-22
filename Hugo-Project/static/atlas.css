@@ -26,6 +26,10 @@
   --head: Fraunces, Georgia, NotoTelugu, serif;
   --body: Manrope, NotoTelugu, Arial, sans-serif;
   --mono: ui-monospace, SFMono-Regular, Consolas, monospace;
+  --safe-t: max(env(safe-area-inset-top, 0px), var(--native-t, 0px));
+  --safe-r: max(env(safe-area-inset-right, 0px), var(--native-r, 0px));
+  --safe-b: max(env(safe-area-inset-bottom, 0px), var(--native-b, 0px));
+  --safe-l: max(env(safe-area-inset-left, 0px), var(--native-l, 0px));
 }
 * {
   box-sizing: border-box;
@@ -73,12 +77,13 @@ select:focus-visible {
   margin: auto;
 }
 .top {
-  height: 78px;
+  padding-top: var(--safe-t);
+  min-height: calc(78px + var(--safe-t));
   border-bottom: 1px solid var(--line);
   background: #fafaf4;
 }
 .bar {
-  height: 100%;
+  min-height: 78px;
   display: flex;
   align-items: center;
   gap: 34px;
@@ -740,7 +745,7 @@ html[lang="te"] .lang span:first-child {
 }
 footer {
   border-top: 1px solid var(--line);
-  padding: 20px 0 25px !important;
+  padding: 20px 0 calc(25px + var(--safe-b)) !important;
   color: #657467;
   font-size: 11px;
 }
@@ -757,7 +762,7 @@ dialog {
   background: #fbfcf4;
   color: var(--ink);
   width: min(680px, calc(100% - 24px));
-  max-height: 84dvh;
+  max-height: calc(84dvh - var(--safe-t) - var(--safe-b));
   padding: 20px 24px 24px;
   box-shadow: 0 18px 70px #122a2844;
   overflow-y: auto;
@@ -1080,20 +1085,22 @@ html[lang="te"] .eyebrow {
     width: calc(100% - 28px);
   }
   .top {
-    height: 60px;
+    min-height: calc(58px + var(--safe-t));
   }
   .brand {
     gap: 8px;
     min-width: 0;
   }
   .brand img {
-    width: 32px;
-    height: 32px;
+    width: 30px;
+    height: 30px;
     flex-shrink: 0;
   }
   .brand > span {
-    font-size: 18px;
+    font-size: 17px;
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   .brand small {
     font-size: 7.5px;
@@ -1101,20 +1108,23 @@ html[lang="te"] .eyebrow {
   }
   .bar nav {
     gap: 2px;
+    flex-shrink: 0;
   }
   .bar nav .active,
   .bar nav span {
     display: none;
   }
-  .bar nav button {
-    width: 36px;
-    height: 36px;
+  .bar nav button,
+  .bar nav a:not(.active) {
+    width: 34px;
+    height: 34px;
     padding: 0;
     display: grid;
     place-items: center;
     border-radius: 8px;
   }
   .bar {
+    min-height: 58px;
     gap: 6px;
   }
   .lang {
