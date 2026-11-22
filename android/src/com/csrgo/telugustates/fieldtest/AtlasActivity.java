@@ -73,6 +73,7 @@ public final class AtlasActivity extends Activity {
         }
     }
     private void immersive(boolean walk) {
+        getWindow().setStatusBarColor(walk ? Color.TRANSPARENT : 0xFFFAFAF4);
         if(Build.VERSION.SDK_INT>=30){android.view.WindowInsetsController c=getWindow().getInsetsController();if(c==null)return;
             int lightMask=android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS|android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
             c.setSystemBarsBehavior(android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
@@ -128,7 +129,7 @@ public final class AtlasActivity extends Activity {
         if(Build.VERSION.SDK_INT>=29)getWindow().setNavigationBarContrastEnforced(false);
         getWindow().setStatusBarColor(Color.TRANSPARENT);getWindow().setNavigationBarColor(Color.TRANSPARENT);
         root.setOnApplyWindowInsetsListener((v,in)->{
-            if(Build.VERSION.SDK_INT>=30){android.graphics.Insets a=in.getInsets(WindowInsets.Type.systemBars()|WindowInsets.Type.displayCutout()|WindowInsets.Type.ime());safe=new int[]{a.top,a.right,a.bottom,a.left};}
+            if(Build.VERSION.SDK_INT>=30){android.graphics.Insets a=in.getInsetsIgnoringVisibility(WindowInsets.Type.systemBars()|WindowInsets.Type.displayCutout());android.graphics.Insets ime=in.getInsets(WindowInsets.Type.ime());safe=new int[]{a.top,a.right,Math.max(a.bottom,ime.bottom),a.left};}
             else {safe=new int[]{in.getSystemWindowInsetTop(),in.getSystemWindowInsetRight(),in.getSystemWindowInsetBottom(),in.getSystemWindowInsetLeft()};if(Build.VERSION.SDK_INT>=28&&in.getDisplayCutout()!=null){android.view.DisplayCutout c=in.getDisplayCutout();safe[0]=Math.max(safe[0],c.getSafeInsetTop());safe[1]=Math.max(safe[1],c.getSafeInsetRight());safe[2]=Math.max(safe[2],c.getSafeInsetBottom());safe[3]=Math.max(safe[3],c.getSafeInsetLeft());}}
             publishInsets();return in;
         });
@@ -328,6 +329,11 @@ public final class AtlasActivity extends Activity {
         }
         @Override public void doUpdateVisitedHistory(WebView w, String url, boolean reload) {
             if (w == atlas && safeLocal(url)) last = url;
+        }
+        @Override public void onPageCommitVisible(WebView w, String url) {
+            if (w != atlas || !safeLocal(url)) return;
+            lastInsetsSent = "";
+            publishInsets();
         }
         @Override public void onPageFinished(WebView w, String url) {
             if (w != atlas || !safeLocal(url)) return;
