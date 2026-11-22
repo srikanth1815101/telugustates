@@ -133,8 +133,7 @@ public final class AtlasActivity extends Activity {
             getOnBackInvokedDispatcher().registerOnBackInvokedCallback(
                 android.window.OnBackInvokedDispatcher.PRIORITY_DEFAULT, this::back);
         }
-        String saved = state == null ? null : state.getString("atlas-route");
-        start(safeLocal(saved) ? saved : HOME);
+        start(HOME);
     }
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -233,6 +232,10 @@ public final class AtlasActivity extends Activity {
             Uri u = req.getUrl();
             if (!local(u)) return status(403,"Offline atlas only");
             if (!"GET".equals(req.getMethod()) && !"HEAD".equals(req.getMethod())) return status(405,"Method not allowed");
+            if ("/_field/sync-cached".equals(u.getPath())) {
+                if ("HEAD".equals(req.getMethod())) return response(200, "OK", "application/json", new ByteArrayInputStream(new byte[0]));
+                return liveSync.cachedSyncResponse(apkCode, installedVersionName());
+            }
             if ("/_field/sync".equals(u.getPath())) {
                 if ("HEAD".equals(req.getMethod())) return response(200, "OK", "application/json", new ByteArrayInputStream(new byte[0]));
                 return liveSync.syncResponse(apkCode, installedVersionName());

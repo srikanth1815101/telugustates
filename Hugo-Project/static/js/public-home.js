@@ -426,14 +426,10 @@ if (home) {
     window.addEventListener("atlas:visit", (e) => {
       location.hash = "/u/" + e.detail;
     });
-    cold = /^#\/(u|acre)\//.test(location.hash) ? null : readPosition(a);
-    if (cold?.active && !location.hash)
-      history.replaceState(null, "", cold.route);
-    if (cold && !cold.active && !location.hash)
-      map.focusPoint(
-        ...(await import("./grid.js")).ll(a.project, cold.x, cold.y),
-        40,
-      );
+    cold =
+      location.hash && !/^#\/(u|acre)\//.test(location.hash)
+        ? readPosition(a)
+        : null;
     if (cold?.route !== location.hash) cold = null;
     await route();
   } catch (e) {
