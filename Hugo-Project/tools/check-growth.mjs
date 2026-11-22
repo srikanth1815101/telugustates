@@ -5,6 +5,7 @@ import os from "node:os";
 import { fileURLToPath } from "node:url";
 import { execFileSync } from "node:child_process";
 import assert from "node:assert/strict";
+import { residentId } from "../static/js/resident-id.js";
 const root = fileURLToPath(new URL("../", import.meta.url)),
   tmp = await fs.mkdtemp(path.join(os.tmpdir(), "atlas-grow-")),
   copy = path.join(tmp, "Hugo-Project"),
@@ -23,19 +24,38 @@ try {
       cwd: copy,
       stdio: "pipe",
     });
-  let count = 0;
+  let count = 0,
+    firstId = "";
   for (const districts of [
     [17, 44],
     [17, 44, 17, 44, 17, 44, 17, 44, 17, 44],
   ]) {
     for (const d of districts) {
-      const u = "test_join_" + (count < 2 ? "0_" + count : "1_" + (count - 2));
+      const rawHandle =
+          "test_join_" + (count < 2 ? "0_" + count : "1_" + (count - 2)),
+        houseName = `Palle Illu ${count + 1}`;
       count++;
-      await fs.writeFile(
-        path.join(copy, "content/houses", u + ".md"),
-        `---\ntitle: Growth test\nusername: ${u}\ndistrict_id: ${d}\n---\nTemporary QA record only.\n`,
-        { flag: "wx" },
+      execFileSync(
+        process.execPath,
+        [
+          "tools/add-house.mjs",
+          "--username",
+          rawHandle,
+          "--district",
+          String(d),
+          "--name",
+          houseName,
+        ],
+        { cwd: copy, stdio: "pipe" },
       );
+      const hid = residentId(rawHandle);
+      if (!firstId) firstId = hid;
+      const mdText = await fs.readFile(
+        path.join(copy, "content/houses", hid + ".md"),
+        "utf8",
+      );
+      assert(!mdText.includes(rawHandle), "Raw username leaked to house .md");
+      assert(mdText.includes(houseName), "House name missing from house .md");
     }
     publish();
     const next = JSON.parse(await fs.readFile(ledger));
@@ -60,7 +80,7 @@ try {
   const bytes = await fs.readFile(ledger);
   publish();
   assert.deepEqual(await fs.readFile(ledger), bytes);
-  const src = path.join(copy, "content/houses", "test_join_0_0.md");
+  const src = path.join(copy, "content/houses", firstId + ".md");
   await fs.writeFile(
     src,
     (await fs.readFile(src, "utf8")).replace(

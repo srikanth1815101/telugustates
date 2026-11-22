@@ -26,6 +26,7 @@ import { ecology } from "../static/js/ecodata.js";
 import { preparePads, residents } from "../static/js/resident-scene.js";
 import { compoundWallSegments } from "../static/js/resident-forms.js";
 import { nameboardSpot } from "../static/js/nameboard.js";
+import { residentId } from "../static/js/resident-id.js";
 import { marks, updateRouteLeaves } from "../static/js/hamlet-scene.js";
 import { Tread } from "../static/js/tread.js";
 const root = fileURLToPath(new URL("../", import.meta.url)),
@@ -360,7 +361,13 @@ try {
       assert.equal(
         grp.userData.names?.length,
         1,
-        u + " did not render username nameboard",
+        u + " did not render house nameboard",
+      );
+      assert(
+        grp.userData.names[0].label === h.sign.label &&
+          !grp.userData.names[0].label.startsWith("@") &&
+          grp.userData.names[0].label !== u,
+        u + " nameboard should display house/nick name instead of @id",
       );
       grp.traverse((o) => {
         o.geometry?.dispose();
@@ -485,8 +492,9 @@ try {
       for (let i = -1; i <= 1; i++) ks.add(key(x + i * 90, y + j * 90));
     await Promise.all([...ks].map((k) => tiles.load(k)));
     tiles.trim(ks);
-    const detail =
-      gr.find((r) => r[2] === "palnadu_demo01") || (!q.groundRays ? gr[0] : null);
+    const demoTarget = residentId("palnadu_demo01"),
+      detail =
+        gr.find((r) => r[2] === demoTarget) || (!q.groundRays ? gr[0] : null);
     for (const [focus, survey, g, ray] of [
       [[x + 20, y - 18], true, gr, false],
       ...(detail

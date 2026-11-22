@@ -2,6 +2,7 @@ import { dev } from "./edition.js";
 import { msg } from "./messages.js";
 import { recordCounts } from "./record-kinds.js";
 import { get, url, xy, ll, key, Tiles } from "./grid.js";
+import { houseLabel } from "./resident-id.js";
 export async function mountMap(initialAtlas, tr, boundaries = get("frozen/map.json")) {
   let a = initialAtlas;
   const wrap = document.querySelector("#map-wrap"),
@@ -182,13 +183,14 @@ export async function mountMap(initialAtlas, tr, boundaries = get("frozen/map.js
       if (x < 8 || x > w - 8 || y < 12 || y > h - 12) return;
       const n = count ?? rows.length,
         single = !!rows && n === 1,
+        houseName = single ? rows[0].name || "Illu" : "",
         group = el(
           "g",
           {
             transform: `translate(${x} ${y})`,
             tabindex: 0,
             role: "button",
-            "aria-label": label || `@${rows[0].u}, open virtual plot`,
+            "aria-label": label || `${houseName}, open virtual plot`,
             "data-plot": single ? rows[0].u : "cluster",
             style: "cursor:pointer",
           },
@@ -212,7 +214,7 @@ export async function mountMap(initialAtlas, tr, boundaries = get("frozen/map.js
           fill: "white",
         });
       const selected = single && rows[0].u === highlight;
-      const half = single ? (rows[0].u.length + 1) * 3.1 : 0;
+      const half = single ? houseName.length * 3.1 : 0;
       // Labels are never hit targets; the actual circle stays tappable in dense neighbourhoods.
       if (
         single &&
@@ -225,7 +227,7 @@ export async function mountMap(initialAtlas, tr, boundaries = get("frozen/map.js
             )))
       ) {
         occupiedLabels.push([x, y, half]);
-        text(group, 0, -11, "@" + rows[0].u, {
+        text(group, 0, -11, houseName, {
           "pointer-events": "none",
           "font-size": 11,
           "font-weight": 750,
@@ -251,7 +253,7 @@ export async function mountMap(initialAtlas, tr, boundaries = get("frozen/map.js
       }
       const title = el("title", {}, group);
       title.textContent =
-        label || (single ? "@" + rows[0].u : `${n} village homes · zoom in`);
+        label || (single ? houseName : `${n} village homes · zoom in`);
       const open = (e) => {
         e.stopPropagation();
         if (single) {
@@ -372,6 +374,7 @@ export async function mountMap(initialAtlas, tr, boundaries = get("frozen/map.js
                   )
                   .map(([x, y, u, style, did, h]) => ({
                     u,
+                    name: houseLabel(h),
                     did,
                     pt: ll(a.project, ...h.centre),
                   })),

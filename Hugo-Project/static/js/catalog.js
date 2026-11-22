@@ -1,5 +1,6 @@
 import { residentDesign } from "./resident-design.js";
 import { curvedPoints } from "./curves.js";
+import { houseLabel, shardKey } from "./resident-id.js";
 let cache,
   bypassHttpCache = false;
 export function resetCatalogCache() {
@@ -14,7 +15,15 @@ export async function records(url, ll, project) {
     );
     if (!res.ok) throw Error("Hugo content catalog unavailable");
     const j = await res.json(),
-      rows = j.houses.map(residentDesign),
+      rows = j.houses.map((rawRow) => {
+        const label = houseLabel(rawRow);
+        rawRow.name = label;
+        rawRow.house = {
+          ...rawRow.house,
+          sign: { ...(rawRow.house?.sign || {}), label },
+        };
+        return residentDesign(rawRow);
+      }),
       active = rows,
       shards = Object.create(null),
       plots = {},
@@ -22,16 +31,14 @@ export async function records(url, ll, project) {
       counts = {},
       byUser = new Map(rows.map((r) => [r.u, r])),
       directory = rows
-        .map((r) => [r.u, r.d, r.href])
-        .sort((a, b) => a[0].localeCompare(b[0]));
+        .map((r) => [r.u, r.d, r.href, r.name])
+        .sort((a, b) => a[3].localeCompare(b[3]) || a[0].localeCompare(b[0]));
     for (const r of rows) {
       const [lon, lat] = ll(project, r.c[0] + 0.5, r.c[1] + 0.5);
       r.lat = lat;
       r.lon = lon;
       r.homeLL = ll(project, ...r.house.centre);
-      const k = Array.from(r.u.slice(0, 2), (c) =>
-          c.charCodeAt(0).toString(16),
-        ).join(""),
+      const k = shardKey(r.u),
         tile = r.c.map((n) => Math.floor(n / 256)).join("_");
       (shards[k] ??= Object.create(null))[r.u] = r;
       const row = [...r.c, r.u, r.s, r.d, r.house];

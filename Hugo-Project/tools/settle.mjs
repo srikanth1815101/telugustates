@@ -397,10 +397,16 @@ try {
     for (const f of await fs.readdir(path.join(root, "content/houses"))) {
       if (!f.endsWith(".md") || f === "_index.md") continue;
       const p = path.join(root, "content/houses", f),
-        text = await fs.readFile(p, "utf8"),
-        u = (
-          /^username:\s*["']?([\w.]+)/im.exec(text)?.[1] || f.slice(0, -3)
-        ).toLowerCase();
+        text = await fs.readFile(p, "utf8");
+      if (/^username\s*:/im.test(text))
+        throw Error(
+          "House files must not store real usernames (" +
+            f +
+            "); create records with node tools/add-house.mjs",
+        );
+      const u = f.slice(0, -3).toLowerCase();
+      if (!/^h[0-9a-f]{24}$/.test(u))
+        throw Error("House filename must be a one-way resident ID: " + f);
       fileMap.set(u, [p, text]);
     }
 

@@ -1,6 +1,7 @@
 import { ink } from "./walk-icons.js";
 // Accessible, localised play controls; only the active language is displayed.
 import { msg, bindMessages } from "./messages.js";
+import { houseLabel } from "./resident-id.js";
 export function fieldHUD(host, deck, on, tr, api) {
   const $ = (s) => host.querySelector(s),
     insert = (p, h) => p.insertAdjacentHTML("beforeend", h),
@@ -50,7 +51,7 @@ export function fieldHUD(host, deck, on, tr, api) {
   );
   insert(
     host,
-    '<div class="walk-toast" role="status" hidden></div><div class="walk-tip" hidden><button data-msg-aria="tip.next"><small></small><b></b></button><button data-msg-aria="tip.dismiss">×</button></div><section class="resident-card" role="dialog" aria-labelledby="resident-title" hidden><button class="dismiss" data-msg-aria="resident.close">×</button><small></small><h3 id="resident-title"></h3><p></p><nav><a class="ig" rel="noreferrer" target="_blank" data-msg="resident.profile"></a><button class="share" data-msg="resident.share"></button><button class="walk" data-msg="resident.walk"></button></nav></section>',
+    '<div class="walk-toast" role="status" hidden></div><div class="walk-tip" hidden><button data-msg-aria="tip.next"><small></small><b></b></button><button data-msg-aria="tip.dismiss">×</button></div><section class="resident-card" role="dialog" aria-labelledby="resident-title" hidden><button class="dismiss" data-msg-aria="resident.close">×</button><small></small><h3 id="resident-title"></h3><p></p><nav><button class="share" data-msg="resident.share"></button><button class="walk" data-msg="resident.walk"></button></nav></section>',
   );
   const sheet = $(".world-sheet"),
     layout = document.createElement("details");
@@ -255,7 +256,7 @@ export function fieldHUD(host, deck, on, tr, api) {
   }
   function renderCard() {
     panel.querySelector("small").textContent = api.classLabel(card.u);
-    panel.querySelector("h3").textContent = "@" + card.u;
+    panel.querySelector("h3").textContent = card.name;
     panel.querySelector("p").textContent =
       api.district(card.d) +
       " · " +
@@ -268,7 +269,11 @@ export function fieldHUD(host, deck, on, tr, api) {
   });
   on(panel.querySelector(".share"), "click", async () => {
     if (location.hostname === "appassets.androidplatform.net") {
-      location.href = "/_field/resident?name=" + encodeURIComponent(card.u);
+      location.href =
+        "/_field/resident?name=" +
+        encodeURIComponent(card.u) +
+        "&label=" +
+        encodeURIComponent(card.name);
       return;
     }
     const u = new URL(api.shareBase);
@@ -276,7 +281,7 @@ export function fieldHUD(host, deck, on, tr, api) {
     try {
       if (navigator.share)
         await navigator.share({
-          title: msg("resident.shareTitle", { handle: card.u }),
+          title: msg("resident.shareTitle", { handle: card.name }),
           url: u.href,
         });
       else await copy(u.href);
@@ -324,10 +329,8 @@ export function fieldHUD(host, deck, on, tr, api) {
       wake();
     },
     placed(row, d) {
-      card = { u: row[2], d, x: row[0], y: row[1] };
+      card = { u: row[2], name: houseLabel(row[5]), d, x: row[0], y: row[1] };
       renderCard();
-      panel.querySelector(".ig").href =
-        "https://www.instagram.com/" + encodeURIComponent(card.u) + "/";
       sheet.hidden = details.hidden = true;
       panel.hidden = false;
       $("#read-place").setAttribute("aria-expanded", "false");

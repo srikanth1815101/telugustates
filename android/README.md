@@ -6,7 +6,7 @@
 
 ### Try this version
 
-Search **@palnadu_demo01**. The new roster has 133 fictional households and 133 one-acre fields across ten villages; the remaining 51 districts have no seed households. Houses occupy fixed 9- or 16-acre residential squares. Short frontage paths meet shared lanes, and the farm tracks follow holding boundaries. Home and Land are beside Settings even in local orbit. Select either and choose **Walk there** (use the stick/WASD) or **Teleport**. Use `/houses/` for the complete new directory. Old demo house links are intentionally retired.
+Search any registered handle (hashed one-way on device) or pick a household from the district directory. The roster has 133 fictional households and 133 one-acre fields across ten villages; the remaining 51 districts have no seed households. Houses occupy fixed 9- or 16-acre residential squares, and each 3D signboard shows only the household's chosen house or nickname. Short frontage paths meet shared lanes, and the farm tracks follow holding boundaries. Home and Land are beside Settings even in local orbit. Select either and choose **Walk there** (use the stick/WASD) or **Teleport**. Use `/houses/` for the complete directory.
 
 At **Canopy trail** or **Open meadow**, select Heavy rain, wait around half a minute, then select **Clear** or **Cloudy**. Moving streams on the ground stop immediately, including in the monsoon. The soil can stay dark, and a filled hollow drains instead of vanishing. Choose Light rain, Rain or Heavy rain for active precipitation in any season.
 

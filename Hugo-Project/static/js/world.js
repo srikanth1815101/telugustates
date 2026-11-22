@@ -28,6 +28,7 @@ import { touchWalk } from "./touch-walk.js";
 import { fieldHUD } from "./field-hud.js";
 import { followCamera } from "./walk-camera.js";
 import { residents, preparePads } from "./resident-scene.js";
+import { houseLabel, shardKey } from "./resident-id.js";
 import { basis, localPoint, SIDE } from "./metres.js";
 import * as T from "../vendor/three.module.min.js";
 import { Tiles, get, key, ll, url, xy } from "./grid.js";
@@ -248,9 +249,7 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
   );
   const pinFromName = async (u) => {
     if (!u) return null;
-    const shard = Array.from(u.slice(0, 2), (c) =>
-      c.charCodeAt(0).toString(16),
-    ).join("");
+    const shard = shardKey(u);
     if (!a.shards.includes(shard)) return null;
     return (await get("data/search/" + shard + ".json"))[u] || null;
   };
@@ -865,8 +864,10 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
     const select = q("#holding-resident");
     if (!select.options.length) {
       select.add(new Option(msg("holding.pick"), ""));
-      for (const [u, d] of await get("data/directory.json"))
-        select.add(new Option("@" + u + " · " + (ds.get(d)?.name || ""), u));
+      for (const [u, d, , name] of await get("data/directory.json"))
+        select.add(
+          new Option((name || "Illu") + " · " + (ds.get(d)?.name || ""), u),
+        );
     }
     if (mark !== menuSerial) return;
     select.options[0].text = msg("holding.pick");
@@ -874,7 +875,7 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
     q("#holding-choose").hidden = !!v;
     const en = kind === "acre" ? "village.acre" : "village.home";
     q("#destination-name").textContent = msg(en);
-    q(".resident-handle").textContent = chosen ? "@" + chosen.u : "";
+    q(".resident-handle").textContent = chosen ? houseLabel(chosen) : "";
     q("#walk-acre").disabled = q("#teleport-acre").disabled = !chosen;
     q("#holding-chart").hidden = q("#holding-distance").hidden = !chosen;
     if (chosen) {

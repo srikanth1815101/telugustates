@@ -4,6 +4,13 @@ import { loadMessages, bindMessages, msg } from "./messages.js";
 import { mountMap } from "./map.js";
 import { mountTreasury } from "./treasury-view.js";
 import { initAppSync } from "./app-sync.js";
+import {
+  houseLabel,
+  isResidentId,
+  normalizeUsername,
+  residentId,
+  shardKey,
+} from "./resident-id.js";
 const $ = (s) => document.querySelector(s),
   home = $("#public-home"),
   dlg = $("#dialog"),
@@ -66,17 +73,9 @@ function renderDistrictBoard() {
   if (searchInput) searchInput.placeholder = msg("home.districtFilter");
   const tgList = a.districts.filter((d) => d.state === "Telangana"),
     apList = a.districts.filter((d) => d.state !== "Telangana"),
-    tgHouses = tgList.reduce((n, d) => n + (d.count || 0), 0),
-    apHouses = apList.reduce((n, d) => n + (d.count || 0), 0),
     maxCount = Math.max(1, ...a.districts.map((d) => d.count || 0));
   const summary = $("#district-summary");
-  if (summary)
-    summary.textContent = msg("home.districtSummary", {
-      tg: tgHouses,
-      tgD: tgList.length,
-      ap: apHouses,
-      apD: apList.length,
-    });
+  if (summary) summary.textContent = msg("home.districtSummary");
   for (const btn of document.querySelectorAll("[data-state-filter]")) {
     const f = btn.dataset.stateFilter;
     btn.setAttribute("aria-selected", String(f === stateFilter));
@@ -99,7 +98,8 @@ function renderDistrictBoard() {
       })
       .sort(
         (x, y) =>
-          (y.count || 0) - (x.count || 0) || x.name.localeCompare(y.name),
+          Number(y.count || 0) - Number(x.count || 0) ||
+          x.name.localeCompare(y.name),
       );
   grid.replaceChildren();
   for (const d of items) {
@@ -154,8 +154,15 @@ $("#district-search")?.addEventListener("input", (e) => {
 });
 function paint() {
   if (!home) return;
-  $("#nd").textContent = a.districts.length;
-  $("#nr").textContent = a.total;
+  const fmt = new Intl.NumberFormat(lang === "te" ? "te-IN" : "en-IN");
+  for (const [k, sel] of [
+    ["food", "#res-food"],
+    ["currency", "#res-currency"],
+    ["gold", "#res-gold"],
+  ]) {
+    const node = $(sel);
+    if (node) node.textContent = fmt.format(a.resources?.[k] ?? 0);
+  }
   if (a.home) {
     const t = $("#home-title"),
       p = $("#home-intro");
@@ -211,13 +218,17 @@ async function showDialog(k) {
       body.append(l, document.createElement("br"));
     }
   }
-  if (k === "residents")
-    for (const [u, , href] of directory) {
-      const l = document.createElement("a");
+  if (k === "residents") {
+    const byId = new Map((a?.districts || []).map((d) => [d.id, d]));
+    for (const [, d, href, name] of directory) {
+      const l = document.createElement("a"),
+        ds = byId.get(d);
       l.href = url(href);
-      l.textContent = "@" + u;
+      l.textContent =
+        (name || "Illu") + (ds ? " · " + tr(ds.name, ds.te || ds.name) : "");
       body.append(l);
     }
+  }
   if (k === "economy")
     document.dispatchEvent(new CustomEvent("living:economy", { detail: body }));
   if (!dlg.open) dlg.showModal();
@@ -230,33 +241,18 @@ $("#close-dialog").onclick = () => dlg.close();
 dlg.onclick = (e) => {
   if (e.target === dlg) dlg.close();
 };
-export function normalize(s) {
-  s = s.trim().toLowerCase();
-  if (/^(?:https?:\/\/)?(?:www\.|m\.)?instagram\.com\//.test(s)) {
-    try {
-      const u = new URL(s.startsWith("http") ? s : "https://" + s);
-      if (
-        !["instagram.com", "www.instagram.com", "m.instagram.com"].includes(
-          u.hostname,
-        )
-      )
-        return "";
-      s = u.pathname.replace(/^\/|\/$/g, "");
-    } catch {
-      return "";
-    }
-  } else s = s.replace(/^@/, "");
-  return /^[a-z0-9_](?:[a-z0-9._]{0,28}[a-z0-9_])?$/.test(s) &&
-    !s.includes("..")
-    ? s
-    : "";
+export const normalize = normalizeUsername;
+function resolveResidentId(raw) {
+  const trimmed = String(raw || "").trim().toLowerCase();
+  if (!trimmed) return "";
+  if (isResidentId(trimmed)) return trimmed;
+  return residentId(trimmed);
 }
 const shardCache = new Map();
-async function lookup(u) {
+async function lookup(rawOrId) {
+  const u = resolveResidentId(rawOrId);
   if (!u) return null;
-  const key = Array.from(u.slice(0, 2), (c) =>
-    c.charCodeAt(0).toString(16),
-  ).join("");
+  const key = shardKey(u);
   if (!a.shards.includes(key)) return null;
   const sh = shardCache.get(key) || (await get("data/search/" + key + ".json"));
   shardCache.set(key, sh);
@@ -342,13 +338,28 @@ async function route() {
   retryHash = hash;
   let r, s;
   if (match) {
-    const u = normalize(match[2]);
-    r = await lookup(u);
+    const rawTarget = match[2],
+      id = resolveResidentId(rawTarget);
+    r = await lookup(id);
     if (token !== seq) return;
     if (!r) {
       paper(true);
-      tell($("#search-msg"), msg("home.missing", { name: u }));
+      tell(
+        $("#search-msg"),
+        msg("home.missing", {
+          name: normalizeUsername(rawTarget) || rawTarget.slice(0, 30),
+        }),
+      );
       return;
+    }
+    if (rawTarget !== r.u) {
+      const canonical = "#/" + match[1] + "/" + r.u;
+      history.replaceState(
+        null,
+        "",
+        location.pathname + location.search + canonical,
+      );
+      retryHash = canonical;
     }
     if (match[1] === "plot") {
       paper(true);
@@ -407,6 +418,8 @@ if (recordPage) {
       r.z = Number.isFinite(z) && z !== -32768 ? z : null;
     }
     const fill = () => {
+      const titleEl = $("#record-title") || recordPage.querySelector("h1");
+      if (titleEl) titleEl.textContent = houseLabel(r);
       $("#record-where").textContent =
         tr(district.name, district.te) +
         " · " +
@@ -488,19 +501,23 @@ if (home) {
       e.preventDefault();
       cold = null;
       requestFull();
-      const u = normalize($("#handle").value);
-      if (!u || !(await lookup(u))) {
+      const raw = $("#handle").value,
+        clean = normalize(raw),
+        id = resolveResidentId(raw),
+        found = id ? await lookup(id) : null;
+      if (!found) {
         tell(
           $("#search-msg"),
           msg("home.missing", {
-            name: u || $("#handle").value.trim().slice(0, 30),
+            name: clean || raw.trim().replace(/^@+/, "").slice(0, 30),
           }),
         );
         return;
       }
+      $("#handle").value = "";
       tell($("#search-msg"), "");
-      if (location.hash === "#/u/" + u) route();
-      else location.hash = "/u/" + u;
+      if (location.hash === "#/u/" + found.u) route();
+      else location.hash = "/u/" + found.u;
     };
     document.addEventListener("click", (e) => {
       const link = e.target.closest('a[href^="#/field/"],a[href^="#/u/"]');
