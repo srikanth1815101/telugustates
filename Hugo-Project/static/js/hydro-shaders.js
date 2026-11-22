@@ -103,13 +103,22 @@ void main(){vec2 local=P.xz,p=local+hydroOffset;float tm=liquidTime,sea=smoothst
  if(fogD<52.)for(int i=0;i<${lite ? 3 : 6};i++){float age=wakeClock-wakes[i].z;if(age>=0.&&age<2.85&&wakes[i].w>.001){vec2 d=local-wakes[i].xy-rd*(.18*age*speed);float r=length(d),e=r-(.13+age*1.07),pulse=exp(-abs(e)*9.)*(1.-age/2.85)*wakes[i].w;grad+=.24*pulse*sin(e*20.)*d/(r+.03);foam+=.24*pulse;}}
  grad*=1.-(.32-.29*sea)*calmWater;foam-=drop.z*.08*fine*calmWater;float d=max(0.,ew),deep=smoothstep(.06,2.7,d);
  vec3 geoCross=cross(dFdx(P),dFdy(P));float geoLen=length(geoCross);vec3 geoN=geoLen>1e-8?geoCross/geoLen:vec3(0.,1.,0.);if(geoN.y<0.)geoN=-geoN;
- float chute=sea<.5?smoothstep(.065,.28,length(geoN.xz)/max(.12,geoN.y)):0.;
- if(chute>.002){vec2 downDir=normalize(geoN.xz+vec2(1e-6,2e-6));float sCoord=dot(p,downDir)-P.y*1.35,xCoord=dot(p,vec2(-downDir.y,downDir.x));
- float cA=mod(tm*2.6,6.),cB=mod(cA+3.,6.),cW=smoothstep(.15,.85,abs(cA-3.)/3.);
- float rush=mix(fieldNoise(vec2(xCoord*1.85,(sCoord-cA*2.2)*.55)),fieldNoise(vec2(xCoord*1.85,(sCoord-cB*2.2)*.55)),cW);
- float lace=fieldNoise(vec2(xCoord*3.9,sCoord*.95-tm*4.4));
- foam+=chute*(.34+.48*smoothstep(-.18,.52,rush*.68+lace*.32));grad+=downDir*chute*(.22*rush);}
- vec3 n=normalize(vec3(grad.x+geoN.x*.85,max(.25,geoN.y),grad.y+geoN.z*.85)),eye=normalize(cameraInPatch-P),refl=reflect(-eye,n);
+ float sinSlope=length(geoN.xz),spill=(1.-sea)*smoothstep(.085,.32,sinSlope),cascadeFoam=0.;
+ float slopeBreak=(1.-sea)*clamp(length(vec2(dFdx(sinSlope),dFdy(sinSlope)))/max(.035,.09*pixel),0.,1.2);
+ float footBoil=slopeBreak*smoothstep(.008,.055,sinSlope)*(1.-smoothstep(.24,.50,sinSlope));
+ if(spill>.002||footBoil>.01){vec2 downDir=sinSlope>.001?geoN.xz/sinSlope:rd,crossDir=vec2(-downDir.y,downDir.x);
+ float sFall=dot(p,downDir)*geoN.y-P.y*sinSlope,xCross=dot(p,crossDir);
+ float sheet1=fieldNoise(vec2(xCross*.24,sFall*.15-tm*.92));
+ float sWarped=sFall+(sheet1-.5)*2.6;
+ float plume=fieldNoise(vec2(xCross*.62+(sheet1-.5)*.75,sWarped*.32-tm*1.58));
+ float lace=middle*fieldNoise(vec2(xCross*1.45-(plume-.5)*.55,sWarped*.58-tm*2.22));
+ float aerated=smoothstep(.24,.75,sheet1*.46+plume*.39+lace*.18+.18*smoothstep(.36,.82,sinSlope));
+ float lipThread=smoothstep(.045,.15,sinSlope)*(1.-smoothstep(.28,.56,sinSlope))*smoothstep(.36,.78,plume*.65+sheet1*.35);
+ float boilWave=fieldNoise(p*.48-downDir*(tm*1.25)+vec2(sheet1*.6,-plume*.5));
+ cascadeFoam=clamp(spill*(.22+.68*aerated)+.26*lipThread+footBoil*(.28+.46*boilWave),0.,.94);
+ foam=max(foam,cascadeFoam*.82);
+ grad+= (downDir*(.34*(plume-.5)+.22*(sheet1-.5))+crossDir*(.24*(sheet1-.5)))*(spill+footBoil*.6);}
+ vec3 n=normalize(vec3(grad.x+geoN.x*.88,max(.22,geoN.y),grad.y+geoN.z*.88)),eye=normalize(cameraInPatch-P),refl=reflect(-eye,n);
  float fres=.07+.64*pow(1.-clamp(dot(eye,n),0.,1.),3.3);
  // Unified inland freshwater body & sky reflection so flowing channels and adjacent still pools share one continuous optical medium.
  float horizon=1.-smoothstep(.015,.42,refl.y);vec3 freshSky=mix(mix(uZen,uHor,.26),uHor,.30+.62*horizon);
@@ -119,16 +128,21 @@ void main(){vec2 local=P.xz,p=local+hydroOffset;float tm=liquidTime,sea=smoothst
  vec3 bankTone=mix(mix(vec3(.139,.197,.102),vec3(.065,.149,.102),h.b),uHor,.18+.26*smoothstep(90.,2100.,metres));
  freshSky=mix(freshSky,mix(bankTone,freshSky,smoothstep(height-.062,height+.075,refl.y/max(.11,hor))),stFade);}}
  vec3 freshBody=mix(mix(vec3(.122,.316,.242),vec3(.035,.147,.154),deep),mix(vec3(.108,.272,.200),vec3(.035,.143,.140),deep),.52*pace);
+ freshBody=mix(freshBody,vec3(.078,.288,.276),spill*.68);
  freshBody*=1.+mix(.19,.44,pace)*wavelet+.048*area*wide;
  float rf=mix(.08,.104,pace)+mix(.64,.71,pace)*pow(1.-clamp(dot(eye,n),0.,1.),mix(3.2,2.55,pace));
- vec3 col=mix(freshBody,freshSky*(1.+.105*pace*wavelet),rf);
+ vec3 col=mix(freshBody,freshSky*(1.+.105*pace*wavelet),rf*(1.-.38*spill));
  if(sea>.002){vec3 waterSky=mix(mix(vec3(.086,.207,.239),uHor,.18),mix(uHor,uZen,.29+.38*smoothstep(-.10,.44,refl.y)),smoothstep(-.10,.44,refl.y));
  float face=smoothstep(-.26,.33,waveFace);vec3 seaBody=mix(vec3(.108,.356,.269),vec3(.020,.134,.171),deep)*(.79+.28*face+.17*surfSlope.w+.135*gr*middle);
  seaBody+=vec3(.045,.125,.072)*smoothstep(.24,.9,surfSlope.w)*smoothstep(.6,1.9,depth);
  vec3 facet=mix(seaBody,waterSky,.075+.68*pow(1.-clamp(dot(eye,n),0.,1.),2.6));
  facet*=1.+.085*wr*wide+.056*gr*middle;facet=mix(facet,mix(vec3(.098,.239,.292),uHor,.18),smoothstep(108.,520.,fogD)*.74);col=mix(col,facet,sea);}
- float gl=pow(max(0.,dot(refl,uSun)),57.);col+=vec3(.30,.287,.205)*gl*uDay*(.42+.58*middle);col=mix(col,vec3(.80,.89,.84),clamp(foam,0.,.87));col*=mix(.42,1.,uDay);col=mix(col,uHor,1.-exp(-pow(max(0.,fogD)*uFog,2.)));
- float alpha=.35+.50*deep+.17*fres+.41*foam;alpha=mix(alpha,max(alpha,.55+.38*deep+.12*foam),pace*smoothstep(.08,.78,d));alpha=mix(alpha,max(alpha,.57+.42*smoothstep(.38,1.85,d)),sea*smoothstep(.12,.85,d));
+ float gl=pow(max(0.,dot(refl,uSun)),57.);col+=vec3(.30,.287,.205)*gl*uDay*(.42+.58*middle);
+ vec3 foamHue=mix(vec3(.80,.89,.84),vec3(.90,.955,.945),clamp(spill+footBoil*.5,0.,1.));
+ col=mix(col,foamHue,clamp(foam,0.,.91));col*=mix(.42,1.,uDay);col=mix(col,uHor,1.-exp(-pow(max(0.,fogD)*uFog,2.)));
+ float alpha=.35+.50*deep+.17*fres+.41*foam;alpha=mix(alpha,max(alpha,.55+.38*deep+.12*foam),pace*smoothstep(.08,.78,d));
+ alpha=max(alpha,(spill*.80+footBoil*.55)+.18*cascadeFoam);
+ alpha=mix(alpha,max(alpha,.57+.42*smoothstep(.38,1.85,d)),sea*smoothstep(.12,.85,d));
  float shGain=smoothstep(0.,.18,max(shelf,river*(1.-smoothstep(.04,.38,ew))));if(shGain>.001){float shallow=(1.-smoothstep(.025,.35,ew))*shGain;col=mix(col,vec3(.066,.181,.147)*(1.+.24*wavelet)+vec3(.45,.58,.58)*fres*.68,shallow*.46);alpha=mix(alpha,.28+.44*fres+.07*wavelet,shallow);alpha*=mix(1.,smoothstep(0.,max(.034,1.15*ewf),ew),shGain);}
  alpha*=mix(1.,smoothstep(0.,max(.034,1.05*wmf),wetM),sea);gl_FragColor=vec4(col,clamp(alpha,0.,.995));
 #include <colorspace_fragment>
