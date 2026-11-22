@@ -527,16 +527,23 @@ export class Surface {
         (soilField(x + y * 0.41, y * 0.87 - x * 0.41, 8) - 0.5) * 2.13);
     let line = base,
       z = base,
-      depth = 0;
+      depth = 0,
+      hd = null;
     if (wet > 0) {
+      hd = sea > 0.002 ? null : headAt(this, x, y);
       line = sea > 0.002 ? -this.o.z * this.relief : this.waterLevel(x, y, ch);
       // A continuous stylised littoral shelf, NOT measured bathymetry. No submerged
       // wall at the mask edge. Bank, bed and water share this exact lattice.
       const signed = wet - 0.385;
-      const bed =
+      let bed =
         line -
         signed *
           (signed < 0 ? 7.5 : 5.35 + Math.min(2.8, (e.depth || 0) * 0.22));
+      if (hd && (hd.cliff > 0.01 || hd.lip > 0.01 || hd.plunge > 0.01)) {
+        const ledgeBacking = line - (0.78 + 0.32 * Math.abs(shelf)),
+          cliffW = Math.min(1, hd.cliff * 0.92 + hd.lip * 0.55);
+        bed = bed + (ledgeBacking - bed) * cliffW - 2.2 * hd.plunge * (1 - hd.cliff);
+      }
       z = base + (bed - base) * smooth(0.006, 0.35, wet);
       depth = Math.max(0, line - z);
     }
@@ -582,7 +589,10 @@ export class Surface {
     const coast =
       (1 - smooth(1.5, 4.5, e.coast ?? 300)) *
       (1 - smooth(17, 26, base / this.relief + this.o.z));
-    const rocks = smooth(0.26, 0.88, r) * (0.73 + 0.18 * shelf);
+    const rocks = Math.max(
+      smooth(0.26, 0.88, r) * (0.73 + 0.18 * shelf),
+      hd ? Math.min(0.96, hd.cliff * 0.96 + hd.lip * 0.72) : 0,
+    );
     const mud = Math.max(
       smooth(0.06, 0.38, wet) * (0.93 - 0.81 * coast),
       Math.min(0.76, (e.marsh || 0) * 0.009),
@@ -600,6 +610,11 @@ export class Surface {
       depth,
       mix: [sand, mud, rocks, f],
       sea,
+      cliff: hd?.cliff || 0,
+      lip: hd?.lip || 0,
+      plunge: hd?.plunge || 0,
+      outX: hd?.outX || 0,
+      outZ: hd?.outZ || 0,
     };
   }
   // Barycentric query on the SAME stored vertex heights as the renderer, including terrace and bank cuts.
@@ -870,7 +885,17 @@ function* chunkRows(s, cx, cy, step, mat, light = false) {
     wc.push(marine ? tidalBed(v, datum) : shelfDepth(v));
     const flow = marine ? s.current(v.x, v.y, 1, true) : wetVertex(v);
     wg.push(marine ? 0 : v.margin?.[4] || 0);
-    wf.push(flow[0], flow[1], Math.max(0, flow[2]), marine ? 1 : 0);
+    if (!marine && (v.plunge > 0.004 || v.cliff > 0.004 || v.lip > 0.004)) {
+      const hasDir = v.outX * v.outX + v.outZ * v.outZ > 0.01;
+      wf.push(
+        hasDir ? v.outX : flow[0],
+        hasDir ? v.outZ : flow[1],
+        Math.max(0, flow[2], 1.75 * v.cliff + 0.85 * v.lip + 1.15 * v.plunge),
+        -v.plunge,
+      );
+    } else {
+      wf.push(flow[0], flow[1], Math.max(0, flow[2]), marine ? 1 : 0);
+    }
     return k;
   }
   // Refine only nearby MARINE edges. Any two adjacent triangles share the same midpoint decision,
@@ -1083,7 +1108,7 @@ function* chunkRows(s, cx, cy, step, mat, light = false) {
       }
       if (ids.length) {
         const g = new T.BufferGeometry();
-        for (const k of ["position", "flow", "depthM", "marginGain"])
+        for (const k of ["position", "normal", "flow", "depthM", "marginGain"])
           g.setAttribute(k, w.attributes[k]);
         g.setIndex(ids);
         g.boundingSphere = w.boundingSphere.clone();

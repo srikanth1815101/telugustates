@@ -4,6 +4,7 @@ import {
   rockWater,
   findFall,
   cascade,
+  stagePlungeMist,
   disposeWater,
 } from "./moving-water.js";
 import * as T from "../vendor/three.module.min.js";
@@ -222,7 +223,9 @@ uniform vec2 hydroOffset;uniform float liquidTime,uDay,uFog;uniform vec3 uHor;va
         this.g.add(cascade(s, site, u));
       }
     }
-    this.fall = this.sites.length > 0;
+    const stMist = stagePlungeMist(s, x, y, u);
+    if (stMist) this.g.add(stMist);
+    this.fall = this.sites.length > 0 || !!stMist;
   }
   syncRocks(items) {
     if (this.placements === items) return;
