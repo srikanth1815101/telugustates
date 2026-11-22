@@ -119,18 +119,19 @@ function pattern(v) {
     const east = ((index >> 1) & 1) === 0,
       outer = !!(index & 1),
       walk = east ? "east" : "west",
-      bx = east ? S + 1 : -1,
+      vx = east ? S : 0,
+      bx = outer ? (east ? S + 1 : -1) : vx,
       head = east ? endR : endL,
       band = index >> 2,
       offset = band % 2 ? -1 - (band >> 1) : band >> 1,
       row = head + offset,
-      delta = outer ? (east ? 1 : -1) : east ? -1 : 1,
+      delta = east ? 1 : -1,
       fy = row + 0.4 + 0.2 * random(v.id + ":gate:" + walk + ":" + row)(),
       junction = world(bx, fy),
       land = world(bx + (delta * 1.65) / M, fy),
-      p = world(bx + delta * 0.5, row + 0.5),
+      p = world((outer ? (east ? S + 1 : -2) : east ? S : -1) + 0.5, row + 0.5),
       c = p.map(Math.floor),
-      tip = `${walk}/turn`,
+      tip = outer ? `${walk}/turn` : id("street", east ? 20 : 0),
       mk = (k, to, a, b) => {
         nodes.set(k, a);
         if (!edge.has(k)) {
@@ -149,13 +150,14 @@ function pattern(v) {
           });
         }
       };
-    mk(
-      tip,
-      id("street", east ? 20 : 0),
-      world(bx, head),
-      world(east ? S : 0, head),
-    );
-    const fk = (y) => `${walk}/gate/${y}`;
+    if (outer)
+      mk(
+        tip,
+        id("street", east ? 20 : 0),
+        world(bx, head),
+        world(vx, head),
+      );
+    const fk = (y) => `${walk}/${outer ? "gate" : "inner"}/${y}`;
     for (let n = 0; n <= Math.abs(offset >= 0 ? offset : offset + 1); n++) {
       const row0 = offset >= 0 ? head + n : head - 1 - n,
         r0 = (r) => r + 0.4 + 0.2 * random(v.id + ":gate:" + walk + ":" + r)(),
@@ -591,19 +593,54 @@ try {
             throw Error(
               "Explicit acre unavailable in exterior field belt: " + row.u,
             );
-          const field =
-            avail.find(
-              (q) =>
+          const field = avail
+            .slice()
+            .sort(
+              (a, b) =>
                 dist(
-                  q.c.map((n) => n + 0.5),
+                  a.c.map((n) => n + 0.5),
                   h.p,
-                ) >= 109 &&
+                ) -
                 dist(
-                  q.c.map((n) => n + 0.5),
+                  b.c.map((n) => n + 0.5),
                   h.p,
-                ) <= 492,
-            ) || avail[0];
-          const ids = new Set(v.paths.map((p) => p.id));
+                ),
+            )[0];
+          const ids = new Set(v.paths.map((p) => p.id)),
+            tagP = (p) => p.map((x) => x.toFixed(7)).join(","),
+            seenSegs = new Set();
+          for (const ep of v.paths)
+            for (let i = 1; i < ep.xy.length; i++)
+              seenSegs.add([tagP(ep.xy[i - 1]), tagP(ep.xy[i])].sort().join(";"));
+          function pushDedup(pth) {
+            let cur = [pth.xy[0]],
+              sub = 0;
+            for (let i = 1; i < pth.xy.length; i++) {
+              const a0 = pth.xy[i - 1],
+                b0 = pth.xy[i];
+              if (dist(a0, b0) < 0.001) continue;
+              const ek = [tagP(a0), tagP(b0)].sort().join(";");
+              if (seenSegs.has(ek)) {
+                if (cur.length > 1)
+                  v.paths.push({
+                    ...pth,
+                    id: sub ? `${pth.id}:${sub}` : pth.id,
+                    xy: cur,
+                  });
+                sub++;
+                cur = [b0];
+              } else {
+                seenSegs.add(ek);
+                cur.push(b0);
+              }
+            }
+            if (cur.length > 1)
+              v.paths.push({
+                ...pth,
+                id: sub ? `${pth.id}:${sub}` : pth.id,
+                xy: cur,
+              });
+          }
           function ensure(k) {
             if (k === "street/10") return;
             const e = P.edge.get(k);
@@ -611,26 +648,24 @@ try {
             if (ids.has(e.p.id)) return;
             ensure(e.to);
             ids.add(e.p.id);
-            v.paths.push(e.p);
+            pushDedup(e.p);
           }
           ensure(h.k);
           ensure(field.tip);
-          v.paths.push(
-            {
-              id: "lane-" + row.u,
-              type: "yard-lane",
-              w: 1.04,
-              surveyed: true,
-              xy: [h.gate, h.porch, h.join],
-            },
-            {
-              id: "field-" + row.u,
-              type: "field-entry",
-              w: 0.9,
-              surveyed: true,
-              xy: [field.junction, field.land],
-            },
-          );
+          pushDedup({
+            id: "lane-" + row.u,
+            type: "yard-lane",
+            w: 1.04,
+            surveyed: true,
+            xy: [h.gate, h.porch, h.join],
+          });
+          pushDedup({
+            id: "field-" + row.u,
+            type: "field-entry",
+            w: 0.9,
+            surveyed: true,
+            xy: [field.junction, field.land],
+          });
           v.homes[row.u] = {
             p: h.p,
             a: h.a,
