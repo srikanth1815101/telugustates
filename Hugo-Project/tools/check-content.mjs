@@ -34,8 +34,8 @@ try {
     );
   }
   assert.equal(
-    residentId("@Palnadu_Demo01"),
-    residentId("https://www.instagram.com/palnadu_demo01/"),
+    residentId("@TeluguStates.Csrgo"),
+    residentId("https://www.instagram.com/telugustates.csrgo/"),
   );
   assert.equal(normalizeUsername("https://instagram.com/reel/xyz"), "");
   for (const f of await fs.readdir(path.join(root, "content/houses"))) {
@@ -161,9 +161,22 @@ try {
       pageHtml = await fs.readFile(pagePath, "utf8");
     assert(!pageHtml.includes("@" + u), "Record page leaked @" + u);
   }
-  const demoId = residentId("palnadu_demo01"),
-    demoShard = await get("data/search/" + shardKey(demoId) + ".json");
-  assert(demoShard[demoId]?.u === demoId, "One-way search shard lookup failed");
+  const founderId = residentId("telugustates.csrgo"),
+    founderShard = await get("data/search/" + shardKey(founderId) + ".json");
+  assert(
+    founderShard[founderId]?.u === founderId &&
+      founderShard[founderId]?.name === "Srikanth" &&
+      founderShard[founderId]?.d === 32 &&
+      founderShard[founderId]?.record_kind === "community",
+    "One-way search shard lookup failed for founding household",
+  );
+  const appVer = await json(path.join(tmp, "app-version.json"));
+  assert(
+    Array.isArray(appVer.domains) &&
+      appVer.domains.includes("https://telugustates.csrgo.com") &&
+      !JSON.stringify(appVer).includes("netlify"),
+    "app-version.json domain configuration invalid",
+  );
   assert.deepEqual(Object.keys(all.resources).sort(), [
     "currency",
     "food",

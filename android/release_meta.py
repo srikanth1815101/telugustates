@@ -31,7 +31,6 @@ DEFAULT_RELEASE_META_URL = (
 )
 DEFAULT_DOMAINS = [
     "https://telugustates.csrgo.com",
-    "https://telugustates.netlify.app",
 ]
 
 ENGINE_PATHS = [
