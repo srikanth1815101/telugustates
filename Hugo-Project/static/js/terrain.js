@@ -8,7 +8,7 @@ import {
 } from "./river-margin.js";
 import { beachFace, tidalBed, seaLift } from "./surf-zone.js";
 import { soilField } from "./soil-field.js";
-import { headAt } from "./hydraulic-stage.js";
+import { headAt, warpWaterXY, stageBreak } from "./hydraulic-stage.js";
 import { bankBuilder, bankSample } from "./bank-mesh.js";
 import { emitTreadCells, subContact } from "./tread.js";
 import { benchAt } from "./house-ground.js";
@@ -470,14 +470,7 @@ export class Surface {
     return n;
   }
   mask(x, y) {
-    const X =
-        x +
-        0.12 * Math.sin(y * 2.07 + Math.sin(x * 0.84)) +
-        0.047 * Math.sin(y * 8.2 + x * 2.3),
-      Y =
-        y +
-        0.11 * Math.sin(x * 2.28 + y * 0.61) +
-        0.042 * Math.sin(x * 8.8 - y * 1.3),
+    const [X, Y] = warpWaterXY(x, y),
       i = Math.floor(X),
       j = Math.floor(Y),
       u = X - i,
@@ -506,9 +499,12 @@ export class Surface {
   }
   wet(x, y) {
     const [r, sea] = this.mask(x, y);
-    if (sea >= 0.1 || r >= 0.999) return r;
+    if (sea >= 0.1) return r;
+    const sb = stageBreak(this, x, y),
+      gate = sb ? sb.gate : 1;
+    if (r >= 0.999) return r * gate;
     const ch = this.channel(x, y);
-    return Math.max(r, channelWater(ch));
+    return Math.max(r, channelWater(ch)) * gate;
   }
   point(x, y) {
     const i = Math.floor(x),
@@ -522,9 +518,10 @@ export class Surface {
     const [raster, sea, f, r] = this.mask(x, y),
       e = this.ec?.surface?.(x, y) || this.ec?.at(x, y) || {},
       shelf = 2 * soilField(x * 0.38 + y * 0.14, y * 0.33 - x * 0.17, 12) - 1;
-    const ch = sea < 0.1 && raster < 0.999 ? this.channel(x, y) : null,
+    const sb = sea < 0.1 ? stageBreak(this, x, y) : null,
+      ch = sea < 0.1 && raster < 0.999 ? this.channel(x, y) : null,
       narrow = channelWater(ch),
-      wet = Math.max(narrow, raster);
+      wet = Math.max(narrow, raster) * (sb ? sb.gate : 1);
     let base = (A + (B - A) * u) * (1 - v) + (C + (D - C) * u) * v;
     const amp = smooth(0.22, 0.93, r) * this.relief,
       phase = base / (this.relief * (e.rock === 2 ? 6.2 : 9.1)) + shelf * 0.18;
@@ -532,6 +529,15 @@ export class Surface {
       amp *
       (Math.sin(phase * 6.283) * 0.8 +
         (soilField(x + y * 0.41, y * 0.87 - x * 0.41, 8) - 0.5) * 2.13);
+    if (sb && sb.sill > 0) {
+      const zHi = (sb.hHi - this.o.z) * this.relief,
+        zLo = (sb.hLo - this.o.z) * this.relief,
+        lip = zHi + (0.34 + 0.12 * shelf) * this.relief,
+        toe = zLo + 0.1 * this.relief,
+        face = smooth(-0.14, 0.1, sb.phi),
+        sillZ = toe + (lip - toe) * face;
+      base += (Math.max(base, sillZ) - base) * sb.sill;
+    }
     let line = base,
       z = base,
       depth = 0;
@@ -589,7 +595,10 @@ export class Surface {
     const coast =
       (1 - smooth(1.5, 4.5, e.coast ?? 300)) *
       (1 - smooth(17, 26, base / this.relief + this.o.z));
-    const rocks = smooth(0.26, 0.88, r) * (0.73 + 0.18 * shelf);
+    const rocks = Math.max(
+      smooth(0.26, 0.88, r) * (0.73 + 0.18 * shelf),
+      sb ? sb.sill * (0.8 + 0.12 * shelf) : 0,
+    );
     const mud = Math.max(
       smooth(0.06, 0.38, wet) * (0.93 - 0.81 * coast),
       Math.min(0.76, (e.marsh || 0) * 0.009),
@@ -855,7 +864,14 @@ function* chunkRows(s, cx, cy, step, mat, light = false) {
       return;
     for (const v of V0) wetVertex(v);
     if (!V0.some((v) => v.margin)) return;
-    aprons.push(wiFor(V[a], a), wiFor(V[b], b), wiFor(V[c], c));
+    const i0 = wiFor(V[a], a),
+      i1 = wiFor(V[b], b),
+      i2 = wiFor(V[c], c),
+      y0 = wp[i0 * 3 + 1],
+      y1 = wp[i1 * 3 + 1],
+      y2 = wp[i2 * 3 + 1];
+    if (Math.max(y0, y1, y2) - Math.min(y0, y1, y2) > 4.0) return;
+    aprons.push(i0, i1, i2);
   }
   function wiFor(v, key, apron = false) {
     const marine = v.sea > 0.05 || apron;
@@ -865,7 +881,8 @@ function* chunkRows(s, cx, cy, step, mat, light = false) {
     if (k !== undefined) return k;
     k = wc.length;
     waterVertices.set(key, k);
-    wp.push(...s.xyz(v.x, v.y, (marine ? datum : v.line) + 0.008));
+    const wl = !marine && v.w < -0.38 ? s.waterLevel(v.x, v.y) : v.line;
+    wp.push(...s.xyz(v.x, v.y, (marine ? datum : wl) + 0.008));
     wc.push(marine ? tidalBed(v, datum) : shelfDepth(v));
     const flow = marine ? s.current(v.x, v.y, 1, true) : wetVertex(v);
     wg.push(marine ? 0 : v.margin?.[4] || 0);
@@ -901,7 +918,42 @@ function* chunkRows(s, cx, cy, step, mat, light = false) {
     for (let k = 0; k < 4; k++) wf.push((wf[a * 4 + k] + wf[b * 4 + k]) * 0.5);
     return i;
   }
+  const bMinX = (cx * 64 - s.o.x) * U,
+    bMaxX = ((cx + 1) * 64 - s.o.x) * U,
+    bMaxZ = (s.o.y - cy * 64) * U,
+    bMinZ = (s.o.y - (cy + 1) * 64) * U;
+  function onChunkSeam(a, b) {
+    const x1 = wp[a * 3],
+      z1 = wp[a * 3 + 2],
+      x2 = wp[b * 3],
+      z2 = wp[b * 3 + 2];
+    return (
+      (Math.abs(x1 - bMinX) < 0.01 && Math.abs(x2 - bMinX) < 0.01) ||
+      (Math.abs(x1 - bMaxX) < 0.01 && Math.abs(x2 - bMaxX) < 0.01) ||
+      (Math.abs(z1 - bMinZ) < 0.01 && Math.abs(z2 - bMinZ) < 0.01) ||
+      (Math.abs(z1 - bMaxZ) < 0.01 && Math.abs(z2 - bMaxZ) < 0.01)
+    );
+  }
   function leaf(a, b, c) {
+    const y0 = wp[a * 3 + 1],
+      y1 = wp[b * 3 + 1],
+      y2 = wp[c * 3 + 1],
+      rise = Math.max(y0, y1, y2) - Math.min(y0, y1, y2);
+    if (
+      rise > 3.2 &&
+      wf[a * 4 + 3] + wf[b * 4 + 3] + wf[c * 4 + 3] < 0.5 &&
+      !onChunkSeam(a, b) &&
+      !onChunkSeam(b, c) &&
+      !onChunkSeam(c, a)
+    ) {
+      const e0 = Math.hypot(
+          wp[a * 3] - wp[b * 3],
+          wp[a * 3 + 2] - wp[b * 3 + 2],
+        ),
+        e1 = Math.hypot(wp[b * 3] - wp[c * 3], wp[b * 3 + 2] - wp[c * 3 + 2]),
+        e2 = Math.hypot(wp[c * 3] - wp[a * 3], wp[c * 3 + 2] - wp[a * 3 + 2]);
+      if (rise > Math.max(3.2, 0.38 * Math.max(e0, e1, e2))) return;
+    }
     wi.push(a, b, c);
   }
   function split(a, b, c, again, put) {
