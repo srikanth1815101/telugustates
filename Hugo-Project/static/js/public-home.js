@@ -57,6 +57,101 @@ const esc = (s) =>
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;");
+let stateFilter = "all",
+  districtQuery = "";
+function renderDistrictBoard() {
+  const grid = $("#district-grid");
+  if (!grid || !a?.districts) return;
+  const searchInput = $("#district-search");
+  if (searchInput) searchInput.placeholder = msg("home.districtFilter");
+  const tgList = a.districts.filter((d) => d.state === "Telangana"),
+    apList = a.districts.filter((d) => d.state !== "Telangana"),
+    tgHouses = tgList.reduce((n, d) => n + (d.count || 0), 0),
+    apHouses = apList.reduce((n, d) => n + (d.count || 0), 0),
+    maxCount = Math.max(1, ...a.districts.map((d) => d.count || 0));
+  const summary = $("#district-summary");
+  if (summary)
+    summary.textContent = msg("home.districtSummary", {
+      tg: tgHouses,
+      tgD: tgList.length,
+      ap: apHouses,
+      apD: apList.length,
+    });
+  for (const btn of document.querySelectorAll("[data-state-filter]")) {
+    const f = btn.dataset.stateFilter;
+    btn.setAttribute("aria-selected", String(f === stateFilter));
+    btn.textContent =
+      f === "all"
+        ? msg("home.allStates", { n: a.districts.length })
+        : f === "Telangana"
+          ? `${msg("geo.tg")} (${tgList.length})`
+          : `${msg("geo.ap")} (${apList.length})`;
+  }
+  const q = districtQuery.trim().toLowerCase(),
+    items = [...a.districts]
+      .filter((d) => {
+        if (stateFilter !== "all" && d.state !== stateFilter) return false;
+        if (!q) return true;
+        return (
+          d.name.toLowerCase().includes(q) ||
+          (d.te && d.te.toLowerCase().includes(q))
+        );
+      })
+      .sort(
+        (x, y) =>
+          (y.count || 0) - (x.count || 0) || x.name.localeCompare(y.name),
+      );
+  grid.replaceChildren();
+  for (const d of items) {
+    const cnt = d.count || 0,
+      row = document.createElement("button");
+    row.type = "button";
+    row.className = "district-item" + (cnt > 0 ? " has-houses" : " is-empty");
+    row.setAttribute("role", "listitem");
+    row.style.setProperty(
+      "--share",
+      `${cnt > 0 ? Math.max(8, Math.round((cnt / maxCount) * 100)) : 0}%`,
+    );
+    const top = document.createElement("div");
+    top.className = "district-item-top";
+    const nameEl = document.createElement("strong");
+    nameEl.textContent = tr(d.name, d.te || d.name);
+    const badge = document.createElement("span");
+    badge.className = "district-count";
+    badge.textContent =
+      cnt === 1 ? msg("home.oneHouse") : msg("home.districtCount", { n: cnt });
+    top.append(nameEl, badge);
+    const meta = document.createElement("div");
+    meta.className = "district-item-meta";
+    const st = document.createElement("small");
+    st.textContent = msg(d.state === "Telangana" ? "geo.tg" : "geo.ap");
+    const bar = document.createElement("i");
+    bar.className = "district-bar";
+    meta.append(st, bar);
+    row.append(top, meta);
+    row.onclick = () => {
+      if (Array.isArray(d.label) && d.label.length >= 2) {
+        map?.focusPoint(d.label[0], d.label[1], 320);
+        $("#atlas-chart")?.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+      }
+    };
+    grid.append(row);
+  }
+}
+document.addEventListener("click", (e) => {
+  const tab = e.target.closest("[data-state-filter]");
+  if (tab) {
+    stateFilter = tab.dataset.stateFilter;
+    renderDistrictBoard();
+  }
+});
+$("#district-search")?.addEventListener("input", (e) => {
+  districtQuery = e.target.value || "";
+  renderDistrictBoard();
+});
 function paint() {
   if (!home) return;
   $("#nd").textContent = a.districts.length;
@@ -75,6 +170,7 @@ function paint() {
       p.innerHTML = lang === "te" ? p.dataset.te : p.dataset.en;
     }
   }
+  renderDistrictBoard();
   document.dispatchEvent(new Event("living:home-painted"));
 }
 async function showDialog(k) {

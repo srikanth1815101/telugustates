@@ -10,9 +10,7 @@ import { U } from "../static/js/habitats.js";
 import { RunoffWindow, TILE, CORE, SPACING } from "../static/js/rain-ground.js";
 import {
   findFall,
-  findStageFalls,
   cascade,
-  fallRocks,
   bedStones,
   rockWater,
   disposeWater,
@@ -305,19 +303,15 @@ try {
         s,
         ec.falls.find((x) => x.name === "Talakona Waterfalls"),
       ),
-      fx = cascade(s, site, uniforms),
-      rk = fallRocks(s, site, uniforms);
+      fx = cascade(s, site, uniforms);
     assert(
       site.drop > 4 &&
         site.top > site.bottom &&
         site.feeder?.length >= 2 &&
-        fx.children.length === 3 &&
-        rk?.userData.role === "waterfall-rocks",
+        fx.children.length === 3,
     );
-    rk.geometry.dispose();
-    rk.material.dispose();
     disposeWater(fx);
-    // Verify plunge-pool mapped waterfalls (e.g. Etthipothala) also resolve before chunk() runs, and Nagarkurnool 66 m stage jump has zero vertical water walls.
+    // Verify plunge-pool mapped waterfalls (e.g. Etthipothala) also resolve before chunk() runs, and Nagarkurnool continuous stage spillway stays full without dry-ridge hollows.
     const et = ec.falls.find((x) => x.name === "Etthipothala Waterfalls"),
       tEt = new Tiles(a);
     await Promise.all(
@@ -342,11 +336,19 @@ try {
       wNag = gNag.children.find(
         (o) => o.userData.role === "continuous-water",
       )?.geometry,
-      spills = findStageFalls(sNag, 3371.5, 5812.5, []);
-    let maxTiltDeg = 0;
+      nagCenter = sNag.xyz(3371.5, 5812.5, 0);
+    let spillTris = 0,
+      maxLocalWaterY = -Infinity;
+    assert(sNag.wet(3371.5, 5812.5) > 0.5);
     if (wNag) {
       const p = wNag.attributes.position,
         id = wNag.index.array;
+      for (let i = 0; i < p.count; i++) {
+        if (
+          Math.hypot(p.getX(i) - nagCenter[0], p.getZ(i) - nagCenter[2]) < 140
+        )
+          maxLocalWaterY = Math.max(maxLocalWaterY, p.getY(i));
+      }
       for (let k = 0; k < id.length; k += 3) {
         const i0 = id[k],
           i1 = id[k + 1],
@@ -362,20 +364,19 @@ try {
             p.getZ(i2) - p.getZ(i0),
           ),
           n = new T.Vector3().crossVectors(v1, v2);
-        if (n.lengthSq() > 1e-10)
-          maxTiltDeg = Math.max(
-            maxTiltDeg,
-            (Math.atan2(Math.hypot(n.x, n.z), Math.abs(n.y)) * 180) / Math.PI,
-          );
+        if (n.lengthSq() > 1e-10) {
+          const sinSlope = Math.hypot(n.x, n.z) / n.length();
+          if (sinSlope > 0.22) spillTris++;
+        }
       }
     }
-    assert(maxTiltDeg < 12 && spills.length >= 1 && spills[0].drop > 10);
+    assert(spillTris > 20 && maxLocalWaterY / sNag.relief < 330);
     q.fall = {
       name: site.name,
       modelDropM: site.drop,
       etthipothalaDropM: etSite.drop,
-      nagarkurnoolMaxWaterTiltDeg: maxTiltDeg,
-      nagarkurnoolSpillways: spills.length,
+      nagarkurnoolSpillTriangles: spillTris,
+      nagarkurnoolMaxDatumM: +(maxLocalWaterY / sNag.relief).toFixed(2),
       effects: fx.children.map((o) => o.userData.role),
     };
   }

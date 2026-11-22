@@ -3,9 +3,7 @@ import { fieldNoise } from "./ground-weave.js";
 import {
   rockWater,
   findFall,
-  findStageFalls,
   cascade,
-  fallRocks,
   disposeWater,
 } from "./moving-water.js";
 import * as T from "../vendor/three.module.min.js";
@@ -222,15 +220,7 @@ uniform vec2 hydroOffset;uniform float liquidTime,uDay,uFog;uniform vec3 uHor;va
       if (site) {
         this.sites.push(site);
         this.g.add(cascade(s, site, u));
-        const rocks = fallRocks(s, site, u);
-        if (rocks) this.g.add(rocks);
       }
-    }
-    for (const site of findStageFalls(s, x, y, this.sites)) {
-      this.sites.push(site);
-      this.g.add(cascade(s, site, u));
-      const rocks = fallRocks(s, site, u);
-      if (rocks) this.g.add(rocks);
     }
     this.fall = this.sites.length > 0;
   }

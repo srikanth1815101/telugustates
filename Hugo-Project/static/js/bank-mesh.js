@@ -1,6 +1,5 @@
 import { bankMix, shelfDepth } from "./river-margin.js";
 import { benchSplit } from "./house-ground.js";
-import { isStageStep } from "./hydraulic-stage.js";
 // Conforming refinement of the simulated waterline. Both chunks take the union of the same edge vertices; load order never defines a shoreline.
 import { ACRE } from "./metres.js";
 // Map coordinates below are in 63.615 m cells; mesh positions remain in the floating-origin frame.
@@ -41,20 +40,7 @@ export function bankBuilder(s, cx, cy, V, emit, X, Y, outer) {
     let w = 0,
       l = 0;
     for (let i = 0; i < span; i++) {
-      const nd = s.node(ox + i, oy + j),
-        h0 = nd.head;
-      let stepCell = false;
-      if (h0) {
-        for (let dj = -1; dj <= 1 && !stepCell; dj++)
-          for (let di = -1; di <= 1 && !stepCell; di++)
-            if (
-              (di || dj) &&
-              isStageStep(h0, s.node(ox + i + di, oy + j + dj).head)
-            )
-              stepCell = true;
-      }
-      if (stepCell) flags[j * span + i] = 1;
-      w += nd.wet && !stepCell ? 1 : 0;
+      w += s.node(ox + i, oy + j).wet;
       l += flags[j * span + i];
       const n = (j + 1) * stride + i + 1;
       wet[n] = w + wet[n - stride];
