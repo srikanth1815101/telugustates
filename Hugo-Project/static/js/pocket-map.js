@@ -67,14 +67,24 @@ export class PocketMap {
       c.fillStyle = "#9b6349";
       c.fillRect(p[0] - 2.5, p[1] - 2.5, 5, 5);
     }
-    if (L.routeLine) {
-      c.beginPath();
-      c.strokeStyle = "#ffeb98";
-      c.lineWidth = 2.6;
-      L.routeLine.forEach((p, i) =>
-        i ? c.lineTo(...point(...p)) : c.moveTo(...point(...p)),
-      );
-      c.stroke();
+    if (L.routeLine?.length) {
+      const startIdx = Math.max(0, Math.min(L.routeLine.length - 1, L.routeIndex || 0)),
+        ahead = L.routeLine.slice(startIdx);
+      if (ahead.length) {
+        const pts = [[x, y], ...ahead];
+        c.lineCap = "round";
+        c.lineJoin = "round";
+        c.beginPath();
+        pts.forEach((p, i) =>
+          i ? c.lineTo(...point(...p)) : c.moveTo(...point(...p)),
+        );
+        c.strokeStyle = "#8b4e27";
+        c.lineWidth = 3.1;
+        c.stroke();
+        c.strokeStyle = "#eddab2";
+        c.lineWidth = 1.45;
+        c.stroke();
+      }
     }
     c.save();
     c.translate(56, 56);

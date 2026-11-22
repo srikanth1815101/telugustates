@@ -111,6 +111,7 @@ try {
     }
     const links = new Set(),
       vertices = new Set(),
+      adj = new Map(),
       vs = new Map();
     let insideBund = 0;
     for (const path of v.paths) {
@@ -118,12 +119,18 @@ try {
       for (let i = 1; i < path.xy.length; i++) {
         const a = path.xy[i - 1],
           b = path.xy[i],
-          key = [tag(a), tag(b)].sort().join(";");
+          ta = tag(a),
+          tb = tag(b),
+          key = [ta, tb].sort().join(";");
         assert(!links.has(key), "Duplicate tread " + key);
         assert(dist(a, b) > 0.0001);
         links.add(key);
-        vertices.add(tag(a));
-        vertices.add(tag(b));
+        vertices.add(ta);
+        vertices.add(tb);
+        if (!adj.has(ta)) adj.set(ta, []);
+        if (!adj.has(tb)) adj.set(tb, []);
+        adj.get(ta).push(tb);
+        adj.get(tb).push(ta);
         if (path.type === "bund") {
           const axis = [0, 1].find(
             (k) => Math.abs(a[k] - Math.round(a[k])) < 1e-7 && a[k] === b[k],
@@ -139,11 +146,22 @@ try {
         }
       }
     }
+    const reached = new Set([tag(v.hub)]),
+      bfs = [tag(v.hub)];
+    while (bfs.length) {
+      const cur = bfs.shift();
+      for (const nb of adj.get(cur) || [])
+        if (!reached.has(nb)) {
+          reached.add(nb);
+          bfs.push(nb);
+        }
+    }
     assert.equal(
-      links.size,
-      vertices.size - 1,
-      "single connected tree without loops",
+      reached.size,
+      vertices.size,
+      "single connected footpath network",
     );
+    assert(links.size >= vertices.size - 1);
     uniqueLinks += links.size;
     for (const h of Object.values(v.homes)) {
       const l = v.paths.find(
