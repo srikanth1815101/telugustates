@@ -119,17 +119,35 @@ export function hamletScene(s, rows, commons, focus, tier) {
         const yaw = a + 0.6,
           cy = Math.cos(yaw),
           sy = Math.sin(yaw);
-        add("box", cartPt, 0.62, [1.26, 0.12, 2.25], [-0.14, yaw, 0], 0x7d5a3e);
+        // Offsets are (lateral, forward) metres in the cart's own frame, converted to plot
+        // axes: lateral -> (cy, sy), forward -> (sy, -cy). The plot frame flips y against
+        // world Z (see s.xyz), which is what the two minus signs below account for.
+        const along = (lat, fwd) => scale(cartPt, lat * cy + fwd * sy, lat * sy - fwd * cy);
+        // Level goods bed on two cross-beams; the wheels sit outside it, as on a real bandi.
+        add("box", cartPt, 0.66, [1.24, 0.11, 2.18], [0, yaw, 0], 0x7d5a3e);
+        for (const fwd of [-0.74, 0.74])
+          add("box", along(0, fwd), 0.56, [1.4, 0.13, 0.15], [0, yaw, 0], 0x6d4d35);
+        // Open slatted sides: two planks on a front and a rear post.
         for (const sgn of [-1, 1]) {
-          const rail = scale(cartPt, sgn * 0.58 * cy, -sgn * 0.58 * sy);
-          add("box", rail, 0.82, [0.08, 0.34, 2.2], [-0.14, yaw, 0], 0x936e4b);
-          const wh = scale(cartPt, sgn * 0.72 * cy, -sgn * 0.72 * sy);
-          add("cyl", wh, 0.56, [1.12, 0.1, 1.12], [0, yaw, Math.PI / 2], 0x62442f);
-          add("cyl", wh, 0.56, [0.28, 0.16, 0.28], [0, yaw, Math.PI / 2], 0x4b3526);
+          for (const h of [0.82, 0.98])
+            add("box", along(sgn * 0.6, 0), h, [0.07, 0.13, 2.12], [0, yaw, 0], 0x936e4b);
+          for (const fwd of [-0.9, 0.9])
+            add("box", along(sgn * 0.6, fwd), 0.89, [0.12, 0.56, 0.11], [0, yaw, 0], 0x8a6746);
         }
-        const yoke = scale(cartPt, sy * 1.65, cy * 1.65);
-        add("box", yoke, 0.34, [0.1, 0.1, 1.55], [-0.28, yaw, 0], 0x6d4d35);
-        add("box", yoke, 0.16, [1.35, 0.1, 0.12], [0, yaw, 0], 0x6d4d35);
+        // Two wheels on stub axles reaching in under the bed. A real bandi's wheels are
+        // big and proud of the bed, so they carry a thick felloe and a protruding hub:
+        // from the game's high orbit camera that mass is what makes them read as wheels.
+        for (const sgn of [-1, 1]) {
+          const wh = along(sgn * 0.8, 0);
+          add("cyl", wh, 0.575, [1.15, 0.15, 1.15], [0, yaw, Math.PI / 2], 0x62442f);
+          add("cyl", wh, 0.575, [1.15, 0.06, 1.15], [0, yaw, Math.PI / 2], 0x4e3728);
+          add("cyl", along(sgn * 0.88, 0), 0.575, [0.34, 0.16, 0.34], [0, yaw, Math.PI / 2], 0x4b3526);
+          add("box", along(sgn * 0.4, 0), 0.575, [0.86, 0.12, 0.12], [0, yaw, 0], 0x5b3f2d);
+        }
+        // Twin draught poles reaching forward to the yoke bar at the bullocks' shoulders.
+        for (const sgn of [-1, 1])
+          add("box", along(sgn * 0.34, 1.1), 0.54, [0.1, 0.11, 2.24], [0, yaw, 0], 0x6d4d35);
+        add("box", along(0, 2.2), 0.62, [1.5, 0.13, 0.15], [0, yaw, 0], 0x7a573d);
         solids.push([cartPt[0], cartPt[1], 1.18 / M]);
         break;
       }
