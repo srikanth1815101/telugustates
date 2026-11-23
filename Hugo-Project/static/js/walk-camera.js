@@ -66,17 +66,7 @@ export function followCamera(
     if (c != null) ceilingY = Math.min(ceilingY, c);
   }
   const indoors = ceilingY !== Infinity,
-    rawCeil = ceilingY;
-  // The boom reads a smoothed ceiling so crossing a lintel cannot snap the boom; the final
-  // camera height is still clamped against the raw (unsmoothed) slab below.
-  if (indoors)
-    prev.ceil =
-      reset || prev.ceil === undefined
-        ? ceilingY
-        : lerp(prev.ceil, ceilingY, 1 - Math.exp(-step * 9));
-  else prev.ceil = Infinity;
-  const boomCeil = indoors ? prev.ceil : Infinity,
-    ceilDy = indoors ? Math.max(0.12, boomCeil - anchorY - 0.22) : Infinity,
+    ceilDy = indoors ? Math.max(0.12, ceilingY - anchorY - 0.22) : Infinity,
     minKeep = indoors ? 0.72 : 1.98;
   const destYaw = yaw,
     turn =
@@ -210,12 +200,7 @@ export function followCamera(
           best = v;
         }
       }
-  if (prev.side !== undefined && prev.el !== undefined) {
-    const keep = test(prev.side, prev.el);
-    if (keep.length >= minKeep && keep.length * 1.18 >= best.length)
-      best = keep;
-  }
-  if (indoors && best.length < minKeep) {
+    if (indoors && best.length < minKeep) {
       /* last resort inside a home: a high but under-roof look-down at the traveller, never above the slab */
       best = {
         xx: 0,
@@ -232,17 +217,12 @@ export function followCamera(
     }
   }
   prev.side = best.da;
-  prev.el = best.el;
   const { xx, zz } = best,
     t = best.t;
   let k =
     reset || prev.arm === undefined
       ? t
-      : lerp(
-          prev.arm,
-          t,
-          1 - Math.exp(-step * (t < prev.arm ? 17 : 6.5)),
-        );
+      : Math.min(t, lerp(prev.arm, t, 1 - Math.exp(-step * 11)));
   k = Math.max(k, Math.min(t, minKeep / (Math.hypot(xx, zz, best.dy) || 1)));
   prev.arm = k;
   const floor = s.sample(...at(xx * k, zz * k));
@@ -253,7 +233,7 @@ export function followCamera(
   );
   cam.position.set(
     base[0] + xx * k,
-    indoors ? Math.min(outY, rawCeil - 0.22) : outY,
+    indoors ? Math.min(outY, ceilingY - 0.22) : outY,
     base[2] + zz * k,
   );
   const flat = Math.max(0.01, Math.hypot(xx, zz) * k),

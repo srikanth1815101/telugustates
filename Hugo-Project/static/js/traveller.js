@@ -9,19 +9,19 @@ const clamp = T.MathUtils.clamp,
   Q = () => new T.Quaternion(),
   up = new T.Vector3(0, 1, 0),
   round = (x) => +x.toFixed(4);
-// Re-dress the village villagers' cloth: ochre kurta & cream dhoti for the man (Farmer
-// body), grenadine blouse & zari-bordered pallu for the woman (Casual body). Skin keeps its
-// authored colour (the rain-weather cloth mask keys off it); the woman's hair goes dark.
+// Re-dress the Atlas explorer rigs as village villagers: ochre kurta & cream dhoti for the
+// man, kumkum saree with a deep zari border for the woman. Skin and hair keep their exact
+// authored colours (the rain-weather cloth mask keys off them).
 const VILLAGE_RETEX = {
   man: [
-    [[0.17886, 0.12677, 0.05132], [0.722, 0.478, 0.157]],
-    [[0.03311, 0.04971, 0.06301], [0.91, 0.862, 0.733]],
-    [[0.33245, 0.30947, 0.20156], [0.835, 0.541, 0.165]],
+    [[0.4969, 0.1812, 0.0802], [0.722, 0.478, 0.157]],
+    [[0.3231, 0.0931, 0.0437], [0.478, 0.306, 0.086]],
+    [[0.0844, 0.1022, 0.0666], [0.91, 0.862, 0.733]],
+    [[0.5841, 0.3813, 0.1274], [0.478, 0.337, 0.165]],
   ],
   woman: [
-    [[0.36602, 0.36602, 0.36602], [0.522, 0.18, 0.212]],
-    [[0.2739, 0.09713, 0.03187], [0.64, 0.36, 0.12]],
-    [[0.20784, 0.14293, 0.0502], [0.055, 0.038, 0.026]],
+    [[0.0976, 0.2831, 0.2423], [0.522, 0.18, 0.212]],
+    [[0.0307, 0.1384, 0.1274], [0.196, 0.078, 0.082]],
   ],
 };
 function restyleVillager(R, style) {

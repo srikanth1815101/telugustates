@@ -33,12 +33,16 @@ function renderProgress(st) {
     bar = document.querySelector("#app-update-bar"),
     cta = document.querySelector("#app-update-cta"),
     ctaLabel = document.querySelector("#app-update-cta-label"),
-    skip = document.querySelector("#app-update-skip");
+    skip = document.querySelector("#app-update-skip"),
+    btn = document.querySelector("#app-download"),
+    btnLabel = document.querySelector("#app-download-label"),
+    btnSub = document.querySelector("#app-download-sub");
 
   if (!st || st.state === "idle" || st.state === "up_to_date") {
     userInitiatedUpdate = false;
     if (prog) prog.hidden = true;
     cta?.classList.remove("is-busy");
+    btn?.classList.remove("is-busy");
     if (st?.state === "up_to_date") {
       latestSync = { ...(latestSync || {}), updateAvailable: false };
       hideUpdateBanner();
@@ -74,9 +78,18 @@ function renderProgress(st) {
       note.textContent = msg("home.updateDownloading") + detail;
     }
     cta?.classList.add("is-busy");
+    btn?.classList.add("is-busy");
     if (ctaLabel) {
       ctaLabel.removeAttribute("data-msg");
       ctaLabel.textContent = `${pct}%`;
+    }
+    if (btnLabel) {
+      btnLabel.removeAttribute("data-msg");
+      btnLabel.textContent = msg("home.updateDownloading");
+    }
+    if (btnSub) {
+      btnSub.hidden = false;
+      btnSub.textContent = `${pct}%`;
     }
     return;
   }
@@ -92,6 +105,7 @@ function renderProgress(st) {
       note.textContent = msg("home.updatePermission");
     }
     cta?.classList.remove("is-busy");
+    btn?.classList.remove("is-busy");
     if (ctaLabel) {
       ctaLabel.setAttribute("data-msg", "home.updateAppCta");
       ctaLabel.textContent = msg("home.updateAppCta");
@@ -110,9 +124,14 @@ function renderProgress(st) {
       note.textContent = msg("home.updateInstalling");
     }
     cta?.classList.add("is-busy");
+    btn?.classList.add("is-busy");
     if (ctaLabel) {
       ctaLabel.setAttribute("data-msg", "home.updateInstalling");
       ctaLabel.textContent = msg("home.updateInstalling");
+    }
+    if (btnLabel) {
+      btnLabel.setAttribute("data-msg", "home.updateInstalling");
+      btnLabel.textContent = msg("home.updateInstalling");
     }
     return;
   }
@@ -127,6 +146,7 @@ function renderProgress(st) {
     if (prog) prog.hidden = true;
     if (skip) skip.hidden = false;
     cta?.classList.remove("is-busy");
+    btn?.classList.remove("is-busy");
     if (note && st.message) {
       note.removeAttribute("data-msg");
       note.textContent = st.message;
@@ -135,11 +155,17 @@ function renderProgress(st) {
       ctaLabel.setAttribute("data-msg", "home.updateRetry");
       ctaLabel.textContent = msg("home.updateRetry");
     }
+    if (btnLabel) {
+      btnLabel.setAttribute("data-msg", "home.updateRetry");
+      btnLabel.textContent = msg("home.updateRetry");
+    }
   }
 }
 
 function renderUpdateUi() {
   const btn = document.querySelector("#app-download"),
+    label = document.querySelector("#app-download-label"),
+    sub = document.querySelector("#app-download-sub"),
     banner = document.querySelector("#app-update-banner"),
     ver = document.querySelector("#app-update-ver"),
     note = document.querySelector("#app-update-note"),
@@ -169,6 +195,18 @@ function renderUpdateUi() {
 
   const apkUrl = latestSync.apkUrl || DEFAULT_APK_URL,
     tag = latestSync.latestVersionName ? "v" + latestSync.latestVersionName : "";
+  if (btn && label) {
+    btn.hidden = false;
+    btn.classList.add("is-update");
+    btn.removeAttribute("download");
+    btn.href = apkUrl;
+    label.setAttribute("data-msg", "home.updateApp");
+    label.textContent = msg("home.updateApp");
+    if (sub) {
+      sub.hidden = false;
+      sub.textContent = tag || "APK";
+    }
+  }
   if (banner && cta) {
     cta.href = apkUrl;
     if (ver) ver.textContent = tag;
@@ -280,6 +318,13 @@ export function initAppSync() {
   hideUpdateBanner();
 
   if (cta) cta.addEventListener("click", startInAppUpdate);
+  if (btn) {
+    btn.addEventListener("click", (e) => {
+      if (btn.classList.contains("is-update") || latestSync?.updateAvailable) {
+        startInAppUpdate(e);
+      }
+    });
+  }
   window.addEventListener("atlas:update-started", () => {
     userInitiatedUpdate = true;
     pollInAppUpdate();
