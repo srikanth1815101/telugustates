@@ -201,7 +201,7 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
   }
   renderer.outputColorSpace = T.SRGBColorSpace;
   renderer.shadowMap.type = T.PCFShadowMap;
-  renderer.setClearColor("#e8eee2");
+  renderer.setClearColor("#e9eede");
   deck.prepend(canvas);
   dock.append(deck);
   canvas.tabIndex = 0;

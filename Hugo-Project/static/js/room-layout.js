@@ -1,14 +1,14 @@
 // Furnish a room in metres. Authors keep the original acreage, door and envelope. A visit never rolls the dice again.
 const schemes = [
   // accent, second dye, wood, floor, inner limewash, ceiling
-  ["#346b72", "#cb9462", "#704733", "#ae9685", "#e9d9b9", "#d5c9ad"],
-  ["#924a44", "#e3b65f", "#664635", "#bd8c70", "#e2c8ab", "#ddd1b9"],
-  ["#46634d", "#cf9d55", "#72503c", "#b3a18a", "#dbe2ca", "#c9c8a6"],
-  ["#385471", "#b48256", "#574136", "#928d88", "#d8d8cc", "#c6b59c"],
-  ["#975d38", "#778e72", "#77533e", "#bd9c83", "#efe0bd", "#c9b39b"],
-  ["#715168", "#d2a66d", "#624943", "#a38f82", "#e3d4cc", "#d9c5b8"],
-  ["#3a7563", "#b96443", "#705542", "#b29975", "#e2dbba", "#c2ba9a"],
-  ["#826137", "#62949b", "#684737", "#a49683", "#e2d4b5", "#d5c9ba"],
+  ["#346b72", "#c29a36", "#73462f", "#b39585", "#eadab0", "#d6c9a7"],
+  ["#865239", "#e7b63a", "#694432", "#c28a6d", "#e0cb95", "#ded1b3"],
+  ["#406441", "#cca02f", "#764e39", "#b1a37d", "#d9e3c4", "#d0c6ab"],
+  ["#385471", "#a58941", "#594034", "#928d88", "#d8d8cc", "#c5b691"],
+  ["#9f5834", "#778e72", "#7c503b", "#b7a069", "#f1e0b4", "#c6b68b"],
+  ["#6d554a", "#cfa946", "#61493e", "#a78d81", "#e5d4cb", "#dcc4b7"],
+  ["#3a7563", "#b8653b", "#765341", "#b09a64", "#e6d9bb", "#c6b997"],
+  ["#7a642d", "#62949b", "#6b4634", "#a3987a", "#e3d4ae", "#d4cab2"],
 ];
 const layouts = {
   sleeping: ["charpoy", "chest", "jarstand"],

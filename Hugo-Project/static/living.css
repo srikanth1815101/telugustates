@@ -1,13 +1,13 @@
 #public-home {
   padding-block: 22px 50px;
-  --forest: #254c3a;
+  --forest: #1b4e29;
 }
 .land-hero {
   display: grid;
   grid-template-columns: 1.25fr 1fr;
-  background: #eaf0e1;
+  background: #e9f1d7;
   overflow: hidden;
-  border: 1px solid #c4d3be;
+  border: 1px solid #c5d59e;
   border-radius: 18px;
   margin: 5px 0 24px;
 }
@@ -21,12 +21,12 @@
     serif;
   letter-spacing: -0.045em;
   margin: 14px 0;
-  color: #203e2e;
+  color: #193f27;
 }
 .land-hero p {
   max-width: 42ch;
   line-height: 1.65;
-  color: #425649;
+  color: #285c35;
 }
 .land-hero figure {
   position: relative;
@@ -44,8 +44,8 @@
   bottom: 12px;
   left: 12px;
   border-radius: 20px;
-  background: #173427df;
-  color: #faf7e6;
+  background: #143420df;
+  color: #fdf6e6;
   padding: 4px 12px;
   font-size: 12px;
 }
@@ -91,9 +91,9 @@
 .treasury,
 #recent-homes {
   padding: clamp(19px, 3.2vw, 36px);
-  border: 1px solid #c9d4c4;
+  border: 1px solid #c8d6a5;
   border-radius: 14px;
-  background: #fffdf6;
+  background: #fefdf8;
 }
 .join li {
   margin: 6px 0;
@@ -107,7 +107,7 @@
   min-width: 12ch;
   flex: 1;
   padding: 9px;
-  border: 1px solid #9cab94;
+  border: 1px solid #96b05a;
   border-radius: 7px;
   font: inherit;
 }
@@ -131,7 +131,7 @@
 }
 .scenic p,
 .treasury p {
-  color: #405a47;
+  color: #275f36;
 }
 #scenic-cards {
   display: grid;
@@ -142,7 +142,7 @@
   display: block;
   color: inherit;
   text-decoration: none;
-  border: 1px solid #d2dbc9;
+  border: 1px solid #cfdbd0;
   border-radius: 10px;
   overflow: hidden;
   background: white;
@@ -158,7 +158,7 @@
   margin: 6px 12px;
 }
 .scenic-card small {
-  color: #526650;
+  color: #306c40;
 }
 .text-link {
   background: none;
@@ -187,14 +187,14 @@ body.walking.paper-map.public-edition #public-home {
 }
 #progress:not([hidden]) {
   padding: 11px 15px;
-  background: #edf1df;
-  border-left: 3px solid #577b52;
+  background: #eaf3d7;
+  border-left: 3px solid #378039;
 }
 .public-edition #world .world-sheet input[type="range"] {
   max-width: 100%;
 }
 .public-edition :focus-visible {
-  outline: 3px solid #985623;
+  outline: 3px solid #b2430c;
   outline-offset: 2px;
 }
 @media (max-width: 650px) {
@@ -232,8 +232,8 @@ body.walking.paper-map.public-edition #public-home {
 }
 /* Nature walk edition: the map folio, not a second splash screen. */
 body.public-edition {
-  background: linear-gradient(150deg, #f5f4e8, #f8f7ee 36%, #eff2e5);
-  color: #243e31;
+  background: linear-gradient(150deg, #f0f6e2, #fbf6ec 36%, #edf3de);
+  color: #1a4128;
 }
 #public-home .titlebar {
   padding-block: 20px 16px;
@@ -241,34 +241,34 @@ body.public-edition {
 #public-home .titlebar h1,
 #public-home .journeys h2,
 #public-home .find-inner h2 {
-  color: #193d2e;
+  color: #163d25;
 }
 #public-home .titlebar h1 span,
 #public-home .find-inner h2 span,
 #public-home .journeys h2 span {
-  color: #8a7940;
+  color: #957526;
 }
 #public-home .map-card {
-  background: #fbfbef;
+  background: #f8fbee;
 }
 #public-home #map-wrap {
   height: clamp(320px, 53vh, 545px);
-  background: linear-gradient(135deg, #e3ead6, #ecebd8 58%, #d0ddd0);
+  background: linear-gradient(135deg, #e1ecc8, #e4eece 58%, #d2ddd2);
 }
 #public-home #find .primary {
   width: 100%;
-  background: linear-gradient(115deg, #244b35, #396446);
-  color: #fffbea;
+  background: linear-gradient(115deg, #1a4c28, #276838);
+  color: #fefbf2;
 }
 #public-home .sample-acres {
-  border-top: 1px solid #d4dac7;
+  border-top: 1px solid #cedacf;
   margin-top: 16px;
   padding-top: 12px;
 }
 #public-home .sample-acres small {
   font-size: 11px;
   font-weight: 700;
-  color: #52624e;
+  color: #2f6a3e;
 }
 #sample-links {
   display: flex;
@@ -283,8 +283,8 @@ body.public-edition {
   font: 600 12px var(--body);
   padding: 4px 8px;
   border-radius: 7px;
-  background: #e8efdd;
-  color: #294e36;
+  background: #e7f0d3;
+  color: #1d512b;
   text-decoration: none;
 }
 #scenic-cards {
@@ -298,8 +298,8 @@ a.scenic-card {
   height: clamp(130px, 17vw, 205px);
   border: 0;
   border-radius: 10px;
-  color: #fffcef;
-  background: #536b50;
+  color: #fefcf5;
+  background: #317242;
 }
 a.scenic-card img {
   position: absolute;
@@ -313,7 +313,7 @@ a.scenic-card:after {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(0deg, #152d24e8, transparent 92%);
+  background: linear-gradient(0deg, #112e1ce8, transparent 92%);
   z-index: -1;
 }
 a.scenic-card div {
@@ -330,12 +330,12 @@ a.scenic-card span {
 }
 a.scenic-card small {
   font: 650 10px/1.25 var(--body);
-  color: #e4ebda;
+  color: #e2ebe3;
   margin: 0;
 }
 .public-edition .treasury {
   border-radius: 14px;
-  background: linear-gradient(145deg, #f7f6e9, #e6eddb);
+  background: linear-gradient(145deg, #f2f7e4, #e5eecf);
   padding: clamp(16px, 3.4vw, 38px);
 }
 .public-edition #balances {
@@ -348,15 +348,15 @@ a.scenic-card small {
   grid-template-columns: 24px 1fr;
   align-items: center;
   gap: 4px 9px;
-  border: 1px solid #d5ddc7;
-  background: #fbfaef;
+  border: 1px solid #d1ded2;
+  background: #f7fbee;
   border-radius: 9px;
   padding: 10px;
 }
 .resource i {
   display: grid;
   place-items: center;
-  color: #587151;
+  color: #327745;
 }
 .resource svg {
   width: 23px;
@@ -365,7 +365,7 @@ a.scenic-card small {
 .resource span {
   grid-column: 1/-1;
   font: 600 11px var(--body);
-  color: #526451;
+  color: #2f6b3f;
   line-height: 1.3;
 }
 #balances .resource strong {
@@ -376,10 +376,10 @@ a.scenic-card small {
   font-variant-numeric: tabular-nums;
 }
 .resource-gold i {
-  color: #937530;
+  color: #97731a;
 }
 .resource-currency i {
-  color: #887041;
+  color: #8d7025;
 }
 @media (max-width: 750px) {
   #scenic-cards {
@@ -414,10 +414,10 @@ a.scenic-card small {
   min-width: 44px;
   min-height: 44px;
   padding: 9px;
-  background: #254333b9;
-  color: #fffbea;
-  border: 1px solid #e4ead28f;
-  box-shadow: 0 1px 4px #15241426;
+  background: #1a4525b9;
+  color: #fefbf2;
+  border: 1px solid #e1ecc58f;
+  box-shadow: 0 1px 4px #0f251726;
 }
 #world #world-menu {
   border-radius: 14px;
@@ -431,9 +431,9 @@ a.scenic-card small {
   gap: 9px;
 }
 #world .pace-panel button[aria-pressed="true"] {
-  background: #d7e8b4;
-  color: #1b442e;
-  box-shadow: inset 0 0 0 2px #4c7952;
+  background: #d5e9a7;
+  color: #194429;
+  box-shadow: inset 0 0 0 2px #317d46;
 }
 #world .joystick,
 #world.walk-view .joystick {
@@ -442,7 +442,7 @@ a.scenic-card small {
   left: calc(var(--pad-l) + 16px);
   right: auto;
   bottom: calc(var(--pad-b) + 14px);
-  background: radial-gradient(circle at 50% 42%, #6983665c, #253c2c70);
+  background: radial-gradient(circle at 50% 42%, #6f843e5c, #1a3e2770);
   width: 68px;
   height: 68px;
 }
@@ -467,10 +467,10 @@ a.scenic-card small {
   display: block;
   width: clamp(54px, 13vmin, 73px);
   aspect-ratio: 1;
-  border: 1.4px solid #f7f5d9bb;
+  border: 1.4px solid #eef7d7bb;
   border-radius: 7px;
-  box-shadow: 0 1px 4px #15241440;
-  background: #a8b493;
+  box-shadow: 0 1px 4px #0f251740;
+  background: #9fb960;
 }
 #world .walk-corner #place-chip {
   min-height: 0;
@@ -480,8 +480,8 @@ a.scenic-card small {
   border: 0;
   border-radius: 5px;
   text-align: right;
-  color: #f8fbec;
-  background: #223c2ccf;
+  color: #f7fcec;
+  background: #193e26cf;
   box-shadow: none;
   pointer-events: auto;
 }
@@ -499,7 +499,7 @@ a.scenic-card small {
 #world .walk-corner #place-chip small {
   font-size: 9px;
   font-weight: 500;
-  color: #e2ebd7;
+  color: #e2ecc9;
 }
 #world .world-sheet {
   left: calc(var(--pad-l) + 8px);
@@ -509,14 +509,14 @@ a.scenic-card small {
 }
 #world .quick-settings {
   padding: 4px 0 12px;
-  border-bottom: 1px solid #d1dac6;
+  border-bottom: 1px solid #cedbce;
 }
 .quick-settings button {
   padding: 6px 10px;
-  border: 1px solid #c4d2bc;
+  border: 1px solid #c3d49b;
   border-radius: 8px;
-  background: #e9efdc;
-  color: #284833;
+  background: #e7f0d2;
+  color: #1c4b28;
 }
 .quick-settings label {
   display: flex;
@@ -610,9 +610,9 @@ a.scenic-card small {
   align-items: center;
   gap: 0.35rem 0.65rem;
   padding: 0.65rem 0.8rem;
-  background: #e6eadf;
+  background: #e4ebe4;
   border-radius: 0.75rem;
-  color: #203d34;
+  color: #193f27;
 }
 #orbit-read {
   font-variant-numeric: tabular-nums;
@@ -623,7 +623,7 @@ a.scenic-card small {
   grid-column: 1/-1;
   width: 100%;
   min-width: 0;
-  accent-color: #315d4b;
+  accent-color: #236033;
   margin: 0;
 }
 #world .orbit-help {
@@ -645,12 +645,12 @@ a.scenic-card small {
   height: 45px;
   align-items: center;
   gap: 3px;
-  color: #fffbe9;
-  background: #203c34eb;
-  border: 1px solid #e2d9b780;
+  color: #fefbf2;
+  background: #183e26eb;
+  border: 1px solid #ebd7a580;
   border-radius: 30px;
   padding: 0 3px;
-  box-shadow: 0 2px 8px #24352f26;
+  box-shadow: 0 2px 8px #18372426;
   font-variant-numeric: tabular-nums;
 }
 .orbit-tools[hidden] {
@@ -683,7 +683,7 @@ a.scenic-card small {
   font-weight: 650;
 }
 .orbit-tools button:focus-visible {
-  outline: 2px solid #e9bd66;
+  outline: 2px solid #f0bb37;
 }
 .world-sheet:not([hidden]) ~ .orbit-tools {
   visibility: hidden;
@@ -710,7 +710,7 @@ a.scenic-card small {
   font-size: 12px;
   font-weight: 650;
   margin-bottom: 5px;
-  color: #50635a;
+  color: #2f6b3f;
 }
 #world .quick-settings .field-tool {
   display: inline-grid;
@@ -720,9 +720,9 @@ a.scenic-card small {
   min-width: 46px;
   height: 44px;
   padding: 0;
-  background: #f5f5eb;
-  color: #274d3d;
-  border: 1px solid #b8c7b7;
+  background: #f2f6e6;
+  color: #1c4f2a;
+  border: 1px solid #b9ca8f;
   border-radius: 12px;
 }
 #world .field-tool svg {
@@ -730,12 +730,12 @@ a.scenic-card small {
   height: 23px;
 }
 #world .quick-settings .field-tool[aria-pressed="true"] {
-  background: #275644;
-  border-color: #275644;
-  color: #fffbed;
+  background: #1e582d;
+  border-color: #1e582d;
+  color: #fefbf2;
 }
 #world .quick-settings .field-tool:focus-visible {
-  outline: 3px solid #b67836;
+  outline: 3px solid #a87f1a;
   outline-offset: 2px;
 }
 #world.groundless .readings:not([hidden]) {
@@ -761,10 +761,10 @@ a.scenic-card small {
   min-height: 46px;
   padding: 8px 15px;
   border-radius: 24px;
-  background: #f9f5e5;
-  color: #193c30;
-  border: 1px solid #93a48b;
-  box-shadow: 0 2px 10px #162b2160;
+  background: #fcf5e2;
+  color: #163d25;
+  border: 1px solid #8ea950;
+  box-shadow: 0 2px 10px #112d1b60;
   line-height: 1.2;
   -webkit-tap-highlight-color: transparent;
   font-family: inherit;
@@ -780,12 +780,12 @@ a.scenic-card small {
 }
 #use-door kbd {
   font: 600 11px/1.3 system-ui;
-  border: 1px solid #9aa992;
+  border: 1px solid #94af57;
   border-radius: 4px;
   padding: 1px 4px;
 }
 #world #use-door:focus-visible {
-  outline: 3px solid #e6bc65;
+  outline: 3px solid #f0ba31;
   outline-offset: 2px;
 }
 #world #use-door[hidden],
@@ -817,11 +817,11 @@ a.scenic-card small {
 #world .holding-icon {
   display: grid;
   place-items: center;
-  border: 1px solid #e4ead28f;
+  border: 1px solid #e1ecc58f;
   border-radius: 14px;
-  background: #254333c9;
-  color: #fffbea;
-  box-shadow: 0 1px 4px #15241426;
+  background: #1a4525c9;
+  color: #fefbf2;
+  box-shadow: 0 1px 4px #0f251726;
   width: 44px;
   height: 44px;
   min-width: 44px;
@@ -834,14 +834,14 @@ a.scenic-card small {
   height: 24px;
 }
 #world .holding-icon[aria-expanded="true"] {
-  background: #efe4bc;
-  color: #22412e;
-  border-color: #b9ac85;
+  background: #f6e3b1;
+  color: #1a4229;
+  border-color: #caa957;
 }
 #world .holding-icon:focus-visible,
 #holding-menu button:focus-visible,
 #holding-menu input:focus-visible {
-  outline: 3px solid #ffda87;
+  outline: 3px solid #f7dc96;
   outline-offset: 2px;
 }
 #holding-menu {
@@ -852,11 +852,11 @@ a.scenic-card small {
   width: min(296px, calc(100% - 22px));
   max-height: calc(100% - 100px);
   overflow: auto;
-  color: #fcf8e7;
-  background: #203c31f4;
-  border: 1px solid #cfcaa880;
+  color: #fdf7e9;
+  background: #183e26f4;
+  border: 1px solid #ddc79180;
   border-radius: 15px;
-  box-shadow: 0 6px 24px #20372a40;
+  box-shadow: 0 6px 24px #17382340;
   padding: 14px;
   box-sizing: border-box;
 }
@@ -875,7 +875,7 @@ a.scenic-card small {
 #holding-menu small,
 #holding-menu label {
   font-size: 12px;
-  color: #edead6;
+  color: #f3e9ce;
 }
 #holding-menu #close-holding {
   background: transparent;
@@ -898,9 +898,9 @@ a.scenic-card small {
   display: flex;
   align-items: center;
   gap: 6px;
-  background: #f8f5e6;
-  color: #19382b;
-  border: 1px solid #d5ceaf;
+  background: #fbf4e4;
+  color: #163923;
+  border: 1px solid #e1cb96;
   border-radius: 9px;
   padding: 4px 5px 4px 10px;
 }
@@ -914,7 +914,7 @@ a.scenic-card small {
   min-width: 0;
   border: 0;
   background: transparent;
-  color: #19382b;
+  color: #163923;
   font: 600 13.5px system-ui;
   height: 32px;
   outline: none;
@@ -926,8 +926,8 @@ a.scenic-card small {
 #holding-verify {
   border: 0;
   border-radius: 7px;
-  background: #285140;
-  color: #fffdf5;
+  background: #1d542c;
+  color: #fefdf8;
   font: 700 12px system-ui;
   padding: 7px 11px;
   min-height: 32px;
@@ -937,7 +937,7 @@ a.scenic-card small {
   margin: 7px 0 0;
   font-size: 11.5px;
   line-height: 1.4;
-  color: #ffd599;
+  color: #f6d98e;
 }
 #holding-distance {
   display: block;
@@ -963,12 +963,12 @@ a.scenic-card small {
   flex: 1;
   border: 0;
   border-radius: 8px;
-  background: #f4efd9;
-  color: #173c2c;
+  background: #f8eed3;
+  color: #163c24;
   font: 600 13px system-ui;
 }
 #holding-menu .home-pair button:last-child {
-  background: #d8b06f;
+  background: #e2af2c;
 }
 #holding-menu button:disabled {
   opacity: 0.48;
@@ -980,8 +980,8 @@ a.scenic-card small {
   left: calc(var(--pad-l, 0px) + 10px);
   border-radius: 8px;
   padding: 5px 8px;
-  background: #203d32df;
-  color: #fffbe8;
+  background: #193f27df;
+  color: #fefbf2;
   font: 600 12px system-ui;
   pointer-events: none;
 }

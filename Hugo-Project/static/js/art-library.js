@@ -56,8 +56,8 @@ export async function loadPatch(items) {
     ),
   );
 }
-const copper = new T.Color("#be7650"),
-  gold = new T.Color("#b4a563");
+const copper = new T.Color("#c4734a"),
+  gold = new T.Color("#bca263");
 const palette = (kind, name, s, ps, lith) => {
   const mat = s.name.toLowerCase(),
     p = ps.trees[name] || ps.plants[name],
@@ -69,16 +69,16 @@ const palette = (kind, name, s, ps, lith) => {
         mat.includes("white")
           ? "#8e8270"
           : mat.includes("black")
-            ? "#635840"
+            ? "#715343"
             : mat.includes("coconut")
-              ? "#73603e"
-              : "#785d48",
+              ? "#716137"
+              : "#6f613d",
       );
     c.set(
       name === "Flame tree"
-        ? "#61834e"
+        ? "#478749"
         : name === "Golden shower"
-          ? "#628447"
+          ? "#408a42"
           : p.colour,
     );
     if (mat.includes("dark")) c.multiplyScalar(0.74);
@@ -95,7 +95,7 @@ const palette = (kind, name, s, ps, lith) => {
         ? "#808468"
         : /dirt/.test(mat)
           ? "#796f5f"
-          : ["#969084", "#9a867a", "#898a83", "#9a8774", "#928d85"][
+          : ["#969084", "#9a867a", "#898a83", "#978967", "#928d85"][
               Math.abs(lith || 0) % 5
             ],
     );
@@ -103,7 +103,7 @@ const palette = (kind, name, s, ps, lith) => {
   if (kind === "plant") {
     if (/color|flower/.test(mat)) return c.set(p.colour || s.hex);
     if (/grass|green|leaf/.test(mat))
-      return c.set(/Golden|reed/.test(name) ? "#7e8759" : "#66824d");
+      return c.set(/Golden|reed/.test(name) ? "#549056" : "#468848");
   }
   return c;
 };
