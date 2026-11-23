@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>World editor · Telugu States</title>
+    <link rel="stylesheet" href="/css/editor.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <span class="mark" aria-hidden="true"></span>
+        <span>
+          <strong>World editor</strong>
+          <small id="status">loading…</small>
+        </span>
+      </div>
+      <div class="search-wrap">
+        <input
+          id="search"
+          type="search"
+          placeholder="Search houses, trees, trails, districts…"
+          autocomplete="off"
+          spellcheck="false"
+        />
+        <kbd>/</kbd>
+      </div>
+      <div class="top-actions">
+        <button id="reload-preview" class="ghost" title="Reload the 3D preview">↻ Preview</button>
+        <button id="toggle-preview" class="ghost" title="Show or hide the 3D pane">◧ Layout</button>
+      </div>
+    </header>
+
+    <main class="shell" id="shell">
+      <aside class="sidebar">
+        <nav id="nav" class="nav" aria-label="World contents"></nav>
+      </aside>
+
+      <section class="stage">
+        <div class="preview" id="preview">
+          <iframe id="world" title="3D world preview" src="/preview/"></iframe>
+          <div class="preview-hint" id="preview-hint">
+            <span>Drag to orbit · scroll to zoom</span>
+          </div>
+        </div>
+        <div class="resizer" id="resizer" role="separator" aria-orientation="vertical"></div>
+        <div class="inspector" id="inspector">
+          <div class="empty">
+            <h2>Pick something to edit</h2>
+            <p>
+              Everything in the world comes from a file under
+              <code>Hugo-Project/content</code>. Choose a house, a tree species, a trail or a
+              district from the list, and the fields below write straight back to that file.
+            </p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <script type="module" src="/ui/editor.js"></script>
+  </body>
+</html>

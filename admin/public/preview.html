@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>World preview</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        overflow: hidden;
+        background: #8d9b7c;
+        font: 13px "Segoe UI", system-ui, sans-serif;
+        color: #16301f;
+      }
+      #world {
+        position: absolute;
+        inset: 0;
+      }
+      #world canvas {
+        display: block;
+      }
+      #world,
+      #world * {
+        box-sizing: border-box;
+      }
+      #boot {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        place-content: center;
+        gap: 14px;
+        justify-items: center;
+        background: linear-gradient(165deg, #cfd8bd, #a8b795 55%, #8d9b7c);
+        text-align: center;
+        padding: 24px;
+        z-index: 30;
+        transition: opacity 0.35s;
+      }
+      #boot.is-done {
+        opacity: 0;
+        pointer-events: none;
+      }
+      #boot .ring {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        border: 3px solid rgba(30, 84, 45, 0.22);
+        border-top-color: #1e542d;
+        animation: spin 0.9s linear infinite;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      #boot h1 {
+        margin: 0;
+        font-size: 15px;
+        font-weight: 700;
+      }
+      #boot p {
+        margin: 0;
+        max-width: 42ch;
+        font-size: 12.5px;
+        line-height: 1.55;
+        color: #2f4a35;
+      }
+      #boot pre {
+        display: none;
+        max-width: 62ch;
+        max-height: 40vh;
+        overflow: auto;
+        text-align: left;
+        background: rgba(255, 253, 246, 0.92);
+        border-radius: 8px;
+        padding: 10px 12px;
+        font: 11px ui-monospace, Menlo, Consolas, monospace;
+        color: #7c2f14;
+        white-space: pre-wrap;
+      }
+      #boot.is-error pre {
+        display: block;
+      }
+      #boot.is-error .ring {
+        animation: none;
+        border-color: #ad4817;
+      }
+      #tag {
+        position: absolute;
+        top: 10px;
+        left: 12px;
+        z-index: 20;
+        padding: 5px 11px;
+        border-radius: 999px;
+        background: rgba(20, 40, 26, 0.6);
+        color: #f2f7ee;
+        font: 11.5px ui-monospace, Menlo, Consolas, monospace;
+        letter-spacing: 0.02em;
+        pointer-events: none;
+        backdrop-filter: blur(4px);
+        opacity: 0;
+        transition: opacity 0.3s;
+      }
+      #tag.is-live {
+        opacity: 1;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="world"></div>
+    <div id="tag">live engine · content files</div>
+    <div id="boot">
+      <div class="ring"></div>
+      <h1>Loading the world</h1>
+      <p id="boot-note">Reading terrain, villages and every house from the content files…</p>
+      <pre id="boot-error"></pre>
+    </div>
+
+    <script type="module">
+      // Boots the real engine against the content tree.
+      //
+      // Nothing in Hugo-Project is modified: this page imports the same world.js
+      // the site ships, and the editor server synthesises the two files Hugo
+      // would normally generate (catalog.json, app-version.json).
+      import { get } from "/preview/js/grid.js";
+      import { expedition } from "/preview/js/world.js";
+
+      const boot = document.getElementById("boot");
+      const note = document.getElementById("boot-note");
+      const errorBox = document.getElementById("boot-error");
+      const host = document.getElementById("world");
+      const tag = document.getElementById("tag");
+
+      const say = (text) => {
+        note.textContent = text;
+      };
+
+      // The engine reports renderer problems rather than throwing, so both paths
+      // land in the same place: say what happened, keep the editor usable.
+      function fail(error) {
+        boot.classList.remove("is-done");
+        boot.classList.add("is-error");
+        boot.querySelector(".ring")?.remove();
+        note.textContent =
+          "The 3D preview could not start. The content files are still editable — only this pane is affected.";
+        errorBox.textContent = String(error?.stack || error);
+        console.error(error);
+        parent.postMessage(
+          { type: "atlas:preview-error", message: String(error?.message || error) },
+          "*",
+        );
+      }
+
+      let view = null;
+
+      // Where to put the camera on first paint: the first village in the register.
+      async function firstVillageCell() {
+        try {
+          const res = await fetch("/preview/catalog.json");
+          if (!res.ok) return null;
+          const catalog = await res.json();
+          for (const bundle of Object.values(catalog.roads || {}))
+            for (const s of bundle.settlements || [])
+              if (Array.isArray(s.hub)) return [Math.floor(s.hub[0]), Math.floor(s.hub[1])];
+        } catch {
+          /* no villages yet */
+        }
+        return null;
+      }
+
+      function flyTo(cell) {
+        if (!view || !Array.isArray(cell) || cell.some((n) => !Number.isFinite(n))) return;
+        try {
+          view.coordinate(cell[0], cell[1]);
+        } catch (error) {
+          console.warn("could not fly to", cell, error);
+        }
+      }
+
+      async function start() {
+        say("Reading the atlas…");
+        const atlas = await get("data/atlas.json");
+
+        say("Loading terrain and villages…");
+        view = await expedition(
+          host,
+          atlas,
+          (en) => en, // editor UI is English-only, like the site's default
+          () => {}, // paper() is the site's 2D map; the preview is 3D only
+          (cause) => fail(cause || new Error("renderer unavailable")),
+          get("frozen/map.json"),
+        );
+
+        boot.classList.add("is-done");
+        tag.classList.add("is-live");
+        parent.postMessage({ type: "atlas:preview-ready" }, "*");
+
+        const cell = await firstVillageCell();
+        if (cell) flyTo(cell);
+      }
+
+      // The editor drives the preview by postMessage.
+      window.addEventListener("message", (event) => {
+        const data = event.data;
+        if (!data || typeof data !== "object") return;
+        if (data.type === "atlas:fly") flyTo(data.cell);
+        if (data.type === "atlas:reload") location.reload();
+      });
+
+      start().catch(fail);
+    </script>
+  </body>
+</html>
