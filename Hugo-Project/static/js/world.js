@@ -1,15 +1,9 @@
 import { laneSoil } from "./lane-soil.js";
-import {
-  hamletScene,
-  marks,
-  updateHamlet,
-  updateRouteLeaves,
-} from "./hamlet-scene.js";
+import { hamletScene, marks, updateRouteLeaves } from "./hamlet-scene.js";
 import { pathTo, guideStep, drawHolding } from "./hamlet-route.js";
 import { farms } from "./agriculture.js";
 import { homesAt, inCourt } from "./home-index.js";
 import {
-  activeRoomAt,
   roomLocal,
   roomPlan,
   insideRoom,
@@ -212,7 +206,7 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
   dock.append(deck);
   canvas.tabIndex = 0;
   canvas.setAttribute("aria-label", msg("world.canvas"));
-  host.innerHTML = `<div class="world-top"><a class="world-back" href="#">← <span></span></a><div class="world-id"><i class="dot"></i><span></span><b></b></div><div class="chart-switch"><button data-view="3d" aria-pressed="true">3D</button><button data-view="map"></button></div><button class="world-btn" id="world-menu" data-msg-aria="hud.menu">${icon("menu")}</button></div><div id="life-read" hidden></div><div class="greeting" hidden></div><div class="world-hud"><div class="eyebrow"><i class="dot"></i><span id="world-district"></span></div><div><span id="gps"></span><button id="copy-gps" data-msg-aria="details.copyCoords">${icon("copy")}</button></div><small id="alt"></small><div class="conditions"><b id="acre-now"></b><span id="clock-now"></span><span id="weather-now"></span></div></div><div class="pace-panel"><span id="underfoot"></span><button type="button" id="hop" data-msg="hud.jump"></button><button type="button" id="pace" aria-pressed="false" data-msg="hud.sprint"></button></div><span id="room-notice" role="status" aria-live="polite" class="door-sr"></span><div class="walk-help"></div><div class="joystick" role="group" data-msg-aria="hud.stick"><b></b></div><aside class="world-sheet" hidden><div class="sheet-head"><strong></strong><button class="icon-btn" id="hide-sheet" data-msg-aria="hud.closeMenu">${icon("close")}</button></div><section class="walk-settings"><div class="eyebrow" data-msg="menu.scenery"></div><div class="field-pair"><label><span data-msg="menu.season"></span><select id="season"><option value="auto" data-msg="season.shared"></option><option value="retreat" data-msg="season.retreat"></option><option value="winter" data-msg="menu.winter"></option><option value="summer" data-msg="menu.summer"></option><option value="monsoon" data-msg="menu.monsoon"></option></select></label><label><span data-msg="menu.light"></span><select id="light"><option value="shared4" data-msg="time.four"></option><option value="shared2" data-msg="time.two"></option><option value="shared6" data-msg="time.six"></option><option value="golden" data-msg="menu.golden"></option><option value="day" data-msg="menu.day"></option><option value="dusk" data-msg="menu.dusk"></option><option value="live" data-msg="menu.live"></option></select></label></div><label><span data-msg="weather.sim"></span><select id="sim-weather"><option value="auto" data-msg="menu.auto"></option><option value="Clear" data-msg="weather.clear"></option><option value="Cloudy" data-msg="weather.cloudy"></option><option value="Light rain" data-msg="weather.drizzle"></option><option value="Rain" data-msg="weather.rain"></option><option value="Heavy rain" data-msg="weather.heavy"></option></select></label><label><span data-msg="menu.quality"></span><select id="quality"><option value="auto" data-msg="menu.auto"></option><option value="low" data-msg="menu.low"></option><option value="medium" data-msg="menu.medium"></option><option value="high" data-msg="menu.high"></option></select></label></section><p class="detail-note"></p><button class="mode detail-trial" hidden></button><div class="sheet-foot"><button class="lang" data-lang data-msg-aria="menu.language">EN / తెలుగు</button><button class="sub-link" data-open="about"></button></div><p class="generated-note"></p><p class="creditline">© OpenStreetMap contributors · Copernicus DEM · ESA WorldCover · HydroLAKES · LGD. <a href="${url("frozen/credits.md")}" data-msg="menu.licences"></a> · <a href="${url("library/CREDITS.html")}" data-msg="menu.art"></a></p></aside>`;
+  host.innerHTML = `<div class="world-top"><a class="world-back" href="#">← <span></span></a><div class="world-id"><i class="dot"></i><span></span><b></b></div><div class="chart-switch"><button data-view="3d" aria-pressed="true">3D</button><button data-view="map"></button></div><button class="world-btn" id="world-menu" data-msg-aria="hud.menu">${icon("menu")}</button></div><div id="life-read" hidden></div><div class="greeting" hidden></div><div class="world-hud"><div class="eyebrow"><i class="dot"></i><span id="world-district"></span></div><div><span id="gps"></span><button id="copy-gps" data-msg-aria="details.copyCoords">${icon("copy")}</button></div><small id="alt"></small><div class="conditions"><b id="acre-now"></b><span id="clock-now"></span><span id="weather-now"></span></div></div><div class="pace-panel"><span id="underfoot"></span><button type="button" id="hop" data-msg="hud.jump"></button><button type="button" id="pace" aria-pressed="false" data-msg="hud.sprint"></button></div><button id="use-door" type="button" hidden aria-keyshortcuts="E"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 21h17M6 20V3h12v17M7 4l7 2v14l-7-1z"/><path d="M11.4 12.4h.2"/></svg><span></span><kbd>E</kbd></button><span id="room-notice" role="status" aria-live="polite" class="door-sr"></span><div class="walk-help"></div><div class="joystick" role="group" data-msg-aria="hud.stick"><b></b></div><aside class="world-sheet" hidden><div class="sheet-head"><strong></strong><button class="icon-btn" id="hide-sheet" data-msg-aria="hud.closeMenu">${icon("close")}</button></div><section class="walk-settings"><div class="eyebrow" data-msg="menu.scenery"></div><div class="field-pair"><label><span data-msg="menu.season"></span><select id="season"><option value="auto" data-msg="season.shared"></option><option value="retreat" data-msg="season.retreat"></option><option value="winter" data-msg="menu.winter"></option><option value="summer" data-msg="menu.summer"></option><option value="monsoon" data-msg="menu.monsoon"></option></select></label><label><span data-msg="menu.light"></span><select id="light"><option value="shared4" data-msg="time.four"></option><option value="shared2" data-msg="time.two"></option><option value="shared6" data-msg="time.six"></option><option value="golden" data-msg="menu.golden"></option><option value="day" data-msg="menu.day"></option><option value="dusk" data-msg="menu.dusk"></option><option value="live" data-msg="menu.live"></option></select></label></div><label><span data-msg="weather.sim"></span><select id="sim-weather"><option value="auto" data-msg="menu.auto"></option><option value="Clear" data-msg="weather.clear"></option><option value="Cloudy" data-msg="weather.cloudy"></option><option value="Light rain" data-msg="weather.drizzle"></option><option value="Rain" data-msg="weather.rain"></option><option value="Heavy rain" data-msg="weather.heavy"></option></select></label><label><span data-msg="menu.quality"></span><select id="quality"><option value="auto" data-msg="menu.auto"></option><option value="low" data-msg="menu.low"></option><option value="medium" data-msg="menu.medium"></option><option value="high" data-msg="menu.high"></option></select></label></section><p class="detail-note"></p><button class="mode detail-trial" hidden></button><div class="sheet-foot"><button class="lang" data-lang data-msg-aria="menu.language">EN / తెలుగు</button><button class="sub-link" data-open="about"></button></div><p class="generated-note"></p><p class="creditline">© OpenStreetMap contributors · Copernicus DEM · ESA WorldCover · HydroLAKES · LGD. <a href="${url("frozen/credits.md")}" data-msg="menu.licences"></a> · <a href="${url("library/CREDITS.html")}" data-msg="menu.art"></a></p></aside>`;
   const q = (s) => host.querySelector(s),
     dq = (s) => deck.querySelector(s),
     sheet = q(".world-sheet"),
@@ -468,20 +462,21 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
     lastContact = 0,
     photoCatch = null,
     photoLastLift = 0;
-  let roomOwner = null,
-    activeRoomId = null;
-  const roomLamp = new T.PointLight(0xffdfb7, 9.2, 14, 2);
+  let roomOwner = null;
+  const roomLamp = new T.PointLight(0xffdfb7, 9.0, 12, 2),
+    doorBtn = q("#use-door");
   roomLamp.visible = false;
   scene.add(roomLamp);
   function doorRow(l = L) {
     return l?.sc?.userData.near.find((r) => r.u === roomOwner);
   }
-  function setRoom(owner, rm = null) {
-    const changedOwner = roomOwner !== owner,
-      nextRoomId = rm?.id || null;
-    if (!changedOwner && activeRoomId === nextRoomId) return;
+  function setRoom(owner) {
+    const prior = doorRow();
+    if (prior) {
+      const leaf = L?.doors?.get(prior.u);
+      if (leaf) leaf.userData.hinge.rotation.y = 0;
+    }
     roomOwner = owner;
-    activeRoomId = nextRoomId;
     const r = owner && doorRow();
     if (L) L.s.openHome = r?.h || null;
     roomLamp.visible = !!r;
@@ -491,79 +486,96 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
     }
     if (r) {
       if (!L.s.roomDetail?.has(owner)) nature(L, false);
-      const activeRm = rm || roomPlan(r.h).rooms[0];
+      const leaf = L.doors?.get(owner);
+      if (leaf) leaf.userData.hinge.rotation.y = 1.52;
+      const p = roomPlan(r.h);
       roomLamp.position.fromArray(
         L.s.worldXYZ(
-          ...localPoint(r.h, activeRm.design.lampX, activeRm.design.lampZ),
-          L.s.ground(...r.h.centre) + activeRm.top - 0.55,
+          ...localPoint(r.h, p.design.lampX, p.design.lampZ),
+          L.s.ground(...r.h.centre) + p.top - 0.63,
         ),
       );
     }
-    if (changedOwner) {
-      host.classList.toggle("in-room", !!r);
-      q("#room-notice").textContent = msg(r ? "home.inside" : "home.outside");
-      once = true;
-      camState = {};
-      stamp = -1e9;
-    }
+    host.classList.toggle("in-room", !!r);
+    doorBtn.hidden = true;
+    once = true;
+    camState = {};
+    stamp = -1e9;
     dirty = true;
   }
-  function updateHouseDoors(dt) {
-    if (!L?.doors?.size) return;
-    L.s.doorAngles ??= new WeakMap();
-    for (const [u, leaf] of L.doors) {
-      const entries = leaf?.userData?.doors;
-      if (!entries?.length) continue;
-      const row = L.all.find((r) => r[2] === u),
-        h = row?.[5];
-      if (!h) continue;
-      const baseZ = L.s.ground(...h.centre);
-      let angleMap = L.s.doorAngles.get(h);
-      if (!angleMap) {
-        angleMap = new Map();
-        L.s.doorAngles.set(h, angleMap);
-      }
-      for (const entry of entries) {
-        const distM = Math.hypot(x - entry.gx, y - entry.gy) * U,
-          vertM = Math.abs(motor.root - (baseZ + entry.floor)),
-          alreadyOpen = entry.angle > 0.25,
-          wantOpen = alreadyOpen
-            ? distM <= 2.75 && vertM <= 1.75
-            : distM <= 2.35 && vertM <= 1.45,
-          target = wantOpen ? entry.maxAngle : 0,
-          diff = target - entry.angle;
-        if (Math.abs(diff) > 0.002) {
-          const rate = wantOpen ? 9.6 : 5.2;
-          entry.angle =
-            Math.abs(diff) < 0.006
-              ? target
-              : entry.angle + diff * (1 - Math.exp(-dt * rate));
-          entry.hinge.rotation.y = entry.swingSign * entry.angle;
-          dirty = true;
-        }
-        angleMap.set(entry.id, entry.angle);
-      }
+  function nearbyDoor() {
+    if (!L || !canPlay() || !motor.grounded || motor.swim) return null;
+    if (roomOwner) return doorRow();
+    for (const r of homesAt(L.s, x, y)) {
+      const p = roomPlan(r),
+        [u, w] = roomLocal(r, x, y),
+        d = w - p.front;
+      if (
+        d >= -0.08 &&
+        d <= 2.6 &&
+        Math.hypot(u - p.door, d) <= 2.65 &&
+        Math.abs(u - p.door) <= 1.05
+      )
+        return L.sc?.userData.near.find((v) => v.h === r);
+    }
+    return null;
+  }
+  function promptDoor() {
+    const r = nearbyDoor();
+    doorBtn.hidden = !r;
+    if (!r) return;
+    const text = msg(roomOwner ? "home.leave" : "home.enter");
+    if (doorBtn.firstElementChild.nextElementSibling.textContent !== text) {
+      doorBtn.querySelector("span").textContent = text;
+      doorBtn.title = text + " · E";
+      doorBtn.setAttribute("aria-label", text);
     }
   }
-  function syncIndoorState() {
-    if (!L || mode !== "ground") {
-      if (roomOwner) setRoom(null);
-      return;
-    }
-    let insideHit = null;
-    for (const h of homesAt(L.s, x, y)) {
-      const rm = activeRoomAt(L.s, h, x, y, motor.root);
-      if (rm && !rm.isBalcony) {
-        const near = L.sc?.userData.near.find((v) => v.h === h);
-        if (near) {
-          insideHit = { owner: near.u, rm };
-          break;
-        }
-      }
-    }
-    if (insideHit) setRoom(insideHit.owner, insideHit.rm);
-    else if (roomOwner) setRoom(null);
+  function useDoor() {
+    const r = nearbyDoor();
+    if (!r) return;
+    const entering = !roomOwner,
+      p = roomPlan(r.h),
+      [X, Y] = doorPoint(r.h, entering ? -1.05 : 1.16);
+    if (houseBlocked(r.h, X, Y, entering)) return;
+    neutral();
+    setRoom(entering ? r.u : null);
+    x = motor.x = X;
+    y = motor.y = Y;
+    const [tx, ty] = localPoint(
+      r.h,
+      p.furniture[0]?.x ?? p.cx,
+      p.furniture[0]?.z ?? p.cz,
+    );
+    const front = basis(r.h).yaw,
+      target = Math.atan2(X - tx, ty - Y);
+    yaw = entering
+      ? front +
+        clamp(
+          Math.atan2(Math.sin(target - front), Math.cos(target - front)),
+          -0.56,
+          0.56,
+        )
+      : front + Math.PI;
+    pitch = entering ? -0.135 : 0.015;
+    motor.yaw = yaw;
+    motor.up = motor.air = motor.vx = motor.vy = motor.speed = 0;
+    motor.grab = null;
+    motor.grounded = true;
+    motor.recontact(L.s, walker.H);
+    lastBodyYaw = yaw;
+    portrait = false;
+    lastHud = -1e8;
+    walker.reset();
+    ui.wake();
+    promptDoor();
+    q("#room-notice").textContent = msg(
+      entering ? "home.inside" : "home.outside",
+    );
+    canvas.focus({ preventScroll: true });
+    bookmark(true, true);
   }
+  on(doorBtn, "click", useDoor);
   const rates = { walk: 1.75, jog: 4.15 },
     pad = new StandardPad();
   const canPlay = () =>
@@ -582,7 +594,7 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
     else navigator.vibrate?.(n);
   };
   const activeJump = () => {
-    if (canPlay()) {
+    if (canPlay() && !roomOwner) {
       motor.jump();
       ui.lesson("jump");
       buzz(12);
@@ -1075,17 +1087,8 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
     l.group.add(l.sc);
     const infrastructure = works(l.s, l.villages, p, false);
     l.sc.add(infrastructure);
-    const villagePaths = l.villages.flatMap((q) => q.paths);
-    const ham = hamletScene(
-      l.s,
-      l.all,
-      l.s.commons,
-      p,
-      gov.tier,
-      villagePaths,
-    );
+    const ham = hamletScene(l.s, l.all, l.s.commons, p, gov.tier);
     l.sc.add(ham);
-    l.ham = ham;
     l.communitySolids = ham.userData.solids;
     if (l.all.some((r) => Math.hypot(r[0] + 0.5 - p.x, r[1] + 0.5 - p.y) < 6)) {
       l.farms = farms(
@@ -1093,7 +1096,7 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
         p,
         gov.tier,
         calendar(calendarAt, worldConfig).year,
-        villagePaths,
+        l.villages.flatMap((q) => q.paths),
       );
       l.sc.add(l.farms);
     }
@@ -1107,7 +1110,7 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
           (r) =>
             r[2] === roomOwner ||
             Math.hypot(r[5].centre[0] - p.x, r[5].centre[1] - p.y) * U <
-              (gov.tier ? 68 : 42),
+              (gov.tier ? 42 : 20),
         )
         .map((r) => r[2]),
     );
@@ -1116,7 +1119,7 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
     l.paths = l.villages.reduce((n, v) => n + v.paths.length, 0);
     const stones = wayside(
       l.s,
-      villagePaths,
+      l.villages.flatMap((v) => v.paths),
       p,
       walkArt,
     );
@@ -1137,19 +1140,8 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
     l.doors = homes.userData.doors || new Map();
     const occupied = roomOwner && doorRow(l);
     l.s.openHome = occupied?.h || null;
-    if (l.s.doorAngles) {
-      for (const [uid, leaf] of l.doors) {
-        const row = l.all.find((r) => r[2] === uid),
-          saved = row?.[5] && l.s.doorAngles.get(row[5]);
-        if (saved && leaf?.userData?.doors) {
-          for (const entry of leaf.userData.doors) {
-            const ang = saved.get(entry.id) || 0;
-            entry.angle = ang;
-            entry.hinge.rotation.y = entry.swingSign * ang;
-          }
-        }
-      }
-    }
+    if (occupied && l.doors.has(roomOwner))
+      l.doors.get(roomOwner).userData.hinge.rotation.y = 1.52;
     l.nightMeshes = [];
     l.sc.traverse((m) => {
       if (m.userData.glow != null) l.nightMeshes.push(m);
@@ -1450,7 +1442,7 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
           l.pickGround.push(o);
         }
       });
-      s.floor = (x, y, refZ) => support(s, x, y, [], refZ);
+      s.floor = (x, y) => support(s, x, y, []);
       l.drain = new RunoffWindow(s, {
         renderer,
         uniforms: mats.uniforms,
@@ -2203,6 +2195,7 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
       pads = act ? navigator.getGamepads?.() : null;
     } catch {}
     const gp = pad.poll(pads, act);
+    if (gp.use) useDoor();
     if (gp.down) activeJump();
     if (gp.up) motor.releaseJump();
     if (gp.lookX || gp.lookY) {
@@ -2291,9 +2284,8 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
         ].filter((o) => o.top),
       };
       const rocks = L.supports.rocks;
-      S.floor = (x, y, refZ) => support(S, x, y, rocks, refZ);
+      S.floor = (x, y) => support(S, x, y, rocks);
     }
-    updateHouseDoors(h);
     const resetCamera = once && !camState.arm;
     if (
       prefs.recenter &&
@@ -2341,7 +2333,7 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
       vel: motor.speed,
       depth: motor.depth,
       swim: motor.swim,
-      ground: ([X, Z]) => S.floor(O.x + X / U, O.y - Z / U, motor.root).z,
+      ground: ([X, Z]) => S.floor(O.x + X / U, O.y - Z / U).z,
       root: motor.touch.z,
       at: [ma[0], ma[2]],
       yaw: motor.yaw,
@@ -2373,7 +2365,17 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
       heading = motor.yaw,
       at = [local[0], local[2]],
       wet = motor.depth > 0.074;
-    syncIndoorState();
+    const visited = roomOwner && doorRow();
+    if (visited) {
+      const h = visited.h,
+        p = roomPlan(h),
+        [u, v] = roomLocal(h, x, y);
+      if (v > p.front + 0.53) {
+        setRoom(null);
+        q("#room-notice").textContent = msg("home.outside");
+      }
+    }
+    promptDoor();
     avatar.visible = third && !roomOwner;
     avatar.position.set(...point);
     avatar.rotation.set(0, heading, 0);
@@ -2514,7 +2516,7 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
     tracks.update(h);
     const hop = q("#hop"),
       pace = q("#pace"),
-      disabled = motor.swim || motor.depth >= 0.68;
+      disabled = !!roomOwner || motor.swim || motor.depth >= 0.68;
     if (hop.disabled !== disabled) hop.disabled = disabled;
     if (pace.getAttribute("aria-pressed") !== String(run))
       pace.setAttribute("aria-pressed", String(run));
@@ -3426,6 +3428,13 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
       return;
     }
     if (!expanded && e.target !== canvas) return;
+    if (e.target === doorBtn && (e.code === "Space" || e.code === "Enter"))
+      return;
+    if (e.code === "KeyE" && canPlay() && nearbyDoor()) {
+      e.preventDefault();
+      if (!e.repeat) useDoor();
+      return;
+    }
     if (
       sheet.hidden &&
       mode === "ground" &&
@@ -3767,8 +3776,7 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
         rms: mixer.meter(),
       },
       room: roomOwner,
-      roomId: activeRoomId,
-      doorAction: false,
+      doorAction: !doorBtn.hidden,
       weatherParticles: !!(fx.group.visible && fx.rain.visible),
       cameraMode: third && !roomOwner ? "third" : "first",
       frames: fr,

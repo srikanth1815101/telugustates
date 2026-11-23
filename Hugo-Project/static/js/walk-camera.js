@@ -107,15 +107,13 @@ export function followCamera(
       )
         return true;
     if (Y < Math.min(hit.z + 1.6, fenceTop(fences, gx, gy) + 0.17)) return true;
-    for (const h of homes || []) {
-      const baseZ = s.ground(...h.centre);
+    for (const h of homes || [])
       if (
         Math.hypot(gx - h.centre[0], gy - h.centre[1]) < 0.33 &&
-        Y < baseZ + h.size_m[2] + 0.15 &&
-        houseBlocked(h, gx, gy, s.doorAngles?.get(h) ?? false, 0.43, Y, baseZ)
+        Y < s.ground(...h.centre) + h.size_m[2] + 0.15 &&
+        houseBlocked(h, gx, gy, false, 0.43)
       )
         return true;
-    }
     return false;
   }
   // Lift the desired endpoint at a bank; sweep the full boom so an intervening ridge or wall cannot be pierced.
