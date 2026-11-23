@@ -384,32 +384,7 @@ export function makeHouse(s, h, u, distance, tier, put) {
         }
       }
     } else {
-      if (S === 5) {
-        // Keep the balcony INSIDE the covered footprint: recess the upper floor.
-        // When mid/hollow is active, buildRoom() builds both hollow ground & upper floors!
-        const f = wallH * 0.5 + 0.15,
-          cut = bd * 0.22;
-        if (!hollow) {
-          (hi ? soft : box)(
-            px,
-            (f + foundation) / 2,
-            pz,
-            bw - 0.1,
-            f - foundation,
-            bd - 0.1,
-            wall,
-          );
-          (hi ? soft : box)(
-            px,
-            (H - 0.48 + f) / 2,
-            pz - cut / 2,
-            bw - 0.12,
-            H - 0.48 - f,
-            bd - cut - 0.12,
-            tint(wall, 0.024),
-          );
-        }
-      } else if (!hollow)
+      if (!hollow)
         (hi ? soft : box)(
           px,
           foundation + coreH / 2,
@@ -421,11 +396,11 @@ export function makeHouse(s, h, u, distance, tier, put) {
         );
       if (mid && !hollow) {
         box(px, 0.2, pz, bw, 0.4, bd, tint(wall, -0.2));
-        if (S !== 5 && S !== 7)
+        if (S !== 7)
           box(px, top - 0.11, pz, bw, 0.2, bd, tint(wall, 0.08));
       }
-      if (S === 4 || S === 5 || S === 10) {
-        const slabY = S === 5 ? H - 0.36 : coreH + 0.34,
+      if (S === 4) {
+        const slabY = coreH + 0.34,
           ter = plan?.terrace,
           rx = ter ? (ter.x0 + ter.x1) * 0.5 : px,
           rw = ter ? ter.x1 - ter.x0 : bw;
@@ -456,63 +431,7 @@ export function makeHouse(s, h, u, distance, tier, put) {
               );
           }
         }
-        if (S === 4 && first) {
-          const tank = H - slabY - 0.23,
-            tx = px + bw * (ter ? 0.12 : 0.21),
-            tz = pz - bd * 0.17;
-          drum(tx, slabY + 0.14 + tank / 2, tz, 2.28, tank, 2.28, "#657776");
-          if (hi)
-            for (const k of [0.13, 0.52, 0.87])
-              drum(tx, slabY + 0.14 + tank * k, tz, 2.34, 0.1, 2.34, "#82918a");
-        }
-        if (S === 5 && first) {
-          const f = wallH * 0.5 + 0.15,
-            front = pz + bd / 2,
-            back = front - bd * 0.22;
-          if (!hollow) box(px, f, front - bd * 0.11, bw, 0.21, bd * 0.22, sill);
-          if (mid)
-            for (const side of [-1, 1])
-              box(
-                px + side * (bw / 2 - 0.16),
-                (slabY + f - 0.08) / 2,
-                front - 0.15,
-                0.23,
-                slabY - f - 0.08,
-                0.23,
-                tint(wall, 0.08),
-              );
-          if (mid) {
-            box(px, f + 0.95, front - 0.095, bw, 0.09, 0.12, wood);
-            box(px, f + 0.47, front - 0.095, bw, 0.09, 0.09, lime);
-            for (const side of [-1, 1])
-              box(
-                px + side * (bw / 2 - 0.075),
-                f + 0.95,
-                front - bd * 0.11,
-                0.13,
-                0.11,
-                bd * 0.22,
-                wood,
-              );
-            for (let j = 0; j < (hi ? 9 : 4); j++)
-              box(
-                px + bw * (-0.47 + (0.94 * j) / (hi ? 8 : 3)),
-                f + 0.46,
-                front - 0.095,
-                0.082,
-                0.93,
-                0.082,
-                lime,
-              );
-            // Warm upper balcony lantern
-            paint("window-" + (seed % 4), "orb", px, slabY - 0.24, front - bd * 0.11, 0.2, 0.22, 0.2, "#ffe3a8");
-            if (!hollow) {
-              box(px - bw * 0.18, f + 0.95, back + 0.02, 1.04, 1.9, 0.13, teak);
-              box(px + bw * 0.2, f + 1.23, back + 0.03, 1.58, 1.1, 0.13, lime);
-              box(px + bw * 0.2, f + 1.23, back + 0.12, 1.37, 0.9, 0.09, night);
-            }
-          }
-        }
+
       } else if (S === 7) {
         paint(
           "lean-fascia",
@@ -554,7 +473,7 @@ export function makeHouse(s, h, u, distance, tier, put) {
               0.065,
             );
       } else {
-        const g = [0, 2, 8].includes(S) ? "hipped" : "gabled";
+        const g = [0, 2, 5, 8].includes(S) ? "hipped" : "gabled";
         clad(px, pz, bw, bd, g, top, H - top, roof);
         if (S === 2 && hi)
           for (let k = 0; k < 3; k++) {
@@ -597,17 +516,7 @@ export function makeHouse(s, h, u, distance, tier, put) {
           continue;
         }
         box(wx, 1.76, front, ww + 0.18, 1.12, 0.12, lime);
-        paint(
-          "window-" + (seed % 4),
-          "slab",
-          wx,
-          1.78,
-          front + 0.075,
-          ww,
-          0.91,
-          0.12,
-          night,
-        );
+        box(wx, 1.78, front + 0.075, ww, 0.91, 0.12, shade);
         if (hi) {
           box(wx, 1.78, front + 0.16, 0.075, 0.93, 0.07, brass);
           box(wx, 1.69, front + 0.16, ww, 0.065, 0.07, brass);
@@ -773,16 +682,14 @@ export function makeHouse(s, h, u, distance, tier, put) {
       queueMuggu(s, h, plan.door, mugguZ, yaw);
     }
     // Warm porch lantern beside front door
-    paint(
-      "window-" + (seed % 4),
-      "orb",
+    box(
       plan.door + (plan.dw * 0.5 + 0.34),
       plan.floor + plan.dh - 0.14,
       plan.front + 0.16,
       0.18,
       0.22,
       0.18,
-      "#ffe2a2",
+      wood,
     );
     box(
       plan.door + (plan.dw * 0.5 + 0.34),

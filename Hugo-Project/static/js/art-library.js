@@ -60,22 +60,11 @@ export function loadModel(id) {
 }
 export const loadPeople = () =>
   Promise.all(["traveller-man", "traveller-woman"].map(loadModel));
-// Village life: rigged Atlas humans & domestic animals for the commons, plus open-source
-// CC0 Kenney props (Fantasy Town, Survival and Furniture kits) baked into Atlas mesh format.
+// Village life: open-source CC0 Kenney props (Fantasy Town, Survival and Furniture kits)
+// baked into Atlas mesh format. Atlas character/cattle rigs were removed by owner decision —
+// the commons carries ambient birds and butterflies only.
 // Missing files degrade gracefully to the procedural underlay instead of failing the walk.
-export const VILLAGE_HUMANS = ["traveller-man", "traveller-woman"],
-  VILLAGE_ANIMALS = [
-    "atlas-cow",
-    "atlas-bullock",
-    "atlas-buffalo",
-    "atlas-goat",
-    "atlas-hen",
-    "atlas-chick",
-    "atlas-village-dog",
-    "atlas-yard-cat",
-    "atlas-peafowl",
-  ],
-  VILLAGE_PROPS = [
+export const VILLAGE_PROPS = [
     "kenney-cart",
     "kenney-stall",
     "kenney-stall-red",
@@ -91,9 +80,7 @@ export const VILLAGE_HUMANS = ["traveller-man", "traveller-woman"],
     "kenney-plant-small",
   ];
 export const loadVillageLife = () =>
-  Promise.allSettled(
-    [...VILLAGE_ANIMALS, ...VILLAGE_PROPS].map((id) => loadModel(id)),
-  );
+  Promise.allSettled(VILLAGE_PROPS.map((id) => loadModel(id)));
 export const PROP_IDS = new Set(VILLAGE_PROPS);
 // Shared geometry for an open-source prop, or null when it is not loaded (never throws).
 export function propForm(id) {

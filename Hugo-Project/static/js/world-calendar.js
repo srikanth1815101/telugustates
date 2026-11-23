@@ -44,14 +44,6 @@ export function calendar(now, cfg, mode = "shared4", hour = 12) {
     phase,
   };
 }
-export function windowLight(group, day, hour, storm = 0) {
-  const dusk = Math.max(
-    0,
-    Math.min(1, (0.48 - day + 0.16 * storm - (group % 4) * 0.055) * 3.5),
-  );
-  let asleep = hour >= 1 && hour < 5;
-  return dusk * (asleep && group % 4 !== 0 ? 0.05 : 1);
-}
 // Smooth small wall-clock corrections between paints; large changes and app resume re-anchor.
 export function disciplinedClock() {
   let base, previous;
