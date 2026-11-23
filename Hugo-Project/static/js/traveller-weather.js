@@ -9,7 +9,7 @@ export function wornWeather(R, mat, style) {
     for (let i = 0; i < a.length; i++) {
       const r = c.getX(i),
         y = p.getY(i),
-        skin = Math.abs(r - (style === "man" ? 0.3813 : 0.402)) < 0.003,
+        skin = Math.abs(r - (style === "man" ? 0.6172 : 0.4938)) < 0.003,
         hair = r < 0.06 && y > 1.4;
       a[i] = skin ? 0.14 : hair ? 0.53 : r > 0.57 && r < 0.61 ? 0.42 : 1;
     }
