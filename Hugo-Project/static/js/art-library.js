@@ -39,18 +39,6 @@ export function loadModel(id) {
       j.geom = g;
       for (const clip of Object.values(j.clips))
         clip.poses = clip.poses.map((a) => Float32Array.from(a));
-    } else if (j.type === "prop") {
-      const g = new T.BufferGeometry();
-      g.setAttribute("position", new T.Float32BufferAttribute(j.p, 3));
-      g.setAttribute("normal", new T.Float32BufferAttribute(j.n, 3));
-      g.setAttribute("color", new T.Float32BufferAttribute(j.c, 3));
-      g.setIndex(j.i);
-      delete j.p;
-      delete j.n;
-      delete j.c;
-      delete j.i;
-      g.computeBoundingSphere();
-      j.geom = g;
     }
     resources.set(id, j);
     return j;
@@ -60,48 +48,6 @@ export function loadModel(id) {
 }
 export const loadPeople = () =>
   Promise.all(["traveller-man", "traveller-woman"].map(loadModel));
-// Village life: open-source CC0 Kenney props (Fantasy Town, Survival and Furniture kits)
-// baked into Atlas mesh format. Atlas character/cattle rigs were removed by owner decision —
-// the commons carries ambient birds and butterflies only.
-// Missing files degrade gracefully to the procedural underlay instead of failing the walk.
-export const VILLAGE_PROPS = [
-    "kenney-cart",
-    "kenney-stall",
-    "kenney-stall-red",
-    "kenney-stall-bench",
-    "kenney-lantern",
-    "kenney-chest",
-    "kenney-bench",
-    "kenney-desk",
-    "kenney-lounge-sofa",
-    "kenney-coffee-table",
-    "kenney-bookcase",
-    "kenney-potted-plant",
-    "kenney-plant-small",
-  ];
-export const loadVillageLife = () =>
-  Promise.allSettled(VILLAGE_PROPS.map((id) => loadModel(id)));
-export const PROP_IDS = new Set(VILLAGE_PROPS);
-// Shared geometry for an open-source prop, or null when it is not loaded (never throws).
-export function propForm(id) {
-  const d = resources.get(id);
-  return d?.type === "prop" ? d.geom : null;
-}
-export function propBox(id) {
-  const d = resources.get(id);
-  return d?.type === "prop" ? d.bb : null;
-}
-let propLambert;
-// One shared lit material for every baked open-source prop (vertex-colour, double-sided).
-export const propMaterial = () =>
-  (propLambert ??= new T.MeshLambertMaterial({
-    vertexColors: true,
-    side: T.DoubleSide,
-  }));
-export const rigReady = (id) => {
-  const d = resources.get(id);
-  return d?.type === "rig";
-};
 export async function loadPatch(items) {
   await catalog();
   await Promise.all(

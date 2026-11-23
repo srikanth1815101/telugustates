@@ -1,13 +1,13 @@
 #public-home {
   padding-block: 22px 50px;
-  --forest: var(--green-deep);
+  --forest: #254c3a;
 }
 .land-hero {
   display: grid;
   grid-template-columns: 1.25fr 1fr;
-  background: #f6ead0;
+  background: #eaf0e1;
   overflow: hidden;
-  border: 1px solid #e0cfa8;
+  border: 1px solid #c4d3be;
   border-radius: 18px;
   margin: 5px 0 24px;
 }
@@ -16,15 +16,17 @@
 }
 .land-hero h1 {
   font:
-    500 clamp(43px, 6vw, 82px) / 1.02 var(--head);
+    500 clamp(43px, 6vw, 82px) / 1.02 Fraunces,
+    "Noto Sans Telugu",
+    serif;
   letter-spacing: -0.045em;
   margin: 14px 0;
-  color: var(--green-deep);
+  color: #203e2e;
 }
 .land-hero p {
   max-width: 42ch;
   line-height: 1.65;
-  color: var(--muted);
+  color: #425649;
 }
 .land-hero figure {
   position: relative;
@@ -42,8 +44,8 @@
   bottom: 12px;
   left: 12px;
   border-radius: 20px;
-  background: var(--hud);
-  color: var(--hud-text);
+  background: #173427df;
+  color: #faf7e6;
   padding: 4px 12px;
   font-size: 12px;
 }
@@ -69,7 +71,9 @@
 }
 #public-home h2 {
   font:
-    500 clamp(24px, 3.4vw, 40px) / 1.2 var(--head);
+    500 clamp(24px, 3.4vw, 40px) / 1.2 Fraunces,
+    "Noto Sans Telugu",
+    serif;
   margin: 10px 0 15px;
 }
 #public-home .card-head h2 {
@@ -87,9 +91,9 @@
 .treasury,
 #recent-homes {
   padding: clamp(19px, 3.2vw, 36px);
-  border: 1px solid var(--line);
+  border: 1px solid #c9d4c4;
   border-radius: 14px;
-  background: var(--panel);
+  background: #fffdf6;
 }
 .join li {
   margin: 6px 0;
@@ -103,7 +107,7 @@
   min-width: 12ch;
   flex: 1;
   padding: 9px;
-  border: 1px solid var(--line);
+  border: 1px solid #9cab94;
   border-radius: 7px;
   font: inherit;
 }
@@ -112,7 +116,7 @@
   margin: 20px 0;
 }
 .treasury {
-  background: #f6edda;
+  background: #edf2e8;
 }
 #balances {
   display: flex;
@@ -122,11 +126,12 @@
 #balances strong {
   display: block;
   font:
-    32px var(--head);
+    32px Fraunces,
+    serif;
 }
 .scenic p,
 .treasury p {
-  color: var(--muted);
+  color: #405a47;
 }
 #scenic-cards {
   display: grid;
@@ -137,7 +142,7 @@
   display: block;
   color: inherit;
   text-decoration: none;
-  border: 1px solid var(--line);
+  border: 1px solid #d2dbc9;
   border-radius: 10px;
   overflow: hidden;
   background: white;
@@ -153,7 +158,7 @@
   margin: 6px 12px;
 }
 .scenic-card small {
-  color: var(--muted);
+  color: #526650;
 }
 .text-link {
   background: none;
@@ -182,14 +187,14 @@ body.walking.paper-map.public-edition #public-home {
 }
 #progress:not([hidden]) {
   padding: 11px 15px;
-  background: #f6edda;
-  border-left: 3px solid var(--leaf);
+  background: #edf1df;
+  border-left: 3px solid #577b52;
 }
 .public-edition #world .world-sheet input[type="range"] {
   max-width: 100%;
 }
 .public-edition :focus-visible {
-  outline: 3px solid var(--terra-deep);
+  outline: 3px solid #985623;
   outline-offset: 2px;
 }
 @media (max-width: 650px) {
@@ -227,8 +232,8 @@ body.walking.paper-map.public-edition #public-home {
 }
 /* Nature walk edition: the map folio, not a second splash screen. */
 body.public-edition {
-  background: linear-gradient(150deg, #f5f4e8, #f8f7ee 36%, #f1e4c8);
-  color: var(--ink);
+  background: linear-gradient(150deg, #f5f4e8, #f8f7ee 36%, #eff2e5);
+  color: #243e31;
 }
 #public-home .titlebar {
   padding-block: 20px 16px;
@@ -236,34 +241,34 @@ body.public-edition {
 #public-home .titlebar h1,
 #public-home .journeys h2,
 #public-home .find-inner h2 {
-  color: var(--green-deep);
+  color: #193d2e;
 }
 #public-home .titlebar h1 span,
 #public-home .find-inner h2 span,
 #public-home .journeys h2 span {
-  color: var(--terra);
+  color: #8a7940;
 }
 #public-home .map-card {
-  background: var(--panel);
+  background: #fbfbef;
 }
 #public-home #map-wrap {
   height: clamp(320px, 53vh, 545px);
-  background: linear-gradient(135deg, #e9dfc4, #f2e6cd 58%, #ded3b4);
+  background: linear-gradient(135deg, #e3ead6, #ecebd8 58%, #d0ddd0);
 }
 #public-home #find .primary {
   width: 100%;
-  background: linear-gradient(115deg, var(--terra), #d8763f);
+  background: linear-gradient(115deg, #244b35, #396446);
   color: #fffbea;
 }
 #public-home .sample-acres {
-  border-top: 1px solid var(--line);
+  border-top: 1px solid #d4dac7;
   margin-top: 16px;
   padding-top: 12px;
 }
 #public-home .sample-acres small {
   font-size: 11px;
   font-weight: 700;
-  color: var(--muted);
+  color: #52624e;
 }
 #sample-links {
   display: flex;
@@ -278,8 +283,8 @@ body.public-edition {
   font: 600 12px var(--body);
   padding: 4px 8px;
   border-radius: 7px;
-  background: #f6edda;
-  color: var(--green-deep);
+  background: #e8efdd;
+  color: #294e36;
   text-decoration: none;
 }
 #scenic-cards {
@@ -294,7 +299,7 @@ a.scenic-card {
   border: 0;
   border-radius: 10px;
   color: #fffcef;
-  background: var(--green);
+  background: #536b50;
 }
 a.scenic-card img {
   position: absolute;
@@ -308,7 +313,7 @@ a.scenic-card:after {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(0deg, #1b241ee8, transparent 92%);
+  background: linear-gradient(0deg, #152d24e8, transparent 92%);
   z-index: -1;
 }
 a.scenic-card div {
@@ -318,17 +323,19 @@ a.scenic-card div {
 }
 a.scenic-card span {
   font:
-    600 clamp(16px, 2vw, 25px) / 1.15 var(--head);
+    600 clamp(16px, 2vw, 25px) / 1.15 Fraunces,
+    NotoTelugu,
+    serif;
   margin: 3px 0;
 }
 a.scenic-card small {
   font: 650 10px/1.25 var(--body);
-  color: var(--hud-dim);
+  color: #e4ebda;
   margin: 0;
 }
 .public-edition .treasury {
   border-radius: 14px;
-  background: linear-gradient(150deg, #fdf3da, #f6ead0);
+  background: linear-gradient(145deg, #f7f6e9, #e6eddb);
   padding: clamp(16px, 3.4vw, 38px);
 }
 .public-edition #balances {
@@ -341,15 +348,15 @@ a.scenic-card small {
   grid-template-columns: 24px 1fr;
   align-items: center;
   gap: 4px 9px;
-  border: 1px solid var(--line);
-  background: var(--panel);
+  border: 1px solid #d5ddc7;
+  background: #fbfaef;
   border-radius: 9px;
   padding: 10px;
 }
 .resource i {
   display: grid;
   place-items: center;
-  color: var(--leaf);
+  color: #587151;
 }
 .resource svg {
   width: 23px;
@@ -358,16 +365,18 @@ a.scenic-card small {
 .resource span {
   grid-column: 1/-1;
   font: 600 11px var(--body);
-  color: var(--muted);
+  color: #526451;
   line-height: 1.3;
 }
 #balances .resource strong {
   font:
-    600 24px/1 var(--head);
+    600 24px/1 Fraunces,
+    NotoTelugu,
+    serif;
   font-variant-numeric: tabular-nums;
 }
 .resource-gold i {
-  color: var(--gold-deep);
+  color: #937530;
 }
 .resource-currency i {
   color: #887041;
@@ -405,9 +414,9 @@ a.scenic-card small {
   min-width: 44px;
   min-height: 44px;
   padding: 9px;
-  background: var(--hud);
+  background: #254333b9;
   color: #fffbea;
-  border: 1px solid var(--hud-line);
+  border: 1px solid #e4ead28f;
   box-shadow: 0 1px 4px #15241426;
 }
 #world #world-menu {
@@ -422,10 +431,9 @@ a.scenic-card small {
   gap: 9px;
 }
 #world .pace-panel button[aria-pressed="true"] {
-  background: var(--gold);
-  color: #33240c;
-  border-color: var(--gold-deep);
-  box-shadow: inset 0 0 0 2px rgba(51, 36, 12, 0.35), 0 3px 0 #7a5510;
+  background: #d7e8b4;
+  color: #1b442e;
+  box-shadow: inset 0 0 0 2px #4c7952;
 }
 #world .joystick,
 #world.walk-view .joystick {
@@ -434,33 +442,9 @@ a.scenic-card small {
   left: calc(var(--pad-l) + 16px);
   right: auto;
   bottom: calc(var(--pad-b) + 14px);
-  background: radial-gradient(circle at 50% 42%, rgba(70, 92, 74, 0.55), rgba(18, 26, 21, 0.78));
+  background: radial-gradient(circle at 50% 42%, #6983665c, #253c2c70);
   width: 68px;
   height: 68px;
-}
-@media (orientation: landscape) {
-  #world .joystick,
-  #world.walk-view .joystick {
-    bottom: calc(var(--pad-b) + clamp(46px, 14dvh, 76px));
-    left: calc(var(--pad-l) + clamp(24px, 3vw, 40px));
-    right: auto;
-  }
-  #world.left-handed .joystick,
-  #world.walk-view.left-handed .joystick {
-    left: auto;
-    right: calc(var(--pad-r) + clamp(24px, 3vw, 40px));
-  }
-  #world .pace-panel {
-    bottom: calc(var(--pad-b) + clamp(50px, 15dvh, 80px));
-    right: calc(var(--pad-r) + clamp(22px, 2.8vw, 38px));
-  }
-  #world.left-handed .pace-panel {
-    right: auto;
-    left: calc(var(--pad-l) + clamp(22px, 2.8vw, 38px));
-  }
-  .orbit-tools {
-    bottom: calc(var(--pad-b) + clamp(22px, 6.5dvh, 36px));
-  }
 }
 #world.groundless .pace-panel,
 #world.groundless .joystick,
@@ -483,10 +467,10 @@ a.scenic-card small {
   display: block;
   width: clamp(54px, 13vmin, 73px);
   aspect-ratio: 1;
-  border: 1.4px solid var(--hud-line);
+  border: 1.4px solid #f7f5d9bb;
   border-radius: 7px;
   box-shadow: 0 1px 4px #15241440;
-  background: var(--muted);
+  background: #a8b493;
 }
 #world .walk-corner #place-chip {
   min-height: 0;
@@ -497,7 +481,7 @@ a.scenic-card small {
   border-radius: 5px;
   text-align: right;
   color: #f8fbec;
-  background: var(--hud);
+  background: #223c2ccf;
   box-shadow: none;
   pointer-events: auto;
 }
@@ -515,7 +499,7 @@ a.scenic-card small {
 #world .walk-corner #place-chip small {
   font-size: 9px;
   font-weight: 500;
-  color: var(--hud-dim);
+  color: #e2ebd7;
 }
 #world .world-sheet {
   left: calc(var(--pad-l) + 8px);
@@ -525,14 +509,14 @@ a.scenic-card small {
 }
 #world .quick-settings {
   padding: 4px 0 12px;
-  border-bottom: 1px solid var(--hud-line);
+  border-bottom: 1px solid #d1dac6;
 }
 .quick-settings button {
   padding: 6px 10px;
-  border: 1px solid var(--hud-line);
+  border: 1px solid #c4d2bc;
   border-radius: 8px;
-  background: #141d17;
-  color: var(--hud-text);
+  background: #e9efdc;
+  color: #284833;
 }
 .quick-settings label {
   display: flex;
@@ -626,9 +610,9 @@ a.scenic-card small {
   align-items: center;
   gap: 0.35rem 0.65rem;
   padding: 0.65rem 0.8rem;
-  background: #f6edda;
+  background: #e6eadf;
   border-radius: 0.75rem;
-  color: var(--ink);
+  color: #203d34;
 }
 #orbit-read {
   font-variant-numeric: tabular-nums;
@@ -639,13 +623,13 @@ a.scenic-card small {
   grid-column: 1/-1;
   width: 100%;
   min-width: 0;
-  accent-color: var(--green);
+  accent-color: #315d4b;
   margin: 0;
 }
 #world .orbit-help {
   grid-column: 1/-1;
   line-height: 1.45;
-  color: var(--muted);
+  color: #566258;
 }
 
 #world.groundless .walk-corner {
@@ -662,11 +646,11 @@ a.scenic-card small {
   align-items: center;
   gap: 3px;
   color: #fffbe9;
-  background: var(--hud);
-  border: 1px solid var(--hud-line);
+  background: #203c34eb;
+  border: 1px solid #e2d9b780;
   border-radius: 30px;
   padding: 0 3px;
-  box-shadow: 0 2px 8px rgba(8, 14, 10, 0.28);
+  box-shadow: 0 2px 8px #24352f26;
   font-variant-numeric: tabular-nums;
 }
 .orbit-tools[hidden] {
@@ -726,7 +710,7 @@ a.scenic-card small {
   font-size: 12px;
   font-weight: 650;
   margin-bottom: 5px;
-  color: var(--muted);
+  color: #50635a;
 }
 #world .quick-settings .field-tool {
   display: inline-grid;
@@ -736,9 +720,9 @@ a.scenic-card small {
   min-width: 46px;
   height: 44px;
   padding: 0;
-  background: var(--panel);
-  color: var(--green-deep);
-  border: 1px solid var(--line);
+  background: #f5f5eb;
+  color: #274d3d;
+  border: 1px solid #b8c7b7;
   border-radius: 12px;
 }
 #world .field-tool svg {
@@ -746,12 +730,12 @@ a.scenic-card small {
   height: 23px;
 }
 #world .quick-settings .field-tool[aria-pressed="true"] {
-  background: var(--gold);
-  border-color: var(--gold);
+  background: #275644;
+  border-color: #275644;
   color: #fffbed;
 }
 #world .quick-settings .field-tool:focus-visible {
-  outline: 3px solid var(--gold);
+  outline: 3px solid #b67836;
   outline-offset: 2px;
 }
 #world.groundless .readings:not([hidden]) {
@@ -763,6 +747,53 @@ a.scenic-card small {
   }
 }
 
+/* Contextual door action: never replaces Jump, the stick, or the player's saved outdoor camera. */
+#world #use-door {
+  position: absolute;
+  z-index: 4;
+  left: 50%;
+  bottom: calc(var(--pad-b, 0px) + 23px);
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 46px;
+  padding: 8px 15px;
+  border-radius: 24px;
+  background: #f9f5e5;
+  color: #193c30;
+  border: 1px solid #93a48b;
+  box-shadow: 0 2px 10px #162b2160;
+  line-height: 1.2;
+  -webkit-tap-highlight-color: transparent;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 650;
+  white-space: nowrap;
+  touch-action: manipulation;
+  pointer-events: auto;
+}
+#use-door svg {
+  width: 21px;
+  height: 21px;
+}
+#use-door kbd {
+  font: 600 11px/1.3 system-ui;
+  border: 1px solid #9aa992;
+  border-radius: 4px;
+  padding: 1px 4px;
+}
+#world #use-door:focus-visible {
+  outline: 3px solid #e6bc65;
+  outline-offset: 2px;
+}
+#world #use-door[hidden],
+#world.groundless #use-door,
+#world.photo-mode #use-door,
+#world:has(.world-sheet:not([hidden])) #use-door {
+  display: none !important;
+}
 .door-sr {
   position: absolute;
   clip-path: inset(50%);
@@ -770,15 +801,25 @@ a.scenic-card small {
   height: 1px;
   overflow: hidden;
 }
+@media (pointer: coarse) {
+  #use-door kbd {
+    display: none;
+  }
+}
+@media (max-width: 380px) {
+  #world #use-door {
+    bottom: calc(var(--pad-b, 0px) + 87px);
+  }
+}
 
 /* Resident destinations, outside the joystick and minimap safe areas. */
 /* Shortcuts share the upper safe area with Settings in both 3-D modes. */
 #world .holding-icon {
   display: grid;
   place-items: center;
-  border: 1px solid var(--hud-line);
+  border: 1px solid #e4ead28f;
   border-radius: 14px;
-  background: var(--hud);
+  background: #254333c9;
   color: #fffbea;
   box-shadow: 0 1px 4px #15241426;
   width: 44px;
@@ -793,14 +834,14 @@ a.scenic-card small {
   height: 24px;
 }
 #world .holding-icon[aria-expanded="true"] {
-  background: var(--gold);
-  color: #33240c;
-  border-color: var(--gold-deep);
+  background: #efe4bc;
+  color: #22412e;
+  border-color: #b9ac85;
 }
 #world .holding-icon:focus-visible,
 #holding-menu button:focus-visible,
 #holding-menu input:focus-visible {
-  outline: 3px solid var(--gold);
+  outline: 3px solid #ffda87;
   outline-offset: 2px;
 }
 #holding-menu {
@@ -811,11 +852,11 @@ a.scenic-card small {
   width: min(296px, calc(100% - 22px));
   max-height: calc(100% - 100px);
   overflow: auto;
-  color: var(--hud-text);
-  background: var(--hud);
-  border: 1px solid var(--hud-line);
+  color: #fcf8e7;
+  background: #203c31f4;
+  border: 1px solid #cfcaa880;
   border-radius: 15px;
-  box-shadow: 0 10px 26px rgba(8, 14, 10, 0.5);
+  box-shadow: 0 6px 24px #20372a40;
   padding: 14px;
   box-sizing: border-box;
 }
@@ -857,15 +898,15 @@ a.scenic-card small {
   display: flex;
   align-items: center;
   gap: 6px;
-  background: #141d17;
-  color: var(--hud-text);
-  border: 1px solid var(--hud-line);
+  background: #f8f5e6;
+  color: #19382b;
+  border: 1px solid #d5ceaf;
   border-radius: 9px;
   padding: 4px 5px 4px 10px;
 }
 .holding-input-row > span {
   font-weight: 800;
-  color: var(--hud-dim);
+  color: #6b7666;
   font-size: 14px;
 }
 .holding-input-row input {
@@ -873,22 +914,21 @@ a.scenic-card small {
   min-width: 0;
   border: 0;
   background: transparent;
-  color: var(--hud-text);
-  font: 600 13.5px var(--body);
+  color: #19382b;
+  font: 600 13.5px system-ui;
   height: 32px;
   outline: none;
 }
 .holding-input-row input::placeholder {
-  color: #7d7460;
+  color: #878e7f;
   font-weight: 500;
 }
 #holding-verify {
   border: 0;
   border-radius: 7px;
-  background: var(--terra);
-  color: #fff3df;
-  border-bottom: 3px solid var(--terra-deep);
-  font: 700 12px var(--body);
+  background: #285140;
+  color: #fffdf5;
+  font: 700 12px system-ui;
   padding: 7px 11px;
   min-height: 32px;
   white-space: nowrap;
@@ -897,7 +937,7 @@ a.scenic-card small {
   margin: 7px 0 0;
   font-size: 11.5px;
   line-height: 1.4;
-  color: var(--gold);
+  color: #ffd599;
 }
 #holding-distance {
   display: block;
@@ -923,12 +963,12 @@ a.scenic-card small {
   flex: 1;
   border: 0;
   border-radius: 8px;
-  background: #f6edda;
-  color: var(--green-deep);
-  font: 600 13px var(--body);
+  background: #f4efd9;
+  color: #173c2c;
+  font: 600 13px system-ui;
 }
 #holding-menu .home-pair button:last-child {
-  background: var(--gold);
+  background: #d8b06f;
 }
 #holding-menu button:disabled {
   opacity: 0.48;
@@ -940,161 +980,11 @@ a.scenic-card small {
   left: calc(var(--pad-l, 0px) + 10px);
   border-radius: 8px;
   padding: 5px 8px;
-  background: var(--green-deep);
+  background: #203d32df;
   color: #fffbe8;
   font: 600 12px system-ui;
   pointer-events: none;
 }
 #world:has(#holding-menu:not([hidden])) #route-step {
   display: none;
-}
-
-/* ==========================================================================
-   LOW-POLY GAME RESTYLE — in-walk chrome (dark caravan panels, gold trim)
-   ========================================================================== */
-#world #world-menu,
-#world .pace-panel button {
-  background: var(--hud);
-  color: var(--hud-text);
-  border: 1px solid var(--hud-line);
-  border-radius: 14px;
-  box-shadow: 0 4px 14px rgba(8, 14, 10, 0.4);
-}
-#world #world-menu:hover,
-#world .pace-panel button:hover {
-  border-color: var(--gold);
-  color: var(--gold);
-}
-#world #world-menu:active,
-#world .pace-panel button:active {
-  transform: translateY(2px);
-}
-#world .pace-panel button[aria-pressed="true"] {
-  background: var(--gold);
-  color: #33240c;
-  border-color: var(--gold-deep);
-  box-shadow: inset 0 0 0 2px rgba(51, 36, 12, 0.35), 0 3px 0 #7a5510;
-}
-#world .joystick,
-#world.walk-view .joystick {
-  background: radial-gradient(circle at 50% 42%, rgba(70, 92, 74, 0.55), rgba(18, 26, 21, 0.78));
-  border: 2px solid var(--hud-line);
-  box-shadow: inset 0 0 22px rgba(0, 0, 0, 0.45);
-}
-#world .pocket-map {
-  border: 2px solid var(--hud-line);
-  border-radius: 12px;
-  box-shadow: 0 4px 14px rgba(8, 14, 10, 0.4);
-}
-#world .walk-corner #place-chip {
-  background: var(--hud);
-  border: 1px solid var(--hud-line);
-  border-radius: 10px;
-  color: var(--hud-text);
-}
-#world .walk-corner #place-chip small {
-  color: var(--hud-dim);
-}
-#world .quick-settings {
-  border-bottom: 1px solid var(--hud-line);
-}
-.quick-settings button {
-  border: 1px solid var(--hud-line);
-  border-radius: 10px;
-  background: #141d17;
-  color: var(--hud-text);
-}
-.quick-settings button:hover {
-  border-color: var(--gold);
-  color: var(--gold);
-}
-.view-picks > span,
-.quick-settings label {
-  color: var(--hud-dim);
-}
-.holding-input-row input {
-  background: #141d17;
-  border: 1px solid var(--hud-line);
-  border-radius: 12px;
-  color: var(--hud-text);
-}
-.holding-input-row input::placeholder {
-  color: #7d7460;
-}
-.holding-input-row input:focus {
-  border-color: var(--gold);
-  outline: none;
-}
-.orbit-tools {
-  background: var(--hud);
-  border: 1px solid var(--hud-line);
-  color: var(--hud-text);
-  box-shadow: 0 10px 26px rgba(8, 14, 10, 0.45);
-}
-.orbit-tools small {
-  color: var(--gold);
-  opacity: 1;
-  letter-spacing: 0.16em;
-}
-.orbit-tools button:hover {
-  color: var(--gold);
-}
-
-/* low-poly public edition */
-body.public-edition {
-  background: linear-gradient(155deg, #fdf3da, #f8ecd2 42%, #f1e4c8);
-  color: var(--ink);
-}
-#public-home .titlebar h1,
-#public-home .journeys h2,
-#public-home .find-inner h2 {
-  color: var(--green-deep);
-}
-#public-home .titlebar h1 span,
-#public-home .find-inner h2 span,
-#public-home .journeys h2 span {
-  color: var(--terra);
-}
-#public-home .map-card {
-  background: var(--panel);
-}
-#public-home #map-wrap {
-  background: linear-gradient(135deg, #cfe3c0, #f2e3c2 58%, #cfd8c0);
-}
-#public-home #find .primary {
-  background: linear-gradient(115deg, #c4552d, #d8763f);
-  color: #fff3df;
-  border: 0;
-  border-bottom: 4px solid var(--terra-deep);
-  border-radius: 14px;
-  box-shadow: 0 8px 16px rgba(143, 58, 28, 0.35);
-  font-weight: 800;
-}
-#public-home #find .primary:hover {
-  filter: brightness(1.06);
-}
-#public-home #find .primary:active {
-  transform: translateY(2px);
-  border-bottom-width: 2px;
-}
-#public-home .sample-acres {
-  border-top: 2px solid var(--line);
-}
-#world .quick-settings .field-tool[aria-pressed="true"] {
-  background: var(--gold);
-  border-color: var(--gold-deep);
-  color: #33240c;
-}
-#world .holding-icon {
-  background: var(--hud);
-  border: 1px solid var(--hud-line);
-  color: var(--hud-text);
-  border-radius: 14px;
-}
-/* Repaint the remaining dusk-green in-world chips to the caravan-hud family */
-#world .holding-icon:hover,
-#world .pace-panel button:not([aria-pressed="true"]):hover,
-#world .quick-settings .field-tool:not([aria-pressed="true"]):hover {
-  color: var(--gold);
-  border-color: var(--gold);
 }

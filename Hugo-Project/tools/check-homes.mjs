@@ -9,7 +9,6 @@ import * as T from "../static/vendor/three.module.min.js";
 import { get, Tiles, key } from "../static/js/grid.js";
 import { basis, localPoint, ACRE as M, RAIL_END } from "../static/js/metres.js";
 import {
-  activeRoomAt,
   roomPlan,
   roomLocal,
   doorPoint,
@@ -19,7 +18,6 @@ import {
 import { models, residentDesign } from "../static/js/resident-design.js";
 import { buildRoom, doorLeaf } from "../static/js/home-interior.js";
 import { pathIndex } from "../static/js/path-right-of-way.js";
-import { indexHome } from "../static/js/home-index.js";
 import { yards } from "../static/js/timber-yard.js";
 import { fenceAt } from "../static/js/acre-edge.js";
 import { passes, support } from "../static/js/contacts.js";
@@ -30,13 +28,7 @@ import { preparePads, residents } from "../static/js/resident-scene.js";
 import { compoundWallSegments } from "../static/js/resident-forms.js";
 import { nameboardSpot } from "../static/js/nameboard.js";
 import { residentId } from "../static/js/resident-id.js";
-import {
-  hamletScene,
-  marks,
-  updateHamlet,
-  updateRouteLeaves,
-} from "../static/js/hamlet-scene.js";
-import { loadPeople, loadVillageLife } from "../static/js/art-library.js";
+import { marks, updateRouteLeaves } from "../static/js/hamlet-scene.js";
 import { Tread } from "../static/js/tread.js";
 const root = fileURLToPath(new URL("../", import.meta.url)),
   tmp = await fs.mkdtemp(path.join(os.tmpdir(), "atlas-homes-")),
@@ -340,26 +332,13 @@ try {
         width: 0,
         height: 0,
         getContext() {
-          const gradient = { addColorStop() {} };
-          return new Proxy(
-            {},
-            {
-              get(_t, prop) {
-                if (prop === "measureText")
-                  return (txt) => ({ width: String(txt).length * 36 });
-                if (
-                  prop === "createLinearGradient" ||
-                  prop === "createRadialGradient" ||
-                  prop === "createPattern"
-                )
-                  return () => gradient;
-                return () => {};
-              },
-              set() {
-                return true;
-              },
-            },
-          );
+          return {
+            createLinearGradient: () => ({ addColorStop() {} }),
+            fillRect() {},
+            strokeRect() {},
+            measureText: (txt) => ({ width: String(txt).length * 36 }),
+            fillText() {},
+          };
         },
       };
     },
@@ -598,199 +577,12 @@ try {
     syntheticLayouts.add(plan.design.style);
     set.add(plan.design.style);
     syntheticByShell.set(arch, set);
-
-    // Multi-room, window, and bounds checks across all 144 synthetic archetypes
-    if (!Number.isFinite(designed.house.centre?.[0]))
-      designed.house.centre = [2344.5, 7759.5];
-    const [W, D] = designed.house.size_m;
-    const probeGroup = new T.Group();
-    buildRoom(designed.house, (role, shape, x, y, z, w, H, d, c, ang = 0) => {
-      if (shape === "pot" || shape === "disc") {
-        assert(Math.abs(x) <= W * 0.5 + 0.65 && Math.abs(z) <= D * 0.5 + 1.05, `${arch} fitting outside bounds`);
-        return;
-      }
-      const m = new T.Mesh(
-        new T.BoxGeometry(1, 1, 1),
-        new T.MeshBasicMaterial(),
-      );
-      m.scale.set(w, H, d);
-      m.rotation.y = ang;
-      m.position.set(x, y, z);
-      m.userData.role = role;
-      probeGroup.add(m);
-    });
-    probeGroup.updateMatrixWorld(true);
-    for (const rm of plan.rooms) {
-      assert(rm.x0 >= -W * 0.5 - 0.05 && rm.x1 <= W * 0.5 + 0.05, `${arch} room X bounds`);
-      assert(rm.z0 >= -D * 0.5 - 0.05 && rm.z1 <= D * 0.5 + 0.05, `${arch} room Z bounds`);
-      for (const f of rm.furniture) {
-        const [fx, fy] = localPoint(designed.house, f.x, f.z);
-        assert(
-          houseBlocked(designed.house, fx, fy, true, 0.34, rm.floor + 0.05, 0),
-          `${arch} ${rm.id} missing furniture collider`,
-        );
-      }
-    }
-    if (arch === "lime-terrace") {
-      // Walkable compacted-lime terrace: flat roof, side stair, no overhead water tank
-      assert(plan.rooms.length === 3 && plan.terrace && plan.stairs.length === 1, `${arch} terrace topology`);
-      assert((plan.extraColliders?.length ?? 0) === 0, `${arch} must not carry a roof water-tank collider`);
-    } else if (arch === "courtyard-house") {
-      assert(plan.rooms.length === 3 && plan.doors.length >= 5, "courtyard-house topology");
-    } else if (arch === "l-court") {
-      assert(plan.rooms.length === 3 && plan.doors.length >= 4, "l-court topology");
-    } else if (arch !== "round-thatch") {
-      assert(plan.rooms.length >= 2 && plan.doors.length >= 2, `${arch} multi-room topology`);
-      const winCount = plan.walls.reduce((acc, w) => acc + (w.windows?.length || 0), 0);
-      assert(winCount >= 1, `${arch} missing daylight window`);
-      // Verify daylight window aperture is genuinely open above sill and below lintel
-      const firstWallWithWin = plan.walls.find((w) => w.windows?.length);
-      const win = firstWallWithWin.windows[0],
-        midY = (win.sillY + win.headY) * 0.5,
-        wallMeshes = probeGroup.children.filter((m) => m.userData.role === "room-wall");
-      const wr =
-        firstWallWithWin.axis === "x"
-          ? new T.Raycaster(new T.Vector3(win.c, midY, firstWallWithWin.pos + 0.5), new T.Vector3(0, 0, -1), 0, 1.0)
-          : new T.Raycaster(new T.Vector3(firstWallWithWin.pos + 0.5, midY, win.c), new T.Vector3(-1, 0, 0), 0, 1.0);
-      assert(wr.intersectObjects(wallMeshes).length === 0, `${arch} daylight window blocked by wall`);
-    }
-    probeGroup.traverse((o) => o.geometry?.dispose());
-  }
-
-  // WalkMotor Physics Proof:
-  // 1) Founding house (single-storey vernacular): walk in from the lane through the front door
-  // 2) Lime-terrace house: climb side stairs onto the open compacted-lime roof terrace & verify parapets
-  {
-    const mkFlatSurface = (homeObj) => {
-      const fakeS = {
-        traversable: () => true,
-        ways: pathIndex([]),
-        sample: () => ({ z: 0, depth: 0, drawn: true, line: 0, m: [0, 0, 0, 0] }),
-        ground: () => 0,
-        water: () => -10,
-        gradeAt: () => [0, 0],
-        tread: null,
-        doorAngles: new WeakMap([[homeObj, new Map(roomPlan(homeObj).doors.map((d) => [d.id, d.maxAngle]))]]),
-        homeMap: new Map(),
-      };
-      indexHome(fakeS, homeObj);
-      fakeS.floor = (x, y, refZ) => support(fakeS, x, y, [], refZ);
-      return fakeS;
-    };
-
-    const founding = rows[0][5],
-      fp = roomPlan(founding),
-      sFounding = mkFlatSurface(founding),
-      passFounding = (...v) => passes(sFounding, [], [], [], ...v);
-
-    // Stand on the lane outside the front door and walk straight in
-    const frontDoor = fp.doors.find((d) => d.id === "front"),
-      [startX, startY] = localPoint(founding, frontDoor.x, fp.rooms[0].z1 + 2.8),
-      [doorX, doorY] = localPoint(founding, frontDoor.x, fp.rooms[0].z1 - 0.4),
-      dirX = doorX - startX,
-      dirY = doorY - startY,
-      dirLen = Math.hypot(dirX, dirY) || 1,
-      ux = dirX / dirLen,
-      uy = dirY / dirLen;
-
-    const porchMotor = new WalkMotor();
-    porchMotor.reset(startX, startY, sFounding);
-    for (let step = 0; step < 300; step++) {
-      porchMotor.advance(1 / 60, ux, uy, 2.2, sFounding, passFounding, 0.92);
-    }
-    const inside = activeRoomAt(sFounding, founding, porchMotor.x, porchMotor.y, porchMotor.root);
-    assert(
-      inside && inside.level === 0,
-      `WalkMotor could not walk from the lane through the front door into the founding house: room=${inside?.id ?? "none"}`,
-    );
-
-    // Verify lime-terrace side stair climb & parapet protection
-    const terraceDesign = residentDesign({
-        u: residentId("terrace_climb_probe"),
-        c: [2345, 7760],
-        d: 32,
-        house: {
-          seed: 424242,
-          archetype: "lime-terrace",
-          facing: "south",
-          setback_m: 8.5,
-          path_width_m: 1.2,
-          wall_color: "#e2d4be",
-          roof_color: "#c49a76",
-          size_m: [10.4, 10.8, 3.8],
-          props: [],
-          sign: { label: "TerraceProbe" },
-        },
-      }).house;
-    if (!Number.isFinite(terraceDesign.centre?.[0]))
-      terraceDesign.centre = [2345.5, 7760.5];
-    const tp = roomPlan(terraceDesign),
-      tst = tp.stairs[0],
-      sTerrace = mkFlatSurface(terraceDesign),
-      passTerrace = (...v) => passes(sTerrace, [], [], [], ...v),
-      [ts0x, ts0y] = localPoint(terraceDesign, (tst.x0 + tst.x1) * 0.5, tst.z1 + 0.35),
-      [ts1x, ts1y] = localPoint(terraceDesign, (tst.x0 + tst.x1) * 0.5, tst.topZ - 0.2),
-      tdx = ts1x - ts0x,
-      tdy = ts1y - ts0y,
-      tdl = Math.hypot(tdx, tdy),
-      terraceMotor = new WalkMotor();
-    terraceMotor.reset(ts0x, ts0y, sTerrace);
-    for (let step = 0; step < 380; step++) {
-      terraceMotor.advance(1 / 60, tdx / tdl, tdy / tdl, 2.2, sTerrace, passTerrace, 0.92);
-    }
-    assert(
-      Math.abs(terraceMotor.root - tp.terrace.floor) < 0.05,
-      `WalkMotor failed to reach flat-roof terrace: root=${terraceMotor.root} expected=${tp.terrace.floor}`,
-    );
-    q.terraceWalkVerified = true;
-  }
-
-  // Verify Village Hub upgrades & landscape CSS invariants
-  {
-    const livingCss = await fs.readFile(path.join(root, "static/living.css"), "utf8"),
-      worldJs = await fs.readFile(path.join(root, "static/js/world.js"), "utf8");
-    assert(livingCss.includes("@media (orientation: landscape)") && !livingCss.includes("#use-door"), "landscape HUD CSS or #use-door cleanup missing");
-    assert(!worldJs.includes("id=\"use-door\"") && worldJs.includes("updateHamlet"), "world.js #use-door removal or updateHamlet wiring missing");
-
-    const settlementsData = JSON.parse(
-        await fs.readFile(path.join(root, "data/settlements.json"), "utf8"),
-      ),
-      vRoads = (settlementsData.villages || []).filter((v) => v.d === 32),
-      vPaths = vRoads.flatMap((v) => v.paths || []),
-      vFocus = vRoads[0]?.hub ? { x: vRoads[0].hub[0], y: vRoads[0].hub[1] } : { x: rows[0][0] + 0.5, y: rows[0][1] + 0.5 };
-    for (let j = -1; j <= 1; j++)
-      for (let i = -1; i <= 1; i++)
-        await tiles.load(key(vFocus.x + i * 90, vFocus.y + j * 90));
-    const vSurf = new Surface(tiles, O, [vFocus.x, vFocus.y]);
-    vSurf.focus = [vFocus.x, vFocus.y];
-    vSurf.ways = pathIndex(vPaths);
-    await Promise.all([loadPeople(), loadVillageLife()]);
-    const ham = hamletScene(vSurf, rows, vRoads, vFocus, 2, vPaths),
-      animList = ham.userData.animated || [],
-      hasGlow = ham.children.some((m) => m.userData?.glow === 0),
-      birds = animList.filter((a) => a.kind === "bird");
-    assert(
-      birds.length >= 1 &&
-        animList.every((a) => ["bird", "toranam", "wisp"].includes(a.kind)) &&
-        !animList.some((a) => a.kind === "person" || a.kind === "animal") &&
-        hasGlow,
-      "hamletScene missing ambient village life (or still spawning people/livestock)",
-    );
-    updateHamlet(ham, 1.25, vFocus);
-    updateHamlet(ham, 3.75, vFocus);
-    for (const a of animList)
-      if (a.kind === "bird")
-        assert(
-          Number.isFinite(a.bird.position.x) && Number.isFinite(a.bird.position.y),
-          "animated bird lost world position",
-        );
-    q.villageAmbientActors = animList.length;
   }
   assert(
     rows.length >= 1 &&
       profiles.size === rows.length &&
       q.furniturePieces === rows.length * 3 &&
-      syntheticLayouts.size === 11 && // two of the twelve shells share a composition seed class
+      syntheticLayouts.size === 11 &&
       syntheticByShell.size === models.length &&
       [...syntheticByShell.values()].every((v) => v.size >= 3),
   );

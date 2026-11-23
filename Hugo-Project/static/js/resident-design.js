@@ -1,19 +1,17 @@
 // The only model catalogue. Content names a model, not a second numeric selector or cached mesh.
 import { ACRE, SIDE, localPoint } from "./metres.js";
-// Vernacular-only catalogue. Storeys, RCC flats and roof water tanks were
-// removed by owner decision: every home is a small village house in the two States.
 export const models = [
   "mud-veranda",
   "pillared-tile",
   "thatch-longhouse",
   "round-thatch",
-  "lime-terrace",
-  "hipped-tile",
+  "rcc-tank",
+  "balcony-stair",
   "l-court",
   "sheet-lean-to",
   "cattle-compound",
   "stone-gable",
-  "veranda-front",
+  "street-shop",
   "courtyard-house",
 ];
 const footprints = {
@@ -27,8 +25,8 @@ const footprints = {
   ],
   3: [[0, 0, 1, 1, "round"]],
   5: [
-    [0, -0.09, 1, 0.79, "body"],
-    [0, 0.395, 1, 0.21, "veranda"],
+    [-0.07, 0, 0.86, 1, "body"],
+    [0.43, 0, 0.14, 1, "stairs"],
   ],
   6: [
     [0, -0.2, 1, 0.6, "body"],
@@ -58,6 +56,7 @@ export function residentDesign(row) {
     z = ACRE / 2 - h.setback_m - d / 2;
   if (i < 0) throw Error("Unknown house model: " + h.archetype);
   row.s = h.style = i;
+  if (i === 5) h.size_m[2] = Math.max(5.37, h.size_m[2]);
   const lot = row.court?.p && row.court;
   if (lot) {
     h.centre = row.homeLocation;

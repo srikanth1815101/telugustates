@@ -9,42 +9,6 @@ const clamp = T.MathUtils.clamp,
   Q = () => new T.Quaternion(),
   up = new T.Vector3(0, 1, 0),
   round = (x) => +x.toFixed(4);
-// Re-dress the village villagers' cloth: ochre kurta & cream dhoti for the man (Farmer
-// body), grenadine blouse & zari-bordered pallu for the woman (Casual body). Skin keeps its
-// authored colour (the rain-weather cloth mask keys off it); the woman's hair goes dark.
-const VILLAGE_RETEX = {
-  man: [
-    [[0.17886, 0.12677, 0.05132], [0.722, 0.478, 0.157]],
-    [[0.03311, 0.04971, 0.06301], [0.91, 0.862, 0.733]],
-    [[0.33245, 0.30947, 0.20156], [0.835, 0.541, 0.165]],
-  ],
-  woman: [
-    [[0.36602, 0.36602, 0.36602], [0.522, 0.18, 0.212]],
-    [[0.2739, 0.09713, 0.03187], [0.64, 0.36, 0.12]],
-    [[0.20784, 0.14293, 0.0502], [0.055, 0.038, 0.026]],
-  ],
-};
-function restyleVillager(R, style) {
-  const src = R.mesh.geometry,
-    cmap = src.getAttribute("color");
-  if (!cmap) return;
-  const pairs = VILLAGE_RETEX[style] || [],
-    c = new Float32Array(cmap.array);
-  for (const [from, to] of pairs)
-    for (let i = 0; i < c.length; i += 3)
-      if (
-        Math.abs(c[i] - from[0]) < 1e-3 &&
-        Math.abs(c[i + 1] - from[1]) < 1e-3 &&
-        Math.abs(c[i + 2] - from[2]) < 1e-3
-      ) {
-        c[i] = to[0];
-        c[i + 1] = to[1];
-        c[i + 2] = to[2];
-      }
-  const geo = src.clone();
-  geo.setAttribute("color", new T.BufferAttribute(c, 3));
-  R.mesh.geometry = geo;
-}
 export function traveller(style = "woman") {
   style = style === "man" ? "man" : "woman";
   const R = rigInstance("traveller-" + style),
@@ -460,7 +424,6 @@ export function traveller(style = "woman") {
     arrive: true,
     reduced: true,
   });
-  restyleVillager(R, style);
   const privateMat = R.mesh.material.clone();
   R.mesh.material = privateMat;
   const rainwear = wornWeather(R, privateMat, style);

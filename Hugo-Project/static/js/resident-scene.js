@@ -9,7 +9,6 @@ import {
   compoundWallSegments,
   makeHouse,
 } from "./resident-forms.js";
-import { drainMuggus } from "./muggu.js";
 import { ACRE, basis } from "./metres.js";
 const forms = {
   wall: new T.BoxGeometry(),
@@ -85,7 +84,7 @@ export function residents(s, rows, p, tier) {
     rz = 0,
   ) => {
     if (!forms[shape]) throw Error("Unknown resident form " + shape);
-    const key = shape;
+    const key = kind.startsWith("window-") ? kind + ":" + shape : shape;
     let bin = bins.get(key);
     if (!bin) {
       bin = { m: [], c: [] };
@@ -114,7 +113,6 @@ export function residents(s, rows, p, tier) {
     if (d < (tier ? 185 : 150) && typeof document !== "undefined")
       nameboard(group, s, h, u, put);
   }
-  drainMuggus(s, group);
   for (const [key, bin] of bins) {
     const count = bin.c.length / 3;
     if (!count) continue;
@@ -135,6 +133,11 @@ export function residents(s, rows, p, tier) {
       cullable: true,
       disposableMaterial: true,
     };
+    if (key.startsWith("window-")) {
+      mat.emissive.set(0xffbc67);
+      mat.emissiveIntensity = 0;
+      mesh.userData.glow = +key[7];
+    }
     group.add(mesh);
   }
   group.userData.houses = drawn;

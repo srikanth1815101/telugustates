@@ -625,7 +625,9 @@ try {
                 ? w * 0.18
                 : row.house.archetype === "cattle-compound"
                   ? -0.2 * w
-                  : 0;
+                  : row.house.archetype === "balcony-stair"
+                    ? -0.07 * w
+                    : 0;
 
           // Build candidate street stations along main Pedda Veedhi and perpendicular Chinna Veedhi lanes,
           // including mid-segment stations so neighbors pack cleanly side-by-side without wasteful gaps.

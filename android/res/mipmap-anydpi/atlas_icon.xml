@@ -1,3 +1,4 @@
-<bitmap xmlns:android="http://schemas.android.com/apk/res/android"
-    android:src="@drawable/atlas_icon_art"
-    android:gravity="fill" />
+<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="48dp" android:height="48dp" android:viewportWidth="108" android:viewportHeight="108">
+ <path android:fillColor="#193C32" android:pathData="M0,0 H108 V108 H0 Z"/><path android:fillColor="#E9BA76" android:pathData="M67,35a4,4 0,1 1,-8 0a4,4 0,1 1,8 0"/>
+ <path android:fillColor="@android:color/transparent" android:strokeColor="#F6EAC8" android:strokeWidth="3.2" android:strokeLineCap="round" android:strokeLineJoin="round" android:pathData="M25,66 L45,39 L57,56 L67,45 L83,66 M27,72 L81,72 M38,60 L45,51 L53,60"/>
+</vector>
