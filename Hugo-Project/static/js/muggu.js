@@ -4,7 +4,7 @@
 // a pulli kolam drawn from a dot grid: bundula dot ring, two interlocking stars,
 // petal rosettes, Sikku arcs and a threshold frame. No geometric primitives.
 import * as T from "../vendor/three.module.min.js";
-import { localPoint, ACRE } from "./metres.js";
+import { localPoint } from "./metres.js";
 
 const TAU = Math.PI * 2;
 let tex = null,
@@ -177,14 +177,13 @@ function mugguTexture() {
 
 function mugguMaterial() {
   if (!material)
-    material = new T.MeshBasicMaterial({
+    material = new T.MeshLambertMaterial({
       map: mugguTexture(),
       transparent: true,
-      alphaTest: 0.02,
+      alphaTest: 0.05,
       depthWrite: false,
       polygonOffset: true,
-      polygonOffsetFactor: -4,
-      polygonOffsetUnits: -4,
+      polygonOffsetFactor: -2,
     });
   return material;
 }
@@ -206,27 +205,12 @@ export function drainMuggus(s, group) {
   geo.userData = { muggu: true };
   const mat = mugguMaterial();
   for (const d of decals) {
-    // Lift above the highest ground sample under the decal's corners — the threshold
-    // spills onto un-padded soil that can swallow a centre-only plane.
-    let lift = d.ground;
-    for (const [ox, oz] of [
-      [0, 0],
-      [0.79, 0],
-      [-0.79, 0],
-      [0, 0.79],
-      [0, -0.79],
-      [0.56, 0.56],
-      [-0.56, 0.56],
-      [0.56, -0.56],
-      [-0.56, -0.56],
-    ])
-      lift = Math.max(lift, s.ground(d.x + ox / ACRE, d.y + oz / ACRE));
-    const [X, H, Z] = s.xyz(d.x, d.y, lift + 0.035);
+    const [X, H, Z] = s.xyz(d.x, d.y, d.ground + 0.028);
     const mesh = new T.Mesh(geo, mat);
     mesh.position.set(X, H, Z);
     mesh.rotation.y = d.yaw || 0;
-    mesh.renderOrder = 3;
-    mesh.receiveShadow = false;
+    mesh.renderOrder = 2;
+    mesh.receiveShadow = true;
     mesh.userData = { role: "muggu", glow: 0, cullable: true };
     group.add(mesh);
   }

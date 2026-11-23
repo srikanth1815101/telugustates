@@ -26,7 +26,7 @@ import { PocketMap } from "./pocket-map.js";
 import { readPosition, writePosition } from "./position-book.js";
 import { dampGround } from "./regional-weather.js";
 import { RunoffWindow } from "./rain-ground.js";
-import { calendar, disciplinedClock } from "./world-calendar.js";
+import { calendar, windowLight, disciplinedClock } from "./world-calendar.js";
 import { villageData, works } from "./landworks.js";
 import { recordKind } from "./record-kinds.js";
 import { passes, solidFor, clearance, support } from "./contacts.js";
@@ -1154,6 +1154,10 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
         }
       }
     }
+    l.nightMeshes = [];
+    l.sc.traverse((m) => {
+      if (m.userData.glow != null) l.nightMeshes.push(m);
+    });
     l.nx = p.x;
     l.ny = p.y;
     if (refreshLife && l.bio && !l.bio.rebuilding)
@@ -2963,6 +2967,20 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
           }
         : prefs,
     );
+    if (L?.nightMeshes && now - (L.lastNight || -1e9) > 350) {
+      const hr = calendar(Date.now(), worldConfig, prefs.time, prefs.hour).hour;
+      for (const m of L.nightMeshes) {
+        const strength = windowLight(
+          m.userData.glow,
+          env.uni.uDay.value,
+          hr,
+          env.weather.rain,
+        );
+        if (m.material.emissive) m.material.emissiveIntensity = strength * 1.6;
+        else m.material.opacity = strength * 0.55;
+      }
+      L.lastNight = now;
+    }
     if (mode !== "ground" || overlay) tracks.mix.silence();
     if (
       mode === "ground" &&
@@ -3667,7 +3685,11 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
         programs: renderer.info.programs?.length,
       },
       lamps: L?.bulbs?.length || 0,
-      windowIntensity: 0,
+      windowIntensity:
+        L?.nightMeshes?.reduce(
+          (m, n) => Math.max(m, n.material.emissiveIntensity || 0),
+          0,
+        ) || 0,
       hydrology: L?.drain?.stats || null,
       waterScene: L
         ? {

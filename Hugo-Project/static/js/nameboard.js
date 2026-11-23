@@ -44,77 +44,28 @@ export function nameboard(group, s, h, u, put) {
   c.width = 640;
   c.height = 208;
   const a = c.getContext("2d");
-  // Hand-painted signboard: dark teak planks washed with age, chalk lettering, brass studs.
-  // Warm and village-made — no official green, no printed look.
   const g = a.createLinearGradient(0, 0, 0, 208);
-  g.addColorStop(0, "#463322");
-  g.addColorStop(0.5, "#38291d");
-  g.addColorStop(1, "#2b2015");
+  g.addColorStop(0, "#264c41");
+  g.addColorStop(1, "#112e2b");
   a.fillStyle = g;
   a.fillRect(0, 0, 640, 208);
-  // Plank seams and a little grain wobble
-  a.strokeStyle = "rgba(20,13,8,0.55)";
-  a.lineWidth = 3;
-  for (const y of [69, 138]) {
-    a.beginPath();
-    a.moveTo(0, y);
-    for (let x = 0; x <= 640; x += 32) a.lineTo(x, y + Math.sin(x * 0.045 + y) * 1.6);
-    a.stroke();
-  }
-  a.strokeStyle = "rgba(233,220,189,0.10)";
-  a.lineWidth = 1.4;
-  for (let i = 0; i < 9; i++) {
-    const y = 22 + i * 21 + Math.sin(i * 2.7) * 5;
-    a.beginPath();
-    a.moveTo(18 + (i * 37) % 60, y);
-    a.lineTo(622 - ((i * 53) % 80), y + Math.sin(i * 1.3) * 2);
-    a.stroke();
-  }
-  // Chalk border, wobbly like a hand-cut stencil
-  a.strokeStyle = "#e9dcbd";
-  a.lineJoin = "round";
-  a.lineWidth = 6.5;
-  a.beginPath();
-  a.rect(16, 15, 608, 178);
-  a.stroke();
-  a.lineWidth = 1.8;
-  a.globalAlpha = 0.85;
-  a.beginPath();
-  a.rect(25, 24, 590, 160);
-  a.stroke();
-  a.globalAlpha = 1;
-  // Brass studs in the corners
-  for (const [sx, sy] of [
-    [39, 38],
-    [601, 38],
-    [39, 170],
-    [601, 170],
-  ]) {
-    a.fillStyle = "#c9a24a";
-    a.beginPath();
-    a.arc(sx, sy, 7, 0, Math.PI * 2);
-    a.fill();
-    a.fillStyle = "#8a6b28";
-    a.beginPath();
-    a.arc(sx, sy, 2.6, 0, Math.PI * 2);
-    a.fill();
-  }
+  a.strokeStyle = trim;
+  a.lineWidth = 4;
+  a.strokeRect(13, 12, 614, 184);
+  a.lineWidth = 1;
+  a.strokeRect(20, 19, 600, 170);
   a.textAlign = "center";
-  // One heavy hand-painted inscription, painted directly onto the face. No screen-space duplicate.
-  a.shadowColor = "rgba(0,0,0,0.5)";
-  a.shadowBlur = 3;
-  a.shadowOffsetY = 2.5;
-  a.fillStyle = "#f6ead0";
-  const fontStack = '"Trebuchet MS", "Arial Black", Verdana, sans-serif';
-  a.font = `900 96px ${fontStack}`;
+  // One high-contrast inscription, painted directly onto the face. No screen-space duplicate.
+  a.fillStyle = "#fff7df";
+  const fontStack = '"Fraunces", "Noto Sans Telugu", Georgia, sans-serif';
+  a.font = `bold 96px ${fontStack}`;
   let px = Math.min(
     96,
     Math.floor((96 * 572) / Math.max(1, a.measureText(label).width)),
   );
-  a.font = `900 ${px}px ${fontStack}`;
+  a.font = `bold ${px}px ${fontStack}`;
   a.textBaseline = "middle";
-  a.fillText(label, 320, 108, 560);
-  a.shadowColor = "transparent";
+  a.fillText(label, 320, 106, 576);
   const tex = new T.CanvasTexture(c);
   tex.colorSpace = T.SRGBColorSpace;
   tex.anisotropy = 2;

@@ -85,7 +85,7 @@ export function residents(s, rows, p, tier) {
     rz = 0,
   ) => {
     if (!forms[shape]) throw Error("Unknown resident form " + shape);
-    const key = shape;
+    const key = kind.startsWith("window-") ? kind + ":" + shape : shape;
     let bin = bins.get(key);
     if (!bin) {
       bin = { m: [], c: [] };
@@ -135,6 +135,11 @@ export function residents(s, rows, p, tier) {
       cullable: true,
       disposableMaterial: true,
     };
+    if (key.startsWith("window-")) {
+      mat.emissive.set(0xffbc67);
+      mat.emissiveIntensity = 0;
+      mesh.userData.glow = +key[7];
+    }
     group.add(mesh);
   }
   group.userData.houses = drawn;
