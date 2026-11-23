@@ -31,10 +31,10 @@ export class FieldExtras {
         pos[i * 3 + 2] = (noise(i, 22) - 0.5) * 28;
         new T.Color(
           settings.season === "summer"
-            ? "#edb566"
+            ? "#e8b841"
             : i % 3
-              ? "#e7d493"
-              : "#b9cb81",
+              ? "#ecd391"
+              : "#b1ce6d",
         ).toArray(col, i * 3);
       }
       geo.setAttribute("position", new T.BufferAttribute(pos, 3));
@@ -116,7 +116,7 @@ export class FieldExtras {
           m.setColorAt(
             k,
             base
-              .set(settings.season === "summer" ? "#dbc399" : "#b9c1a6")
+              .set(settings.season === "summer" ? "#dbc489" : "#b8c29e")
               .multiplyScalar(0.83 + 0.45 * v),
           );
         });

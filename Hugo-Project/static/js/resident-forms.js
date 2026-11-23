@@ -72,14 +72,14 @@ export function addForms(g) {
   }
   g.canopy.setAttribute("normal", new T.BufferAttribute(na, 3));
 }
-const earth = "#a77c58",
-  lime = "#eee0b9",
-  wood = "#77523b",
-  teak = "#624333",
-  shade = "#554b3f",
-  sill = "#d8cda5",
+const earth = "#998349",
+  lime = "#f1dfb4",
+  wood = "#7d5039",
+  teak = "#654130",
+  shade = "#5b483f",
+  sill = "#dccca3",
   night = "#314c50",
-  brass = "#b39a69";
+  brass = "#b49a5a";
 const tint = (c, v) => new T.Color(c).offsetHSL(0, 0, v);
 export const COMPOUND_WALL_H = 0.68;
 
@@ -260,7 +260,7 @@ export function makeHouse(s, h, u, distance, tier, put) {
           0.36,
           0.22,
           0.36,
-          "#816341",
+          "#796637",
         );
       }
     } else if (covered) {
@@ -310,7 +310,7 @@ export function makeHouse(s, h, u, distance, tier, put) {
           bw,
           0.23,
           bd,
-          role === "awning" ? "#d9ae72" : roof,
+          role === "awning" ? "#d8b14d" : roof,
           0,
           0.105,
         );
@@ -326,7 +326,7 @@ export function makeHouse(s, h, u, distance, tier, put) {
               bw / 7,
               0.044,
               bd,
-              k % 2 ? lime : "#a35448",
+              k % 2 ? lime : "#995b3d",
               0,
               0.105,
             );
@@ -337,7 +337,7 @@ export function makeHouse(s, h, u, distance, tier, put) {
               bw / 7,
               0.32,
               0.085,
-              k % 2 ? lime : "#a35448",
+              k % 2 ? lime : "#995b3d",
             );
           }
         }
@@ -607,7 +607,7 @@ export function makeHouse(s, h, u, distance, tier, put) {
               0.53 + (k % 2) * 0.23,
               0.35,
               0.16,
-              k % 2 ? "#a0957a" : "#c2b897",
+              k % 2 ? "#a29573" : "#c6b794",
             );
     }
     if (hi && !covered && role !== "stairs" && role !== "round") {
@@ -657,9 +657,9 @@ export function makeHouse(s, h, u, distance, tier, put) {
   // Low village compound wall (prahari) and street-facing gate piers define cohesive neighborly courtyards.
   const layout = compoundLayout(h);
   if (layout) {
-    const kerbPalette = ["#d8c8a8", "#ceb995", "#c7af8c", "#dfd3b7"],
+    const kerbPalette = ["#d9c99f", "#ceba88", "#c6b17b", "#e0d3b1"],
       kerbCol = kerbPalette[seed & 3],
-      capCol = seed % 3 === 0 ? "#b56345" : lime,
+      capCol = seed % 3 === 0 ? "#b4643d" : lime,
       kH = COMPOUND_WALL_H,
       kT = 0.24,
       yEmbed = kH * 0.5 - 0.12,
@@ -701,7 +701,7 @@ export function makeHouse(s, h, u, distance, tier, put) {
     rearTreeZ = rearExt + 1.05;
   if (!mid) {
     const ht = 5.4 + (seed % 3) * 0.8;
-    fixture("yard-trunk", "trunk", rearTreeX, rearTreeZ, ht * 0.36, 0.56, ht * 0.72, 0.56, "#866d4a");
+    fixture("yard-trunk", "trunk", rearTreeX, rearTreeZ, ht * 0.36, 0.56, ht * 0.72, 0.56, "#827041");
     fixture(
       "yard-farCrown",
       "farCrown",
@@ -711,7 +711,7 @@ export function makeHouse(s, h, u, distance, tier, put) {
       3.9,
       3.0,
       3.9,
-      ["#5e8a4e", "#6d9652", "#557f4d"][seed % 3],
+      ["#468d48", "#7c9346", "#458147"][seed % 3],
     );
     return;
   }
@@ -737,8 +737,8 @@ export function makeHouse(s, h, u, distance, tier, put) {
   if (h.props.includes("banana-clump")) {
     const ht = 3.6,
       stemTop = ht * 0.8;
-    obj("trunk", 0, 0, stemTop * 0.5, 0.44, stemTop, 0.44, "#8a734f");
-    obj("canopy", 0, 0, stemTop - 0.08, 0.5, 0.46, 0.5, "#678f4e");
+    obj("trunk", 0, 0, stemTop * 0.5, 0.44, stemTop, 0.44, "#877546");
+    obj("canopy", 0, 0, stemTop - 0.08, 0.5, 0.46, 0.5, "#469549");
     obj(
       "canopy",
       0,
@@ -747,7 +747,7 @@ export function makeHouse(s, h, u, distance, tier, put) {
       0.34,
       0.88,
       0.4,
-      "#7aa558",
+      "#88a24b",
       (seed % 7) * 0.9,
       0.12,
     );
@@ -755,7 +755,7 @@ export function makeHouse(s, h, u, distance, tier, put) {
       const a = k * 0.8976 + (seed % 32) * 0.1,
         tilt = 0.26 + (k % 2) * 0.08,
         rad = 0.88,
-        col = ["#669053", "#749b54", "#568154", "#89a159"][k % 4];
+        col = ["#4b944d", "#809947", "#4c834e", "#88a14d"][k % 4];
       obj(
         "canopy",
         Math.sin(a) * rad,
@@ -775,14 +775,14 @@ export function makeHouse(s, h, u, distance, tier, put) {
       forkY = ht * 0.52,
       bLen = 1.95,
       tilt = 0.64;
-    obj("trunk", 0, 0, stemTop * 0.5, 0.58, stemTop, 0.58, "#89704c");
-    obj("canopy", 0, 0, ht * 0.8, 3.55, 2.7, 3.55, "#628c50");
+    obj("trunk", 0, 0, stemTop * 0.5, 0.58, stemTop, 0.58, "#857243");
+    obj("canopy", 0, 0, ht * 0.8, 3.55, 2.7, 3.55, "#48914a");
     if (near || tier > 0) {
       for (let k = 0; k < 5; k++) {
         const a = k * 1.2566 + (seed % 32) * 0.1,
           bRad = 0.5 * bLen * Math.sin(tilt),
           rad = 1.18,
-          col = ["#669053", "#749b54", "#568154", "#8ca25b"][k % 4];
+          col = ["#4b944d", "#809947", "#4c834e", "#8aa350"][k % 4];
         obj(
           "trunk",
           Math.sin(a) * bRad,
@@ -791,7 +791,7 @@ export function makeHouse(s, h, u, distance, tier, put) {
           0.26,
           bLen,
           0.26,
-          "#836947",
+          "#7e6b3e",
           a,
           tilt,
         );

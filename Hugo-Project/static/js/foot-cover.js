@@ -17,18 +17,18 @@ export const surfaceName = (h) =>
             : "grass";
 const cols = Object.fromEntries(
   Object.entries({
-    green: "#76a344",
-    lime: "#b2c769",
-    shade: "#50804b",
-    dry: "#c6a458",
-    reed: "#8c9851",
-    tip: "#e2d5a0",
+    green: "#82a137",
+    lime: "#a5cb4f",
+    shade: "#438245",
+    dry: "#c9a445",
+    reed: "#829b47",
+    tip: "#e7d3a2",
     rock: "#8d8271",
-    light: "#baab8d",
-    earth: "#705c42",
-    stem: "#6e6447",
-    bloom: "#eae3ac",
-    leaf: "#87b377",
+    light: "#bbab84",
+    earth: "#6c5d3a",
+    stem: "#706443",
+    bloom: "#f0e0b7",
+    leaf: "#97b05d",
   }).map(([k, c]) => [k, new T.Color(c)]),
 );
 export class FootCover {

@@ -242,7 +242,7 @@ export function drawHolding(canvas, rows, paths, r, square = null) {
       (p[0] - (X + xx) / 2) * sc + w / 2,
       h / 2 - (p[1] - (Y + yy) / 2) * sc,
     ];
-  c.fillStyle = "#e8e9d6";
+  c.fillStyle = "#e2ecca";
   c.fillRect(0, 0, w, h);
   function stroke(a, color, l) {
     c.strokeStyle = color;
@@ -255,28 +255,28 @@ export function drawHolding(canvas, rows, paths, r, square = null) {
   }
   if (reserve.length) {
     const [a, b] = pt(reserve[3]);
-    c.fillStyle = "#e6dcc0";
+    c.fillStyle = "#eddbae";
     c.fillRect(a, b, square.side * sc, square.side * sc);
     c.setLineDash([3, 3]);
-    stroke([...reserve, reserve[0]], "#a48c64", 1.3);
+    stroke([...reserve, reserve[0]], "#ac8c38", 1.3);
     c.setLineDash([]);
   }
-  for (const path of paths) stroke(path.xy, "#c3b79c", 1.3);
+  for (const path of paths) stroke(path.xy, "#d0b573", 1.3);
   const [a, b] = pt(corners[3]);
-  c.fillStyle = "#b9cc92";
+  c.fillStyle = "#b2cf6f";
   c.fillRect(a, b, sc, sc);
-  stroke([...corners, corners[0]], "#527148", 2.2);
+  stroke([...corners, corners[0]], "#2f7742", 2.2);
   for (const p of corners) {
     const [x, y] = pt(p);
-    c.fillStyle = "#50624c";
+    c.fillStyle = "#2e683d";
     c.fillRect(x - 1.5, y - 1.5, 3, 3);
   }
-  if (R) stroke(R.xy, "#ac682d", 3.4);
+  if (R) stroke(R.xy, "#ce5011", 3.4);
   for (const z of homes) {
     const p = pt(z[5].centre),
       W = Math.max(3, (z[5].size_m[0] / M) * sc),
       D = Math.max(3, (z[5].size_m[1] / M) * sc);
-    c.fillStyle = z[2] === r.u ? "#883f26" : "#a38867";
+    c.fillStyle = z[2] === r.u ? "#91390e" : "#a88939";
     c.save();
     c.translate(...p);
     c.rotate(-(z[5].yard?.a || 0));
@@ -286,11 +286,11 @@ export function drawHolding(canvas, rows, paths, r, square = null) {
   const [x, y] = pt(r.house.centre);
   c.beginPath();
   c.arc(x, y, 6.6, 0, Math.PI * 2);
-  c.strokeStyle = "#863b24";
+  c.strokeStyle = "#8b370c";
   c.lineWidth = 2.4;
   c.stroke();
   c.font = "bold 14px sans-serif";
-  c.fillStyle = "#334f3b";
+  c.fillStyle = "#21522e";
   c.fillText("N", 11, 21);
   c.fillRect(11, h - 13, (50 / M) * sc, 2);
   c.font = "12px sans-serif";

@@ -31,18 +31,18 @@ export class PocketMap {
         const X = x + ((i + 0.5 - N / 2) * span) / N,
           Y = y + ((N / 2 - j - 0.5) * span) / N,
           t = L.s.t.at(X, Y);
-        let color = "#c9d6ba";
+        let color = "#cbd7b1";
         if (t) {
           if ([3, 4].includes(t.c)) color = "#609f9e";
-          else if (t.f > 48) color = "#839d75";
-          else if (t.s > 12) color = "#b2ad91";
-          else color = t.f > 15 ? "#a1b18c" : "#c4c59b";
+          else if (t.f > 48) color = "#8b9c65";
+          else if (t.s > 12) color = "#b6ac90";
+          else color = t.f > 15 ? "#a2b17f" : "#cec2a2";
         }
         c.fillStyle = color;
         c.fillRect(i * 4, j * 4, 4, 4);
       }
     c.lineWidth = 1.6;
-    c.strokeStyle = "#8d754c";
+    c.strokeStyle = "#8b7744";
     for (const v of L.villages)
       for (const path of v.paths) {
         c.beginPath();
@@ -57,14 +57,14 @@ export class PocketMap {
       let [X, Y, , , , h] = row;
       if (!h) continue;
       const a = point(X, Y + 1);
-      c.strokeStyle = "#6d7152";
+      c.strokeStyle = "#4e7850";
       if (row[2] === L.activeAcre) {
-        c.strokeStyle = "#ffdb7c";
+        c.strokeStyle = "#f4dda2";
         c.lineWidth = 2.3;
         c.strokeRect(...a, k, k);
       }
       const p = point(...h.centre);
-      c.fillStyle = "#9b6349";
+      c.fillStyle = "#9e6243";
       c.fillRect(p[0] - 2.5, p[1] - 2.5, 5, 5);
     }
     if (L.routeLine?.length) {
@@ -80,7 +80,7 @@ export class PocketMap {
         pts.forEach((p, i) =>
           i ? c.lineTo(...point(...p)) : c.moveTo(...point(...p)),
         );
-        c.strokeStyle = "#c97d2e";
+        c.strokeStyle = "#b28920";
         c.lineWidth = 2.0;
         c.stroke();
         c.restore();
@@ -91,7 +91,7 @@ export class PocketMap {
     c.rotate(-yaw);
     c.lineWidth = 2.5;
     c.fillStyle = "#1d513d";
-    c.strokeStyle = "#fcfae8";
+    c.strokeStyle = "#fdf9f0";
     c.beginPath();
     c.moveTo(0, -8);
     c.lineTo(5, 6);
@@ -102,9 +102,9 @@ export class PocketMap {
     c.fill();
     c.restore();
     c.font = "bold 10px sans-serif";
-    c.fillStyle = "#294c3a";
+    c.fillStyle = "#244d25";
     c.fillText("N", 6, 13);
-    c.fillStyle = "#3e5845";
+    c.fillStyle = "#395a3a";
     c.fillRect(7, 103, Math.min(32, (k * 50) / ACRE), 2);
   }
 }

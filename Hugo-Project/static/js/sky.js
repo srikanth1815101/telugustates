@@ -205,14 +205,14 @@ void main(){dir=position;vec3 d=normalize(dir);vec3 c=mix(uHor,uZen,smoothstep(-
     weather,
     skyData,
     timeLabel;
-  const peach = new T.Color("#efb49b"),
+  const peach = new T.Color("#f2b494"),
     night = new T.Color("#7a8b9c"),
     dayH = new T.Color("#c6deda"),
     blue = new T.Color("#76b4cf"),
     nite = new T.Color("#23344a"),
     rainGrey = new T.Color("#a5b3ae"),
-    lightSun = new T.Color("#ffedcc"),
-    lightDusk = new T.Color("#ecad88");
+    lightSun = new T.Color("#faeed3"),
+    lightDusk = new T.Color("#f1ab87");
   let lastOpt = "";
   function update(
     ms,
@@ -258,10 +258,10 @@ void main(){dir=position;vec3 d=normalize(dir);vec3 c=mix(uHor,uZen,smoothstep(-
       .lerp(dayH, dt)
       .lerp(peach, tw * 0.65)
       .lerp(new T.Color("#b7cddd"), (1 - weather.warm) * 0.15)
-      .lerp(new T.Color("#f6d3ac"), weather.warm * 0.16)
+      .lerp(new T.Color("#f2d792"), weather.warm * 0.16)
       .lerp(rainGrey, weather.rain * 0.54);
     if (settings.time === "golden") {
-      uni.uHor.value.lerp(new T.Color("#f8dcb0"), 0.34);
+      uni.uHor.value.lerp(new T.Color("#f4dea7"), 0.34);
       uni.uZen.value.lerp(new T.Color("#88bbd0"), 0.3);
     }
     if (settings.season === "winter")
@@ -279,8 +279,8 @@ void main(){dir=position;vec3 d=normalize(dir);vec3 c=mix(uHor,uZen,smoothstep(-
       (1 - dt) *
       smooth(-4, 22, skyData.moon.altitude) *
       (0.12 + 0.65 * skyData.lit);
-    hemi.color.copy(new T.Color("#b4cce6")).lerp(new T.Color("#f5f2d9"), dt);
-    hemi.groundColor.set(dt > 0.45 ? "#9b9c73" : "#82919b");
+    hemi.color.copy(new T.Color("#b4cce6")).lerp(new T.Color("#f8f1de"), dt);
+    hemi.groundColor.set(dt > 0.45 ? "#a69877" : "#82919b");
     hemi.intensity = 1.22 + 0.54 * dt;
     stars.material.opacity = (1 - dt) * (0.9 - 0.68 * weather.wet);
     scene.fog.color.copy(uni.uHor.value);

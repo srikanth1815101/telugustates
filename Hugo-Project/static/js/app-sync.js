@@ -43,6 +43,9 @@ function renderProgress(st) {
     if (prog) prog.hidden = true;
     cta?.classList.remove("is-busy");
     btn?.classList.remove("is-busy");
+    if (btn) btn.hidden = false;
+    if (btnSub) btnSub.hidden = false;
+    if (btnLabel) btnLabel.setAttribute("data-msg", "home.downloadApp");
     if (st?.state === "up_to_date") {
       latestSync = { ...(latestSync || {}), updateAvailable: false };
       hideUpdateBanner();
@@ -78,19 +81,15 @@ function renderProgress(st) {
       note.textContent = msg("home.updateDownloading") + detail;
     }
     cta?.classList.add("is-busy");
-    btn?.classList.add("is-busy");
     if (ctaLabel) {
       ctaLabel.removeAttribute("data-msg");
       ctaLabel.textContent = `${pct}%`;
     }
-    if (btnLabel) {
-      btnLabel.removeAttribute("data-msg");
-      btnLabel.textContent = msg("home.updateDownloading");
-    }
-    if (btnSub) {
-      btnSub.hidden = false;
-      btnSub.textContent = `${pct}%`;
-    }
+    // The banner above the hero is the only progress surface. Hide the hero download
+    // button while it runs so one download is never reported twice on one screen.
+    btn?.classList.remove("is-busy");
+    if (btn) btn.hidden = true;
+    if (btnSub) btnSub.hidden = true;
     return;
   }
 
@@ -105,7 +104,8 @@ function renderProgress(st) {
       note.textContent = msg("home.updatePermission");
     }
     cta?.classList.remove("is-busy");
-    btn?.classList.remove("is-busy");
+    if (btn) btn.hidden = true;
+    if (btnSub) btnSub.hidden = true;
     if (ctaLabel) {
       ctaLabel.setAttribute("data-msg", "home.updateAppCta");
       ctaLabel.textContent = msg("home.updateAppCta");
@@ -124,14 +124,11 @@ function renderProgress(st) {
       note.textContent = msg("home.updateInstalling");
     }
     cta?.classList.add("is-busy");
-    btn?.classList.add("is-busy");
+    if (btn) btn.hidden = true;
+    if (btnSub) btnSub.hidden = true;
     if (ctaLabel) {
       ctaLabel.setAttribute("data-msg", "home.updateInstalling");
       ctaLabel.textContent = msg("home.updateInstalling");
-    }
-    if (btnLabel) {
-      btnLabel.setAttribute("data-msg", "home.updateInstalling");
-      btnLabel.textContent = msg("home.updateInstalling");
     }
     return;
   }
@@ -147,6 +144,8 @@ function renderProgress(st) {
     if (skip) skip.hidden = false;
     cta?.classList.remove("is-busy");
     btn?.classList.remove("is-busy");
+    if (btn) btn.hidden = false;
+    if (btnSub) btnSub.hidden = false;
     if (note && st.message) {
       note.removeAttribute("data-msg");
       note.textContent = st.message;
@@ -154,10 +153,6 @@ function renderProgress(st) {
     if (ctaLabel) {
       ctaLabel.setAttribute("data-msg", "home.updateRetry");
       ctaLabel.textContent = msg("home.updateRetry");
-    }
-    if (btnLabel) {
-      btnLabel.setAttribute("data-msg", "home.updateRetry");
-      btnLabel.textContent = msg("home.updateRetry");
     }
   }
 }
@@ -195,6 +190,8 @@ function renderUpdateUi() {
 
   const apkUrl = latestSync.apkUrl || DEFAULT_APK_URL,
     tag = latestSync.latestVersionName ? "v" + latestSync.latestVersionName : "";
+  // The banner above the hero is the one place the update is announced, so the hero
+  // download button steps aside while it is on screen.
   if (btn && label) {
     btn.hidden = false;
     btn.classList.add("is-update");
@@ -224,6 +221,7 @@ function renderUpdateUi() {
     }
     if (latestSync.latestVersionCode !== dismissedCode) {
       banner.hidden = false;
+      if (btn) btn.hidden = true;
     }
   }
 }
@@ -298,6 +296,24 @@ export function initAppSync() {
     if (latestSync?.latestVersionCode)
       dismissedCode = latestSync.latestVersionCode;
     if (banner) banner.hidden = true;
+    // Dismissed the banner: the hero button becomes the way back to the update.
+    const heroBtn = document.querySelector("#app-download"),
+      heroSub = document.querySelector("#app-download-sub"),
+      heroLabel = document.querySelector("#app-download-label");
+    if (heroBtn && latestSync?.updateAvailable) {
+      heroBtn.hidden = false;
+      heroBtn.classList.add("is-update");
+      heroBtn.href = latestSync.apkUrl || DEFAULT_APK_URL;
+      heroBtn.removeAttribute("download");
+      heroLabel?.setAttribute("data-msg", "home.updateApp");
+      if (heroLabel) heroLabel.textContent = msg("home.updateApp");
+      if (heroSub) {
+        heroSub.hidden = false;
+        heroSub.textContent = latestSync.latestVersionName
+          ? "v" + latestSync.latestVersionName
+          : "APK";
+      }
+    }
   };
   if (dismiss) dismiss.addEventListener("click", closeBanner);
   if (skip) skip.addEventListener("click", closeBanner);

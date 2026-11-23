@@ -38,8 +38,8 @@ export function nameboard(group, s, h, u, put) {
     { gx, gy, boardW } = nameboardSpot(h),
     base = s.xyz(gx, gy, s.ground(gx, gy)),
     label = houseLabel(h),
-    wood = h.sign?.wood || "#523424",
-    trim = h.sign?.trim || "#d3ba7e";
+    wood = h.sign?.wood || "#553321",
+    trim = h.sign?.trim || "#d6ba71";
   const c = document.createElement("canvas");
   c.width = 640;
   c.height = 208;
@@ -56,7 +56,7 @@ export function nameboard(group, s, h, u, put) {
   a.strokeRect(20, 19, 600, 170);
   a.textAlign = "center";
   // One high-contrast inscription, painted directly onto the face. No screen-space duplicate.
-  a.fillStyle = "#fff7df";
+  a.fillStyle = "#fcf7e9";
   const fontStack = '"Fraunces", "Noto Sans Telugu", Georgia, sans-serif';
   a.font = `bold 96px ${fontStack}`;
   let px = Math.min(

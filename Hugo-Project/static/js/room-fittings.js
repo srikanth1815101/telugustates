@@ -3,10 +3,10 @@ export function fittings(p, paint) {
   const v = p.design,
     [ink, dye, wood, floor, plaster, ceil] = v.palette,
     F = p.floor,
-    cream = "#efdfbb",
+    cream = "#f1dfb3",
     iron = "#4e5551",
-    clay = "#ab6648",
-    brass = "#c69a56";
+    clay = "#ad6642",
+    brass = "#c39c38";
   const draw = (
       g,
       x,
@@ -211,7 +211,7 @@ export function fittings(p, paint) {
       case "charpoy":
         legs(0.39);
         shelf(0.4);
-        b(0, 0.48, 0, 0.94, 0.11, 0.95, "#ceb283");
+        b(0, 0.48, 0, 0.94, 0.11, 0.95, "#ceb370");
         for (let i = 0; i < 9; i++)
           b((i - 4) * 0.1, 0.542, 0, 0.019, 0.012, 0.9, dye);
         b(-0.3, 0.61, 0, 0.23, 0.14, 0.75, cream);
@@ -266,8 +266,8 @@ export function fittings(p, paint) {
       }
       case "hearth":
         b(0, 0.24, 0, 0.95, 0.46, 0.93, clay);
-        b(0, 0.21, 0.47, 0.37, 0.27, 0.02, "#533d34");
-        b(0, 0.49, 0, 0.99, 0.1, 0.96, "#79594a");
+        b(0, 0.21, 0.47, 0.37, 0.27, 0.02, "#543d31");
+        b(0, 0.49, 0, 0.99, 0.1, 0.96, "#7b5846");
         for (const [x, sz] of [
           [-0.26, 0.39],
           [0.21, 0.28],
@@ -351,7 +351,7 @@ export function fittings(p, paint) {
       case "wheel":
         c(0, 0.15, 0, 0.64, 0.28, 0.64, wood);
         c(0, 0.34, 0, 0.16, 0.37, 0.16, iron);
-        c(0, 0.55, 0, 0.94, 0.09, 0.94, "#8e6949");
+        c(0, 0.55, 0, 0.94, 0.09, 0.94, "#826e3c");
         j(0, 0.76, 0, 0.4, 0.37, 0.4, clay);
         break;
       case "instrument": {
@@ -420,7 +420,7 @@ export function fittings(p, paint) {
               0.81 / N,
               H * 0.48,
               0.67,
-              ["#527758", "#79925c", "#629780"][(i + k) % 3],
+              ["#4b794c", "#7e9151", "#629780"][(i + k) % 3],
             );
         }
         break;

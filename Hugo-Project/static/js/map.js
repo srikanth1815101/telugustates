@@ -81,13 +81,15 @@ export async function mountMap(initialAtlas, tr, boundaries = get("frozen/map.js
       ];
     });
   let tileBoxes = buildTileBoxes(a);
+  // District fills: an even spread of the brand families (leaf, lime, gold,
+  // terracotta, sky, plum) so neighbouring districts never merge visually.
   const palette = [
-    "#b8c8a7",
-    "#bac8ae",
-    "#cccfac",
-    "#b1c2a8",
-    "#d0c8a9",
-    "#c3cba2",
+    "#c6cf96",
+    "#b3d377",
+    "#e2c489",
+    "#ddb07a",
+    "#a9cbdd",
+    "#cbb6d6",
   ];
   for (const f of map.features) {
     const rings =
@@ -120,7 +122,7 @@ export async function mountMap(initialAtlas, tr, boundaries = get("frozen/map.js
         "data-d": f.properties.id,
         "vector-effect": "non-scaling-stroke",
         "stroke-width": 0.65,
-        stroke: "#738772",
+        stroke: "#758945",
       },
       reg,
     );
@@ -149,16 +151,16 @@ export async function mountMap(initialAtlas, tr, boundaries = get("frozen/map.js
       p.setAttribute(
         "fill",
         id === (hover || sel)
-          ? "#bb7844"
+          ? "#df6224"
           : districtMode
             ? palette[(id * 7) % 6]
-            : "#98ac77",
+            : "#91b046",
       );
       p.setAttribute(
         "fill-opacity",
         id === (hover || sel) ? 0.49 : districtMode ? 0.92 : 0.04,
       );
-      p.setAttribute("stroke", id === (hover || sel) ? "#975633" : "#637f68");
+      p.setAttribute("stroke", id === (hover || sel) ? "#ac4817" : "#6b803c");
     }
     relief.style.display = zoom > 30 ? "none" : "";
     relief.style.opacity = districtMode ? ".39" : "1";
@@ -200,8 +202,8 @@ export async function mountMap(initialAtlas, tr, boundaries = get("frozen/map.js
         "circle",
         {
           r: single ? 5 : 8.5,
-          fill: "#a25e3d",
-          stroke: "#fffbe9",
+          fill: "#b8511d",
+          stroke: "#fefbf2",
           "stroke-width": 1.8,
         },
         group,
@@ -231,8 +233,8 @@ export async function mountMap(initialAtlas, tr, boundaries = get("frozen/map.js
           "pointer-events": "none",
           "font-size": 11,
           "font-weight": 750,
-          fill: "#493e31",
-          stroke: "#fff8e9",
+          fill: "#4c3e1c",
+          stroke: "#fef8ec",
           "stroke-width": 3,
           "paint-order": "stroke",
         });
@@ -243,7 +245,7 @@ export async function mountMap(initialAtlas, tr, boundaries = get("frozen/map.js
           {
             r: 8.5,
             fill: "none",
-            stroke: "#ad573b",
+            stroke: "#ba4e19",
             "stroke-width": 1.4,
             "pointer-events": "none",
           },
@@ -331,9 +333,9 @@ export async function mountMap(initialAtlas, tr, boundaries = get("frozen/map.js
         "polygon",
         {
           points: pts,
-          fill: "#d9ac4b",
+          fill: "#e4a916",
           "fill-opacity": 0.18,
-          stroke: "#97691e",
+          stroke: "#926c0d",
           "stroke-width": 1.4,
           "pointer-events": "none",
         },
@@ -343,8 +345,8 @@ export async function mountMap(initialAtlas, tr, boundaries = get("frozen/map.js
       text(marks, x, y - 9, msg("village.acre"), {
         "font-size": 10,
         "text-anchor": "middle",
-        fill: "#664312",
-        stroke: "#fff5de",
+        fill: "#604607",
+        stroke: "#fdf6e3",
         "stroke-width": 2.4,
         "paint-order": "stroke",
       });
@@ -432,8 +434,8 @@ export async function mountMap(initialAtlas, tr, boundaries = get("frozen/map.js
         "font-size": size,
         "font-weight": 750,
         "letter-spacing": size > 12 ? "1.6" : ".1",
-        fill: "#294e3b",
-        stroke: "#eef3d9",
+        fill: "#1d512b",
+        stroke: "#ebf5d5",
         "stroke-width": size > 12 ? 3 : 2,
         "paint-order": "stroke",
       });
@@ -489,10 +491,10 @@ export async function mountMap(initialAtlas, tr, boundaries = get("frozen/map.js
     ) {
       const x = sx(lon);
       if (x < (w < 700 ? 118 : 28) || x > w - 48) continue;
-      el("path", { d: `M${x} 0v5 M${x} ${h}v-4`, stroke: "#94a895" }, ticks);
+      el("path", { d: `M${x} 0v5 M${x} ${h}v-4`, stroke: "#93ac56" }, ticks);
       text(ticks, x, 12, `${+lon.toFixed(4)}°E`, {
         "font-size": 8,
-        fill: "#667c6d",
+        fill: "#6a7e3e",
       });
     }
     for (
@@ -502,11 +504,11 @@ export async function mountMap(initialAtlas, tr, boundaries = get("frozen/map.js
     ) {
       const y = sy(lat);
       if (y < 48 || y > h - (w < 700 ? 72 : 42)) continue;
-      el("path", { d: `M0 ${y}h5 M${w} ${y}h-4`, stroke: "#94a895" }, ticks);
+      el("path", { d: `M0 ${y}h5 M${w} ${y}h-4`, stroke: "#93ac56" }, ticks);
       text(ticks, 8, y + 3, `${+lat.toFixed(4)}°N`, {
         "text-anchor": "start",
         "font-size": 8,
-        fill: "#667c6d",
+        fill: "#6a7e3e",
       });
     }
     featuresLayer.replaceChildren();
@@ -526,7 +528,7 @@ export async function mountMap(initialAtlas, tr, boundaries = get("frozen/map.js
               )
               .join(" "),
             fill: "none",
-            stroke: "#a47b46",
+            stroke: "#a07e25",
             "stroke-dasharray": "3 2",
             "stroke-width": 2,
             "pointer-events": "none",
@@ -553,8 +555,8 @@ export async function mountMap(initialAtlas, tr, boundaries = get("frozen/map.js
         "circle",
         {
           r: zoom > 2 ? 8 : 5,
-          fill: "#40654b",
-          stroke: "#fff6d5",
+          fill: "#2a693b",
+          stroke: "#fdf6e3",
           "stroke-width": 2,
         },
         n,
@@ -562,8 +564,8 @@ export async function mountMap(initialAtlas, tr, boundaries = get("frozen/map.js
       if (zoom >= 5)
         text(n, 12, 4, lang() ? s.title_te || s.title : s.title, {
           "font-size": 12,
-          fill: "#234b39",
-          stroke: "#fff8e8",
+          fill: "#1a4e28",
+          stroke: "#fef8eb",
           "paint-order": "stroke",
           "stroke-width": 3,
         });

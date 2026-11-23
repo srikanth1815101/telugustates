@@ -111,7 +111,7 @@ export function buildRoom(h, paint, detail = true) {
     w + 0.03,
     0.4,
     d + 0.03,
-    "#b49870",
+    "#b2995c",
   );
   paint(
     "floor",
@@ -146,7 +146,7 @@ export function buildRoom(h, paint, detail = true) {
       wood,
     );
   box(door, F + dh + 0.06, front, dw + 0.22, 0.12, 0.245, wood);
-  box(door, 0.07, front + 0.41, dw + 0.52, 0.14, 0.82, "#b8a385");
+  box(door, 0.07, front + 0.41, dw + 0.52, 0.14, 0.82, "#b7a577");
   if (detail) fittings(p, paint);
 }
 export function doorLeaf(s, h, u) {
@@ -180,11 +180,11 @@ export function doorLeaf(s, h, u) {
       normals.push(nor.getX(i), nor.getY(i), nor.getZ(i));
     }
   };
-  bits(p.dw / 2, p.dh / 2, 0, p.dw - 0.044, p.dh - 0.035, 0.082, "#734e35");
+  bits(p.dw / 2, p.dh / 2, 0, p.dw - 0.044, p.dh - 0.035, 0.082, "#7a4a33");
   for (const z of [-0.05, 0.05]) {
     for (const y of [0.25, 0.72])
-      bits(p.dw / 2, p.dh * y, z, p.dw * 0.77, p.dh * 0.32, 0.031, "#966f4b");
-    bits(p.dw - 0.15, p.dh * 0.49, z * 1.55, 0.14, 0.045, 0.055, "#e1c485");
+      bits(p.dw / 2, p.dh * y, z, p.dw * 0.77, p.dh * 0.32, 0.031, "#8a753e");
+    bits(p.dw - 0.15, p.dh * 0.49, z * 1.55, 0.14, 0.045, 0.055, "#e4c472");
   }
   unit.dispose();
   const geo = new T.BufferGeometry();
