@@ -42,7 +42,7 @@ export function fittings(p, paint) {
       0,
       0,
       0,
-      "window-" + p.styleGlow,
+      "lamp",
     );
     disc(X, L - 0.12, Z, 0.34, 0.025, 0.34, cream);
   } else if (v.lamp === 1) {
@@ -60,7 +60,7 @@ export function fittings(p, paint) {
         0,
         0,
         0,
-        "window-" + p.styleGlow,
+        "lamp",
       );
   } else if (v.lamp === 2) {
     draw("disc", X, L + 0.1, Z, 0.52, 0.09, 0.52, wood);
@@ -76,7 +76,7 @@ export function fittings(p, paint) {
       0,
       0,
       0,
-      "window-" + p.styleGlow,
+      "lamp",
     );
   } else {
     disc(X, L, Z, 0.23, 0.18, 0.23, wood);
@@ -105,7 +105,7 @@ export function fittings(p, paint) {
       0,
       0,
       0,
-      "window-" + p.styleGlow,
+      "lamp",
     );
   }
   if (v.beam !== 2) {

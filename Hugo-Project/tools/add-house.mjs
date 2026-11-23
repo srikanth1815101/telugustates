@@ -136,10 +136,7 @@ function seededSpec(id, houseName) {
     archetype = models[b[0] % models.length],
     w = +(8.8 + (u16(2) / 65535) * 3.1).toFixed(2),
     d = +(8.8 + (u16(4) / 65535) * 2.8).toFixed(2),
-    h =
-      archetype === "balcony-stair"
-        ? +(5.45 + (b[6] / 255) * 0.9).toFixed(2)
-        : +(3.85 + (b[6] / 255) * 0.95).toFixed(2),
+    h = +(4.35 + (b[6] / 255) * 0.4).toFixed(2),
     facing = FACINGS[b[7] % 4],
     wall_color = WALL_PALETTE[b[8] % WALL_PALETTE.length],
     roof_color = ROOF_PALETTE[b[9] % ROOF_PALETTE.length],

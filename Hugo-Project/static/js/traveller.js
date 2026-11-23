@@ -9,6 +9,42 @@ const clamp = T.MathUtils.clamp,
   Q = () => new T.Quaternion(),
   up = new T.Vector3(0, 1, 0),
   round = (x) => +x.toFixed(4);
+// Re-dress the Atlas explorer rigs as village villagers: ochre kurta & cream dhoti for the
+// man, kumkum saree with a deep zari border for the woman. Skin and hair keep their exact
+// authored colours (the rain-weather cloth mask keys off them).
+const VILLAGE_RETEX = {
+  man: [
+    [[0.4969, 0.1812, 0.0802], [0.722, 0.478, 0.157]],
+    [[0.3231, 0.0931, 0.0437], [0.478, 0.306, 0.086]],
+    [[0.0844, 0.1022, 0.0666], [0.91, 0.862, 0.733]],
+    [[0.5841, 0.3813, 0.1274], [0.478, 0.337, 0.165]],
+  ],
+  woman: [
+    [[0.0976, 0.2831, 0.2423], [0.522, 0.18, 0.212]],
+    [[0.0307, 0.1384, 0.1274], [0.196, 0.078, 0.082]],
+  ],
+};
+function restyleVillager(R, style) {
+  const src = R.mesh.geometry,
+    cmap = src.getAttribute("color");
+  if (!cmap) return;
+  const pairs = VILLAGE_RETEX[style] || [],
+    c = new Float32Array(cmap.array);
+  for (const [from, to] of pairs)
+    for (let i = 0; i < c.length; i += 3)
+      if (
+        Math.abs(c[i] - from[0]) < 1e-3 &&
+        Math.abs(c[i + 1] - from[1]) < 1e-3 &&
+        Math.abs(c[i + 2] - from[2]) < 1e-3
+      ) {
+        c[i] = to[0];
+        c[i + 1] = to[1];
+        c[i + 2] = to[2];
+      }
+  const geo = src.clone();
+  geo.setAttribute("color", new T.BufferAttribute(c, 3));
+  R.mesh.geometry = geo;
+}
 export function traveller(style = "woman") {
   style = style === "man" ? "man" : "woman";
   const R = rigInstance("traveller-" + style),
@@ -424,6 +460,7 @@ export function traveller(style = "woman") {
     arrive: true,
     reduced: true,
   });
+  restyleVillager(R, style);
   const privateMat = R.mesh.material.clone();
   R.mesh.material = privateMat;
   const rainwear = wornWeather(R, privateMat, style);

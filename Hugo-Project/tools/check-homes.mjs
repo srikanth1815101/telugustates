@@ -631,10 +631,10 @@ try {
         );
       }
     }
-    if (arch === "balcony-stair") {
-      assert(plan.rooms.length === 5 && plan.doors.length >= 7 && plan.stairs.length === 1 && plan.balcony, "balcony-stair multi-floor topology");
-    } else if (arch === "rcc-tank" || arch === "street-shop") {
+    if (arch === "lime-terrace") {
+      // Walkable compacted-lime terrace: flat roof, side stair, no overhead water tank
       assert(plan.rooms.length === 3 && plan.terrace && plan.stairs.length === 1, `${arch} terrace topology`);
+      assert((plan.extraColliders?.length ?? 0) === 0, `${arch} must not carry a roof water-tank collider`);
     } else if (arch === "courtyard-house") {
       assert(plan.rooms.length === 3 && plan.doors.length >= 5, "courtyard-house topology");
     } else if (arch === "l-court") {
@@ -658,8 +658,8 @@ try {
   }
 
   // WalkMotor Physics Proof:
-  // 1) Founding balcony-stair house: walk up exterior stairs onto Upper Floor, enter balcony & upstairs room
-  // 2) Flat-roof house: climb exterior stairs onto open RCC roof terrace & verify parapet safety
+  // 1) Founding house (single-storey vernacular): walk in from the lane through the front door
+  // 2) Lime-terrace house: climb side stairs onto the open compacted-lime roof terrace & verify parapets
   {
     const mkFlatSurface = (homeObj) => {
       const fakeS = {
@@ -680,76 +680,38 @@ try {
 
     const founding = rows[0][5],
       fp = roomPlan(founding),
-      st = fp.stairs[0],
-      stMidX = (st.x0 + st.x1) * 0.5,
       sFounding = mkFlatSurface(founding),
       passFounding = (...v) => passes(sFounding, [], [], [], ...v);
 
-    // Start just in front of the side staircase bottom landing and walk straight toward -Z (up the stairs)
-    const [startX, startY] = localPoint(founding, stMidX, st.z1 + 0.38),
-      [topX, topY] = localPoint(founding, stMidX, st.topZ - 0.15),
-      dirX = topX - startX,
-      dirY = topY - startY,
-      dirLen = Math.hypot(dirX, dirY),
+    // Stand on the lane outside the front door and walk straight in
+    const frontDoor = fp.doors.find((d) => d.id === "front"),
+      [startX, startY] = localPoint(founding, frontDoor.x, fp.rooms[0].z1 + 2.8),
+      [doorX, doorY] = localPoint(founding, frontDoor.x, fp.rooms[0].z1 - 0.4),
+      dirX = doorX - startX,
+      dirY = doorY - startY,
+      dirLen = Math.hypot(dirX, dirY) || 1,
       ux = dirX / dirLen,
       uy = dirY / dirLen;
 
-    const stairMotor = new WalkMotor();
-    stairMotor.reset(startX, startY, sFounding);
-    for (let step = 0; step < 360; step++) {
-      stairMotor.advance(1 / 60, ux, uy, 2.2, sFounding, passFounding, 0.92);
+    const porchMotor = new WalkMotor();
+    porchMotor.reset(startX, startY, sFounding);
+    for (let step = 0; step < 300; step++) {
+      porchMotor.advance(1 / 60, ux, uy, 2.2, sFounding, passFounding, 0.92);
     }
+    const inside = activeRoomAt(sFounding, founding, porchMotor.x, porchMotor.y, porchMotor.root);
     assert(
-      Math.abs(stairMotor.root - st.y1) < 0.05,
-      `WalkMotor failed to climb upstairs: root=${stairMotor.root} expected=${st.y1}`,
+      inside && inside.level === 0,
+      `WalkMotor could not walk from the lane through the front door into the founding house: room=${inside?.id ?? "none"}`,
     );
 
-    // Now walk from top stair landing through upper-stair door into Upstairs Study, then out onto Covered Balcony
-    const upStudy = fp.rooms.find((r) => r.id === "upper-study"),
-      upStairDoor = fp.doors.find((d) => d.id === "upper-stair"),
-      balDoor = fp.doors.find((d) => d.id === "balcony-right");
-    for (const target of [
-      localPoint(founding, stMidX, upStairDoor.z),
-      localPoint(founding, upStairDoor.x - 0.85, upStairDoor.z),
-      localPoint(founding, balDoor.x, upStudy.cz),
-    ]) {
-      for (let step = 0; step < 240; step++) {
-        const dx = target[0] - stairMotor.x,
-          dy = target[1] - stairMotor.y,
-          dl = Math.hypot(dx, dy);
-        if (dl < 0.006) break;
-        stairMotor.advance(1 / 60, dx / dl, dy / dl, 2.2, sFounding, passFounding, 0.92);
-      }
-    }
-    const reachedRoom = activeRoomAt(sFounding, founding, stairMotor.x, stairMotor.y, stairMotor.root);
-    assert(
-      reachedRoom?.id === "upper-study" && Math.abs(stairMotor.root - upStudy.floor) < 0.05,
-      `WalkMotor failed to enter upper-study: got=${reachedRoom?.id} root=${stairMotor.root}`,
-    );
-
-    // Step from Upstairs Study through balcony-right door onto the Covered Balcony
-    for (let step = 0; step < 240; step++) {
-      const target = localPoint(founding, balDoor.x, fp.balcony.z0 + (fp.balcony.z1 - fp.balcony.z0) * 0.5),
-        dx = target[0] - stairMotor.x,
-        dy = target[1] - stairMotor.y,
-        dl = Math.hypot(dx, dy);
-      if (dl < 0.006) break;
-      stairMotor.advance(1 / 60, dx / dl, dy / dl, 2.2, sFounding, passFounding, 0.92);
-    }
-    const reachedBalcony = activeRoomAt(sFounding, founding, stairMotor.x, stairMotor.y, stairMotor.root);
-    assert(
-      reachedBalcony?.isBalcony && Math.abs(stairMotor.root - fp.balcony.floor) < 0.05,
-      `WalkMotor failed to step onto covered balcony: got=${reachedBalcony?.id} root=${stairMotor.root}`,
-    );
-
-    // Verify rcc-tank RCC terrace stair climb & parapet protection
+    // Verify lime-terrace side stair climb & parapet protection
     const terraceDesign = residentDesign({
         u: residentId("terrace_climb_probe"),
         c: [2345, 7760],
         d: 32,
         house: {
           seed: 424242,
-          archetype: "rcc-tank",
+          archetype: "lime-terrace",
           facing: "south",
           setback_m: 8.5,
           path_width_m: 1.2,
@@ -780,7 +742,6 @@ try {
       Math.abs(terraceMotor.root - tp.terrace.floor) < 0.05,
       `WalkMotor failed to reach flat-roof terrace: root=${terraceMotor.root} expected=${tp.terrace.floor}`,
     );
-    q.upstairsWalkVerified = true;
     q.terraceWalkVerified = true;
   }
 
@@ -807,33 +768,29 @@ try {
     const ham = hamletScene(vSurf, rows, vRoads, vFocus, 2, vPaths),
       animList = ham.userData.animated || [],
       hasGlow = ham.children.some((m) => m.userData?.glow === 0),
-      persons = animList.filter((a) => a.kind === "person"),
-      bullocks = animList.filter(
-        (a) => a.kind === "animal" && a.id === "atlas-bullock",
-      );
+      birds = animList.filter((a) => a.kind === "bird");
     assert(
-      persons.length >= 4 &&
-        persons.every((a) => a.R && a.R.bones?.length > 7) &&
-        animList.some((a) => a.kind === "animal") &&
-        bullocks.length >= 1 &&
+      birds.length >= 1 &&
+        animList.every((a) => ["bird", "toranam", "wisp"].includes(a.kind)) &&
+        !animList.some((a) => a.kind === "person" || a.kind === "animal") &&
         hasGlow,
-      "hamletScene missing live skeletal village elements",
+      "hamletScene missing ambient village life (or still spawning people/livestock)",
     );
     updateHamlet(ham, 1.25, vFocus);
     updateHamlet(ham, 3.75, vFocus);
     for (const a of animList)
-      if (a.kind === "person" || a.kind === "animal")
+      if (a.kind === "bird")
         assert(
-          Number.isFinite(a.x) && Number.isFinite(a.y),
-          "animated villager lost world position",
+          Number.isFinite(a.bird.position.x) && Number.isFinite(a.bird.position.y),
+          "animated bird lost world position",
         );
-    q.villageAnimatedActors = animList.length;
+    q.villageAmbientActors = animList.length;
   }
   assert(
     rows.length >= 1 &&
       profiles.size === rows.length &&
       q.furniturePieces === rows.length * 3 &&
-      syntheticLayouts.size === 11 &&
+      syntheticLayouts.size === 11 && // two of the twelve shells share a composition seed class
       syntheticByShell.size === models.length &&
       [...syntheticByShell.values()].every((v) => v.size >= 3),
   );
