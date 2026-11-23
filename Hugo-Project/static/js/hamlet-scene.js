@@ -2,7 +2,115 @@
 import { roomPlan } from "./home-volume.js";
 import * as T from "../vendor/three.module.min.js";
 import { ACRE as M, localPoint } from "./metres.js";
+import {
+  rigInstance,
+  rigReady,
+  propForm,
+  propBox,
+  propMaterial,
+} from "./art-library.js";
 const scale = (p, x, y) => [p[0] + x / M, p[1] + y / M];
+const UP_AXIS = new T.Vector3(0, 1, 0),
+  LOOK_Q = new T.Quaternion();
+const hash01 = (n) => {
+  const x = Math.sin(n * 127.1 + 311.7) * 43758.5453;
+  return x - Math.floor(x);
+};
+// Recolour only the cloth clusters of a shared character rig so villagers keep their
+// skin, hair and shading depth but wear a genuinely varied village wardrobe.
+const OUTFIT_RAMPS = [
+  [
+    [0.2, 0.28, 0.44],
+    [0.5, 0.57, 0.74],
+    [0.88, 0.82, 0.62],
+  ], // indigo kurta, ecru dhoti
+  [
+    [0.44, 0.16, 0.12],
+    [0.72, 0.4, 0.22],
+    [0.93, 0.77, 0.48],
+  ], // rust, turmeric
+  [
+    [0.13, 0.3, 0.23],
+    [0.36, 0.53, 0.35],
+    [0.87, 0.81, 0.58],
+  ], // leaf green, ecru
+  [
+    [0.35, 0.14, 0.26],
+    [0.59, 0.29, 0.36],
+    [0.9, 0.72, 0.47],
+  ], // maroon, marigold
+  [
+    [0.15, 0.26, 0.4],
+    [0.3, 0.46, 0.59],
+    [0.76, 0.79, 0.73],
+  ], // steel blue, ash
+  [
+    [0.4, 0.28, 0.09],
+    [0.7, 0.53, 0.19],
+    [0.9, 0.85, 0.65],
+  ], // mustard, ivory
+];
+function tintCloth(R, seed) {
+  const src = R.mesh.geometry,
+    colors = src.attributes.color;
+  if (!colors) return;
+  const c = Float32Array.from(colors.array),
+    key = (r, g, b) =>
+      ((Math.round(r * 12) << 16) |
+        (Math.round(g * 12) << 8) |
+        Math.round(b * 12)) >>>
+      0,
+    counts = new Map();
+  for (let i = 0; i < c.length; i += 3) {
+    const k = key(c[i], c[i + 1], c[i + 2]);
+    counts.set(k, (counts.get(k) || 0) + 1);
+  }
+  const cloth = [];
+  for (const [k, n] of counts) {
+    const r = ((k >>> 16) & 255) / 12,
+      g = ((k >>> 8) & 255) / 12,
+      b = (k & 255) / 12,
+      mx = Math.max(r, g, b),
+      mn = Math.min(r, g, b),
+      skinLike =
+        r > 0.34 &&
+        r >= g &&
+        g >= b * 0.72 &&
+        r - b > 0.1 &&
+        mx - mn < 0.52;
+    if (!skinLike && mx >= 0.16) cloth.push([k, (r + g + b) / 3]);
+  }
+  if (!cloth.length) return;
+  cloth.sort((a, b) => a[1] - b[1]);
+  const ramp = OUTFIT_RAMPS[seed % OUTFIT_RAMPS.length],
+    map = new Map();
+  cloth.forEach(([k], i) => {
+    const t = cloth.length === 1 ? 1 : i / (cloth.length - 1),
+      seg = t * (ramp.length - 1),
+      j = Math.min(ramp.length - 2, Math.floor(seg)),
+      f = seg - j;
+    map.set(k, [
+      ramp[j][0] + (ramp[j + 1][0] - ramp[j][0]) * f,
+      ramp[j][1] + (ramp[j + 1][1] - ramp[j][1]) * f,
+      ramp[j][2] + (ramp[j + 1][2] - ramp[j][2]) * f,
+    ]);
+  });
+  for (let i = 0; i < c.length; i += 3) {
+    const m = map.get(key(c[i], c[i + 1], c[i + 2]));
+    if (m) {
+      const srcL = (c[i] + c[i + 1] + c[i + 2]) / 3 || 1,
+        dstL = (m[0] + m[1] + m[2]) / 3 || 1,
+        k = Math.min(1.55, Math.max(0.42, srcL / dstL) * 0.85 + 0.32);
+      c[i] = Math.min(1, m[0] * k);
+      c[i + 1] = Math.min(1, m[1] * k);
+      c[i + 2] = Math.min(1, m[2] * k);
+    }
+  }
+  const geo = src.clone();
+  geo.setAttribute("color", new T.Float32BufferAttribute(c, 3));
+  geo.computeBoundingSphere();
+  R.mesh.geometry = geo;
+}
 export function hamletScene(s, rows, commons, focus, tier, paths = []) {
   const g = new T.Group(),
     shapes = new Map(),
@@ -74,83 +182,137 @@ export function hamletScene(s, rows, commons, focus, tier, paths = []) {
     return grp;
   };
 
-  const makeVillager = (pt, lift, yaw, outfitCol, clothCol, seated = false, phase = 0) => {
-    const root = placeGroupAt(pt, lift, yaw),
-      skin = 0xb9825b,
-      hair = 0x26211e;
-    if (seated) {
-      root.add(partMesh(unitBox, clothCol, 0.34, 0.16, 0.38, 0, 0.08, 0.06));
-      root.add(partMesh(unitCyl, clothCol, 0.13, 0.38, 0.13, -0.09, -0.1, 0.2));
-      root.add(partMesh(unitCyl, clothCol, 0.13, 0.38, 0.13, 0.09, -0.1, 0.2));
-    } else {
-      root.add(partMesh(unitCyl, clothCol, 0.14, 0.72, 0.14, -0.09, 0.36, 0));
-      root.add(partMesh(unitCyl, clothCol, 0.14, 0.72, 0.14, 0.09, 0.36, 0));
-    }
-    const baseY = seated ? 0.16 : 0.72,
-      torso = new T.Group();
-    torso.position.set(0, baseY, 0);
-    torso.add(partMesh(unitBox, outfitCol, 0.34, 0.5, 0.22, 0, 0.25, 0));
-    torso.add(partMesh(unitBox, clothCol, 0.36, 0.14, 0.24, 0, 0.06, 0));
-    const head = new T.Group();
-    head.position.set(0, 0.56, 0);
-    head.add(partMesh(unitOrb, skin, 0.22, 0.25, 0.22, 0, 0.11, 0));
-    head.add(partMesh(unitOrb, hair, 0.23, 0.16, 0.23, 0, 0.17, -0.02));
-    torso.add(head);
-    const armL = new T.Group(),
-      armR = new T.Group();
-    armL.position.set(-0.21, 0.45, 0);
-    armR.position.set(0.21, 0.45, 0);
-    armL.add(partMesh(unitCyl, skin, 0.09, 0.42, 0.09, 0, -0.19, 0.04));
-    armR.add(partMesh(unitCyl, skin, 0.09, 0.42, 0.09, 0, -0.19, 0.04));
-    torso.add(armL, armR);
-    root.add(torso);
-    animated.push({ kind: "person", torso, head, armL, armR, baseY, phase });
+  // A live skeletal villager: Quaternius Atlas rig (same family as the traveller), reclothed,
+  // walking village beats with pauses, idling with subtle stance sway, head-tracking the traveller.
+  const personActor = (pt, lift, yaw, seed, { mode = "idle", waypoints = null, speed = 1.12, face = null } = {}) => {
+    const id = seed % 2 ? "traveller-man" : "traveller-woman";
+    if (!rigReady(id)) return null;
+    const R = rigInstance(id);
+    tintCloth(R, seed * 7 + 3);
+    R.g.position.set(...s.xyz(pt[0], pt[1], s.ground(pt[0], pt[1]) + lift));
+    R.g.rotation.y = yaw;
+    R.g.scale.setScalar(0.93 + hash01(seed * 3.1 + 11) * 0.14);
+    R.mesh.castShadow = true;
+    actorRoot.add(R.g);
+    animated.push({
+      kind: "person",
+      R,
+      seed,
+      mode,
+      waypoints,
+      wi: 0,
+      dir: 1,
+      speed,
+      face,
+      baseYaw: yaw,
+      x: pt[0],
+      y: pt[1],
+      lift,
+      yaw,
+      gait: hash01(seed * 13.7 + 5.1),
+      pauseUntil: 0,
+      look: 0,
+      clock: hash01(seed * 7.7 + 2.3) * 20,
+    });
+    return R;
   };
 
-  const makeBullock = (pt, yaw, phase = 0) => {
-    const root = placeGroupAt(pt, 0, yaw),
-      coat = 0xeee8da,
-      horn = 0x564b40,
-      hoof = 0x453b32;
-    for (const [lx, lz] of [
-      [-0.22, 0.46],
-      [0.22, 0.46],
-      [-0.22, -0.46],
-      [0.22, -0.46],
-    ]) {
-      root.add(partMesh(unitCyl, coat, 0.13, 0.74, 0.13, lx, 0.37, lz));
-      root.add(partMesh(unitCyl, hoof, 0.14, 0.08, 0.14, lx, 0.04, lz));
-    }
-    root.add(partMesh(unitBox, coat, 0.62, 0.58, 1.32, 0, 0.94, 0));
-    // Characteristic Ongole shoulder hump (మూపురం)
-    root.add(partMesh(unitOrb, 0xe4dcc9, 0.36, 0.32, 0.42, 0, 1.3, 0.38));
-    const neck = new T.Group();
-    neck.position.set(0, 1.06, 0.62);
-    neck.add(partMesh(unitBox, coat, 0.32, 0.36, 0.42, 0, 0.04, 0.16));
-    neck.add(partMesh(unitBox, 0x3b342e, 0.24, 0.14, 0.16, 0, -0.06, 0.38));
-    for (const sgn of [-1, 1]) {
-      const hMesh = partMesh(unitCyl, horn, 0.06, 0.34, 0.06, sgn * 0.18, 0.26, 0.22);
-      hMesh.rotation.z = -sgn * 0.48;
-      neck.add(hMesh);
-    }
-    root.add(neck);
-    const tail = new T.Group();
-    tail.position.set(0, 1.12, -0.66);
-    tail.add(partMesh(unitCyl, horn, 0.05, 0.56, 0.05, 0, -0.26, -0.04));
-    root.add(tail);
-    animated.push({ kind: "bullock", neck, tail, phase });
+  // A live skeletal domestic animal: Atlas CC0 rig with stand/walk/run clips, wandering a
+  // grazing patch around home with pauses — never a rigid statue.
+  const animalActor = (id, pt, yaw, seed, { radius = 2.3, speed = 0.42, lift = 0 } = {}) => {
+    if (!rigReady(id)) return null;
+    const R = rigInstance(id);
+    R.g.position.set(...s.xyz(pt[0], pt[1], s.ground(pt[0], pt[1]) + lift));
+    R.g.rotation.y = yaw;
+    actorRoot.add(R.g);
+    animated.push({
+      kind: "animal",
+      id,
+      R,
+      seed,
+      homeX: pt[0],
+      homeY: pt[1],
+      x: pt[0],
+      y: pt[1],
+      lift,
+      yaw,
+      radius,
+      speed,
+      gait: hash01(seed * 9.3 + 1.7),
+      target: null,
+      pauseUntil: hash01(seed * 3.9 + 0.7) * 3,
+      moveT: 0,
+    });
+    return R;
   };
 
-  const makeHen = (pt, yaw, bodyCol, phase = 0) => {
-    const root = placeGroupAt(pt, 0, yaw),
-      body = new T.Group();
-    body.position.set(0, 0.18, 0);
-    body.add(partMesh(unitOrb, bodyCol, 0.22, 0.19, 0.28, 0, 0, 0));
-    body.add(partMesh(unitOrb, bodyCol, 0.13, 0.14, 0.13, 0, 0.11, 0.12));
-    body.add(partMesh(unitBox, 0xc84332, 0.04, 0.06, 0.08, 0, 0.19, 0.13));
-    body.add(partMesh(unitBox, 0xe0a93b, 0.04, 0.04, 0.07, 0, 0.1, 0.2));
-    root.add(body);
-    animated.push({ kind: "hen", body, originX: root.position.x, originZ: root.position.z, root, phase });
+  // An open-source CC0 Kenney prop (baked Atlas mesh), optionally shadow-casting.
+  const propActor = (id, pt, lift, yaw, targetHeight, { castShadow = false, stretch = 1 } = {}) => {
+    const geo = propForm(id),
+      bb = propBox(id);
+    if (!geo || !bb) return null;
+    const h = Math.max(0.01, bb[4] - bb[1]),
+      sxz = (targetHeight / h) * stretch,
+      sy = targetHeight / h,
+      m = new T.Mesh(geo, propMaterial());
+    m.scale.set(sxz, sy, sxz);
+    m.position.set(...s.xyz(pt[0], pt[1], s.ground(pt[0], pt[1]) + lift));
+    m.rotation.y = yaw;
+    m.castShadow = castShadow;
+    m.userData.role = "commons-" + id;
+    actorRoot.add(m);
+    return m;
+  };
+
+  // Deterministic ping-pong beat along the village lane nearest the commons, else an on-spot ring.
+  const laneWaypoints = (hub, reach = 46) => {
+    let bestPath = null,
+      bestLen = 30;
+    for (const p of paths || []) {
+      if (!["village", "bund"].includes(p.type) || !p.xy?.length) continue;
+      let len = 0;
+      for (let i = 1; i < p.xy.length; i++)
+        len += Math.hypot(p.xy[i][0] - p.xy[i - 1][0], p.xy[i][1] - p.xy[i - 1][1]) * M;
+      const near = p.xy.some(
+        ([px, py]) => Math.hypot(px - hub[0], py - hub[1]) * M < reach,
+      );
+      if (near && len > bestLen) {
+        bestLen = len;
+        bestPath = p;
+      }
+    }
+    if (bestPath) {
+      const xy = bestPath.xy;
+      const arcAt = [];
+      let total = 0;
+      for (let i = 1; i < xy.length; i++) {
+        total += Math.hypot(xy[i][0] - xy[i - 1][0], xy[i][1] - xy[i - 1][1]) * M;
+        arcAt.push(total);
+      }
+      const at = (a) => {
+        let k = 0;
+        while (k < arcAt.length - 1 && arcAt[k] < a) k++;
+        const prev = k === 0 ? 0 : arcAt[k - 1],
+          seg = Math.max(1e-6, arcAt[k] - prev),
+          t = (a - prev) / seg;
+        return [
+          xy[k][0] + (xy[k + 1][0] - xy[k][0]) * t,
+          xy[k][1] + (xy[k + 1][1] - xy[k][1]) * t,
+        ];
+      };
+      const start = Math.max(4, total * 0.18),
+        end = Math.min(total - 2, total * 0.82);
+      const pts = [];
+      for (let i = 0; i <= 5; i++) pts.push(at(start + ((end - start) * i) / 5));
+      return pts;
+    }
+    const ring = [];
+    for (let i = 0; i < 6; i++) {
+      const a = (i * Math.PI * 2) / 6 + 0.4,
+        pt = scale(hub, Math.cos(a) * 5.6, Math.sin(a) * 5.6);
+      ring.push(clearSpot(pt, 0.6) ? pt : hub);
+    }
+    return ring;
   };
 
   const makeCirclingBird = (centerPt, radiusM, altM, phase = 0) => {
@@ -224,9 +386,20 @@ export function hamletScene(s, rows, commons, focus, tier, paths = []) {
 
     if (!inMid) continue;
 
-    // Animated conversing neighbours on the Rachabanda stone platform & circling canopy birds
-    makeVillager(scale(z, 1.38, 0.72), 0.58, -0.95, 0xf2ead7, 0xc86b43, true, 0.4);
-    makeVillager(scale(z, 0.68, 1.42), 0.58, 2.15, 0x3d7068, 0xe2b455, true, 2.1);
+    // Animated conversing neighbours on the Rachabanda stone platform, a villager on the lane beat, a peafowl in the shade
+    personActor(scale(z, 1.38, 0.72), 0.58, -0.95, 3, { mode: "idle" });
+    personActor(scale(z, 0.68, 1.42), 0.58, 2.15, 4, { mode: "idle" });
+    const beat = laneWaypoints(z);
+    if (beat?.length >= 2)
+      personActor(beat[0], 0, Math.atan2(beat[1][0] - beat[0][0], -(beat[1][1] - beat[0][1])), 5, {
+        mode: "patrol",
+        waypoints: beat,
+        speed: 1.18,
+      });
+    const peaPt = scale(z, -2.1, -1.5);
+    if (clearSpot(peaPt, 0.55)) animalActor("atlas-peafowl", peaPt, 2.4, 7, { radius: 2.3, speed: 0.5 });
+    const goatPt = scale(z, 2.45, 1.15);
+    if (clearSpot(goatPt, 0.6)) animalActor("atlas-goat", goatPt, 0.8, 33, { radius: 2.2, speed: 0.5 });
     makeCirclingBird(z, 4.4, 7.6, 0);
     makeCirclingBird(z, 5.3, 8.4, 2.4);
     makeCirclingBird(z, 3.8, 7.1, 4.5);
@@ -264,10 +437,12 @@ export function hamletScene(s, rows, commons, focus, tier, paths = []) {
         const da = dIdx * (Math.PI / 4),
           drawerSpot = scale(wellPt, Math.cos(da) * 1.48, Math.sin(da) * 1.48);
         if (clearSpot(drawerSpot, 0.6)) {
-          makeVillager(drawerSpot, 0.02, da + Math.PI, 0xba4b57, 0xe8c468, false, 2.9);
+          personActor(drawerSpot, 0.02, da + Math.PI, 9, { mode: "idle" });
           break;
         }
       }
+      const catPt = scale(wellPt, 0.65, 1.15);
+      if (clearSpot(catPt, 0.45)) animalActor("atlas-yard-cat", catPt, 1.1, 31, { radius: 1.4, speed: 0.55 });
       solids.push([wellPt[0], wellPt[1], 1.18 / M]);
     }
 
@@ -282,32 +457,47 @@ export function hamletScene(s, rows, commons, focus, tier, paths = []) {
           const yaw = a + 0.6,
             cy = Math.cos(yaw),
             sy = Math.sin(yaw);
-          add("box", cartPt, 0.62, [1.26, 0.12, 2.25], [-0.14, yaw, 0], 0x7d5a3e);
-          for (const sgn of [-1, 1]) {
-            const rail = scale(cartPt, sgn * 0.58 * cy, -sgn * 0.58 * sy);
-            add("box", rail, 0.82, [0.08, 0.34, 2.2], [-0.14, yaw, 0], 0x936e4b);
-            const wh = scale(cartPt, sgn * 0.72 * cy, -sgn * 0.72 * sy);
-            add("cyl", wh, 0.56, [1.12, 0.1, 1.12], [0, yaw, Math.PI / 2], 0x62442f);
-            add("cyl", wh, 0.56, [0.28, 0.16, 0.28], [0, yaw, Math.PI / 2], 0x4b3526);
+          // Open-source CC0 Kenney fantasy-town cart, rescaled to a full-size bullock cart.
+          const cart = propActor("kenney-cart", cartPt, 0.02, yaw, 0.92, {
+            castShadow: true,
+            stretch: 1.75,
+          });
+          if (!cart) {
+            // Fallback when the prop library is not warm: a sound, simple timber cart.
+            add("box", cartPt, 0.66, [1.26, 0.14, 2.3], [0, yaw, 0], 0x7d5a3e);
+            for (const sgn of [-1, 1]) {
+              const rail = scale(cartPt, sgn * 0.6 * cy, -sgn * 0.6 * sy);
+              add("box", rail, 0.9, [0.08, 0.3, 2.24], [0, yaw, 0], 0x936e4b);
+              const wh = scale(cartPt, sgn * 0.68 * cy, -sgn * 0.68 * sy);
+              add("cyl", wh, 0.44, [0.92, 0.09, 0.92], [0, yaw, Math.PI / 2], 0x62442f);
+              add("cyl", wh, 0.44, [0.24, 0.14, 0.24], [0, yaw, Math.PI / 2], 0x4b3526);
+            }
           }
-          // Grain sacks on cart
-          add("box", cartPt, 0.82, [0.86, 0.28, 0.62], [-0.14, yaw + 0.08, 0], 0xc9b388);
-          const yoke = scale(cartPt, sy * 1.65, cy * 1.65);
-          add("box", yoke, 0.34, [0.1, 0.1, 1.55], [-0.28, yaw, 0], 0x6d4d35);
-          add("box", yoke, 0.16, [1.35, 0.1, 0.12], [0, yaw, 0], 0x6d4d35);
+          // Grain sacks riding on the deck
+          add("box", cartPt, 0.98, [0.82, 0.3, 0.62], [0, yaw + 0.08, 0], 0xc9b388);
+          const sackPt = scale(cartPt, 0.14 * Math.cos(yaw) - 0.5 * Math.sin(yaw), -0.14 * Math.sin(yaw) - 0.5 * Math.cos(yaw));
+          add("box", sackPt, 1.2, [0.6, 0.24, 0.44], [0, yaw - 0.07, 0], 0xb39e72);
+          // Charabada (yoke) resting on the shafts
+          const yoke = scale(cartPt, sy * 1.72, cy * 1.72);
+          add("box", yoke, 0.32, [0.12, 0.1, 1.62], [-0.18, yaw, 0], 0x6d4d35);
+          add("box", yoke, 0.15, [1.38, 0.1, 0.13], [0, yaw, 0], 0x6d4d35);
 
-          // Ongole bullock resting/grazing peacefully beside the cart
+          // Harnessed Ongole bullock standing at the yoke (hitched, weight-shifting)
+          const leadOx = scale(cartPt, sy * 2.15, cy * 2.15);
+          animalActor("atlas-bullock", leadOx, yaw, 11, { radius: 0.3, speed: 0.05 });
+          // A second bullock grazing peacefully beside the cart
           let placedOx = null;
           for (let oxIdx = 0; oxIdx < 8; oxIdx++) {
             const oa = yaw + oxIdx * (Math.PI / 4),
-              oxPt = scale(cartPt, Math.cos(oa) * 2.25, Math.sin(oa) * 2.25);
+              oxPt = scale(cartPt, Math.cos(oa) * 2.3, Math.sin(oa) * 2.3);
             if (clearSpot(oxPt, 1.05)) {
-              makeBullock(oxPt, yaw + 0.35, 1.1);
+              animalActor("atlas-bullock", oxPt, yaw + 0.35, 13 + oxIdx, { radius: 1.8, speed: 0.36 });
               placedOx = oxPt;
               break;
             }
           }
           solids.push([cartPt[0], cartPt[1], 1.22 / M]);
+          solids.push([leadOx[0], leadOx[1], 0.8 / M]);
           if (placedOx) solids.push([placedOx[0], placedOx[1], 0.88 / M]);
           break;
         }
@@ -350,8 +540,8 @@ export function hamletScene(s, rows, commons, focus, tier, paths = []) {
           // Warm glowing hanging lantern inside the Angadi stall
           add("glow", loc(0, 0.35), 2.18, [0.24, 0.28, 0.24], [0, 0, 0], 0xffd98a);
 
-          // Friendly shopkeeper behind counter + steam wisp rising from kettle + foraging hens nearby
-          makeVillager(loc(0.15, -0.32), 0.22, yaw, 0xd99b52, 0xf2ecdc, false, 1.3);
+          // Friendly shopkeeper behind counter (live Atlas rig) + steam wisp rising from kettle + foraging hens nearby
+          personActor(loc(0.15, -0.32), 0.22, yaw, 21, { mode: "idle", face: yaw });
           const wispGrp = placeGroupAt(loc(-0.62, 0.42), 1.48, 0);
           for (let wIdx = 0; wIdx < 3; wIdx++) {
             const puff = partMesh(
@@ -373,10 +563,20 @@ export function hamletScene(s, rows, commons, focus, tier, paths = []) {
             const ha = hIdx * (Math.PI / 4),
               henSpot = scale(stallPt, Math.cos(ha) * 2.15, Math.sin(ha) * 2.15);
             if (clearSpot(henSpot, 0.55)) {
-              makeHen(henSpot, ha + 0.7, hensPlaced ? 0xd8c39e : 0xb8683e, 0.3 + hensPlaced * 1.8);
+              animalActor("atlas-hen", henSpot, ha + 0.7, 23 + hensPlaced, { radius: 1.9, speed: 0.33 });
               hensPlaced++;
             }
           }
+          // A white Ongole cow grazing behind the angadi + a village dog loafing at the front
+          const cowSpot = loc(-2.35, -1.3);
+          if (clearSpot(cowSpot, 1.0)) animalActor("atlas-cow", cowSpot, yaw + 1.2, 27, { radius: 2.1, speed: 0.4 });
+          const dogSpot = loc(1.35, 1.15);
+          if (clearSpot(dogSpot, 0.45)) animalActor("atlas-village-dog", dogSpot, yaw + Math.PI, 29, { radius: 2.6, speed: 0.78 });
+          // Open-source stall benches for customers waiting for chai
+          const benchA = loc(-0.95, 1.75),
+            benchB = loc(0.95, 1.75);
+          if (clearSpot(benchA, 0.72)) propActor("kenney-stall-bench", benchA, 0, yaw, 0.46);
+          if (clearSpot(benchB, 0.72)) propActor("kenney-stall-bench", benchB, 0, yaw, 0.46);
           solids.push([stallPt[0], stallPt[1], 1.55 / M]);
           break;
         }
@@ -387,9 +587,13 @@ export function hamletScene(s, rows, commons, focus, tier, paths = []) {
     // 5. Festive Mango-Leaf & Marigold Toranam Welcome Arch + Hub Lantern Post
     const lampPt = scale(z, 2.45, -1.85);
     if (clearSpot(lampPt, 0.85)) {
-      add("trunk", lampPt, 1.75, [0.14, 3.5, 0.14], [0, 0, 0], 0x4c534b);
-      add("box", lampPt, 3.55, [0.36, 0.1, 0.36], [0, 0.4, 0], 0x3d433c);
-      add("glow", lampPt, 3.38, [0.3, 0.32, 0.3], [0, 0, 0], 0xffd788);
+      // Open-source CC0 standing lantern (town-kit) — warm glow at dusk
+      const post = propActor("kenney-lantern", lampPt, 0, 0.4, 1.62, { castShadow: true });
+      if (!post) {
+        add("trunk", lampPt, 1.75, [0.14, 3.5, 0.14], [0, 0, 0], 0x4c534b);
+        add("box", lampPt, 3.55, [0.36, 0.1, 0.36], [0, 0.4, 0], 0x3d433c);
+      }
+      add("glow", lampPt, post ? 1.47 : 3.38, [0.3, 0.34, 0.3], [0, 0, 0], 0xffd788);
     }
     const toranPt = scale(z, -3.4, -2.6);
     if (clearSpot(toranPt, 1.4)) {
@@ -443,10 +647,13 @@ export function hamletScene(s, rows, commons, focus, tier, paths = []) {
             lat = (path.w || 1.7) * 0.5 + (isStreet ? 1.55 : 2.35),
             spot = [px + (nx * sgn * lat) / M, py + (ny * sgn * lat) / M];
           if (isStreet && streetStation % 3 === 0 && clearSpot(spot, 0.75)) {
-            // Warm village street lantern post
-            add("trunk", spot, 1.65, [0.12, 3.3, 0.12], [0, 0, 0], 0x4e564e);
-            add("box", spot, 3.32, [0.3, 0.08, 0.3], [0, 0, 0], 0x3b423b);
-            add("glow", spot, 3.16, [0.24, 0.26, 0.24], [0, 0, 0], 0xffd584);
+            // Warm village street lantern (open-source CC0 standing lantern)
+            const lantern = propActor("kenney-lantern", spot, 0, hash01(streetStation * 3.3 + 1.1) * 3, 1.5);
+            if (!lantern) {
+              add("trunk", spot, 1.65, [0.12, 3.3, 0.12], [0, 0, 0], 0x4e564e);
+              add("box", spot, 3.32, [0.3, 0.08, 0.3], [0, 0, 0], 0x3b423b);
+            }
+            add("glow", spot, lantern ? 1.37 : 3.16, [0.26, 0.28, 0.26], [0, 0, 0], 0xffd584);
           } else if (isStreet && streetStation % 7 === 2 && clearSpot(spot, 1.35)) {
             // Wayside stone Arugu bench under a young Neem tree
             const yaw = Math.atan2(tx, -ty);
@@ -538,28 +745,125 @@ export function hamletScene(s, rows, commons, focus, tier, paths = []) {
   }
   g.userData.solids = solids;
   g.userData.animated = animated;
+  g.userData.groundXYZ = (x, y, lift = 0) => s.xyz(x, y, s.ground(x, y) + lift);
   return g;
 }
 
-export function updateHamlet(ham, t) {
+// A traveller-aligned live actor: time-aware so walking, pauses and head-tracking feel inhabited.
+// focus: optional {x, y} ground position of the player (grid units) for head awareness.
+export function updateHamlet(ham, t, focus = null) {
   const list = ham?.userData?.animated;
   if (!list?.length) return;
+  const dt = Math.min(0.09, Math.max(0, t - (ham.userData.lastT ?? t)));
+  ham.userData.lastT = t;
+  const groundXYZ = ham.userData.groundXYZ,
+    focusXY =
+      focus && Number.isFinite(focus.x ?? focus[0])
+        ? [focus.x ?? focus[0], focus.y ?? focus[1]]
+        : null;
+  const headLook = (a) => {
+    let target = 0;
+    if (focusXY) {
+      const dx = focusXY[0] - a.x,
+        dy = focusXY[1] - a.y,
+        d = Math.hypot(dx, dy) * M;
+      if (d < 8.5 && d > 0.3) {
+        const worldYaw = Math.atan2(dx, -dy);
+        target = Math.max(
+          -0.62,
+          Math.min(
+            0.62,
+            Math.atan2(Math.sin(worldYaw - a.yaw), Math.cos(worldYaw - a.yaw)),
+          ),
+        );
+      }
+    }
+    a.look += (target - a.look) * (1 - Math.exp(-dt * 5.2));
+    LOOK_Q.setFromAxisAngle(UP_AXIS, a.look);
+    a.R.bones[7]?.quaternion.multiply(LOOK_Q);
+  };
   for (const a of list) {
     const p = a.phase || 0;
     if (a.kind === "person") {
-      a.torso.position.y = a.baseY + Math.sin(t * 1.9 + p) * 0.012;
-      a.head.rotation.y = Math.sin(t * 0.85 + p) * 0.24;
-      a.head.rotation.x = Math.sin(t * 1.35 + p * 1.7) * 0.07;
-      a.armR.rotation.x = -0.28 + Math.sin(t * 1.6 + p) * 0.22;
-      a.armL.rotation.x = -0.14 + Math.cos(t * 1.25 + p) * 0.14;
-    } else if (a.kind === "bullock") {
-      a.neck.rotation.x = 0.16 + Math.sin(t * 0.9 + p) * 0.14;
-      a.neck.rotation.y = Math.sin(t * 0.55 + p) * 0.12;
-      a.tail.rotation.z = Math.sin(t * 2.8 + p) * 0.28;
-    } else if (a.kind === "hen") {
-      const peck = Math.max(0, Math.sin(t * 3.8 + p));
-      a.body.rotation.x = peck * 0.55;
-      a.root.rotation.y += Math.sin(t * 0.7 + p) * 0.006;
+      a.clock += dt;
+      const R = a.R,
+        stand = R.d.clips.stand?.seconds || 6;
+      if (a.mode === "patrol" && a.waypoints?.length) {
+        const wp = a.waypoints[a.wi],
+          dx = wp[0] - a.x,
+          dy = wp[1] - a.y,
+          distM = Math.hypot(dx, dy) * M;
+        if (t < a.pauseUntil) {
+          R.sample("stand", a.clock / stand);
+        } else if (distM < 0.4) {
+          a.pauseUntil = t + 1.7 + hash01(a.seed * 31.7 + a.wi * 7.3) * 3.6;
+          a.wi += a.dir;
+          if (a.wi >= a.waypoints.length || a.wi < 0) {
+            a.dir *= -1;
+            a.wi = Math.max(0, Math.min(a.waypoints.length - 1, a.wi));
+          }
+          R.sample("stand", a.clock / stand);
+        } else {
+          const targetYaw = Math.atan2(dx, -dy);
+          a.yaw +=
+            Math.atan2(Math.sin(targetYaw - a.yaw), Math.cos(targetYaw - a.yaw)) *
+            (1 - Math.exp(-dt * 6));
+          const step = Math.min(distM, a.speed * dt),
+            inv = 1 / Math.max(1e-6, Math.hypot(dx, dy));
+          a.x += dx * inv * (step / M);
+          a.y += dy * inv * (step / M);
+          a.gait = (a.gait + step / 0.74) % 1;
+          R.sample("walk", a.gait);
+        }
+        if (groundXYZ) R.g.position.set(...groundXYZ(a.x, a.y, a.lift));
+        R.g.rotation.y = a.yaw;
+      } else {
+        // Idle in place: full body language of the authored idle performance; occasional scan
+        R.sample("stand", a.clock / stand);
+        R.g.rotation.y =
+          a.baseYaw +
+          Math.sin(a.clock * 0.32 + a.seed * 2.13) * 0.42 +
+          (a.face != null ? Math.sin(a.clock * 0.9 + a.seed) * 0.08 : 0);
+      }
+      headLook(a);
+      R.commit();
+    } else if (a.kind === "animal") {
+      a.clock = (a.clock || 0) + dt;
+      const R = a.R,
+        stand = R.d.clips.stand?.seconds || 6,
+        h = R.d.height || 1;
+      if (t < a.pauseUntil) {
+        R.sample("stand", a.clock / stand);
+      } else {
+        if (!a.target) {
+          const ang = hash01(a.seed * 91.7 + a.moveT * 13.3 + Math.floor(t * 0.5)) * Math.PI * 2,
+            dist = (0.35 + hash01(a.seed * 7.13 + a.moveT * 3.71) * 0.65) * (a.radius / M);
+          a.target = [a.homeX + Math.cos(ang) * dist, a.homeY + Math.sin(ang) * dist];
+        }
+        const dx = a.target[0] - a.x,
+          dy = a.target[1] - a.y,
+          distM = Math.hypot(dx, dy) * M;
+        if (distM < 0.3) {
+          a.pauseUntil = t + 1.9 + hash01(a.seed * 17.3 + a.moveT * 7.9) * 3.8;
+          a.target = null;
+          a.moveT++;
+          R.sample("stand", a.clock / stand);
+        } else {
+          const targetYaw = Math.atan2(dx, -dy);
+          a.yaw +=
+            Math.atan2(Math.sin(targetYaw - a.yaw), Math.cos(targetYaw - a.yaw)) *
+            (1 - Math.exp(-dt * 4.6));
+          const step = Math.min(distM, a.speed * dt),
+            inv = 1 / Math.max(1e-6, Math.hypot(dx, dy));
+          a.x += dx * inv * (step / M);
+          a.y += dy * inv * (step / M);
+          a.gait = (a.gait + step / (h * 1.32)) % 1;
+          R.sample("walk", a.gait);
+        }
+        if (groundXYZ) R.g.position.set(...groundXYZ(a.x, a.y, a.lift || 0));
+        R.g.rotation.y = a.yaw;
+      }
+      R.commit();
     } else if (a.kind === "bird") {
       const ang = t * 0.58 + p;
       a.bird.position.set(
@@ -637,11 +941,6 @@ function fallenLeafGeometry() {
   g.setIndex(idx);
   g.computeVertexNormals();
   return g;
-}
-
-function hash01(n) {
-  const x = Math.sin(n * 127.1 + 311.7) * 43758.5453;
-  return x - Math.floor(x);
 }
 
 function sampleRouteArc(xy) {

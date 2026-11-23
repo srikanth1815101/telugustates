@@ -1,5 +1,6 @@
 import { buildRoom } from "./home-interior.js";
 import { roomPlan, wallHeight } from "./home-volume.js";
+import { queueMuggu } from "./muggu.js";
 // Stylized buildings only. Envelopes, entries, road sides and paint come from the resident Markdown.
 import * as T from "../vendor/three.module.min.js";
 import { ACRE, basis, localPoint, GATE_POST_OFFSET } from "./metres.js";
@@ -768,9 +769,8 @@ export function makeHouse(s, h, u, distance, tier, put) {
   if (plan) {
     const mugguZ = d * 0.5 + 1.24;
     if (mugguZ < frontExt - 0.55) {
-      fixture("muggu", "slab", plan.door, mugguZ, 0.014, 0.92, 0.012, 0.92, "#f6f2e4", Math.PI / 4);
-      fixture("muggu", "slab", plan.door, mugguZ, 0.018, 0.58, 0.012, 0.58, "#c86d49", 0);
-      fixture("muggu", "disc", plan.door, mugguZ, 0.022, 0.24, 0.012, 0.24, "#e7be58");
+      // Intricate hand-drawn kolam — textured decal, not primitives
+      queueMuggu(s, h, plan.door, mugguZ, yaw);
     }
     // Warm porch lantern beside front door
     paint(
