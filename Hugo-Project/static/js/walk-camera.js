@@ -1,4 +1,4 @@
-import { houseBlocked, ceilingAt, cameraHouseBlocked } from "./home-volume.js";
+import { houseBlocked } from "./home-volume.js";
 import { clearance } from "./contacts.js";
 // The orbit is built FROM the traveller, never a free pitch applied at a fixed camera position.
 import * as T from "../vendor/three.module.min.js";
@@ -58,16 +58,6 @@ export function followCamera(
             anchor + 0.26,
           );
   prev.anchor = anchorY;
-  // Covered homes impose an overhead slab (ceiling, balcony roof, porch sheet). The boom must
-  // live under it and may be compact (over-the-shoulder) instead of the outdoor-length spring.
-  let ceilingY = Infinity;
-  for (const h of homes || []) {
-    const c = ceilingAt(s, h, x, y, root);
-    if (c != null) ceilingY = Math.min(ceilingY, c);
-  }
-  const indoors = ceilingY !== Infinity,
-    ceilDy = indoors ? Math.max(0.12, ceilingY - anchorY - 0.22) : Infinity,
-    minKeep = indoors ? 0.72 : 1.98;
   const destYaw = yaw,
     turn =
       prev.yaw === undefined
@@ -121,17 +111,8 @@ export function followCamera(
       const baseZ = s.ground(...h.centre);
       if (
         Math.hypot(gx - h.centre[0], gy - h.centre[1]) < 0.33 &&
-        (cameraHouseBlocked(h, gx, gy, Y, baseZ) ||
-          (Y < baseZ + h.size_m[2] + 0.15 &&
-            houseBlocked(
-              h,
-              gx,
-              gy,
-              s.doorAngles?.get(h) ?? false,
-              0.43,
-              Y,
-              baseZ,
-            )))
+        Y < baseZ + h.size_m[2] + 0.15 &&
+        houseBlocked(h, gx, gy, s.doorAngles?.get(h) ?? false, 0.43, Y, baseZ)
       )
         return true;
     }
@@ -144,13 +125,10 @@ export function followCamera(
       xx = sa * Math.cos(el) * D + ca * shoulder,
       zz = ca * Math.cos(el) * D - sa * shoulder,
       end = s.sample(...at(xx, zz)),
-      dy = Math.min(
-        Math.max(
-          Math.sin(el) * D,
-          end.z + 0.27 - anchorY,
-          end.depth > 0.035 ? end.line + 0.29 - anchorY : -Infinity,
-        ),
-        ceilDy,
+      dy = Math.max(
+        Math.sin(el) * D,
+        end.z + 0.27 - anchorY,
+        end.depth > 0.035 ? end.line + 0.29 - anchorY : -Infinity,
       );
     const n = Math.max(3, Math.ceil(Math.hypot(xx, zz, dy) / 0.16));
     let t = 1;
@@ -170,11 +148,7 @@ export function followCamera(
     prior = prev.side || 0;
   if (best.length < wanted) {
     let score = -Infinity;
-    // Under a ceiling the useful arcs stay low (over-the-shoulder); the high sweeps only outdoors.
-    const elevations = indoors
-      ? [tilt, Math.max(0.17, tilt * 0.55), 0.32, 0.55, Math.max(0.63, tilt)]
-      : [tilt, Math.max(0.63, tilt), 1.07, 1.44];
-    for (const el of elevations)
+    for (const el of [tilt, Math.max(0.63, tilt), 1.07, 1.44])
       for (const da of [
         prior,
         0,
@@ -189,7 +163,7 @@ export function followCamera(
         Math.PI,
       ]) {
         const v = test(da, el);
-        if (v.length < minKeep) continue;
+        if (v.length < 1.98) continue;
         const rank =
           Math.min(wanted, v.length) * 3 -
           Math.abs(da) * 0.55 -
@@ -200,18 +174,7 @@ export function followCamera(
           best = v;
         }
       }
-    if (indoors && best.length < minKeep) {
-      /* last resort inside a home: a high but under-roof look-down at the traveller, never above the slab */
-      best = {
-        xx: 0,
-        zz: 0,
-        dy: Math.max(0.34, Math.min(ceilDy - 0.16, 1.18)),
-        da: 0,
-        el: Math.PI / 2,
-        t: 1,
-        length: Math.max(0.34, Math.min(ceilDy - 0.16, 1.18)),
-      };
-    } else if (!indoors && best.length < 1.98) {
+    if (best.length < 1.98) {
       /* vertical escape, above the head capsule rather than inside it */ best =
         { xx: 0, zz: 0, dy: 2.8, da: 0, el: Math.PI / 2, t: 1, length: 2.8 };
     }
@@ -223,17 +186,16 @@ export function followCamera(
     reset || prev.arm === undefined
       ? t
       : Math.min(t, lerp(prev.arm, t, 1 - Math.exp(-step * 11)));
-  k = Math.max(k, Math.min(t, minKeep / (Math.hypot(xx, zz, best.dy) || 1)));
+  k = Math.max(k, Math.min(t, 1.98 / (Math.hypot(xx, zz, best.dy) || 1)));
   prev.arm = k;
   const floor = s.sample(...at(xx * k, zz * k));
-  const outY = Math.max(
-    anchorY + best.dy * k,
-    floor.z + 0.23,
-    floor.depth > 0.025 ? floor.line + 0.24 : -Infinity,
-  );
   cam.position.set(
     base[0] + xx * k,
-    indoors ? Math.min(outY, ceilingY - 0.22) : outY,
+    Math.max(
+      anchorY + best.dy * k,
+      floor.z + 0.23,
+      floor.depth > 0.025 ? floor.line + 0.24 : -Infinity,
+    ),
     base[2] + zz * k,
   );
   const flat = Math.max(0.01, Math.hypot(xx, zz) * k),

@@ -49,7 +49,7 @@ import { Surface, streamChunk, materials } from "./terrain.js";
 import { ACRE as U } from "./metres.js";
 import { acreEntry, fenceAt } from "./acre-edge.js";
 import { FootCover, surfaceName } from "./foot-cover.js";
-import { loadPeople, loadVillageLife } from "./art-library.js";
+import { loadPeople } from "./art-library.js";
 import { traveller } from "./traveller.js";
 import { WalkMotor } from "./walk-motor.js";
 import { loadSurvey, regional, Annotations, horizon } from "./survey.js";
@@ -200,11 +200,7 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
   });
   let data;
   try {
-    [data] = await Promise.all([
-      loadSurvey(a, boundaries),
-      loadPeople(),
-      loadVillageLife(),
-    ]);
+    [data] = await Promise.all([loadSurvey(a, boundaries), loadPeople()]);
   } catch (e) {
     renderer.dispose();
     throw e;
@@ -491,7 +487,7 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
     roomLamp.visible = !!r;
     for (const id of ["#camera-mode", "#photo-start", "#orbit-distance"]) {
       const el = q(id);
-      if (el) el.disabled = false;
+      if (el) el.disabled = !!r;
     }
     if (r) {
       if (!L.s.roomDetail?.has(owner)) nature(L, false);
@@ -1878,7 +1874,7 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
     pressed.clear();
   }
   function zoom(f) {
-    if (overlay || dead || !Number.isFinite(f) || f <= 0) return;
+    if (roomOwner || overlay || dead || !Number.isFinite(f) || f <= 0) return;
     if (photo) {
       photo.p.x -= Math.sin(photo.yaw) * Math.log(f) * 3;
       photo.p.z -= Math.cos(photo.yaw) * Math.log(f) * 3;
@@ -2302,6 +2298,7 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
     if (
       prefs.recenter &&
       third &&
+      !roomOwner &&
       !portrait &&
       !input.isLooking() &&
       now - Math.max(input.lastLook(), lastPadLook) > 3100 &&
@@ -2377,10 +2374,10 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
       at = [local[0], local[2]],
       wet = motor.depth > 0.074;
     syncIndoorState();
-    avatar.visible = third;
+    avatar.visible = third && !roomOwner;
     avatar.position.set(...point);
     avatar.rotation.set(0, heading, 0);
-    floorShade.visible = third && motor.depth < 0.1;
+    floorShade.visible = third && !roomOwner && motor.depth < 0.1;
     floorShade.position.set(point[0], g + 0.009, point[2]);
     if (
       floorShade.visible &&
@@ -2478,7 +2475,7 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
       distance: follow,
       swim: motor.swim,
       eye,
-      first: !third,
+      first: !third || !!roomOwner,
       portrait,
       step: h,
       reset: resetCamera,
@@ -2912,7 +2909,11 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
             : 42000
           : clamp(P.r * 3 + 45000, 45000, 4800000),
       near = mode === "ground" ? 0.14 : clamp(P.r / 800, 0.075, 200);
-    const fov = 48 + 10 * (1 - smooth(7, 160, P.r));
+    const fov = roomOwner
+      ? cam.aspect < 0.8
+        ? 81
+        : 67
+      : 48 + 10 * (1 - smooth(7, 160, P.r));
     if (
       Math.abs(cam.far - far) > 0.1 ||
       Math.abs(cam.near - near) > 0.002 ||
@@ -3193,7 +3194,6 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
         localVisible && !roomOwner && P.r < 260,
       );
     else fx.group.visible = false;
-    if (L?.ham) updateHamlet(L.ham, now / 1000, { x: P.x, y: P.y });
     if (localVisible && L.bio) {
       L.bio.update(dt, P.x, P.y, cam, P.r, reduced);
       if (L.syncedRockStatics !== L.bio.statics) {
@@ -3770,7 +3770,7 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
       roomId: activeRoomId,
       doorAction: false,
       weatherParticles: !!(fx.group.visible && fx.rain.visible),
-      cameraMode: third ? "third" : "first",
+      cameraMode: third && !roomOwner ? "third" : "first",
       frames: fr,
       groundFrames,
       elapsed,
@@ -3783,7 +3783,7 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
       latestRich,
       grass: L?.cover?.count || 0,
       wind: !!(!reduced && L?.cover?.count),
-      people: mode === "ground" && third ? 1 : 0,
+      people: mode === "ground" && third && !roomOwner ? 1 : 0,
 
       animals: L?.bio?.anim.length || 0,
       clouds: fx.clouds?.length || 0,

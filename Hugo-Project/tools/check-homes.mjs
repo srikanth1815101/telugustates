@@ -36,7 +36,6 @@ import {
   updateHamlet,
   updateRouteLeaves,
 } from "../static/js/hamlet-scene.js";
-import { loadPeople, loadVillageLife } from "../static/js/art-library.js";
 import { Tread } from "../static/js/tread.js";
 const root = fileURLToPath(new URL("../", import.meta.url)),
   tmp = await fs.mkdtemp(path.join(os.tmpdir(), "atlas-homes-")),
@@ -340,26 +339,13 @@ try {
         width: 0,
         height: 0,
         getContext() {
-          const gradient = { addColorStop() {} };
-          return new Proxy(
-            {},
-            {
-              get(_t, prop) {
-                if (prop === "measureText")
-                  return (txt) => ({ width: String(txt).length * 36 });
-                if (
-                  prop === "createLinearGradient" ||
-                  prop === "createRadialGradient" ||
-                  prop === "createPattern"
-                )
-                  return () => gradient;
-                return () => {};
-              },
-              set() {
-                return true;
-              },
-            },
-          );
+          return {
+            createLinearGradient: () => ({ addColorStop() {} }),
+            fillRect() {},
+            strokeRect() {},
+            measureText: (txt) => ({ width: String(txt).length * 36 }),
+            fillText() {},
+          };
         },
       };
     },
@@ -803,30 +789,17 @@ try {
     const vSurf = new Surface(tiles, O, [vFocus.x, vFocus.y]);
     vSurf.focus = [vFocus.x, vFocus.y];
     vSurf.ways = pathIndex(vPaths);
-    await Promise.all([loadPeople(), loadVillageLife()]);
     const ham = hamletScene(vSurf, rows, vRoads, vFocus, 2, vPaths),
       animList = ham.userData.animated || [],
-      hasGlow = ham.children.some((m) => m.userData?.glow === 0),
-      persons = animList.filter((a) => a.kind === "person"),
-      bullocks = animList.filter(
-        (a) => a.kind === "animal" && a.id === "atlas-bullock",
-      );
+      hasGlow = ham.children.some((m) => m.userData?.glow === 0);
     assert(
-      persons.length >= 4 &&
-        persons.every((a) => a.R && a.R.bones?.length > 7) &&
-        animList.some((a) => a.kind === "animal") &&
-        bullocks.length >= 1 &&
+      animList.filter((a) => a.kind === "person").length >= 4 &&
+        animList.some((a) => a.kind === "bullock") &&
         hasGlow,
-      "hamletScene missing live skeletal village elements",
+      "hamletScene missing vibrant village elements",
     );
-    updateHamlet(ham, 1.25, vFocus);
-    updateHamlet(ham, 3.75, vFocus);
-    for (const a of animList)
-      if (a.kind === "person" || a.kind === "animal")
-        assert(
-          Number.isFinite(a.x) && Number.isFinite(a.y),
-          "animated villager lost world position",
-        );
+    updateHamlet(ham, 1.25);
+    updateHamlet(ham, 3.75);
     q.villageAnimatedActors = animList.length;
   }
   assert(

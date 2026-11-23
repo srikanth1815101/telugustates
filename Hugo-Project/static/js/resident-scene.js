@@ -9,7 +9,6 @@ import {
   compoundWallSegments,
   makeHouse,
 } from "./resident-forms.js";
-import { drainMuggus } from "./muggu.js";
 import { ACRE, basis } from "./metres.js";
 const forms = {
   wall: new T.BoxGeometry(),
@@ -114,7 +113,6 @@ export function residents(s, rows, p, tier) {
     if (d < (tier ? 185 : 150) && typeof document !== "undefined")
       nameboard(group, s, h, u, put);
   }
-  drainMuggus(s, group);
   for (const [key, bin] of bins) {
     const count = bin.c.length / 3;
     if (!count) continue;
