@@ -65,7 +65,7 @@ code: en
  "geo.tg": "Telangana",
  "home.about": "Elevations, districts and waterways come from geographic data. The homes, footpaths, plants, animals and weather are simulated. Virtual acres are not land ownership.",
  "home.absent": "No published house here yet.",
- "home.allStates": "All ({n})",
+ "home.statesAll": "All",
  "home.audit": "Resource details",
  "home.beauty": "Explore Beautiful Places",
  "home.community": "COMMUNITY",
