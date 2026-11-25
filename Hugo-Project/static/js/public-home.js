@@ -89,9 +89,20 @@ function renderDistrictBoard() {
   if (!grid || !a?.districts) return;
   const searchInput = $("#district-search");
   if (searchInput) searchInput.placeholder = msg("home.districtFilter");
-  const tgList = a.districts.filter((d) => d.state === "Telangana"),
-    apList = a.districts.filter((d) => d.state !== "Telangana"),
-    maxCount = Math.max(1, ...a.districts.map((d) => d.count || 0));
+  // The tabs carry house counts, not district counts: the directory counts
+  // houses, and "Telangana (33)" above a board of house tallies reads as a
+  // house figure. Summed from the same per-district counts the rows use, so
+  // each tab agrees with the badges underneath it.
+  const tgHomes = a.districts
+      .filter((d) => d.state === "Telangana")
+      .reduce((n, d) => n + (Number(d.count) || 0), 0),
+    apHomes = a.districts
+      .filter((d) => d.state !== "Telangana")
+      .reduce((n, d) => n + (Number(d.count) || 0), 0),
+    allHomes = tgHomes + apHomes,
+    maxCount = Math.max(1, ...a.districts.map((d) => d.count || 0)),
+    tally = (n) =>
+      n === 1 ? msg("home.oneHouse") : msg("home.districtCount", { n });
   const summary = $("#district-summary");
   if (summary) summary.textContent = msg("home.districtSummary");
   for (const btn of document.querySelectorAll("[data-state-filter]")) {
@@ -99,10 +110,10 @@ function renderDistrictBoard() {
     btn.setAttribute("aria-selected", String(f === stateFilter));
     btn.textContent =
       f === "all"
-        ? msg("home.allStates", { n: a.districts.length })
+        ? `${msg("home.statesAll")} (${tally(allHomes)})`
         : f === "Telangana"
-          ? `${msg("geo.tg")} (${tgList.length})`
-          : `${msg("geo.ap")} (${apList.length})`;
+          ? `${msg("geo.tg")} (${tally(tgHomes)})`
+          : `${msg("geo.ap")} (${tally(apHomes)})`;
   }
   const q = districtQuery.trim().toLowerCase(),
     items = [...a.districts]
