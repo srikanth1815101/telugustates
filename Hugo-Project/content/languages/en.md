@@ -95,7 +95,7 @@ code: en
  "home.missing": "No virtual house found for @{name} yet.",
  "home.join.link": "Open Instagram",
  "home.join.wait": "Already commented? Houses are built in batches, so allow 24 to 48 hours. You can explore the whole world right now, with no restrictions.",
- "home.join.comment": "Comment your nickname and district on any post",
+ "home.join.comment": "Comment your nickname and district on our latest post",
  "home.join.step": "Follow @telugustates.csrgo on Instagram",
  "home.join.title": "Build your home and get 1 acre",
  "home.offline": "This local file could not be read. Try again.",
