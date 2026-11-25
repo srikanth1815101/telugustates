@@ -21,6 +21,22 @@ const $ = (s) => document.querySelector(s),
       e.hidden = !text;
       e.textContent = text;
     }
+  },
+  // Shown when a lookup finds nothing, so the way to earn a house is in plain
+  // sight rather than buried in an error line. Hidden again on any success.
+  join = (show) => {
+    const card = $("#join-card");
+    if (!card) return;
+    // Data-msg fills the static panel on boot; if a translation is ever
+    // missing, leave it hidden rather than throwing inside the form handler.
+    if (show) {
+      try {
+        bindMessages(card);
+      } catch {
+        return;
+      }
+    }
+    card.hidden = !show;
   };
 let cold = null,
   retryHash = "";
@@ -822,6 +838,7 @@ if (home) {
       e.preventDefault();
       cold = null;
       requestFull();
+      join(false);
       const raw = $("#handle").value,
         clean = normalize(raw),
         id = resolveResidentId(raw),
@@ -833,10 +850,12 @@ if (home) {
             name: clean || raw.trim().replace(/^@+/, "").slice(0, 30),
           }),
         );
+        join(true);
         return;
       }
       $("#handle").value = "";
       tell($("#search-msg"), "");
+      join(false);
       await writeStoredResidentId(found.u);
       await syncSavedHomeUi();
       if (location.hash === "#/u/" + found.u) route();

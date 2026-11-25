@@ -921,6 +921,8 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
     const statusEl = q("#holding-status");
     statusEl.hidden = true;
     statusEl.textContent = "";
+    const prevLink = statusEl.nextElementSibling;
+    if (prevLink?.classList.contains("join-cta")) prevLink.hidden = true;
     let chosen = explicitRecord || preferred;
     if (!chosen) {
       const savedId = await readStoredResidentId();
@@ -1003,14 +1005,31 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
     }
     const found = await pinFromName(id);
     if (!found) {
-      statusEl.textContent = msg("home.missing", { name: clean });
+      // Text stays textContent (the handle is user input); the way to earn a
+      // house is a separate, statically-labelled link built with DOM calls.
+      statusEl.textContent =
+        msg("home.missing", { name: clean }) + " " + msg("home.join.wait");
       statusEl.hidden = false;
+      let next = statusEl.nextElementSibling;
+      if (!next || !next.classList.contains("join-cta")) {
+        const a = document.createElement("a");
+        a.className = "join-cta";
+        a.href = "https://www.instagram.com/telugustates.csrgo/";
+        a.target = "_blank";
+        a.rel = "noreferrer";
+        a.textContent = msg("home.join.link");
+        statusEl.after(a);
+        next = a;
+      }
+      next.hidden = false;
       q("#walk-acre").disabled = q("#teleport-acre").disabled = true;
       return;
     }
     input.value = "";
     statusEl.hidden = true;
     statusEl.textContent = "";
+    const stale = statusEl.nextElementSibling;
+    if (stale?.classList.contains("join-cta")) stale.hidden = true;
     await writeStoredResidentId(found.u);
     preferred = found;
     showMenu(landMenu || "home", found);
