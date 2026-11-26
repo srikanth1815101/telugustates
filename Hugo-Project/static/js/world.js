@@ -3567,13 +3567,13 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
   mixPanel.className = "pref-panel";
   mixPanel.innerHTML =
     '<summary data-msg="sound.title"></summary><button id="audio-on" data-msg="sound.unlock"></button>' +
-    ["Master", "Music", "Effects", "Ambience", "Weather"]
+    ["Master", "Effects", "Ambience", "Weather"]
       .map(
         (k) =>
           `<label><span data-msg="sound.${k}"></span><input data-gain="${k}" type="range" min="0" max="1" step="0.05" value="${mixer.settings[k]}"></label>`,
       )
       .join("") +
-    ["mute", "music"]
+    ["mute"]
       .map(
         (k) =>
           `<label><input data-sound="${k}" type="checkbox" ${mixer.settings[k] ? "checked" : ""}><span data-msg="sound.${k}"></span></label>`,

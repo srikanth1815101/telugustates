@@ -2,34 +2,11 @@ import { url } from "./grid.js";
 const sat = (v) => Math.max(0, Math.min(1, v));
 export const defaults = {
   Master: 0.85,
-  Music: 0.59,
   Effects: 0.68,
   Ambience: 0.77,
   Weather: 0.91,
   mute: false,
-  music: true,
 };
-const motifs = {
-  morning: [0, 4, 7, 11, 9, 7, 4, 2],
-  day: [0, 7, 9, 4, 2, 4, 7, 2],
-  evening: [0, 3, 7, 10, 7, 5, 3, 0],
-  night: [0, 7, 3, 2, -2, 0, 5, 3],
-  rain: [0, 2, 5, 3, 0, -2, 3, 2],
-  explore: [0, 5, 7, 12, 9, 5, 2, 7],
-};
-export function theme(h, r, walk) {
-  return r > 0.48
-    ? "rain"
-    : h < 5 || h >= 21
-      ? "night"
-      : h < 9
-        ? "morning"
-        : h >= 17
-          ? "evening"
-          : walk > 4
-            ? "explore"
-            : "day";
-}
 const calls = {
   kingfisher: [2460, 1.5, 0.12],
   peafowl: [620, 1.9, 0.52],
@@ -86,7 +63,6 @@ export class Soundscape {
     this.samples = new Map();
     this.lastBird = -1e6;
     this.lastWater = -1e6;
-    this.lastScore = -1e6;
   }
   set(k, v) {
     if (!(k in defaults)) return;
@@ -102,13 +78,10 @@ export class Soundscape {
   }
   levels() {
     if (!this.ctx) return;
-    for (const k of ["Master", "Music", "Ambience", "Effects", "Weather"])
+    for (const k of ["Master", "Ambience", "Effects", "Weather"])
       this.graph[k].gain.setTargetAtTime(
         this.settings[k] *
-          ((k === "Master" && (this.isHidden || this.settings.mute)) ||
-          (k === "Music" && !this.settings.music)
-            ? 0
-            : 1),
+          (k === "Master" && (this.isHidden || this.settings.mute) ? 0 : 1),
         this.ctx.currentTime,
         0.12,
       );
@@ -131,7 +104,7 @@ export class Soundscape {
         this.limiter.knee.value = 4;
         this.limiter.ratio.value = 5;
         this.limiter.connect(this.ctx.destination);
-        for (const k of ["Master", "Music", "Effects", "Ambience", "Weather"]) {
+        for (const k of ["Master", "Effects", "Ambience", "Weather"]) {
           this.graph[k] = this.ctx.createGain();
           const tap = this.ctx.createAnalyser();
           tap.fftSize = 1024;
@@ -160,7 +133,6 @@ export class Soundscape {
           "splash-2",
           "rainfall",
           "grove",
-          "acre-song",
         ])
           this.load(k);
       }
@@ -211,7 +183,7 @@ export class Soundscape {
       f.frequency.setValueAtTime(from, t);
       f.frequency.exponentialRampToValueAtTime(Math.max(20, to), t + sec);
     } else {
-      s.type = bus === "Music" ? "triangle" : "sine";
+      s.type = "sine";
       s.frequency.setValueAtTime(from, t);
       s.frequency.exponentialRampToValueAtTime(Math.max(20, to), t + sec);
     }
@@ -241,7 +213,7 @@ export class Soundscape {
       if (!r.ok) throw Error(r.status);
       const b = await this.ctx.decodeAudioData(await r.arrayBuffer());
       let peak = 0.01;
-      if (!["rainfall", "acre-song", "grove"].includes(id))
+      if (!["rainfall", "grove"].includes(id))
         for (let i = 0; i < b.numberOfChannels; i++)
           for (const v of b.getChannelData(i))
             peak = Math.max(peak, Math.abs(v));
@@ -378,7 +350,6 @@ export class Soundscape {
       r > 0.015 ? (roof ? 0.71 : 1) * (0.24 + 0.64 * Math.sqrt(r)) : 0,
       (roof ? 2850 : 4500) + r * 4700,
     );
-    this.bed("acre-song", "Music", this.settings.music ? 0.56 : 0, 11200);
     this.bed(
       "grove",
       "Ambience",
