@@ -46,14 +46,25 @@ const footprints = {
     [0.34, 0.18, 0.32, 0.64, "wing"],
   ],
 };
-const R = (a, d) => +a.toFixed(d);
+// Catalog values arrive through Hugo's JSON, where a quoted or oddly-scalarised
+// front-matter value stays a string. Designing a house only needs a number, so
+// coerce here rather than dying inside toFixed with a stack that names nothing.
+const num = (a, what, row) => {
+  const n = typeof a === "number" ? a : a == null ? NaN : +a;
+  if (!Number.isFinite(n))
+    throw Error(
+      `House ${row?.u ?? "?"} has a non-numeric ${what}: ${JSON.stringify(a)}`,
+    );
+  return n;
+};
+const R = (a, d, what, row) => +num(a, what, row).toFixed(d);
 export function residentDesign(row) {
   const h = row.house,
     i = models.indexOf(h.archetype),
     [fx, fy] = SIDE[h.facing],
-    w = h.size_m[0],
-    d = h.size_m[1],
-    z = ACRE / 2 - h.setback_m - d / 2;
+    w = num(h.size_m?.[0], "size_m width", row),
+    d = num(h.size_m?.[1], "size_m depth", row),
+    z = ACRE / 2 - num(h.setback_m, "setback_m", row) - d / 2;
   if (i < 0) throw Error("Unknown house model: " + h.archetype);
   row.s = h.style = i;
   if (i === 5) h.size_m[2] = Math.max(5.37, h.size_m[2]);
@@ -70,19 +81,23 @@ export function residentDesign(row) {
     h.timberOnly = true;
   } else
     h.centre = [
-      row.c[0] + 0.5 + (fx * z - fy * h.lateral_m) / ACRE,
-      row.c[1] + 0.5 + (fy * z + fx * h.lateral_m) / ACRE,
-    ].map((a) => R(a, 7));
+      num(row.c?.[0], "cell coordinate", row) +
+        0.5 +
+        (fx * z - fy * h.lateral_m) / ACRE,
+      num(row.c?.[1], "cell coordinate", row) +
+        0.5 +
+        (fy * z + fx * h.lateral_m) / ACRE,
+    ].map((a) => R(a, 7, "cell coordinate", row));
   h.parts = (footprints[i] || [[0, 0, 1, 1, "body"]]).map(([a, b, c, e, k]) => [
-    R(a * w, 3),
-    R(b * d, 3),
-    R(c * w, 3),
-    R(e * d, 3),
+    R(a * w, 3, "footprint width", row),
+    R(b * d, 3, "footprint depth", row),
+    R(c * w, 3, "footprint width", row),
+    R(e * d, 3, "footprint depth", row),
     k,
   ]);
   const m = h.parts[0];
-  h.door_x = R(m[0] + (i === 6 ? 0.18 * w : 0), 3);
-  const pt = (z) => localPoint(h, h.door_x, z).map((a) => R(a, 7));
+  h.door_x = R(m[0] + (i === 6 ? 0.18 * w : 0), 3, "door offset", row);
+  const pt = (z) => localPoint(h, h.door_x, z).map((a) => R(a, 7, "door point", row));
   h.door = pt(m[1] + m[3] / 2);
   h.gate = lot ? lot.gate : pt(d / 2 + h.setback_m);
   h.entry = pt(d / 2 + h.setback_m - 1.4);
@@ -92,6 +107,8 @@ export function residentDesign(row) {
       0,
     ),
     2,
+    "footprint area",
+    row,
   );
   h.frontage = lot ? lot.porch : [row.c[0] + fx, row.c[1] + fy];
   return row;
