@@ -29,9 +29,23 @@ try {
         stdio: "pipe",
       });
     } catch (e) {
-      const err = String(e.stderr ?? "").trim(),
-        out = String(e.stdout ?? "").trim();
-      const detail = [out, err].filter(Boolean).join("\n");
+      // execFileSync hands back Buffers (or {type:"Buffer",data:[…]} when the
+      // call was serialised). String() on either yields "[object Object]", so
+      // decode explicitly.
+      const text = (b) =>
+        b == null
+          ? ""
+          : typeof b === "string"
+            ? b
+            : Buffer.isBuffer(b)
+              ? b.toString("utf8")
+              : Array.isArray(b?.data)
+                ? Buffer.from(b.data).toString("utf8")
+                : String(b);
+      const detail = [text(e.stdout), text(e.stderr)]
+        .map((s) => s.trim())
+        .filter(Boolean)
+        .join("\n");
       throw Error(
         "settle.mjs failed" + (detail ? ":\n" + detail : " (" + e.message + ")"),
       );
