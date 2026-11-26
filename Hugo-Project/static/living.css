@@ -886,6 +886,102 @@ a.scenic-card small {
   min-width: 34px;
   min-height: 34px;
 }
+#search-menu {
+  position: absolute;
+  z-index: 12;
+  top: calc(var(--pad-t, 0px) + 60px);
+  left: calc(var(--pad-l, 0px) + 10px);
+  width: min(296px, calc(100% - 22px));
+  max-height: calc(100% - 100px);
+  overflow: auto;
+  color: #fdf7e9;
+  background: #183e26f4;
+  border: 1px solid #ddc79180;
+  border-radius: 15px;
+  box-shadow: 0 6px 24px #17382340;
+  padding: 14px;
+  box-sizing: border-box;
+}
+#search-menu header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 5px;
+}
+#search-menu header h3 {
+  font-size: 18px;
+  line-height: 1.2;
+  margin: 2px 0 8px;
+  color: inherit;
+}
+#search-menu #search-count {
+  font-size: 12px;
+  color: #f3e9ce;
+}
+#search-menu #close-search {
+  background: transparent;
+  border: 0;
+  color: inherit;
+  font-size: 22px;
+  padding: 3px;
+  min-width: 34px;
+  min-height: 34px;
+}
+#search-menu .holding-input-row {
+  margin: 2px 0 10px;
+}
+#search-menu #search-input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  outline: none;
+}
+#search-menu #search-go {
+  border: 1px solid #ddc79180;
+  background: #fbf4e4;
+  color: #163923;
+  border-radius: 7px;
+  font-weight: 700;
+  padding: 5px 11px;
+}
+#search-menu #search-status {
+  font-size: 12px;
+  color: #f3e9ce;
+  margin: 0 0 8px;
+}
+#search-menu .search-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  border-radius: 9px;
+  color: inherit;
+  font: inherit;
+  padding: 8px 9px;
+  cursor: pointer;
+}
+#search-menu .search-row:hover,
+#search-menu .search-row:focus-visible {
+  background: #ffffff1c;
+  outline: 2px solid #f7dc96;
+  outline-offset: -2px;
+}
+#search-menu .search-row strong {
+  font-weight: 650;
+  overflow-wrap: anywhere;
+}
+#search-menu .search-row small {
+  flex: none;
+  font-size: 11px;
+  color: #f3e9ce;
+}
 #holding-claim {
   margin: 2px 0 10px;
 }

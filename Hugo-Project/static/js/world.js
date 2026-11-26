@@ -248,12 +248,23 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
       `<button class="holding-icon" id="${id}" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="holding-menu" data-msg-aria="${k}" data-msg-title="${k}"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${ink}</svg></button>`,
     );
   }
+  strip.insertAdjacentHTML(
+    "beforeend",
+    `<button class="holding-icon" id="world-search" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="search-menu" data-msg-aria="menu.search" data-msg-title="menu.search"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6.2"/><path d="m20.6 20.6-4.8-4.8"/></svg></button>`,
+  );
   cards.innerHTML = `<header><div><small class="resident-handle"></small><h3 id="destination-name"></h3></div><button type="button" id="close-holding" data-msg-aria="details.close">×</button></header><form id="holding-claim" autocomplete="off"><label for="holding-handle" data-msg="holding.askUsername"></label><div class="holding-input-row"><span>@</span><input id="holding-handle" type="text" placeholder="your_username" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="180"><button id="holding-verify" type="submit" data-msg="holding.unlock"></button></div><p id="holding-status" role="status" hidden></p></form><div id="acre-actions"><canvas id="holding-chart" data-msg-aria="village.map" hidden></canvas><small id="holding-distance"></small><div class="home-pair"><button id="walk-acre" type="button" data-msg="village.walk" disabled></button><button id="teleport-acre" type="button" data-msg="village.teleport" disabled></button></div></div>`;
   host.append(cards);
   host.insertAdjacentHTML(
     "beforeend",
     '<output id="route-step" hidden></output>',
   );
+  const searchMenu = document.createElement("section");
+  searchMenu.id = "search-menu";
+  searchMenu.hidden = true;
+  searchMenu.setAttribute("role", "dialog");
+  searchMenu.setAttribute("aria-labelledby", "search-title");
+  searchMenu.innerHTML = `<header><div><small class="resident-handle" id="search-count" hidden></small><h3 id="search-title" data-msg="menu.search"></h3></div><button type="button" id="close-search" data-msg-aria="details.close">×</button></header><div class="holding-input-row"><input id="search-input" type="search" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="80"><button id="search-go" type="button" data-msg="search.find"></button></div><p id="search-status" role="status" hidden></p><div id="search-results" role="group" data-msg-aria="menu.search"></div>`;
+  host.append(searchMenu);
   const pinFromName = async (u) => {
     if (!u) return null;
     const shard = shardKey(u);
@@ -739,6 +750,7 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
     q(".detail-trial").textContent = msg("menu.trial");
     q(".detail-trial").hidden = prefs.saver || gov.cap < 2;
     q(".world-back").setAttribute("aria-label", msg("hud.back"));
+    q("#search-input").placeholder = msg("search.placeholder");
     dq(".chart-tag span").textContent = msg("world.canvas");
     dq(".flight-guide").textContent = msg("world.zoomHint");
     if (landMenu) showMenu(landMenu, menuRecord);
@@ -856,8 +868,12 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
   }
   function displayOwner() {
     const visible = expanded && !photo;
-    for (const id of ["#my-home", "#my-acre"]) q(id).hidden = !visible;
-    if (!visible) menus(false);
+    for (const id of ["#my-home", "#my-acre", "#world-search"])
+      q(id).hidden = !visible;
+    if (!visible) {
+      menus(false);
+      closeSearch();
+    }
   }
   function remember(r) {
     if (!r) return;
@@ -909,6 +925,7 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
   async function showMenu(kind, explicitRecord) {
     const mark = ++menuSerial;
     menus(kind);
+    closeSearch();
     menuNet = null;
     q("#walk-acre").hidden = true;
     q("#walk-acre").disabled = q("#teleport-acre").disabled = true;
@@ -1065,6 +1082,132 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
     );
     resultRoute = location.hash;
     visit(r, k === "acre" ? "acre" : "gate");
+  });
+  // Search: find any mapped place, district or resident from the top bar.
+  const searchInput = q("#search-input"),
+    searchStatus = q("#search-status"),
+    searchResults = q("#search-results"),
+    searchCount = q("#search-count");
+  let searchRows = [];
+  const searchIndex = () =>
+    [
+      ...stops.map((s) => ({
+        kind: "place",
+        id: s.id,
+        label: s.title,
+        te: s.title_te || s.title,
+        view: s.default_view || "ground",
+      })),
+      ...a.districts.map((d) => ({
+        kind: "district",
+        id: d.id,
+        label: d.name,
+        te: d.te || d.name,
+      })),
+    ].sort((x, y) => x.label.localeCompare(y.label));
+  function renderResults(qy) {
+    searchResults.replaceChildren();
+    searchStatus.hidden = true;
+    searchCount.hidden = true;
+    const query = qy.trim().toLowerCase();
+    let rows = searchIndex().filter(
+      (r) =>
+        (query || r.kind === "place") &&
+        (!query ||
+          r.label.toLowerCase().includes(query) ||
+          r.te.toLowerCase().includes(query)),
+    );
+    if (rows.length > 40) rows = rows.slice(0, 40);
+    for (const row of rows) {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "search-row";
+      const name = document.createElement("strong");
+      name.textContent = tr(row.label, row.te);
+      const tag = document.createElement("small");
+      tag.textContent =
+        row.kind === "place" ? msg("search.place") : msg("search.district");
+      b.append(name, tag);
+      b.onclick = () => choose(row);
+      searchResults.append(b);
+    }
+    searchRows = rows;
+    searchCount.hidden = false;
+    searchCount.textContent = msg("search.count", { n: rows.length });
+  }
+  async function searchResident(raw) {
+    const clean = normalizeUsername(raw),
+      id = residentId(raw);
+    searchStatus.hidden = true;
+    if (!clean || !id) {
+      searchStatus.textContent = msg("holding.enterValid");
+      searchStatus.hidden = false;
+      return;
+    }
+    searchStatus.textContent = msg("search.looking");
+    searchStatus.hidden = false;
+    const found = await pinFromName(id);
+    if (!found) {
+      searchStatus.textContent = msg("search.noResident");
+      return;
+    }
+    closeSearch();
+    showMenu("home", found);
+  }
+  function choose(row) {
+    closeSearch();
+    if (row.kind === "place") {
+      history.replaceState(null, "", "#/field/" + row.id + "/" + row.view);
+      resultRoute = location.hash;
+      guide(row.id, row.view);
+    } else {
+      const d = ds.get(row.id);
+      if (d) inspect(d);
+    }
+  }
+  function closeSearch() {
+    searchMenu.hidden = true;
+    q("#world-search").setAttribute("aria-expanded", "false");
+    neutral();
+  }
+  on(q("#world-search"), "click", () => {
+    if (searchMenu.hidden) {
+      menus(false);
+      ui.close();
+      sheet.hidden = true;
+      neutral();
+      searchMenu.hidden = false;
+      q("#world-search").setAttribute("aria-expanded", "true");
+      renderResults(searchInput.value);
+      searchInput.focus({ preventScroll: true });
+    } else closeSearch();
+  });
+  on(q("#close-search"), "click", closeSearch);
+  on(searchInput, "input", () => {
+    if (searchInput.value.trim().startsWith("@")) {
+      searchResults.replaceChildren();
+      searchCount.hidden = true;
+      searchStatus.hidden = false;
+      searchStatus.textContent = msg("search.residentHint");
+    } else renderResults(searchInput.value);
+  });
+  on(searchInput, "keydown", (e) => {
+    if (e.key === "Escape") {
+      e.stopPropagation();
+      closeSearch();
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      const query = searchInput.value.trim();
+      if (query.startsWith("@")) searchResident(query);
+      else if (searchRows.length) choose(searchRows[0]);
+      else if (query) searchResident(query);
+    }
+  });
+  on(q("#search-go"), "click", () => {
+    const query = searchInput.value.trim();
+    if (!query) return;
+    if (searchRows.length && !query.startsWith("@")) choose(searchRows[0]);
+    else searchResident(query);
   });
   on(q("#walk-acre"), "click", async () => {
     const r = menuRecord,
@@ -3491,6 +3634,7 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
   on(window, "blur", neutral);
   q("#world-menu").onclick = () => {
     menus(false);
+    closeSearch();
     sheet.hidden = !sheet.hidden;
     ui.close();
     neutral();
