@@ -180,8 +180,8 @@ export function fnv32a(str) {
   return h >>> 0;
 }
 
-export async function buildCatalog() {
-  const content = (p) => path.join(root, "content", p);
+export async function buildCatalog(base = process.cwd()) {
+  const content = (p) => path.join(base, "content", p);
 
   const districts = [];
   for (const f of (await fs.readdir(content("districts"))).filter((f) =>

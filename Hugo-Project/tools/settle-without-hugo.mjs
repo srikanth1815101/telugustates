@@ -21,7 +21,13 @@ import { fileURLToPath } from "node:url";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 
-const root = fileURLToPath(new URL("../", import.meta.url));
+// Default to the project this script lives in, but honour the cwd when the
+// script is invoked from another checkout (check-growth.mjs copies the project
+// to a temp dir and runs its tools there, so this must follow the copy).
+const here = fileURLToPath(new URL("../", import.meta.url));
+const root = path.resolve(process.cwd(), "..") === path.resolve(here)
+  ? here
+  : (await fs.access(path.join(process.cwd(), "hugo.toml")).then(() => process.cwd(), () => here)) + path.sep;
 const run = promisify(execFile);
 
 const bin = await fs.mkdtemp(path.join(os.tmpdir(), "settle-nohugo-bin-"));
@@ -37,15 +43,19 @@ const fs = require("node:fs");
 const path = require("node:path");
 const { pathToFileURL } = require("node:url");
 const args = process.argv.slice(2);
-const dest = args[args.indexOf("--destination") + 1];
+const arg = (n) => (args.includes(n) ? args[args.indexOf(n) + 1] : null);
+const dest = arg("--destination");
+// Honour Hugo's --source: check-growth.mjs settles a copy in a temp dir, so the
+// catalogue has to describe that copy, not this script's own checkout.
+const source = arg("--source") || ${JSON.stringify(repoRoot)};
 (async () => {
   const mod = await import(pathToFileURL(path.join(${JSON.stringify(repoRoot)}, "tools/catalog-without-hugo.mjs")).href);
-  const catalog = await mod.buildCatalog();
+  const catalog = await mod.buildCatalog(source);
   fs.mkdirSync(dest, { recursive: true });
   fs.writeFileSync(path.join(dest, "catalog.json"), JSON.stringify(catalog));
   // Hugo publishes static/ into the destination; settle.mjs reads tiles,
   // ecology and the atlas projection from there, so mirror it wholesale.
-  fs.cpSync(${JSON.stringify(repoRoot)} + "/static", dest, {
+  fs.cpSync(path.join(source, "static"), dest, {
     recursive: true,
     force: true,
   });
