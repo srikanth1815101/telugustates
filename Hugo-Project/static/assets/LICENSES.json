@@ -1180,14 +1180,6 @@
    "license": "CC0-1.0",
    "inputSHA256": "28f99f536a0772d80052f03bcb22c9ed8fd7c6e4db7f2e8356efcf26a8e24f01",
    "sha256": "cfc0f87ea0124aa7f8251e34ae34e9fa644186d3fd236702e6c79d146b6170fc"
-  },
-  {
-   "file": "library/walk/acre-song.ogg",
-   "id": "acre-song",
-   "author": "Atlas project",
-   "source": "Original 16-bar score, produced for this publication",
-   "license": "Project artwork",
-   "sha256": "68d1213882ee371a3aa36693bcb8fb4d21fae1c9290c09bd69fb2949fcd6a04f"
   }
  ]
 }
