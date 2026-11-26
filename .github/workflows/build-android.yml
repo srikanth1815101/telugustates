@@ -181,6 +181,25 @@ jobs:
               --notes "Pilot branch test app: package com.csrgo.telugustates.pilot, installs alongside the production Telugu States app. This prerelease is not the production release and never appears as 'latest'."
           fi
 
+      - name: Commit pilot APK to the branch (sandbox pickup via git fetch)
+        if: github.event_name == 'workflow_dispatch'
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp "$RUNNER_TEMP/Telugu-States-Pilot.apk" android/Telugu-States-Pilot.apk
+          cp "$RUNNER_TEMP/app-version.json" android/pilot-app-version.json
+          git config user.name "atlas-ci"
+          git config user.email "actions@users.noreply.github.com"
+          git add -f android/Telugu-States-Pilot.apk android/pilot-app-version.json
+          # Replace the previous CI APK commit instead of appending ~60 MB per run.
+          if git log -1 --format=%s | grep -q "^CI: 7-Hills pilot APK"; then
+            git commit --amend -m "CI: 7-Hills pilot APK (run ${{ github.run_number }})"
+            git push -f origin HEAD:${{ github.ref_name }}
+          else
+            git commit -m "CI: 7-Hills pilot APK (run ${{ github.run_number }})"
+            git push origin HEAD:${{ github.ref_name }}
+          fi
+
       - name: Publish latest APK and release metadata to GitHub Releases
         if: github.ref == 'refs/heads/main' && github.event_name != 'schedule'
         shell: bash
