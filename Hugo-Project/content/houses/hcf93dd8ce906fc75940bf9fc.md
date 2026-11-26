@@ -9,14 +9,14 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-25'
-archetype: round-thatch
+archetype: mud-veranda
 size_m:
 - 9.54
 - 10.86
 - 4.32
 facing: west
-wall_color: '#b5ab95'
-roof_color: '#96533c'
+wall_color: '#c4ad8b'
+roof_color: '#b06b49'
 props:
 - banana-clump
 - kitchen-garden
