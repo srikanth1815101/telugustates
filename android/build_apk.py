@@ -8,6 +8,7 @@ import argparse
 import hashlib
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -82,9 +83,27 @@ def main():
     ap.add_argument("--version-name", default=None)
     ap.add_argument("--meta-out", type=Path, default=None)
     ap.add_argument("--out", type=Path, default=ROOT / "Telugu-States-Atlas.apk")
+    ap.add_argument(
+        "--app-id",
+        default=None,
+        help="Override applicationId to build a separate app that installs side by side",
+    )
+    ap.add_argument(
+        "--app-name",
+        default=None,
+        help="Override the launcher label (res/values/atlas.xml app_name)",
+    )
+    ap.add_argument(
+        "--pine-color",
+        default=None,
+        help="Override the pine accent color so the pilot launcher icon is visually distinct",
+    )
     args = ap.parse_args()
     site = args.site.resolve()
     out = args.out.resolve()
+    app_id = args.app_id or APP_ID
+    app_name = args.app_name or "Telugu States"
+    pine_color = args.pine_color or "#193C32"
     if not (site / "hugo.toml").is_file() or not (site / "content" / "houses").is_dir():
         raise SystemExit("Pass --site /path/to/extracted/Hugo-Project")
     sdk = Path(os.environ["ANDROID_HOME"])
@@ -130,7 +149,7 @@ def main():
         ).hexdigest()
         release_meta = {
             **hugo_meta,
-            "appId": APP_ID,
+            "appId": app_id,
             "versionCode": version_code,
             "versionName": version_name,
             "engineHash": engine_hash,
@@ -154,9 +173,16 @@ def main():
             )
 
         manifest_patched = w / "AndroidManifest.xml"
+        manifest_text = manifest_src.read_text(encoding="utf-8")
+        if app_id != APP_ID:
+            manifest_text, pkg_swaps = re.subn(
+                r'\bpackage="[^"]+"', f'package="{app_id}"', manifest_text, count=1
+            )
+            if pkg_swaps != 1:
+                raise ValueError("Could not patch AndroidManifest.xml package attribute")
         manifest_patched.write_text(
             patch_manifest_version(
-                manifest_src.read_text(encoding="utf-8"),
+                manifest_text,
                 version_code,
                 version_name,
             ),
@@ -164,12 +190,42 @@ def main():
         )
 
         source = tree(web)
+        # Separate-app variant: rebrand a private copy of the host sources and resources.
+        src_dir = ROOT / "src"
+        res_dir = ROOT / "res"
+        if app_id != APP_ID or app_name != "Telugu States" or pine_color != "#193C32":
+            src_dir = w / "src-variant"
+            res_dir = w / "res-variant"
+            shutil.copytree(ROOT / "src", src_dir)
+            shutil.copytree(ROOT / "res", res_dir)
+            if app_id != APP_ID:
+                for f in sorted(src_dir.rglob("*.java")):
+                    text = f.read_text(encoding="utf-8")
+                    if APP_ID in text:
+                        f.write_text(text.replace(APP_ID, app_id), encoding="utf-8")
+            atlas_xml = res_dir / "values" / "atlas.xml"
+            text = atlas_xml.read_text(encoding="utf-8")
+            text, name_swaps = re.subn(
+                r'(<string name="app_name">)[^<]*(</string>)',
+                rf"\g<1>{app_name}\g<2>",
+                text,
+                count=1,
+            )
+            text, pine_swaps = re.subn(
+                r'(<color name="pine">)#[0-9a-fA-F]{6,8}(</color>)',
+                rf"\g<1>{pine_color}\g<2>",
+                text,
+                count=1,
+            )
+            if name_swaps != 1 or pine_swaps != 1:
+                raise ValueError("Could not patch res/values/atlas.xml app_name/pine")
+            atlas_xml.write_text(text, encoding="utf-8")
         cl = w / "classes"
         dx = w / "dex"
         cl.mkdir()
         dx.mkdir()
         raw = w / "unsigned.apk"
-        run([bt / "aapt2", "compile", "--dir", ROOT / "res", "-o", w / "res.zip"])
+        run([bt / "aapt2", "compile", "--dir", res_dir, "-o", w / "res.zip"])
         run(
             [
                 bt / "aapt2",
@@ -201,7 +257,7 @@ def main():
                 str(bt / "core-lambda-stubs.jar") + os.pathsep + str(api),
                 "-d",
                 cl,
-                *sorted((ROOT / "src").rglob("*.java")),
+                *sorted(src_dir.rglob("*.java")),
             ]
         )
         run([java / "jar", "cf", w / "app.jar", "-C", cl, "."])
