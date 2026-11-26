@@ -276,10 +276,27 @@ export async function buildCatalog(base = process.cwd()) {
       c: cell,
       acreLocation: cell,
       elevation_m: elevation,
+      // Hugo publishes the row's terrain height as `z` as well as elevation_m,
+      // and settle.mjs grades candidate sites on it. Leaving it out changed
+      // which acres settlement would accept, so the stub never walked the same
+      // path the real build does.
+      z: elevation,
+      lat: p.lat ?? null,
+      lon: p.lon ?? null,
+      corners: p.corners ?? null,
+      approved: p.approved ?? false,
+      record_kind: p.record_kind ?? "unreviewed",
+      href: `/houses/${u}/`,
       homeLocation: p.homeLocation ?? null,
       villageId: p.villageId ?? "",
       added: String(p.added ?? ""),
-      court: p.pin ?? null,
+      // catalog.html takes `court` from the settlement pin (`$pins.Get $u`),
+      // not from the house's own front matter: the pin carries the lot angle,
+      // frontage, gate and porch that residentDesign() lays the house out
+      // against. Emitting `p.pin` here left court null for every settled house,
+      // which sent residentDesign() down a branch real Hugo never takes and hid
+      // the failure it was supposed to reproduce.
+      court: pinned.get(u) ?? null,
       house: {
         setback_m: 9,
         lateral_m: 0,
@@ -292,6 +309,7 @@ export async function buildCatalog(base = process.cwd()) {
         roof_color: p.roof_color ?? "#a45e42",
         road_side: p.facing ?? "south",
         props: p.props ?? [],
+        seed: fnv32a(u),
         sign: { ...sign, label },
       },
     });
