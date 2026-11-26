@@ -9,14 +9,14 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: rcc-tank
+archetype: stone-gable
 size_m:
 - 8.65
 - 8.05
 - 6.15
 facing: south
-wall_color: '#ab9c86'
-roof_color: '#ad664e'
+wall_color: '#c8b69a'
+roof_color: '#a45e42'
 props:
 - shade-tree
 - well

@@ -9,14 +9,14 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: pillared-tile
+archetype: courtyard-house
 size_m:
 - 8.96
 - 8.51
 - 4.3
 facing: south
-wall_color: '#bfae94'
-roof_color: '#a45e42'
+wall_color: '#e8dcc4'
+roof_color: '#9c5f45'
 props:
 - tulasi-kota
 sign:

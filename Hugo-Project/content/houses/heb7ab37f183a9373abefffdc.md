@@ -9,14 +9,14 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: cattle-compound
+archetype: thatch-longhouse
 size_m:
 - 11.62
 - 10.12
 - 6.02
 facing: north
-wall_color: '#e2d4b7'
-roof_color: '#ad664e'
+wall_color: '#cfc0a2'
+roof_color: '#7d5a44'
 props:
 - kitchen-garden
 sign:

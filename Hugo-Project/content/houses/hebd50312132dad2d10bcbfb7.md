@@ -9,14 +9,14 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: mud-veranda
+archetype: cattle-compound
 size_m:
 - 9.2
 - 11.08
 - 4.34
 facing: east
-wall_color: '#b5ab95'
-roof_color: '#7d5a44'
+wall_color: '#bfae94'
+roof_color: '#b06b49'
 props:
 - flower-bed
 - tulasi-kota

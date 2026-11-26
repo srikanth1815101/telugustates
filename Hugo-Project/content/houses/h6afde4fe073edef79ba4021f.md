@@ -9,14 +9,14 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: round-thatch
+archetype: l-court
 size_m:
 - 9.89
 - 11.26
 - 4.45
 facing: north
-wall_color: '#c8b69a'
-roof_color: '#96533c'
+wall_color: '#bfae94'
+roof_color: '#6f5342'
 props:
 - kitchen-garden
 sign:

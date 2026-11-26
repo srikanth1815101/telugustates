@@ -9,14 +9,14 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: rcc-tank
+archetype: cattle-compound
 size_m:
 - 8.58
 - 9.97
 - 3.97
 facing: east
-wall_color: '#ab9c86'
-roof_color: '#8c5843'
+wall_color: '#c8b69a'
+roof_color: '#b5714f'
 props:
 - hayrick
 - kitchen-garden

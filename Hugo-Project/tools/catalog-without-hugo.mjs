@@ -208,9 +208,19 @@ export async function buildCatalog(base = process.cwd()) {
   }
   districts.sort((a, b) => a.id - b.id);
 
-  const houses = [],
-    takenCells = new Set(),
+  // Pinned residences, so a settled record that disagrees with the ledger is
+  // rejected the way catalog.html rejects it.
+  const pinned = new Map(),
     reservedCells = new Set();
+  try {
+    const ledger = JSON.parse(
+      await fs.readFile(path.join(base, "data/settlements.json"), "utf8"),
+    );
+    for (const v of ledger.villages || [])
+      for (const [id, pin] of Object.entries(v.homes || {})) pinned.set(id, pin);
+  } catch {}
+  const houses = [],
+    takenCells = new Set();
   for (const f of (await fs.readdir(content("houses"))
     .catch(() => []))
     .filter((f) => f.endsWith(".md") && f !== "_index.md")) {
@@ -224,7 +234,7 @@ export async function buildCatalog(base = process.cwd()) {
     // catalog.html assigns a suggested acre when a record has no cell: scan the
     // district pool from an FNV32a(u) offset, skipping acreage already spoken
     // for. settle.mjs then confirms the cell against real terrain.
-    let cell = p.cell ?? null,
+    let cell = pinned.get(u)?.c ?? p.cell ?? null,
       elevation = p.elevation_m ?? null;
     if (!cell) {
       const pool = (districts.find((x) => x.id === Number(p.district_id))?.pool) || [],
@@ -244,6 +254,21 @@ export async function buildCatalog(base = process.cwd()) {
     // residentDesign() reads, with the same defaults the template applies.
     const sign = p.sign ?? {},
       label = String(p.house_name ?? sign.label ?? p.title ?? "").trim();
+    // catalog.html hard-errors when a settled house disagrees with the pinned
+    // residence in data/settlements.json. Without this guard the no-Hugo stub
+    // would happily publish a corrupted record that real Hugo rejects, which is
+    // exactly what check-growth tests for.
+    if (p.homeLocation && pinned.has(u)) {
+      const pin = pinned.get(u);
+      const same = (a, b) =>
+        Array.isArray(a) && Array.isArray(b) &&
+        a.length === b.length && a.every((v, i) => Math.abs(v - b[i]) < 1e-6);
+      if (!same(p.homeLocation, pin.p) || !same(cell, pin.c))
+        throw Error(
+          "Conflicting pinned residence/acre for " + u,
+        );
+    }
+
     houses.push({
       u,
       d: Number(p.district_id),

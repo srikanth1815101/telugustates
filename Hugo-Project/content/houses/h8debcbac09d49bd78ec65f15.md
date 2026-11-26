@@ -9,14 +9,14 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: l-court
+archetype: round-thatch
 size_m:
 - 8.92
 - 11.36
 - 4.48
 facing: south
-wall_color: '#e8dcc4'
-roof_color: '#8c5843'
+wall_color: '#e0cdb0'
+roof_color: '#b06b49'
 props:
 - banana-clump
 - cattle-shed

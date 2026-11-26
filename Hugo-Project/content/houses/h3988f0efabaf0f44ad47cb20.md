@@ -9,14 +9,14 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: thatch-longhouse
+archetype: round-thatch
 size_m:
 - 11.71
 - 9.73
 - 6.34
 facing: north
-wall_color: '#dec99e'
-roof_color: '#6f5342'
+wall_color: '#b5ab95'
+roof_color: '#7d5a44'
 props:
 - flower-bed
 sign:

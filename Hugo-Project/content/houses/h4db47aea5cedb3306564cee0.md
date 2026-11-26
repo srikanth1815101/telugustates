@@ -9,14 +9,14 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: balcony-stair
+archetype: rcc-tank
 size_m:
 - 11.83
 - 8.39
 - 4.39
 facing: west
-wall_color: '#d9c7ab'
-roof_color: '#78513f'
+wall_color: '#dec99e'
+roof_color: '#a86a52'
 props:
 - shade-tree
 - banana-clump

@@ -9,13 +9,13 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: mud-veranda
+archetype: sheet-lean-to
 size_m:
 - 11.22
 - 8.05
 - 4.33
 facing: south
-wall_color: '#c8b69a'
+wall_color: '#d9c7ab'
 roof_color: '#78513f'
 props:
 - banana-clump

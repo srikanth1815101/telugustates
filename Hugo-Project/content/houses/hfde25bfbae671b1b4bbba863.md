@@ -9,14 +9,14 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: thatch-longhouse
+archetype: mud-veranda
 size_m:
 - 9.3
 - 11.51
 - 3.94
 facing: east
-wall_color: '#b5ab95'
-roof_color: '#78513f'
+wall_color: '#c9b99b'
+roof_color: '#8c5843'
 props:
 - tulasi-kota
 - well

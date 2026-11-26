@@ -9,14 +9,14 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: l-court
+archetype: mud-veranda
 size_m:
 - 11.34
 - 11.45
 - 6.09
 facing: north
-wall_color: '#d3c3ad'
-roof_color: '#ad664e'
+wall_color: '#e0cdb0'
+roof_color: '#6f5342'
 props:
 - hayrick
 sign:

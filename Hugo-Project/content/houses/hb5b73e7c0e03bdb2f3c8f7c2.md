@@ -9,14 +9,14 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: thatch-longhouse
+archetype: cattle-compound
 size_m:
 - 9.28
 - 8.53
 - 3.96
 facing: west
-wall_color: '#e2d4b7'
-roof_color: '#a45e42'
+wall_color: '#c9b99b'
+roof_color: '#a86a52'
 props:
 - flower-bed
 - tulasi-kota

@@ -9,14 +9,14 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: rcc-tank
+archetype: sheet-lean-to
 size_m:
 - 10.79
 - 8.39
 - 3.78
 facing: north
-wall_color: '#dec99e'
-roof_color: '#ad664e'
+wall_color: '#d8c3a5'
+roof_color: '#6f5342'
 props:
 - cattle-shed
 sign:

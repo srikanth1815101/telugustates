@@ -9,14 +9,14 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: courtyard-house
+archetype: balcony-stair
 size_m:
 - 10.87
 - 10.61
 - 4.08
 facing: west
-wall_color: '#c9b99b'
-roof_color: '#b5714f'
+wall_color: '#b5ab95'
+roof_color: '#875440'
 props:
 - shade-tree
 - hayrick

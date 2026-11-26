@@ -9,14 +9,14 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: courtyard-house
+archetype: sheet-lean-to
 size_m:
 - 8.26
 - 10.26
 - 4.82
 facing: west
-wall_color: '#c8b69a'
-roof_color: '#6f5342'
+wall_color: '#d9c7ab'
+roof_color: '#96533c'
 props:
 - flower-bed
 - shade-tree

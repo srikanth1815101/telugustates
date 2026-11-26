@@ -9,14 +9,14 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: l-court
+archetype: street-shop
 size_m:
 - 11.14
 - 10.34
 - 3.77
 facing: east
-wall_color: '#d8c3a5'
-roof_color: '#7d5a44'
+wall_color: '#e8dcc4'
+roof_color: '#b5714f'
 props:
 - cattle-shed
 sign:

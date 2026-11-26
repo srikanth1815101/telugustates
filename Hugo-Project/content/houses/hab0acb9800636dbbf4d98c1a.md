@@ -9,14 +9,14 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: thatch-longhouse
+archetype: courtyard-house
 size_m:
 - 11.67
 - 11.98
 - 4.65
 facing: south
-wall_color: '#ab9c86'
-roof_color: '#a86a52'
+wall_color: '#dec99e'
+roof_color: '#875440'
 props:
 - tulasi-kota
 sign:

@@ -9,14 +9,14 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: pillared-tile
+archetype: l-court
 size_m:
 - 11.33
 - 9.35
 - 3.91
 facing: south
-wall_color: '#b5ab95'
-roof_color: '#875440'
+wall_color: '#d9c7ab'
+roof_color: '#a45e42'
 props:
 - hayrick
 - kitchen-garden

@@ -9,14 +9,14 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: round-thatch
+archetype: stone-gable
 size_m:
 - 11.23
 - 10.4
 - 4.17
 facing: east
-wall_color: '#e4d5be'
-roof_color: '#78513f'
+wall_color: '#e0cdb0'
+roof_color: '#a45e42'
 props:
 - kitchen-garden
 sign:

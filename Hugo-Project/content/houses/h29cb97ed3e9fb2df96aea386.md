@@ -9,13 +9,13 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: round-thatch
+archetype: balcony-stair
 size_m:
 - 12.29
 - 11.95
 - 4.58
 facing: north
-wall_color: '#c4ad8b'
+wall_color: '#b5ab95'
 roof_color: '#b5714f'
 props:
 - banana-clump

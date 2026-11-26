@@ -9,14 +9,14 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: cattle-compound
+archetype: balcony-stair
 size_m:
 - 10.03
 - 8.56
 - 4.49
 facing: south
-wall_color: '#e4d5be'
-roof_color: '#9c5f45'
+wall_color: '#ab9c86'
+roof_color: '#b06b49'
 props:
 - cattle-shed
 sign:

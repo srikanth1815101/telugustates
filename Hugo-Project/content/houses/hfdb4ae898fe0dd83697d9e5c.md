@@ -9,14 +9,14 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: mud-veranda
+archetype: stone-gable
 size_m:
 - 9.13
 - 10.96
 - 4.49
 facing: south
 wall_color: '#c9b99b'
-roof_color: '#8c5843'
+roof_color: '#875440'
 props:
 - flower-bed
 - well

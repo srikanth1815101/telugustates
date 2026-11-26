@@ -9,14 +9,14 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: thatch-longhouse
+archetype: stone-gable
 size_m:
 - 8.24
 - 9.93
 - 4.56
 facing: north
-wall_color: '#e4d5be'
-roof_color: '#96533c'
+wall_color: '#d9c7ab'
+roof_color: '#6f5342'
 props:
 - shade-tree
 sign:

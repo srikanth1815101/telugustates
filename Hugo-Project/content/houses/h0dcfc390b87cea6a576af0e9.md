@@ -9,14 +9,14 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: mud-veranda
+archetype: balcony-stair
 size_m:
 - 9
 - 10.25
 - 4.69
 facing: west
-wall_color: '#e4d5be'
-roof_color: '#b06b49'
+wall_color: '#e0cdb0'
+roof_color: '#78513f'
 props:
 - shade-tree
 sign:

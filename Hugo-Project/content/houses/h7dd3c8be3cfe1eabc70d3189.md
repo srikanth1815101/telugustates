@@ -9,14 +9,14 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: l-court
+archetype: pillared-tile
 size_m:
 - 9.51
 - 10.08
 - 4.56
 facing: north
-wall_color: '#e2d4b7'
-roof_color: '#b5714f'
+wall_color: '#c8b69a'
+roof_color: '#9c5f45'
 props:
 - banana-clump
 - kitchen-garden

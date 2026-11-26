@@ -9,14 +9,14 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: l-court
+archetype: street-shop
 size_m:
 - 8.79
 - 8.55
 - 3.8
 facing: south
-wall_color: '#cfc0a2'
-roof_color: '#a45e42'
+wall_color: '#bfae94'
+roof_color: '#9c5f45'
 props:
 - flower-bed
 - shade-tree

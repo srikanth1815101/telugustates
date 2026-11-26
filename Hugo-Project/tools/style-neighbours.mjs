@@ -70,6 +70,7 @@ function readHouses(text) {
   };
   const cell = /^cell:\s*\[\s*(-?\d+)\s*,\s*(-?\d+)\s*\]/m.exec(head);
   return {
+    added: get("added"),
     archetype: get("archetype"),
     wall_color: get("wall_color"),
     roof_color: get("roof_color"),
@@ -126,6 +127,10 @@ async function main() {
     return i >= 0 ? argv[i + 1] : d;
   };
   const radius = Number(flag("radius", 2.5));
+  // Houses that are already live must never be restyled: a resident's model,
+  // colours and position are fixed once their home is published. Only houses
+  // added on or after --since are candidates.
+  const since = flag("since", "");
   const dry = argv.includes("--dry");
   const reportPath = flag("report", "");
 
@@ -138,7 +143,10 @@ async function main() {
       text = await fs.readFile(p, "utf8"),
       rec = readHouses(text);
     if (!rec.cell) continue;                       // unsettled: nothing to place yet
-    houses.set(f.slice(0, -3), { ...rec, file: p, text });
+    // A published house is immutable. Restyling one would move a resident's
+    // home out from under them, so anything added before --since is frozen.
+    const free = !since || !rec.added || rec.added >= since;
+    houses.set(f.slice(0, -3), { ...rec, file: p, text, free });
   }
   console.log(`  settled houses  : ${houses.size}`);
 
@@ -163,20 +171,56 @@ async function main() {
   console.log(`  neighbour pairs : ${edges}  (max ${Math.max(...degree)} per house)`);
 
   // biggest-first: the constrained houses get first pick of colours
+  const frozenSet = new Set(ids.filter((u) => !houses.get(u).free));
+  const pressure = (u) =>
+    [...neighbours.get(u)].filter((v) => frozenSet.has(v)).length;
   const order = ids.slice().sort((a, b) =>
+    pressure(b) - pressure(a) ||
     neighbours.get(b).size - neighbours.get(a).size || a.localeCompare(b));
 
-  const arch = colour(order, neighbours, models, "model-layout");
-  const wall = colour(order, neighbours, WALLS, "wall-layout");
-  const roof = colour(order, neighbours, ROOFS, "roof-layout");
+  // Frozen houses keep their published look; they act as fixed colours that
+  // their neighbours must avoid. Only the free houses are coloured.
+  const frozen = new Set(ids.filter((u) => !houses.get(u).free));
+  const seed = (map, key) => {
+    for (const u of frozen) map.set(u, houses.get(u)[key]);
+    return map;
+  };
+  const arch = seed(new Map(), "archetype"),
+    wall = seed(new Map(), "wall_color"),
+    roof = seed(new Map(), "roof_color");
+  const free = order.filter((u) => houses.get(u).free);
+  for (const [map, palette, key] of [
+    [arch, models, "model-layout"],
+    [wall, WALLS, "wall-layout"],
+    [roof, ROOFS, "roof-layout"],
+  ]) {
+    for (const [u, c] of colour(free, neighbours, palette, key)) map.set(u, c);
+    // A single greedy sweep can strand a house hemmed in by frozen neighbours.
+    // Repaint any free house that still clashes, choosing a colour no neighbour
+    // uses; repeat until quiet, then leave it to the audit to object.
+    for (let pass = 0; pass < 12; pass++) {
+      let fixed = 0;
+      for (const u of free) {
+        const taken = new Set();
+        for (const v of neighbours.get(u)) taken.add(map.get(v));
+        if (!taken.has(map.get(u))) continue;
+        const open = palette.filter((c) => !taken.has(c));
+        if (!open.length) continue;
+        map.set(u, open[Math.floor((h32(u + key) % open.length))]);
+        fixed++;
+      }
+      if (!fixed) break;
+    }
+  }
 
   // --- audit the result before writing anything
   const clash = (map, label) => {
-    let bad = 0;
+    const list = [];
     for (const u of ids)
       for (const v of neighbours.get(u))
-        if (u < v && map.get(u) === map.get(v)) bad++;
-    return { label, bad };
+        if (u < v && map.get(u) === map.get(v))
+          if (houses.get(u).free || houses.get(v).free) list.push([u, v]);
+    return { label, bad: list.length, list };
   };
   const audit = [clash(arch, "model"), clash(wall, "wall"), clash(roof, "roof")];
   for (const a of audit) console.log(`  ${a.label.padEnd(5)} clashes : ${a.bad}`);
@@ -213,6 +257,7 @@ async function main() {
   let changed = 0;
   for (const u of ids) {
     const h = houses.get(u);
+    if (!h.free) continue;
     const next = { archetype: arch.get(u), wall_color: wall.get(u), roof_color: roof.get(u) };
     if (next.archetype === h.archetype && next.wall_color === h.wall_color && next.roof_color === h.roof_color)
       continue;

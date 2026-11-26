@@ -9,14 +9,14 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: thatch-longhouse
+archetype: balcony-stair
 size_m:
 - 8.84
 - 10.3
 - 6.19
 facing: west
-wall_color: '#c8b69a'
-roof_color: '#7d5a44'
+wall_color: '#bfae94'
+roof_color: '#96533c'
 props:
 - tulasi-kota
 sign:

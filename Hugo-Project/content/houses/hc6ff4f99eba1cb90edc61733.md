@@ -9,14 +9,14 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: thatch-longhouse
+archetype: round-thatch
 size_m:
 - 10.52
 - 9.88
 - 4.52
 facing: south
-wall_color: '#cdbba0'
-roof_color: '#8c5843'
+wall_color: '#e8dcc4'
+roof_color: '#9c5f45'
 props:
 - well
 - hayrick

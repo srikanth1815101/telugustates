@@ -9,14 +9,14 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: courtyard-house
+archetype: street-shop
 size_m:
 - 10.88
 - 9.95
 - 4.09
 facing: east
-wall_color: '#d3c3ad'
-roof_color: '#b06b49'
+wall_color: '#bfae94'
+roof_color: '#b5714f'
 props:
 - hayrick
 - shade-tree

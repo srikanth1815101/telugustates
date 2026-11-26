@@ -9,7 +9,7 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: stone-gable
+archetype: round-thatch
 size_m:
 - 10.14
 - 10.69

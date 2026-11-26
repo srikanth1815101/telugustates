@@ -9,14 +9,14 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: courtyard-house
+archetype: street-shop
 size_m:
 - 11.74
 - 9.1
 - 4.88
 facing: north
-wall_color: '#ab9c86'
-roof_color: '#8c5843'
+wall_color: '#e2d4b7'
+roof_color: '#b5714f'
 props:
 - shade-tree
 - banana-clump

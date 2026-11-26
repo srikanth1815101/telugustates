@@ -9,14 +9,14 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: cattle-compound
+archetype: courtyard-house
 size_m:
 - 11.49
 - 9.55
 - 4.86
 facing: south
-wall_color: '#e8dcc4'
-roof_color: '#7d5a44'
+wall_color: '#ab9c86'
+roof_color: '#78513f'
 props:
 - cattle-shed
 sign:

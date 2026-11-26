@@ -9,14 +9,14 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: mud-veranda
+archetype: cattle-compound
 size_m:
 - 11.43
 - 9.32
 - 4.63
 facing: south
-wall_color: '#e2d4b7'
-roof_color: '#a86a52'
+wall_color: '#c4ad8b'
+roof_color: '#96533c'
 props:
 - flower-bed
 - well

@@ -9,14 +9,14 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: rcc-tank
+archetype: courtyard-house
 size_m:
 - 11.07
 - 11.97
 - 4.65
 facing: east
-wall_color: '#cdbba0'
-roof_color: '#96533c'
+wall_color: '#c8b69a'
+roof_color: '#b5714f'
 props:
 - tulasi-kota
 - flower-bed

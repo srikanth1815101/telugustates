@@ -9,14 +9,14 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: sheet-lean-to
+archetype: balcony-stair
 size_m:
 - 11.45
 - 9.13
 - 4.09
 facing: east
-wall_color: '#d9c7ab'
-roof_color: '#78513f'
+wall_color: '#d3c3ad'
+roof_color: '#a86a52'
 props:
 - shade-tree
 - kitchen-garden

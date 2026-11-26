@@ -15,8 +15,8 @@ size_m:
 - 9.27
 - 4.13
 facing: north
-wall_color: '#e8dcc4'
-roof_color: '#875440'
+wall_color: '#cfc0a2'
+roof_color: '#8c5843'
 props:
 - hayrick
 - cattle-shed

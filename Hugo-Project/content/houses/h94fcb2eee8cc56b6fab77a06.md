@@ -9,13 +9,13 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: balcony-stair
+archetype: mud-veranda
 size_m:
 - 9.59
 - 11.8
 - 4.2
 facing: west
-wall_color: '#e0cdb0'
+wall_color: '#cfc0a2'
 roof_color: '#b5714f'
 props:
 - banana-clump

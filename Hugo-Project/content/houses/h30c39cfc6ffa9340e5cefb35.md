@@ -16,7 +16,7 @@ size_m:
 - 4.03
 facing: east
 wall_color: '#c4ad8b'
-roof_color: '#ad664e'
+roof_color: '#7d5a44'
 props:
 - well
 - cattle-shed

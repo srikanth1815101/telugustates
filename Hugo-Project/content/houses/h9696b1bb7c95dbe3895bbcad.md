@@ -9,14 +9,14 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: rcc-tank
+archetype: cattle-compound
 size_m:
 - 11.97
 - 9.99
 - 4.73
 facing: north
-wall_color: '#bfae94'
-roof_color: '#875440'
+wall_color: '#c9b99b'
+roof_color: '#6f5342'
 props:
 - hayrick
 - banana-clump

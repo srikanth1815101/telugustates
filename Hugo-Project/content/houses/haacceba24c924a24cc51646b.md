@@ -15,8 +15,8 @@ size_m:
 - 10.66
 - 4.23
 facing: west
-wall_color: '#b5ab95'
-roof_color: '#78513f'
+wall_color: '#cfc0a2'
+roof_color: '#b5714f'
 props:
 - cattle-shed
 - banana-clump

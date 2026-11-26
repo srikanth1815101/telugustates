@@ -9,13 +9,13 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: cattle-compound
+archetype: stone-gable
 size_m:
 - 9.25
 - 9.78
 - 4.32
 facing: west
-wall_color: '#d8c3a5'
+wall_color: '#c8b69a'
 roof_color: '#875440'
 props:
 - kitchen-garden

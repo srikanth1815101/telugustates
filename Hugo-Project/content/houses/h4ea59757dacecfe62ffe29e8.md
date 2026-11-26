@@ -9,14 +9,14 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: round-thatch
+archetype: l-court
 size_m:
 - 9.87
 - 8.43
 - 4.38
 facing: east
-wall_color: '#d8c3a5'
-roof_color: '#a86a52'
+wall_color: '#e8dcc4'
+roof_color: '#a45e42'
 props:
 - banana-clump
 - well

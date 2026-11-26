@@ -9,13 +9,13 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: l-court
+archetype: mud-veranda
 size_m:
 - 9.33
 - 8.07
 - 4.43
 facing: west
-wall_color: '#c4ad8b'
+wall_color: '#c8b69a'
 roof_color: '#78513f'
 props:
 - tulasi-kota

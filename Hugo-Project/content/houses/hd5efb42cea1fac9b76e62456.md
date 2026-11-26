@@ -9,14 +9,14 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: balcony-stair
+archetype: cattle-compound
 size_m:
 - 12.21
 - 9.17
 - 4.75
 facing: east
-wall_color: '#dec99e'
-roof_color: '#a86a52'
+wall_color: '#c9b99b'
+roof_color: '#ad664e'
 props:
 - flower-bed
 - shade-tree

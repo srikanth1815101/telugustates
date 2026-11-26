@@ -9,14 +9,14 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: cattle-compound
+archetype: round-thatch
 size_m:
 - 11.39
 - 8.52
 - 3.84
 facing: north
-wall_color: '#e8dcc4'
-roof_color: '#ad664e'
+wall_color: '#cfc0a2'
+roof_color: '#b5714f'
 props:
 - well
 - flower-bed

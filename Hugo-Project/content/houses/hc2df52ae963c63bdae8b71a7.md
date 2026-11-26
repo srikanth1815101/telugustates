@@ -9,14 +9,14 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: balcony-stair
+archetype: l-court
 size_m:
 - 11.12
 - 10.56
 - 3.94
 facing: south
 wall_color: '#cfc0a2'
-roof_color: '#875440'
+roof_color: '#a45e42'
 props:
 - cattle-shed
 - hayrick
