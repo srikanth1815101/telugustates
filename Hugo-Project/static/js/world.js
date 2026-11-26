@@ -15,6 +15,8 @@ import { hydraulicInset } from "./hydraulic-inset.js";
 import { collar } from "./survey-collar.js";
 import { dev } from "./edition.js";
 import { Tread } from "./tread.js";
+import { stairSlabs } from "./stairs.js";
+import { monuments } from "./temple.js";
 import { yards, wayside, restStone } from "./timber-yard.js";
 import { PocketMap } from "./pocket-map.js";
 import { readPosition, writePosition } from "./position-book.js";
@@ -1294,6 +1296,10 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
     }
     stones.position.copy(l.sc.position).multiplyScalar(-1);
     l.sc.add(stones);
+    const mon = monuments(l.s, stops, p);
+    if (mon.children.length) l.sc.add(mon);
+    const slabs = stairSlabs(l.s, naturalRoutes, p);
+    if (slabs) l.sc.add(slabs);
     l.houses = homes.userData.houses;
     l.boards = homes.userData.names || [];
     l.walls = homes.userData.walls || [];

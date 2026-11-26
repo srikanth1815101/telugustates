@@ -67,6 +67,7 @@ jobs:
             cat "$out"
           }
           run_check node Hugo-Project/tools/check-content.mjs --tiles
+          run_check node Hugo-Project/tools/check-stairs.mjs
           run_check node Hugo-Project/tools/check-villages.mjs
           run_check node Hugo-Project/tools/check-growth.mjs
           run_check node Hugo-Project/tools/check-homes.mjs
