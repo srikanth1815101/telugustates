@@ -86,8 +86,9 @@ icon in the world's top bar. Suggested tour: `tirupati` → `alipiri` → walk t
 the stairway sections) → `galigopuram` → `mokalla` → `tirumala`.
 
 A ready-made preview (the compiled site extracted from the committed APK, with this branch's JS
-and the new catalog entries patched in) lives in `Hugo-Project/preview/` (gitignored) — serve it
-with any static server. It exists only for sandbox demonstrations; the authoritative build is Hugo.
+and the new catalog entries patched in) is served on sandbox port 8123 from `/tmp/preview`
+(deliberately outside the repository so the heavy site does not count against the workspace
+download budget; rebuild it the same way after a sandbox reset). The authoritative build is Hugo.
 
 ## Checks run on this branch
 
