@@ -61,18 +61,32 @@ prompts to "update" itself into the main app. The workflow copy on this branch b
 `Telugu-States-Pilot.apk` on `workflow_dispatch` and uploads the `Telugu-States-7Hills-Pilot-APK`
 artifact; the GitHub Releases publish step stays gated to `refs/heads/main`.
 
-**The APK is never committed to git** (it would blow the workspace download budget). It lives at
-`downloads/Telugu-States-Pilot.apk` (gitignored via the repo-wide `*.apk` rule), with a symlink at
-`Hugo-Project/preview/Telugu-States-Pilot.apk` so the preview web server offers it for download.
-To refresh after changes:
+**The APK is never kept in git** (it would blow the workspace download budget). The single copy
+lives at `downloads/Telugu-States-Pilot.apk` (gitignored via the repo-wide `*.apk` rule), with a
+symlink in the preview web root for HTTP download. CI delivers it two ways on `workflow_dispatch`:
+
+1. **`pilot-apk` prerelease** — the APK is attached to the `pilot-apk` prerelease (never marked
+   `latest`, production releases untouched). Download in a normal browser from the repo's
+   Releases page, or `gh release download pilot-apk`.
+2. **Transient branch commit** — the runner also commits the APK to the branch tip
+   (`CI: 7-Hills pilot APK (run N)`, amend-and-replace so history stays lean). This exists only
+   so sandbox tooling can fetch it with `git show <commit>:android/Telugu-States-Pilot.apk`
+   (Actions-artifact and release-asset CDNs are unreachable from the sandbox). After pickup the
+   commit is force-replaced off the branch and the blob is pruned, so git stays APK-free.
+
+Refresh flow after changes:
 
 ```sh
 gh workflow run build-android.yml --ref arena/43d521a7-telugustates
-gh run download <run-id> -n Telugu-States-7Hills-Pilot-APK -D downloads
+# wait for success, then
+git fetch origin && git show origin/arena/43d521a7-telugustates:android/Telugu-States-Pilot.apk \
+  > downloads/Telugu-States-Pilot.apk   # while the CI commit is still the branch tip
+git push --force-with-lease origin <pre-CI-commit>:refs/heads/arena/43d521a7-telugustates
+git reflog expire --expire=now --all && git gc --prune=now
 ```
 
-If `downloads/` is empty (e.g. after a sandbox reset), rebuild the same way, or copy the APK from
-the GitHub Actions artifact page of the latest "Build offline atlas APK" run on this branch.
+If `downloads/` is empty (e.g. after a sandbox reset), rebuild the same way, or download from the
+`pilot-apk` prerelease.
 
 ## How to run
 
