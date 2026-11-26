@@ -19,11 +19,24 @@ try {
       ),
   });
   let prior = JSON.parse(await fs.readFile(ledger));
-  const publish = () =>
-    execFileSync(process.execPath, ["tools/settle.mjs"], {
-      cwd: copy,
-      stdio: "pipe",
-    });
+  // Surface the child's own stderr as text. A failed settle used to arrive as
+  // `Error: Command failed` wrapping a decimal byte dump of stderr, which named
+  // neither the house nor the field and made this check unreadable in CI.
+  const publish = () => {
+    try {
+      execFileSync(process.execPath, ["tools/settle.mjs"], {
+        cwd: copy,
+        stdio: "pipe",
+      });
+    } catch (e) {
+      const err = String(e.stderr ?? "").trim(),
+        out = String(e.stdout ?? "").trim();
+      const detail = [out, err].filter(Boolean).join("\n");
+      throw Error(
+        "settle.mjs failed" + (detail ? ":\n" + detail : " (" + e.message + ")"),
+      );
+    }
+  };
   let count = 0,
     firstId = "";
   // The last round has to reserve new sites, which only happens in districts
