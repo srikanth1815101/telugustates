@@ -59,9 +59,15 @@ jobs:
             local out="$RUNNER_TEMP/check.out"
             if ! "$@" >"$out" 2>&1; then
               cat "$out" >&2
-              local msg
+              # A Node crash ends with the code frame and stack, so the tail is
+              # the least informative part. Lead with the Error line itself so
+              # the annotation names the problem instead of quoting source.
+              local err msg
+              err=$(grep -m1 -E '^(Error|[A-Za-z]*Error): ' "$out" || true)
               msg=$(tail -n 20 "$out" | tr '\r\n' '  ' | cut -c1-900)
-              echo "::error title=CheckFailed ($*)::${msg}"
+              msg="${err:-$msg}"
+              [ -n "$err" ] && msg="${err} :: ${msg}"
+              echo "::error title=CheckFailed ($*)::${msg:0:1400}"
               exit 1
             fi
             cat "$out"
