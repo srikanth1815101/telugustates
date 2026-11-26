@@ -1,0 +1,37 @@
+# Netlify deployment for the Telugu States 3D atlas.
+# The Hugo project lives in Hugo-Project/; android/, Notes/ and CI files stay outside the site.
+
+[build]
+  base = "Hugo-Project"
+  command = "hugo --minify --gc"
+  publish = "public"
+
+[build.environment]
+  HUGO_VERSION = "0.147.8"
+
+# Terrain survey tiles are immutable content-addressed data: cache hard.
+[[headers]]
+  for = "/frozen/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/art/*"
+  [headers.values]
+    Cache-Control = "public, max-age=604800"
+
+[[headers]]
+  for = "/library/*"
+  [headers.values]
+    Cache-Control = "public, max-age=604800"
+
+# The live catalog + version metadata feed the apps' OTA content sync: never cache stale.
+[[headers]]
+  for = "/catalog.json"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/app-version.json"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
