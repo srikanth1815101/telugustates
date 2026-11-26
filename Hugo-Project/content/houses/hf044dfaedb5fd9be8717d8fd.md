@@ -9,14 +9,14 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: mud-veranda
+archetype: rcc-tank
 size_m:
 - 8.82
 - 10.64
 - 4.44
 facing: south
-wall_color: '#dec99e'
-roof_color: '#8c5843'
+wall_color: '#cfc0a2'
+roof_color: '#9c5f45'
 props:
 - cattle-shed
 - well

@@ -9,14 +9,14 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: sheet-lean-to
+archetype: round-thatch
 size_m:
 - 8.81
 - 9.88
 - 4.39
 facing: east
-wall_color: '#d8c3a5'
-roof_color: '#9c5f45'
+wall_color: '#d3c3ad'
+roof_color: '#b06b49'
 props:
 - well
 - kitchen-garden

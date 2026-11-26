@@ -9,14 +9,14 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: balcony-stair
+archetype: round-thatch
 size_m:
 - 12.37
 - 9.41
 - 4.61
 facing: west
-wall_color: '#c8b69a'
-roof_color: '#78513f'
+wall_color: '#d3c3ad'
+roof_color: '#a45e42'
 props:
 - well
 - hayrick

@@ -9,14 +9,14 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: sheet-lean-to
+archetype: courtyard-house
 size_m:
 - 11.24
 - 9.65
 - 4.09
 facing: east
 wall_color: '#d9c7ab'
-roof_color: '#ad664e'
+roof_color: '#96533c'
 props:
 - cattle-shed
 - shade-tree

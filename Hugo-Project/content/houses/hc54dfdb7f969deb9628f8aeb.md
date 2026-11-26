@@ -9,14 +9,14 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: rcc-tank
+archetype: thatch-longhouse
 size_m:
 - 8.65
 - 11.52
 - 4.66
 facing: east
-wall_color: '#bfae94'
-roof_color: '#875440'
+wall_color: '#e2d4b7'
+roof_color: '#6f5342'
 props:
 - cattle-shed
 - shade-tree

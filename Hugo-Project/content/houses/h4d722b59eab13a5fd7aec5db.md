@@ -9,14 +9,14 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: mud-veranda
+archetype: thatch-longhouse
 size_m:
 - 10.8
 - 10.66
 - 4.5
 facing: west
-wall_color: '#bfae94'
-roof_color: '#6f5342'
+wall_color: '#c9b99b'
+roof_color: '#ad664e'
 props:
 - well
 - kitchen-garden

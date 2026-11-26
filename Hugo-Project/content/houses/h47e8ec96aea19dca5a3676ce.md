@@ -9,14 +9,14 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: round-thatch
+archetype: rcc-tank
 size_m:
 - 11.66
 - 10.13
 - 4.25
 facing: east
-wall_color: '#e0cdb0'
-roof_color: '#b06b49'
+wall_color: '#e4d5be'
+roof_color: '#9c5f45'
 props:
 - hayrick
 - cattle-shed

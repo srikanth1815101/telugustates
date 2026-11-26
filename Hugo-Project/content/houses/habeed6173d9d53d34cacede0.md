@@ -9,14 +9,14 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: balcony-stair
+archetype: pillared-tile
 size_m:
 - 11.77
 - 10.31
 - 4.14
 facing: north
-wall_color: '#b5ab95'
-roof_color: '#6f5342'
+wall_color: '#d8c3a5'
+roof_color: '#78513f'
 props:
 - cattle-shed
 - hayrick

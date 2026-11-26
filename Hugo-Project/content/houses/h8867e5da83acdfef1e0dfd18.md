@@ -9,14 +9,14 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: cattle-compound
+archetype: pillared-tile
 size_m:
 - 9.08
 - 9.24
 - 4.28
 facing: east
-wall_color: '#b5ab95'
-roof_color: '#78513f'
+wall_color: '#e8dcc4'
+roof_color: '#96533c'
 props:
 - tulasi-kota
 - cattle-shed

@@ -9,14 +9,14 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: stone-gable
+archetype: street-shop
 size_m:
 - 11.38
 - 11.71
 - 4.74
 facing: south
-wall_color: '#c4ad8b'
-roof_color: '#a45e42'
+wall_color: '#cdbba0'
+roof_color: '#b5714f'
 props:
 - tulasi-kota
 sign:

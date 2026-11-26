@@ -9,14 +9,14 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: stone-gable
+archetype: mud-veranda
 size_m:
 - 12.16
 - 11.56
 - 4.41
 facing: east
-wall_color: '#e0cdb0'
-roof_color: '#9c5f45'
+wall_color: '#e8dcc4'
+roof_color: '#a86a52'
 props:
 - hayrick
 - well

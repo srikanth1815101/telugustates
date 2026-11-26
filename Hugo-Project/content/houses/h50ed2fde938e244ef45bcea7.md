@@ -9,14 +9,14 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: sheet-lean-to
+archetype: courtyard-house
 size_m:
 - 10.4
 - 8.83
 - 3.89
 facing: south
-wall_color: '#e8dcc4'
-roof_color: '#8c5843'
+wall_color: '#d3c3ad'
+roof_color: '#96533c'
 props:
 - flower-bed
 - banana-clump

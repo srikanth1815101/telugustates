@@ -9,14 +9,14 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: street-shop
+archetype: rcc-tank
 size_m:
 - 10.86
 - 10.24
 - 4.81
 facing: north
-wall_color: '#ab9c86'
-roof_color: '#6f5342'
+wall_color: '#cfc0a2'
+roof_color: '#b06b49'
 props:
 - cattle-shed
 - tulasi-kota

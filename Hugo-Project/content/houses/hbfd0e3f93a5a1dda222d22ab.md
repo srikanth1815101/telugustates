@@ -9,14 +9,14 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: thatch-longhouse
+archetype: l-court
 size_m:
 - 9.41
 - 11.49
 - 3.83
 facing: west
-wall_color: '#e2d4b7'
-roof_color: '#7d5a44'
+wall_color: '#d3c3ad'
+roof_color: '#a45e42'
 props:
 - well
 sign:

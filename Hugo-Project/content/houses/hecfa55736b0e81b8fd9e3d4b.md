@@ -9,14 +9,14 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: thatch-longhouse
+archetype: l-court
 size_m:
 - 10.61
 - 9.3
 - 4.85
 facing: north
-wall_color: '#bfae94'
-roof_color: '#96533c'
+wall_color: '#e0cdb0'
+roof_color: '#78513f'
 props:
 - well
 - banana-clump

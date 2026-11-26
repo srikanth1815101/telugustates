@@ -9,13 +9,13 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: sheet-lean-to
+archetype: l-court
 size_m:
 - 8.85
 - 11.45
 - 4.08
 facing: west
-wall_color: '#c8b69a'
+wall_color: '#dec99e'
 roof_color: '#78513f'
 props:
 - well

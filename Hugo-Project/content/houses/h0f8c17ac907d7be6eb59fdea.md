@@ -9,14 +9,14 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: thatch-longhouse
+archetype: stone-gable
 size_m:
 - 9.46
 - 9.74
 - 5.45
 facing: east
-wall_color: '#e2d4b7'
-roof_color: '#9c5f45'
+wall_color: '#d9c7ab'
+roof_color: '#875440'
 props:
 - cattle-shed
 sign:

@@ -9,14 +9,14 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: balcony-stair
+archetype: stone-gable
 size_m:
 - 9.54
 - 8.39
 - 4.39
 facing: north
-wall_color: '#dec99e'
-roof_color: '#8c5843'
+wall_color: '#c8b69a'
+roof_color: '#96533c'
 props:
 - kitchen-garden
 - hayrick

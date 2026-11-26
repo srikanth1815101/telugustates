@@ -9,14 +9,14 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: thatch-longhouse
+archetype: pillared-tile
 size_m:
 - 10.93
 - 11.12
 - 4.28
 facing: south
-wall_color: '#e0cdb0'
-roof_color: '#ad664e'
+wall_color: '#e2d4b7'
+roof_color: '#a45e42'
 props:
 - well
 - cattle-shed

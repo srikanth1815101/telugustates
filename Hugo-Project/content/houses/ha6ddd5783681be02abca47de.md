@@ -9,14 +9,14 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: stone-gable
+archetype: mud-veranda
 size_m:
 - 12.23
 - 11.09
 - 4.5
 facing: north
-wall_color: '#dec99e'
-roof_color: '#9c5f45'
+wall_color: '#bfae94'
+roof_color: '#6f5342'
 props:
 - banana-clump
 sign:

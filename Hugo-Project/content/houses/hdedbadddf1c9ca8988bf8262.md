@@ -9,14 +9,14 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: street-shop
+archetype: stone-gable
 size_m:
 - 10.68
 - 11.76
 - 4.03
 facing: north
-wall_color: '#cfc0a2'
-roof_color: '#8c5843'
+wall_color: '#d8c3a5'
+roof_color: '#b5714f'
 props:
 - well
 - shade-tree

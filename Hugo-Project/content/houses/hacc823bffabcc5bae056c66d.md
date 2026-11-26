@@ -9,14 +9,14 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: thatch-longhouse
+archetype: rcc-tank
 size_m:
 - 12.37
 - 9.1
 - 4.64
 facing: west
-wall_color: '#bfae94'
-roof_color: '#875440'
+wall_color: '#dec99e'
+roof_color: '#b5714f'
 props:
 - kitchen-garden
 - banana-clump

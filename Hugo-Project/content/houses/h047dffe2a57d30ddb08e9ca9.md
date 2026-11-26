@@ -9,14 +9,14 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: l-court
+archetype: rcc-tank
 size_m:
 - 10.63
 - 9.09
 - 4.55
 facing: south
-wall_color: '#d3c3ad'
-roof_color: '#9c5f45'
+wall_color: '#e2d4b7'
+roof_color: '#6f5342'
 props:
 - well
 - tulasi-kota

@@ -9,14 +9,14 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: sheet-lean-to
+archetype: thatch-longhouse
 size_m:
 - 9.48
 - 9.21
 - 4.1
 facing: north
-wall_color: '#b5ab95'
-roof_color: '#b5714f'
+wall_color: '#bfae94'
+roof_color: '#78513f'
 props:
 - tulasi-kota
 - kitchen-garden

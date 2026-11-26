@@ -9,14 +9,14 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: street-shop
+archetype: thatch-longhouse
 size_m:
 - 11.13
 - 9.79
 - 4.12
 facing: east
-wall_color: '#bfae94'
-roof_color: '#b5714f'
+wall_color: '#e2d4b7'
+roof_color: '#b06b49'
 props:
 - hayrick
 sign:

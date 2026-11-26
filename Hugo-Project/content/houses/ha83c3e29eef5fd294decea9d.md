@@ -9,14 +9,14 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: l-court
+archetype: stone-gable
 size_m:
 - 10.4
 - 9.83
 - 4.31
 facing: west
-wall_color: '#e0cdb0'
-roof_color: '#9c5f45'
+wall_color: '#e4d5be'
+roof_color: '#a86a52'
 props:
 - shade-tree
 sign:

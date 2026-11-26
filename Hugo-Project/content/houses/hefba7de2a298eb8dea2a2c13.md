@@ -9,14 +9,14 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: round-thatch
+archetype: pillared-tile
 size_m:
 - 10.99
 - 11.86
 - 6.09
 facing: south
-wall_color: '#e0cdb0'
-roof_color: '#b06b49'
+wall_color: '#d3c3ad'
+roof_color: '#8c5843'
 props:
 - cattle-shed
 - kitchen-garden

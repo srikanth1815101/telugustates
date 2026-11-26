@@ -9,14 +9,14 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: round-thatch
+archetype: stone-gable
 size_m:
 - 9.91
 - 10.09
 - 4
 facing: north
 wall_color: '#b5ab95'
-roof_color: '#875440'
+roof_color: '#9c5f45'
 props:
 - hayrick
 - banana-clump

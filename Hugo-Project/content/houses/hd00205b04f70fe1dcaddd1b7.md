@@ -9,14 +9,14 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: pillared-tile
+archetype: rcc-tank
 size_m:
 - 10.91
 - 11.79
 - 4.38
 facing: west
-wall_color: '#d8c3a5'
-roof_color: '#a45e42'
+wall_color: '#cfc0a2'
+roof_color: '#8c5843'
 props:
 - banana-clump
 - well

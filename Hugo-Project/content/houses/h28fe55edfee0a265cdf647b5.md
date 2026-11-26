@@ -9,14 +9,14 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: courtyard-house
+archetype: thatch-longhouse
 size_m:
 - 8.7
 - 11.64
 - 4.81
 facing: west
-wall_color: '#cfc0a2'
-roof_color: '#b5714f'
+wall_color: '#cdbba0'
+roof_color: '#ad664e'
 props:
 - hayrick
 sign:

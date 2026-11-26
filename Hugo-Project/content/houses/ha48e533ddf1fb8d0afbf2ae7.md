@@ -9,14 +9,14 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: pillared-tile
+archetype: balcony-stair
 size_m:
 - 11.89
 - 8.37
 - 4.89
 facing: south
-wall_color: '#d9c7ab'
-roof_color: '#b5714f'
+wall_color: '#c8b69a'
+roof_color: '#6f5342'
 props:
 - hayrick
 - banana-clump

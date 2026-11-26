@@ -16,7 +16,7 @@ size_m:
 - 4.25
 facing: east
 wall_color: '#e0cdb0'
-roof_color: '#b06b49'
+roof_color: '#9c5f45'
 props:
 - tulasi-kota
 - hayrick

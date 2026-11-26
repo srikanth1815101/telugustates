@@ -9,14 +9,14 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: street-shop
+archetype: courtyard-house
 size_m:
 - 10.5
 - 8.28
 - 6.33
 facing: west
-wall_color: '#cdbba0'
-roof_color: '#b06b49'
+wall_color: '#d9c7ab'
+roof_color: '#8c5843'
 props:
 - cattle-shed
 - kitchen-garden

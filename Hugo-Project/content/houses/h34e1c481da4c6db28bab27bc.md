@@ -9,14 +9,14 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: cattle-compound
+archetype: l-court
 size_m:
 - 12.05
 - 10.42
 - 3.76
 facing: west
-wall_color: '#e8dcc4'
-roof_color: '#875440'
+wall_color: '#ab9c86'
+roof_color: '#6f5342'
 props:
 - banana-clump
 - flower-bed

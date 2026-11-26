@@ -9,14 +9,14 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: sheet-lean-to
+archetype: round-thatch
 size_m:
 - 10.51
 - 11.27
 - 4.11
 facing: south
-wall_color: '#c8b69a'
-roof_color: '#7d5a44'
+wall_color: '#cdbba0'
+roof_color: '#9c5f45'
 props:
 - shade-tree
 - hayrick

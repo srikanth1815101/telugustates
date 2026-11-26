@@ -9,14 +9,14 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: street-shop
+archetype: mud-veranda
 size_m:
 - 8.51
 - 11.53
 - 4.37
 facing: east
-wall_color: '#e4d5be'
-roof_color: '#a45e42'
+wall_color: '#e0cdb0'
+roof_color: '#b5714f'
 props:
 - hayrick
 - banana-clump

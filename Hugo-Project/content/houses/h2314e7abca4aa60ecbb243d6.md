@@ -9,14 +9,14 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: rcc-tank
+archetype: street-shop
 size_m:
 - 8.6
 - 10.36
 - 4.26
 facing: west
-wall_color: '#cdbba0'
-roof_color: '#a86a52'
+wall_color: '#c4ad8b'
+roof_color: '#96533c'
 props:
 - flower-bed
 - tulasi-kota

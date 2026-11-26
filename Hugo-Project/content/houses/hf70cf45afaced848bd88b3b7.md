@@ -9,14 +9,14 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: mud-veranda
+archetype: thatch-longhouse
 size_m:
 - 10.01
 - 10.59
 - 4.36
 facing: east
-wall_color: '#e4d5be'
-roof_color: '#6f5342'
+wall_color: '#cdbba0'
+roof_color: '#7d5a44'
 props:
 - hayrick
 - flower-bed

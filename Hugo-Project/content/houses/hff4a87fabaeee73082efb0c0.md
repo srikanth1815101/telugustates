@@ -9,14 +9,14 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: balcony-stair
+archetype: l-court
 size_m:
 - 8.47
 - 11.01
 - 4.4
 facing: west
-wall_color: '#ab9c86'
-roof_color: '#8c5843'
+wall_color: '#dec99e'
+roof_color: '#875440'
 props:
 - well
 - banana-clump

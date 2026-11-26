@@ -9,14 +9,14 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: sheet-lean-to
+archetype: cattle-compound
 size_m:
 - 8.6
 - 9.11
 - 4.62
 facing: west
-wall_color: '#d8c3a5'
-roof_color: '#6f5342'
+wall_color: '#c8b69a'
+roof_color: '#78513f'
 props:
 - hayrick
 - shade-tree

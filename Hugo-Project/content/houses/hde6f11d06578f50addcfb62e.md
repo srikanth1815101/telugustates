@@ -9,14 +9,14 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: courtyard-house
+archetype: mud-veranda
 size_m:
 - 10.18
 - 8.26
 - 4.3
 facing: east
 wall_color: '#c8b69a'
-roof_color: '#a45e42'
+roof_color: '#8c5843'
 props:
 - shade-tree
 - hayrick

@@ -9,14 +9,14 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: round-thatch
+archetype: stone-gable
 size_m:
 - 10.6
 - 8.11
 - 3.97
 facing: east
-wall_color: '#e2d4b7'
-roof_color: '#ad664e'
+wall_color: '#c8b69a'
+roof_color: '#6f5342'
 props:
 - shade-tree
 sign:

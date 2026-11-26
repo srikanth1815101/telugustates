@@ -15,7 +15,7 @@ size_m:
 - 11.84
 - 4.51
 facing: east
-wall_color: '#e4d5be'
+wall_color: '#dec99e'
 roof_color: '#6f5342'
 props:
 - flower-bed

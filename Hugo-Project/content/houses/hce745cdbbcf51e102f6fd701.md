@@ -9,14 +9,14 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: round-thatch
+archetype: rcc-tank
 size_m:
 - 12.17
 - 8.29
 - 4.66
 facing: east
 wall_color: '#cdbba0'
-roof_color: '#7d5a44'
+roof_color: '#b5714f'
 props:
 - banana-clump
 - kitchen-garden

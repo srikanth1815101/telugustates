@@ -9,14 +9,14 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: sheet-lean-to
+archetype: cattle-compound
 size_m:
 - 10.95
 - 11.82
 - 4.51
 facing: west
-wall_color: '#d9c7ab'
-roof_color: '#8c5843'
+wall_color: '#e0cdb0'
+roof_color: '#875440'
 props:
 - kitchen-garden
 - shade-tree

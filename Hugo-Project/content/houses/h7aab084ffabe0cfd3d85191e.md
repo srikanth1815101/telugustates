@@ -9,14 +9,14 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: sheet-lean-to
+archetype: thatch-longhouse
 size_m:
 - 10.28
 - 10.19
 - 5.58
 facing: east
-wall_color: '#e0cdb0'
-roof_color: '#78513f'
+wall_color: '#e8dcc4'
+roof_color: '#a45e42'
 props:
 - cattle-shed
 sign:

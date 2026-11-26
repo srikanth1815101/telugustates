@@ -15,8 +15,8 @@ size_m:
 - 10.91
 - 4.35
 facing: east
-wall_color: '#dec99e'
-roof_color: '#b5714f'
+wall_color: '#c9b99b'
+roof_color: '#8c5843'
 props:
 - banana-clump
 sign:

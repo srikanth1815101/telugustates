@@ -9,14 +9,14 @@ record_kind: community
 approved: true
 area_acres: 1
 added: '2026-11-26'
-archetype: rcc-tank
+archetype: l-court
 size_m:
 - 9.9
 - 8.47
 - 3.78
 facing: south
-wall_color: '#cdbba0'
-roof_color: '#78513f'
+wall_color: '#dec99e'
+roof_color: '#a45e42'
 props:
 - shade-tree
 - kitchen-garden
