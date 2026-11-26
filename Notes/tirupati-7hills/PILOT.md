@@ -41,6 +41,31 @@ a district flies the overview camera to it; choosing a resident opens the Walk t
 destination card. Fully bilingual (`search.*` keys added to both dictionaries; key sets verified
 identical).
 
+## Android test app (7-Hills Pilot APK)
+
+A separate Android app is built from this branch so it installs **side by side** with the
+production app without conflict:
+
+| | Production app | 7-Hills pilot app |
+|---|---|---|
+| Package | `com.csrgo.telugustates.fieldtest` | `com.csrgo.telugustates.pilot` |
+| Launcher label | Telugu States | **7Hills Pilot** |
+| Icon accent | pine `#193C32` | terracotta `#7A3B1E` |
+| Content | production catalog | pilot catalog (24 places, 26 trails incl. both mettu stairways) |
+
+`android/build_apk.py` gained `--app-id / --app-name / --pine-color`, which rebrand private copies
+of the manifest, host sources and resources before `aapt2`/`javac` compile them. Because every
+remote release/site metadata file carries the production `appId`, the pilot's `LiveSync` rejects
+them all — so the pilot never overwrites its bundled catalog with production content and never
+prompts to "update" itself into the main app. The workflow copy on this branch builds
+`Telugu-States-Pilot.apk` on `workflow_dispatch`, uploads the `Telugu-States-7Hills-Pilot-APK`
+artifact, commits the APK to this branch (`android/Telugu-States-Pilot.apk`), and keeps the GitHub
+Releases publish step gated to `refs/heads/main`.
+
+To rebuild after changes: `gh workflow run build-android.yml --ref arena/43d521a7-telugustates`,
+then `git pull --ff-only` — the new APK appears at `android/Telugu-States-Pilot.apk`. A copy is
+also served by the preview web root for direct browser download.
+
 ## How to run
 
 ```sh
