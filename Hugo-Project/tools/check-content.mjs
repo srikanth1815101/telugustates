@@ -92,6 +92,40 @@ try {
       !entryJs.includes("app-boot-sync"),
     "3D holding menu must prompt for own username (no household dropdown) and Android boot must not blank screen",
   );
+  // Every district body must be one YAML flow sequence of [x, y, elevation]
+  // integer triples. A block sequence of the same triples parses differently
+  // through transform.Unmarshal in catalog.html, and the failure surfaces far
+  // away as "non-numeric cell coordinate: \"- [2336\"" inside residentDesign.
+  // Keep the source in the shape the template is known to read.
+  for (const f of (await fs.readdir(path.join(root, "content/districts"))).filter(
+    (n) => n.endsWith(".md") && /^\d+$/.test(n.slice(0, -3)),
+  )) {
+    const text = await fs.readFile(
+        path.join(root, "content/districts", f),
+        "utf8",
+      ),
+      body = text.slice(text.indexOf("\n---", 3) + 4),
+      poolText = body
+        .split("\n")
+        .filter((l) => !l.trim().startsWith("#"))
+        .join("\n")
+        .trim();
+    if (!poolText) continue;
+    assert(
+      !/^\s*-\s/m.test(poolText),
+      `District ${f} pool must be a flow sequence, not a block sequence; ` +
+        "a block list is read back as strings by catalog.html",
+    );
+    assert(
+      /^\s*\[\s*\[/.test(poolText) && /\]\s*\]\s*$/.test(poolText),
+      `District ${f} pool must be one bracketed flow sequence of triples`,
+    );
+    for (const m of poolText.matchAll(/\[\s*([^\][]+?)\s*\]/g))
+      assert(
+        /^-?\d+\s*,\s*-?\d+\s*,\s*-?\d+$/.test(m[1]),
+        `District ${f} pool entry is not an integer triple: [${m[1]}]`,
+      );
+  }
   const all = await json(path.join(tmp, "catalog.json")),
     atlas = await json(path.join(tmp, "data/atlas.json"));
   atlas.districts = all.districts;
