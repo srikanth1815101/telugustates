@@ -44,10 +44,13 @@ try {
                 : String(b);
       const detail = [text(e.stdout), text(e.stderr)]
         .map((s) => s.trim())
+        // One line: a workflow command ends at the first newline, and that is
+        // exactly where the child's reason would otherwise land.
+        .map((s) => s.replace(/\s*\n\s*/g, " | "))
         .filter(Boolean)
-        .join("\n");
+        .join(" | ");
       throw Error(
-        "settle.mjs failed" + (detail ? ":\n" + detail : " (" + e.message + ")"),
+        "settle.mjs failed" + (detail ? ": " + detail : " (" + e.message + ")"),
       );
     }
   };
