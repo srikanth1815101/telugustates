@@ -67,7 +67,10 @@ jobs:
               msg=$(tail -n 20 "$out" | tr '\r\n' '  ' | cut -c1-900)
               msg="${err:-$msg}"
               [ -n "$err" ] && msg="${err} :: ${msg}"
-              echo "::error title=CheckFailed ($*)::${msg:0:1400}"
+              # A workflow command ends at the first newline, so a multi-line
+              # message is silently truncated to its first line. Flatten first.
+              msg=$(printf '%s' "$msg" | tr '\r\n' '  ' | tr -s ' ' | cut -c1-1400)
+              echo "::error title=CheckFailed ($*)::${msg}"
               exit 1
             fi
             cat "$out"
