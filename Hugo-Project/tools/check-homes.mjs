@@ -560,6 +560,9 @@ try {
           archetype: arch,
           facing: facings[i % 4],
           setback_m: 8.5,
+          // catalog.html defaults this on every real row; a probe that omits
+          // it would compute NaN centre and hide the omission.
+          lateral_m: 0,
           path_width_m: 1.2,
           wall_color: "#d8c3a5",
           roof_color: "#b06b49",

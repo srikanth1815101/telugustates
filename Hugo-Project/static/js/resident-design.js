@@ -67,6 +67,9 @@ const num = (a, what, row) => {
           size_m: row?.house?.size_m,
           facing: row?.house?.facing,
           setback_m: row?.house?.setback_m,
+          lateral_m: row?.house?.lateral_m,
+          building: row?.house?.building ?? null,
+          houseKeys: row?.house ? Object.keys(row.house) : null,
         })}]`,
     );
   return n;
@@ -75,7 +78,9 @@ const R = (a, d, what, row) => +num(a, what, row).toFixed(d);
 export function residentDesign(row) {
   const h = row.house,
     i = models.indexOf(h.archetype),
-    [fx, fy] = SIDE[h.facing],
+    [fx, fy] = SIDE[h.facing] ?? [0, -1],
+    x0 = Number.isFinite(fx) ? fx : 0,
+    y0 = Number.isFinite(fy) ? fy : 0,
     w = num(h.size_m?.[0], "size_m width", row),
     d = num(h.size_m?.[1], "size_m depth", row),
     z = ACRE / 2 - num(h.setback_m, "setback_m", row) - d / 2;
@@ -97,10 +102,10 @@ export function residentDesign(row) {
     h.centre = [
       num(row.c?.[0], "cell coordinate", row) +
         0.5 +
-        (fx * z - fy * h.lateral_m) / ACRE,
+        (x0 * z - y0 * num(h.lateral_m, "lateral_m", row)) / ACRE,
       num(row.c?.[1], "cell coordinate", row) +
         0.5 +
-        (fy * z + fx * h.lateral_m) / ACRE,
+        (y0 * z + x0 * num(h.lateral_m, "lateral_m", row)) / ACRE,
     ].map((a) => R(a, 7, "cell coordinate", row));
   h.parts = (footprints[i] || [[0, 0, 1, 1, "body"]]).map(([a, b, c, e, k]) => [
     R(a * w, 3, "footprint width", row),
