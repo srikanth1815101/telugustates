@@ -53,7 +53,21 @@ const num = (a, what, row) => {
   const n = typeof a === "number" ? a : a == null ? NaN : +a;
   if (!Number.isFinite(n))
     throw Error(
-      `House ${row?.u ?? "?"} has a non-numeric ${what}: ${JSON.stringify(a)}`,
+      `House ${row?.u ?? "?"} has a non-numeric ${what}: ${JSON.stringify(a)}` +
+        // The row itself, so a value that only exists in a build we cannot run
+        // locally can still be identified from a CI annotation.
+        ` [row=${JSON.stringify({
+          u: row?.u,
+          d: row?.d,
+          c: row?.c,
+          villageId: row?.villageId,
+          homeLocation: row?.homeLocation,
+          court: row?.court ? Object.keys(row.court) : row?.court ?? null,
+          archetype: row?.house?.archetype,
+          size_m: row?.house?.size_m,
+          facing: row?.house?.facing,
+          setback_m: row?.house?.setback_m,
+        })}]`,
     );
   return n;
 };
