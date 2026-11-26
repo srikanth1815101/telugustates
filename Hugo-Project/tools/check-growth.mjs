@@ -26,10 +26,40 @@ try {
     });
   let count = 0,
     firstId = "";
+  // The last round has to reserve new sites, which only happens in districts
+  // that cannot absorb a house into an existing hamlet. Naming fixed districts
+  // here made this check depend on which districts happened to hold a village
+  // when it was written, so it broke as soon as ordinary onboarding filled
+  // those districts. Pick districts that still have no village at all, which
+  // guarantees the new-site path is exercised whatever the atlas holds.
+  const vacant = (await fs.readdir(path.join(copy, "content/districts")))
+      .filter((f) => f.endsWith(".md"))
+      .map((f) => f.slice(0, -3))
+      .filter((n) => /^\d+$/.test(n))
+      .map(Number)
+      .filter((d) => Number.isInteger(d))
+      // A district forces a new village when it has no hamlet, or when every
+      // hamlet it has is already full. Preferring empty districts keeps the
+      // first case common now; the full-hamlet case keeps this working as the
+      // atlas fills up.
+      .filter((d) => {
+        const own = prior.villages.filter((v) => v.d === d);
+        return (
+          own.length === 0 ||
+          own.every((v) => Object.keys(v.homes).length >= v.capacity)
+        );
+      })
+      .sort((a, b) => a - b)
+      .slice(0, 2);
+  assert.equal(
+    vacant.length,
+    2,
+    "Need two districts without a village to exercise new-site reservation",
+  );
   for (const [districts, addedVillages] of [
     [[32, 32], 0],
     [[32, 32, 32, 32, 32, 32, 32, 32], 0],
-    [[17, 17, 44, 44], 2],
+    [[vacant[0], vacant[0], vacant[1], vacant[1]], 2],
   ]) {
     for (const d of districts) {
       const rawHandle =
