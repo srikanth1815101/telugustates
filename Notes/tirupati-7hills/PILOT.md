@@ -58,13 +58,21 @@ of the manifest, host sources and resources before `aapt2`/`javac` compile them.
 remote release/site metadata file carries the production `appId`, the pilot's `LiveSync` rejects
 them all — so the pilot never overwrites its bundled catalog with production content and never
 prompts to "update" itself into the main app. The workflow copy on this branch builds
-`Telugu-States-Pilot.apk` on `workflow_dispatch`, uploads the `Telugu-States-7Hills-Pilot-APK`
-artifact, commits the APK to this branch (`android/Telugu-States-Pilot.apk`), and keeps the GitHub
-Releases publish step gated to `refs/heads/main`.
+`Telugu-States-Pilot.apk` on `workflow_dispatch` and uploads the `Telugu-States-7Hills-Pilot-APK`
+artifact; the GitHub Releases publish step stays gated to `refs/heads/main`.
 
-To rebuild after changes: `gh workflow run build-android.yml --ref arena/43d521a7-telugustates`,
-then `git pull --ff-only` — the new APK appears at `android/Telugu-States-Pilot.apk`. A copy is
-also served by the preview web root for direct browser download.
+**The APK is never committed to git** (it would blow the workspace download budget). It lives at
+`downloads/Telugu-States-Pilot.apk` (gitignored via the repo-wide `*.apk` rule), with a symlink at
+`Hugo-Project/preview/Telugu-States-Pilot.apk` so the preview web server offers it for download.
+To refresh after changes:
+
+```sh
+gh workflow run build-android.yml --ref arena/43d521a7-telugustates
+gh run download <run-id> -n Telugu-States-7Hills-Pilot-APK -D downloads
+```
+
+If `downloads/` is empty (e.g. after a sandbox reset), rebuild the same way, or copy the APK from
+the GitHub Actions artifact page of the latest "Build offline atlas APK" run on this branch.
 
 ## How to run
 
