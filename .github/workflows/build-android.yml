@@ -158,6 +158,29 @@ jobs:
           compression-level: 0
           if-no-files-found: error
 
+      - name: Attach pilot APK to the pilot-apk prerelease (sandbox pickup)
+        if: github.event_name == 'workflow_dispatch'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          if gh release view pilot-apk --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload pilot-apk \
+              "$RUNNER_TEMP/Telugu-States-Pilot.apk" \
+              "$RUNNER_TEMP/app-version.json" \
+              --repo "$GITHUB_REPOSITORY" --clobber
+          else
+            gh release create pilot-apk \
+              "$RUNNER_TEMP/Telugu-States-Pilot.apk" \
+              "$RUNNER_TEMP/app-version.json" \
+              --repo "$GITHUB_REPOSITORY" \
+              --target "$GITHUB_SHA" \
+              --prerelease \
+              --title "7-Hills Pilot APK (side-by-side test build)" \
+              --notes "Pilot branch test app: package com.csrgo.telugustates.pilot, installs alongside the production Telugu States app. This prerelease is not the production release and never appears as 'latest'."
+          fi
+
       - name: Publish latest APK and release metadata to GitHub Releases
         if: github.ref == 'refs/heads/main' && github.event_name != 'schedule'
         shell: bash
