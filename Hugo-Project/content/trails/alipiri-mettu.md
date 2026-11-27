@@ -4,7 +4,7 @@ id: alipiri-mettu
 goal: lookout
 place: alipiri
 surface: hill
-width_m: 1.15
+width_m: 3.0
 points:
 - - 5015.90
   - 1982.00

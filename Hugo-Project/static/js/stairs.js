@@ -101,7 +101,7 @@ export function stairPlan(path, spec, groundAt) {
 }
 
 const slabMat = () =>
-  new T.MeshLambertMaterial({ color: 0xa39a8b });
+  new T.MeshLambertMaterial({ color: 0xa79470 });
 
 /** Instanced stone slabs for the mettu stairways near the walking focus. */
 export function stairSlabs(s, trails, p) {
@@ -120,22 +120,31 @@ export function stairSlabs(s, trails, p) {
     // polyline's curves never open gaps; the long stone-paved forest walk
     // (tread >= 2.5 m, where real step numbers still advance) renders as
     // continuous flagstones with visible joints.
+    // The real stairways are broad masonry flights (~3 m) built into the
+    // slope; slabs are thick blocks sunk into the carved tread so the hill
+    // reads as rising through them, in warm stone that matches the mud.
     const stepped = near.every((q) => q.tread < 2.5),
-      len = stepped ? 1.45 : 1.03;
-    const geo = new T.BoxGeometry(stepped ? w * 0.94 : w, 0.13, 1),
+      len = stepped ? 1.45 : 1.03,
+      slabW = stepped
+        ? Math.max(2.2, Math.min(3.2, (trail.w || 1.15) * 1.0))
+        : Math.max(1.5, Math.min(2.4, (trail.w || 1.15) * 1.0));
+    const geo = new T.BoxGeometry(slabW, 0.3, 1),
       mat = slabMat(),
       ms = new T.InstancedMesh(geo, mat, near.length);
     for (let i = 0; i < near.length; i++) {
       const q = near[i],
         z = s.ground(q.x, q.y);
-      obj.position.set(...s.xyz(q.x, q.y, z + 0.055));
-      obj.rotation.set(0, q.ang, 0);
+      obj.position.set(...s.xyz(q.x, q.y, z - 0.09));
+      obj.rotation.set(0, q.ang + (((i * 13) % 7) - 3) * 0.011, 0);
       obj.scale.set(1, 1, q.tread * len);
+      ms.setColorAt
+        ? ms.setColorAt(
+            i,
+            new T.Color(0xa79470).offsetHSL(0, 0, (((i * 7) % 11) - 5) * 0.011),
+          )
+        : null;
       obj.updateMatrix();
       ms.setMatrixAt(i, obj.matrix);
-      ms.setColorAt
-        ? ms.setColorAt(i, new T.Color().setScalar(0.92 + ((i * 7) % 11) * 0.014))
-        : null;
     }
     ms.userData = { role: "sopana-steps", disposableMaterial: true };
     group.add(ms);

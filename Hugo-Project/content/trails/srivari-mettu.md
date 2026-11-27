@@ -4,7 +4,7 @@ id: srivari-mettu
 goal: lookout
 place: srivari
 surface: hill
-width_m: 1.15
+width_m: 2.2
 points:
 - - 4895.19
   - 2000.11

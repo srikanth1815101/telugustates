@@ -34,9 +34,12 @@ function toGrid(gx, gy, x, z, sinA, cosA) {
 
 const GRANITE = 0x9a9184,
   STONE = 0x8a8172,
-  DARK = 0x4a443c,
+  DARK = 0x3f3a33,
+  PLASTER = 0xc9b28c,
+  PLINTH = 0x6e5741,
   CREAM = 0xd8ccb2,
   TRIM = 0x8a7f6d,
+  CLAY = 0xa8563e,
   GOLD = 0xdfb05c,
   DEITY = 0x3c3028,
   SAFFRON = 0xe8792a,
@@ -116,30 +119,73 @@ function kalashaRow(g, y, w, count) {
   }
 }
 
-// A gate tower straddling the axis: stone jambs and lintel at ground level,
-// cream storeys above, kalasha row on top. Walkable through the opening.
-function gopuram(g, opening, storeyCount, baseW, topW, height, z) {
-  const jambH = height * 0.34;
+// Classic Dravidian gopuram as in the 1938 Gali Gopuram photographs: a
+// strongly battered pyramid of rectangular courses, each tier a dark stone
+// band between lighter cornices, an arched doorway at the base, and a crown
+// of dome kalasams. The trail passes straight through the arched opening.
+function gopuram(g, opening, tiers, baseW, topW, height, z, baseD = 3.2) {
+  const doorH = height * 0.32;
   for (const side of [-1, 1]) {
-    const jamb = box(1.5, jambH, 2.0, STONE);
-    jamb.position.set(side * (opening / 2 + 0.75), jambH / 2, z);
+    const jamb = box((baseW - opening) / 2, doorH, baseD, DARK);
+    jamb.position.set(side * (opening / 2 + (baseW - opening) / 4), doorH / 2, z);
     g.add(jamb);
   }
-  const lintel = box(baseW, 0.85, 2.0, TRIM);
-  lintel.position.set(0, jambH + 0.42, z);
+  // Arch: lintel plus a recessed semicircle above the opening.
+  const lintel = box(baseW, doorH * 0.22, baseD + 0.2, DARK);
+  lintel.position.set(0, doorH + doorH * 0.11, z);
   g.add(lintel);
-  const tiers = storeyCount,
-    top = storeys(
-      g,
-      baseW,
-      2.6,
-      tiers,
-      (height - jambH - 0.85 - 0.6) / tiers - 0.28,
-      topW,
-      1.4,
-      jambH + 0.85,
-    );
-  kalashaRow(g, top, topW + 0.4, 7);
+  const arch = new T.Mesh(
+    new T.CylinderGeometry(opening / 2, opening / 2, baseD + 0.3, 12, 1, false, 0, Math.PI),
+    mat(DARK),
+  );
+  arch.rotation.set(Math.PI / 2, 0, Math.PI / 2);
+  arch.position.set(0, doorH + doorH * 0.1, z);
+  g.add(arch);
+  // Battered courses: each tier shrinks toward the pyramid silhouette.
+  const bodyTop = height - 1.0,
+    n = Math.max(4, tiers),
+    tierH = (bodyTop - doorH * 1.22) / n;
+  let w = baseW * 0.94,
+    d = baseD,
+    y = doorH * 1.22 + doorH * 0.22;
+  for (let i = 0; i < n; i++) {
+    const f0 = i / n,
+      f1 = (i + 1) / n;
+    const w0 = baseW * 0.94 - (baseW * 0.94 - topW) * f0,
+      w1 = baseW * 0.94 - (baseW * 0.94 - topW) * f1,
+      d0 = baseD - (baseD - topW * 0.55) * f0;
+    // Dark band of the course, slightly sloped silhouette via trapezoid box pair.
+    const band = box((w0 + w1) / 2, tierH * 0.72, (d0 + (d0 - (baseD - topW * 0.55) / n)) / 2, DARK);
+    band.position.set(0, y + tierH * 0.36, z);
+    g.add(band);
+    const cornice = box(w1 + 0.5, tierH * 0.28, d0 + 0.4, CREAM);
+    cornice.position.set(0, y + tierH * 0.86, z);
+    g.add(cornice);
+    // Shrine niche row on the cornice.
+    const niches = Math.max(2, Math.round((w1 - 1) / 0.95));
+    for (let a = 0; a < niches; a++) {
+      const nx = -w1 / 2 + 0.5 + ((w1 - 1) * a) / Math.max(1, niches - 1);
+      const niche = box(0.42, 0.4, 0.22, STONE);
+      niche.position.set(nx, y + tierH * 1.06, z + d0 / 2 + 0.22);
+      g.add(niche);
+      const niche2 = niche.clone();
+      niche2.position.z = z - d0 / 2 - 0.22;
+      g.add(niche2);
+    }
+    y += tierH;
+    w = w1;
+    d = d0 - (baseD - topW * 0.55) / n;
+  }
+  // Crown: oste corbel plus the row of dome kalasams (7 on the real towers).
+  const crown = box(topW + 1.1, 0.5, topW * 0.55 + 0.9, DARK);
+  crown.position.set(0, y + 0.25, z);
+  g.add(crown);
+  const kRow = 7;
+  for (let i = 0; i < kRow; i++) {
+    const k = pot(0.14, 0.42, 8);
+    k.position.set(-topW / 2 + (topW * i) / (kRow - 1), y + 0.72, z);
+    g.add(k);
+  }
 }
 
 // The standing Lord inside the garbhagriha, facing east.
@@ -190,18 +236,24 @@ function templeComplex(s, stop) {
     [WT, 2 * Z, -X, 0],
     [WT, 2 * Z, X, 0],
   ]) {
-    const wall = box(w, WH, d, DARK);
+    const wall = box(w, WH, d, PLASTER);
     wall.position.set(x, WH / 2, zz);
     root.add(wall);
+    const skirt = box(w + 0.12, 0.9, d + 0.12, PLINTH);
+    skirt.position.set(x, 0.45, zz);
+    root.add(skirt);
   }
   for (const side of [-1, 1]) {
-    const seg = box(X - GAP / 2, WH, WT, DARK);
+    const seg = box(X - GAP / 2, WH, WT, PLASTER);
     seg.position.set(side * (GAP / 2 + (X - GAP / 2) / 2), WH / 2, Z);
     root.add(seg);
+    const skirt2 = box(X - GAP / 2 + 0.12, 0.9, WT + 0.12, PLINTH);
+    skirt2.position.set(side * (GAP / 2 + (X - GAP / 2) / 2), 0.45, Z);
+    root.add(skirt2);
   }
 
   // Mahadwaram: the 50 ft five-storey gopuram over the east gate.
-  gopuram(root, GAP, 5, 8.2, 3.4, 15.2, Z);
+  gopuram(root, GAP, 7, 9.2, 4.2, 15.2, Z);
 
   // Sampangi Prakaram (inner wall): 30 x 20 m, east gate 2.4 m.
   const IX = 10,
@@ -215,17 +267,23 @@ function templeComplex(s, stop) {
     [IT, 2 * IZ, -IX, 0],
     [IT, 2 * IZ, IX, 0],
   ]) {
-    const wall = box(w, IH, d, DARK);
+    const wall = box(w, IH, d, PLASTER);
     wall.position.set(x, IH / 2, zz);
     root.add(wall);
+    const skirt3 = box(w + 0.12, 0.85, d + 0.12, PLINTH);
+    skirt3.position.set(x, 0.42, zz);
+    root.add(skirt3);
   }
   for (const side of [-1, 1]) {
-    const seg = box(IX - IGAP / 2, IH, IT, DARK);
+    const seg = box(IX - IGAP / 2, IH, IT, PLASTER);
     seg.position.set(side * (IGAP / 2 + (IX - IGAP / 2) / 2), IH / 2, IZ);
     root.add(seg);
+    const skirt4 = box(IX - IGAP / 2 + 0.12, 0.85, IT + 0.12, PLINTH);
+    skirt4.position.set(side * (IGAP / 2 + (IX - IGAP / 2) / 2), 0.42, IZ);
+    root.add(skirt4);
   }
   // Vendivakili: the three-storey silver-entrance gopuram.
-  gopuram(root, IGAP, 3, 5.6, 2.5, 9.6, IZ);
+  gopuram(root, IGAP, 4, 6.4, 3.0, 9.6, IZ, 2.6);
 
   // Sampangi Pradakshinam fittings: dhwajasthambam, balipeetam, mandapams.
   const dhwajaBase = box(1.1, 0.5, 1.1, GRANITE);
@@ -251,17 +309,31 @@ function templeComplex(s, stop) {
         pillar.position.set(px, 2.1, pz);
         mandapam.add(pillar);
       }
-    const roof = box(5.7, 0.5, 5.7, TRIM);
-    roof.position.y = 3.9;
+    const roof = box(5.7, 0.45, 5.7, CLAY);
+    roof.position.y = 3.95;
     mandapam.add(roof);
+    for (const cx of [-2, 0, 2])
+      for (const cz of [-2, 0, 2]) {
+        const fin = pot(0.14, 0.4, 8);
+        fin.position.set(cx, 4.4, cz);
+        mandapam.add(fin);
+      }
     mandapam.position.set(sx * 6.5, 0, 17.5);
     root.add(mandapam);
   }
 
   // Vimana Pradakshinam paving and the Ananda Nilayam sanctum.
-  const paving = box(13, 0.5, 11, GRANITE);
+  const paving = box(15, 0.5, 12, CREAM);
   paving.position.set(0, 0.25, -8);
   root.add(paving);
+  // Axial dharma path: cream stone under the pilgrim line, from the east
+  // gate through both pradakshinams to the Bangaruvakili.
+  const path1 = box(2.8, 0.42, 11, CREAM);
+  path1.position.set(0, 0.21, 16.6);
+  root.add(path1);
+  const path2 = box(2.4, 0.42, 20, CREAM);
+  path2.position.set(0, 0.21, 4.4);
+  root.add(path2);
   const SZ = -8,
     SW = 6,
     SH = 4.6,
@@ -442,7 +514,8 @@ function galiTower(s, stop) {
     root = new T.Group();
   root.position.set(...s.xyz(gx, gy, z));
   root.rotation.y = stop.yaw || 0;
-  gopuram(root, 3.0, 4, 7.0, 3.0, 13.5, 0);
+  gopuram(root, 3.0, 6, 8.4, 3.6, 13.5, 0, 3.2);
+  root.position.y -= 0.35;
   const sinA = Math.sin(stop.yaw || 0),
     cosA = Math.cos(stop.yaw || 0),
     solids = [];
@@ -469,7 +542,7 @@ function padalaMandapam(s, stop) {
       pillar.position.set(px, 2.5, pz);
       root.add(pillar);
     }
-  const roof = box(6.6, 0.6, 6.6, TRIM);
+  const roof = box(6.6, 0.55, 6.6, CLAY);
   roof.position.y = 4.4;
   root.add(roof);
   const k = pot(0.22, 0.8);
