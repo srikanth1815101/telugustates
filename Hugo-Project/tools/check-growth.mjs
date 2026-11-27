@@ -56,40 +56,52 @@ try {
   };
   let count = 0,
     firstId = "";
-  // The last round has to reserve new sites, which only happens in districts
-  // that cannot absorb a house into an existing hamlet. Naming fixed districts
-  // here made this check depend on which districts happened to hold a village
-  // when it was written, so it broke as soon as ordinary onboarding filled
-  // those districts. Pick districts that still have no village at all, which
-  // guarantees the new-site path is exercised whatever the atlas holds.
-  const vacant = (await fs.readdir(path.join(copy, "content/districts")))
+  // The last round has to reserve new sites, which settle.mjs only does when a
+  // district cannot absorb a house into an existing hamlet -- either because it
+  // has none, or because every hamlet it has is full.
+  //
+  // This used to hunt for districts that happened to satisfy that, which broke
+  // the moment ordinary onboarding filled the last one. Waiting for the atlas to
+  // run out of room is not a property worth depending on, so make the condition
+  // true instead: fill every hamlet in two chosen districts, in this throw-away
+  // copy only, then settle there. The source atlas is never touched, and the
+  // new-site path is exercised whatever the real atlas holds.
+  const census = (await fs.readdir(path.join(copy, "content/districts")))
       .filter((f) => f.endsWith(".md"))
       .map((f) => f.slice(0, -3))
       .filter((n) => /^\d+$/.test(n))
       .map(Number)
-      .filter((d) => Number.isInteger(d))
-      // A district forces a new village when it has no hamlet, or when every
-      // hamlet it has is already full. Preferring empty districts keeps the
-      // first case common now; the full-hamlet case keeps this working as the
-      // atlas fills up.
-      .filter((d) => {
-        const own = prior.villages.filter((v) => v.d === d);
-        return (
-          own.length === 0 ||
-          own.every((v) => Object.keys(v.homes).length >= v.capacity)
-        );
-      })
-      .sort((a, b) => a - b)
-      .slice(0, 2);
-  assert.equal(
-    vacant.length,
-    2,
-    "Need two districts without a village to exercise new-site reservation",
+      .filter((d) => Number.isInteger(d) && prior.villages.some((v) => v.d === d))
+      .sort((a, b) => {
+        const own = (d) =>
+          prior.villages.filter((v) => v.d === d).reduce(
+            (n, v) => n + (v.capacity - Object.keys(v.homes).length),
+            0,
+          );
+        // Cheapest to saturate first: fewest free berths left.
+        return own(a) - own(b) || a - b;
+      });
+  assert.ok(
+    census.length >= 2,
+    "Need two districts with hamlets to exercise new-site reservation",
   );
+  const starved = census.slice(0, 2);
+  for (const d of starved)
+    for (const v of prior.villages.filter((v) => v.d === d))
+      v.capacity = Object.keys(v.homes).length;
+  assert(
+    starved.every((d) =>
+      prior.villages
+        .filter((v) => v.d === d)
+        .every((v) => Object.keys(v.homes).length >= v.capacity),
+    ),
+    "Satellites must be full before settling new sites onto them",
+  );
+  await fs.writeFile(ledger, JSON.stringify(prior, null, 2) + "\n");
   for (const [districts, addedVillages] of [
     [[32, 32], 0],
     [[32, 32, 32, 32, 32, 32, 32, 32], 0],
-    [[vacant[0], vacant[0], vacant[1], vacant[1]], 2],
+    [[starved[0], starved[0], starved[1], starved[1]], 2],
   ]) {
     for (const d of districts) {
       const rawHandle =
