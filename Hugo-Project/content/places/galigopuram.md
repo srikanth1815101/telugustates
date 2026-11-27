@@ -5,12 +5,12 @@ place:
   title_te: గాలి గోపురం
   district: Tirupati
   cell: [5002, 1994]
-  point: [5002.3741, 1994.9852]
-  lat: 13.6557759
-  lon: 79.3988442
+  point: [5002.54, 1994.78]
+  lat: 13.6556381
+  lon: 79.3989176
   yaw: 2.0626
   mid_view:
-    point: [5002.3741, 1994.9852]
+    point: [5002.54, 1994.78]
     yaw: 2.0626
     tilt: 0.28
   observations:

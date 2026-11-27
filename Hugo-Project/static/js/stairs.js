@@ -116,13 +116,13 @@ export function stairSlabs(s, trails, p) {
     );
     if (!near.length) continue;
     const w = Math.max(0.9, Math.min(2, trail.w || 1.15));
-    let treadMin = 0.3,
-      treadMax = 0.75;
-    for (const q of near) {
-      treadMin = Math.min(treadMin, q.tread);
-      treadMax = Math.max(treadMax, q.tread);
-    }
-    const geo = new T.BoxGeometry(w, 0.13, 1),
+    // Discrete stairs (tread < 2.5 m) slabs overlap their neighbours so the
+    // polyline's curves never open gaps; the long stone-paved forest walk
+    // (tread >= 2.5 m, where real step numbers still advance) renders as
+    // continuous flagstones with visible joints.
+    const stepped = near.every((q) => q.tread < 2.5),
+      len = stepped ? 1.45 : 1.03;
+    const geo = new T.BoxGeometry(stepped ? w * 0.94 : w, 0.13, 1),
       mat = slabMat(),
       ms = new T.InstancedMesh(geo, mat, near.length);
     for (let i = 0; i < near.length; i++) {
@@ -130,7 +130,7 @@ export function stairSlabs(s, trails, p) {
         z = s.ground(q.x, q.y);
       obj.position.set(...s.xyz(q.x, q.y, z + 0.055));
       obj.rotation.set(0, q.ang, 0);
-      obj.scale.set(1, 1, q.tread);
+      obj.scale.set(1, 1, q.tread * len);
       obj.updateMatrix();
       ms.setMatrixAt(i, obj.matrix);
       ms.setColorAt

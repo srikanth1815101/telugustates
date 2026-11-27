@@ -246,5 +246,19 @@ points:
   - 2023.80
 - - 4905.20
   - 2024.60
+- - 4904.06
+  - 2025.49
+- - 4904.10
+  - 2025.46
+- - 4904.16
+  - 2025.41
+- - 4904.24
+  - 2025.34
+- - 4904.26
+  - 2025.33
+- - 4904.30
+  - 2025.29
+- - 4904.34
+  - 2025.27
 ---
 The 3,550-step pilgrim stairway from Alipiri Padala Mandapam (209 m) to the Tirumala plateau (853 m), traced on the bundled survey terrain. The first stretch follows the covered, lit stairway past the 2,083rd-step Gali Gopuram; the middle walk runs west along the hillside past the Dasavatara statues and Prasanna Anjaneya temple to the Divya Darshan checkpoint; Mokalla Parvatham is the final climb to the last step, after which the route joins the ring road by the GNC gate and enters the temple town.

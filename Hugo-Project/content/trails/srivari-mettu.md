@@ -50,5 +50,27 @@ points:
   - 2023.00
 - - 4904.00
   - 2024.60
+- - 4900.40
+  - 2018.40
+- - 4901.80
+  - 2020.30
+- - 4903.30
+  - 2022.50
+- - 4904.70
+  - 2024.99
+- - 4904.06
+  - 2025.49
+- - 4904.10
+  - 2025.46
+- - 4904.16
+  - 2025.41
+- - 4904.24
+  - 2025.34
+- - 4904.26
+  - 2025.33
+- - 4904.30
+  - 2025.29
+- - 4904.34
+  - 2025.27
 ---
 The shorter, steeper footpath (about 2,388 steps) from the Srivari Mettu entrance above Srinivasa Mangapuram (542 m) straight up the western face of the Tirumala plateau (853 m). The landing-to-landing zigzag follows the natural stair spine of the hill; at the top the route joins the ring road and walks into the temple town.
