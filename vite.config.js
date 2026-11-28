@@ -17,6 +17,10 @@ import { resolve } from "node:path";
 const root = import.meta.dirname;
 
 export default defineConfig({
+  // Relative base: every emitted chunk/asset URL resolves against the
+  // importing module, so dynamic imports land in /dist/ wherever the page
+  // lives (/, /houses/x/, …) instead of the site root.
+  base: "./",
   publicDir: false,
   resolve: {
     alias: {

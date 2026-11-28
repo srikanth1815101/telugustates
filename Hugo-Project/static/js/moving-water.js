@@ -72,7 +72,8 @@ float mwHash(vec2 p){p=fract(p*vec2(127.1,311.7));p+=dot(p,p+45.32);return fract
 float mwNoise(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(mwHash(i),mwHash(i+vec2(1.,0.)),f.x),mix(mwHash(i+vec2(0.,1.)),mwHash(i+vec2(1.,1.)),f.x),f.y);}
 `;
 const fss = {
-  rocks: `float g=sin(v.y*7.-t*vel*5.+1.6*sin(v.x*6.-v.y));float v0=smoothstep(.08,.88,g);float edge=(1.-smoothstep(.43,1.,abs(v.x)));float a=edge*(.26+.62*v0)*min(1.,vel*1.6);vec3 c=mix(vec3(.26,.50,.46),vec3(.89,.95,.88),v0);`,
+  // Assign (do not redeclare) — main() already declares `float a` and `vec3 c`.
+  rocks: `float g=sin(v.y*7.-t*vel*5.+1.6*sin(v.x*6.-v.y));float v0=smoothstep(.08,.88,g);float edge=(1.-smoothstep(.43,1.,abs(v.x)));a=edge*(.26+.62*v0)*min(1.,vel*1.6);c=mix(vec3(.26,.50,.46),vec3(.89,.95,.88),v0);`,
   fall: `
   float veil=step(vel,0.),spd=abs(vel),x=v.x,ax=abs(x);
   if(v.y<0.){
