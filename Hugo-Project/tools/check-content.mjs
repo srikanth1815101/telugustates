@@ -54,6 +54,14 @@ try {
     );
   }
   execFileSync("hugo", ["--source", root, "--destination", tmp, "--minify"]);
+  // One read of the ledger, used both to validate the running balance against
+  // content/resources/*.md and to check what the home page actually prints.
+  const ledger = JSON.parse(
+      await fs.readFile(path.join(root, "data/resource_ledger.json"), "utf8"),
+    ),
+    entries = ledger?.entries ?? [];
+  assert(Array.isArray(entries) && entries.length > 0,
+    "data/resource_ledger.json must list at least one batch");
   const homeHtml = await fs.readFile(path.join(tmp, "index.html"), "utf8");
   const legalHtml = await fs.readFile(
     path.join(tmp, "legal/index.html"),
@@ -79,6 +87,46 @@ try {
       !homeHtml.includes(">02<"),
     "Home page header must show editorial hero card, 1 Home + 1 Acre pillar, treasury resources + 1=1 icon rates without bottom #economy card",
   );
+  // The ledger is collapsed on purpose: only the newest batch may be printed in
+  // the hero, and the rest must arrive through the button so the page does not
+  // grow with every batch. A regression that inlines them all would otherwise
+  // pass silently, because the markup would still be valid.
+  {
+    // Count the inline rows rather than matching date strings: two batches can
+    // share a date, so looking for text would be ambiguous. Exactly one batch
+    // may be printed in the hero, and it must be the newest.
+    const inline = [...homeHtml.matchAll(/class=["']?ledger-date["']?>([^<]+)</g)].map(
+      (m) => m[1],
+    );
+    assert.equal(
+      inline.length,
+      1,
+      `Hero must print exactly one batch inline, found ${inline.length}`,
+    );
+    assert.equal(
+      inline[0],
+      entries[0].date,
+      "The batch printed inline must be the newest one",
+    );
+    assert(
+      /id=["']?ledger-all-btn["'\s>]/.test(homeHtml),
+      "The collapsed ledger needs a button to open the full history",
+    );
+    // The dialog reads its rows from the generated ledger.json, so that file
+    // must exist and carry every batch.
+    const ledgerJson = JSON.parse(
+      await fs.readFile(path.join(tmp, "ledger.json"), "utf8"),
+    );
+    assert.equal(
+      ledgerJson?.entries?.length,
+      entries.length,
+      `ledger.json should hold all ${entries.length} batches`,
+    );
+    assert(
+      entries.every((e, i) => ledgerJson.entries[i].date === e.date),
+      "ledger.json must keep the ledger order, newest first",
+    );
+  }
   assert(
     legalHtml.includes("entertainment") &&
       legalHtml.includes("Non-Political, Non-Religious") &&
@@ -221,12 +269,6 @@ try {
   // and compare against the published totals: a batch that updates one without
   // the other fails here instead of drifting silently.
   {
-    const ledger = JSON.parse(
-        await fs.readFile(path.join(root, "data/resource_ledger.json"), "utf8"),
-      ),
-      entries = ledger?.entries ?? [];
-    assert.ok(Array.isArray(entries) && entries.length > 0,
-      "data/resource_ledger.json must list at least one batch");
     const int = (e, k) => {
       assert(Number.isInteger(e[k]), `Ledger ${e.date} needs an integer ${k}`);
       return e[k];

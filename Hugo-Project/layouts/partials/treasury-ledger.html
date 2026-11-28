@@ -1,72 +1,76 @@
-{{/* Resource ledger: what each batch consumed and what it added, newest first.
-     Rows live in data/resource_ledger.json so the home page, the check and the
-     published balances all read one source. Replaces the old legal strip; the
-     Legal & Disclaimer dialog is still reachable from the footer. */}}
+{{/* Resource ledger, collapsed: only the newest batch is shown in the hero.
+     The full history lives in data/resource_ledger.json, is embedded below for
+     the dialog, and is opened by the button rather than printed inline. The
+     old legal strip this replaced is still covered by the footer disclaimer and
+     the header's Legal & Credits dialog. */}}
 {{- $entries := slice -}}
 {{/* index, not dot notation: data keys must not depend on how Hugo
      normalises the file name. */}}
 {{- with index .Site.Data "resource_ledger" -}}
   {{- with .entries -}}{{- $entries = . -}}{{- end -}}
 {{- end -}}
-<div class="map-read hero-foot ledger-foot" id="treasury-ledger" aria-label="Resource transactions">
+<div class="map-read hero-foot ledger-foot" id="treasury-ledger">
   <div class="ledger-head">
     <span class="ledger-title">{{ partial "i.html" "currency" }}<b data-msg="home.ledgerTitle">Resource transactions</b></span>
-    <small class="ledger-sub" data-msg="home.ledgerSub">Consumed and added, per batch</small>
-  </div>
-  {{- if $entries }}
-  <ol class="ledger-rows">
-    {{- range $entries }}
-    {{- $e := . -}}
-    {{- /* JSON numbers arrive as floats; force integers so the comparisons and
-           the printed values are unambiguous. */}}
-    {{- $food := int (or (index $e "food") 0) -}}
-    {{- $currency := int (or (index $e "currency") 0) -}}
-    {{- $gold := int (or (index $e "gold") 0) -}}
-    {{- $houses := int (or (index $e "houses_added") 0) -}}
-    {{- $likes := int (or (index $e "likes") 0) -}}
-    {{- $comments := int (or (index $e "comments") 0) -}}
-    {{- $shares := int (or (index $e "shares") 0) -}}
-    <li class="ledger-row">
-      <div class="ledger-what">
-        <b class="ledger-date">{{ .date }}</b>
-        <small class="ledger-note">{{ if $houses }}{{ $houses }} <span data-msg="home.ledgerHouses">houses</span> · {{ end }}{{ .note }}</small>
-      </div>
-      <div class="ledger-deltas">
-        {{- if $likes }}
-        <span class="ledger-chip chip-food" title="{{ $likes }} likes became food">
-          <i class="ledger-ico">{{ partial "i.html" "like" }}</i><b>{{ $likes }}</b>
-        </span>
-        {{- end }}
-        {{- if $comments }}
-        <span class="ledger-chip chip-currency" title="{{ $comments }} comments became currency">
-          <i class="ledger-ico">{{ partial "i.html" "comment" }}</i><b>{{ $comments }}</b>
-        </span>
-        {{- end }}
-        {{- if $shares }}
-        <span class="ledger-chip chip-gold" title="{{ $shares }} shares became gold">
-          <i class="ledger-ico">{{ partial "i.html" "share" }}</i><b>{{ $shares }}</b>
-        </span>
-        {{- end }}
-      </div>
-      <div class="ledger-net">
-        {{- if $food }}
-        <span class="ledger-delta {{ if lt $food 0 }}neg{{ else }}pos{{ end }}">
-          <i class="ledger-ico">{{ partial "i.html" "food" }}</i><b>{{ if gt $food 0 }}+{{ end }}{{ $food }}</b>
-        </span>
-        {{- end }}
-        {{- if $currency }}
-        <span class="ledger-delta {{ if lt $currency 0 }}neg{{ else }}pos{{ end }}">
-          <i class="ledger-ico">{{ partial "i.html" "currency" }}</i><b>{{ if gt $currency 0 }}+{{ end }}{{ $currency }}</b>
-        </span>
-        {{- end }}
-        {{- if $gold }}
-        <span class="ledger-delta {{ if lt $gold 0 }}neg{{ else }}pos{{ end }}">
-          <i class="ledger-ico">{{ partial "i.html" "gold" }}</i><b>{{ if gt $gold 0 }}+{{ end }}{{ $gold }}</b>
-        </span>
-        {{- end }}
-      </div>
-    </li>
+    {{- if gt (len $entries) 1 }}
+    <button type="button" class="notes-btn ledger-all-btn" id="ledger-all-btn" data-msg="home.ledgerSeeAll">See all transactions</button>
     {{- end }}
-  </ol>
+  </div>
+  {{- with index $entries 0 }}
+  {{- /* JSON numbers arrive as floats; force integers so the comparisons and
+         the printed values are unambiguous. */}}
+  {{- $food := int (or (index . "food") 0) -}}
+  {{- $currency := int (or (index . "currency") 0) -}}
+  {{- $gold := int (or (index . "gold") 0) -}}
+  {{- $houses := int (or (index . "houses_added") 0) -}}
+  {{- $likes := int (or (index . "likes") 0) -}}
+  {{- $comments := int (or (index . "comments") 0) -}}
+  {{- $shares := int (or (index . "shares") 0) -}}
+  <div class="ledger-latest">
+    <div class="ledger-what">
+      <span class="ledger-badge" data-msg="home.ledgerLatest">LATEST</span>
+      <b class="ledger-date">{{ index . "date" }}</b>
+      <small class="ledger-note">{{ if $houses }}{{ $houses }} <span data-msg="home.ledgerHouses">houses</span> · {{ end }}{{ index . "note" }}</small>
+    </div>
+    <div class="ledger-deltas">
+      {{- if $likes }}
+      <span class="ledger-chip chip-food" title="{{ $likes }} likes became food">
+        <i class="ledger-ico">{{ partial "i.html" "like" }}</i><b>{{ $likes }}</b>
+      </span>
+      {{- end }}
+      {{- if $comments }}
+      <span class="ledger-chip chip-currency" title="{{ $comments }} comments became currency">
+        <i class="ledger-ico">{{ partial "i.html" "comment" }}</i><b>{{ $comments }}</b>
+      </span>
+      {{- end }}
+      {{- if $shares }}
+      <span class="ledger-chip chip-gold" title="{{ $shares }} shares became gold">
+        <i class="ledger-ico">{{ partial "i.html" "share" }}</i><b>{{ $shares }}</b>
+      </span>
+      {{- end }}
+    </div>
+    <div class="ledger-net">
+      {{- if $food }}
+      <span class="ledger-delta {{ if lt $food 0 }}neg{{ else }}pos{{ end }}">
+        <i class="ledger-ico">{{ partial "i.html" "food" }}</i><b>{{ if gt $food 0 }}+{{ end }}{{ $food }}</b>
+      </span>
+      {{- end }}
+      {{- if $currency }}
+      <span class="ledger-delta {{ if lt $currency 0 }}neg{{ else }}pos{{ end }}">
+        <i class="ledger-ico">{{ partial "i.html" "currency" }}</i><b>{{ if gt $currency 0 }}+{{ end }}{{ $currency }}</b>
+      </span>
+      {{- end }}
+      {{- if $gold }}
+      <span class="ledger-delta {{ if lt $gold 0 }}neg{{ else }}pos{{ end }}">
+        <i class="ledger-ico">{{ partial "i.html" "gold" }}</i><b>{{ if gt $gold 0 }}+{{ end }}{{ $gold }}</b>
+      </span>
+      {{- end }}
+    </div>
+  </div>
+  {{- end }}
+  {{- if gt (len $entries) 1 }}
+  {{- /* The dialog fetches the rows from the generated ledger.json rather than
+         embedding them: a JSON <script> inside HTML drags in escaping rules
+         that would break the moment a note contained & or <. */}}
   {{- end }}
 </div>
