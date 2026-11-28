@@ -2235,6 +2235,21 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
       lifeRef._grade = (gx, gz) => S.gradeAt(gx, gz);
       lifeRef._face = (gx, gz) => (S.floor ? S.floor(gx, gz) : S.sample(gx, gz));
       lifeRef._motor = () => ({ x: motor.x, y: motor.y });
+      lifeRef._scene = (mx, my, h) =>
+        S.worldXYZ(mx, my, h ?? S.ground(mx, my));
+      lifeRef._sceneHeight = (sx, sz) =>
+        S.ground(S.atlas.x + sx / U, S.atlas.y - sz / U);
+      lifeRef._scene3d = scene;
+      lifeRef._T = T;
+      if (lifeRef._vehicle) {
+        lifeRef._vehicle.rig.step(h);
+        lifeRef._vehicle.phys.step(h);
+        const vp = lifeRef._vehicle.rig.position();
+        const vr = lifeRef._vehicle.rig.rotation();
+        if (lifeRef._vehicle.mesh)
+          lifeRef._vehicle.mesh.position.set(vp.x, vp.y, vp.z),
+            lifeRef._vehicle.mesh.quaternion.set(vr.x, vr.y, vr.z, vr.w);
+      }
       if (lifeRef.farming) {
         lifeRef.farming.tick(h);
         const act = (farmAct = lifeRef.farming.actionAt(motor.x, motor.y));
@@ -4157,6 +4172,16 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
       host.hidden = true;
       document.body.classList.remove("walking");
       delete window.atlasWalk;
+      if (globalThis.atlasLife?._vehicle) {
+        const { rig, mesh } = globalThis.atlasLife._vehicle;
+        rig?.dispose();
+        if (mesh) {
+          scene.remove(mesh);
+          mesh.geometry?.dispose();
+          mesh.material?.dispose();
+        }
+        globalThis.atlasLife._vehicle = null;
+      }
       delete globalThis.atlasLife;
     },
   };
@@ -4236,7 +4261,7 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
           const [
             { createBus },
             { createInventory },
-            { createQuests },
+            { createQuests, INTRO_QUESTS },
             { createEconomy },
             { createFarming },
             { createFishing },
@@ -4256,7 +4281,8 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
           ]);
           this.bus = createBus();
           this.inventory = createInventory();
-          this.quests = createQuests([]);
+          this.quests = createQuests(INTRO_QUESTS, { autoStart: true });
+          this._questDefs = INTRO_QUESTS;
           this.economy = createEconomy();
           const ev = (t, p) => this.event(t, p);
           this.farming = createFarming({ onEvent: ev });
@@ -4277,11 +4303,76 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
         })();
       return this._p;
     },
-    /** Publish a life event: advances quests, then fans out on the bus. */
+    /** Publish a life event: advances quests (paying rewards), then fans out. */
     async event(type, payload) {
       const s = await this.ready();
-      s.quests.feed(type, payload);
+      const changed = s.quests.feed(type, payload);
+      for (const id of changed) {
+        const def = (this._questDefs ?? []).find((d) => d.id === id);
+        if (def?.reward?.rupees)
+          s.economy.credit(def.reward.rupees, `quest:${id}`);
+        this._toast?.(`Quest complete: ${def?.title ?? id}`);
+      }
       return s.bus.emit(type, payload);
+    },
+    /** Cast into the water under the walker; returns the cast result. */
+    async fish() {
+      const s = await this.ready();
+      const at = s._motor?.() ?? { x: 0, y: 0 };
+      const face = s._face?.(at.x, at.y) ?? { depth: 0 };
+      return s.fishing.cast(face.depth ?? 0);
+    },
+    /** Reel during a bite window; a catch lands in the inventory. */
+    async reelFish() {
+      const s = await this.ready();
+      const r = s.fishing.reel();
+      if (r.ok) s.inventory.add(r.kind, 1);
+      return r;
+    },
+    /** Spawn a pen of livestock around the given motor-space box. */
+    async spawnLivestock(pen) {
+      const s = await this.ready();
+      const { createLivestock } = await import("./livestock.js");
+      s.livestock = createLivestock({ pen, onEvent: (t, p) => this.event(t, p) });
+      return s.livestock;
+    },
+    /** Spawn a Rapier buggy at the walker (own physics world + box mesh). */
+    async spawnVehicle() {
+      const s = await this.ready();
+      if (this._vehicle) return this._vehicle;
+      const [phys, veh] = await Promise.all([
+        import("./physics.js"),
+        import("./vehicles.js"),
+      ]);
+      const at = s._motor?.() ?? { x: 0, y: 0 };
+      const scene = s._scene?.(at.x, at.y) ?? [0, 0, 0];
+      const p = await phys.AtlasPhysics.create({
+        heightAt: (x, z) => (s._sceneHeight ? s._sceneHeight(x, z) : 0),
+      });
+      p.syncTiles(scene[0], scene[2]);
+      p.flush();
+      const rig = veh.createVehicleRig({
+        R: p.R,
+        world: p.world,
+        x: scene[0],
+        y: scene[1],
+        z: scene[2],
+      });
+      let mesh = null;
+      if (this._scene3d && this._T) {
+        mesh = new this._T.Mesh(
+          new this._T.BoxGeometry(1.7, 0.6, 3.4),
+          new this._T.MeshLambertMaterial({ color: 0xb5462f }),
+        );
+        mesh.castShadow = true;
+        this._scene3d.add(mesh);
+      }
+      this._vehicle = { rig, phys: p, mesh };
+      return this._vehicle;
+    },
+    /** Set driving inputs for the spawned vehicle (all optional). */
+    drive(throttle = 0, steer = 0, brake = 0) {
+      this._vehicle?.rig.input(throttle, steer, brake);
     },
     /** Persist life state to IndexedDB (slot "default"). */
     async persist() {
@@ -4336,6 +4427,7 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
     },
   };
   globalThis.atlasLife = atlasLife;
+  atlasLife._toast = toast;
   // Boot the singletons right away (pure data — no renderer dependency).
   atlasLife.ready().catch((e) => console.warn("[atlasLife]", e));
   return api;

@@ -12,9 +12,50 @@
  * }} QuestDef
  */
 
+/** The opening quest chain — fired by real slice events (sow/water/…). */
+export const INTRO_QUESTS = /** @type {QuestDef[]} */ ([
+  {
+    id: "first-sowing",
+    title: "First sowing",
+    steps: [{ id: "sow1", type: "sow" }],
+    reward: { rupees: 20 },
+  },
+  {
+    id: "water-wise",
+    title: "Water wise",
+    steps: [{ id: "w1", type: "water", need: 3 }],
+    reward: { rupees: 15 },
+  },
+  {
+    id: "first-harvest",
+    title: "First harvest",
+    steps: [{ id: "h1", type: "harvest" }],
+    reward: { rupees: 50 },
+  },
+  {
+    id: "market-day",
+    title: "Market day",
+    steps: [{ id: "t1", type: "trade" }],
+    reward: { rupees: 25 },
+  },
+  {
+    id: "angler",
+    title: "Angler",
+    steps: [{ id: "c1", type: "catch" }],
+    reward: { rupees: 30 },
+  },
+  {
+    id: "hand-reared",
+    title: "Hand reared",
+    steps: [{ id: "p1", type: "produce" }],
+    reward: { rupees: 20 },
+  },
+]);
+
 /**
  * @param {QuestDef[]} defs
- * @param {{onState?: (questId: string, state: string) => void}} [opts]
+ * @param {{onState?: (questId: string, state: string) => void,
+ *          autoStart?: boolean}} [opts]
  */
 export function createQuests(defs, opts = {}) {
   /** @type {Map<string, QuestDef>} */
@@ -27,6 +68,10 @@ export function createQuests(defs, opts = {}) {
     if (rec) rec.state = s;
     opts.onState?.(id, s);
   };
+
+  // Opening chains are active from boot; feed() only advances active quests.
+  if (opts.autoStart)
+    for (const d of defs) state.set(d.id, { state: "active", step: 0, progress: 0 });
 
   return {
     /** Begin a quest at step 0. */

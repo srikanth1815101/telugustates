@@ -203,9 +203,13 @@ await step("3D world boots and streams a patch", async () => {
     const L = window.atlasLife;
     await L.event("test-event", { n: 1 });
     const sow = L.farming.sow(120, 120, "vegetable");
+    // Let the async quest-reward microtask settle before reading status.
+    await new Promise((r) => setTimeout(r, 60));
     const st = await L.status();
     await L.persist();
     const restored = await L.restore();
+    const veh = await L.spawnVehicle();
+    const vp = veh.rig.position();
     return {
       st,
       bus: !!L.bus,
@@ -213,10 +217,17 @@ await step("3D world boots and streams a patch", async () => {
       plots: L.farming.all().length,
       btn: !!document.getElementById("farm-act"),
       restored,
+      quest: st.quests["first-sowing"]?.state ?? null,
+      vehicle: {
+        finite: Number.isFinite(vp.x) && Number.isFinite(vp.y) && Number.isFinite(vp.z),
+        mesh: !!veh.mesh,
+        wheels: veh.rig.controller.numWheels(),
+      },
       slices: {
         fishing: typeof L.fishing.cast === "function",
         building: typeof L.building.place === "function",
         trading: typeof L.trading.offers === "function",
+        livestock: typeof L.spawnLivestock === "function",
       },
     };
   });
@@ -224,10 +235,16 @@ await step("3D world boots and streams a patch", async () => {
   if (!life.sow || life.plots < 1) throw new Error("farming sow failed");
   if (!life.btn) throw new Error("farm action button missing");
   if (!life.restored) throw new Error("save roundtrip failed");
-  if (!life.slices.fishing || !life.slices.building || !life.slices.trading)
+  if (life.quest !== "complete")
+    throw new Error(`first-sowing quest not completed by sow (${life.quest})`);
+  if (!life.vehicle.finite || !life.vehicle.mesh || life.vehicle.wheels !== 4)
+    throw new Error(`vehicle spawn failed: ${JSON.stringify(life.vehicle)}`);
+  if (!life.slices.fishing || !life.slices.building || !life.slices.trading || !life.slices.livestock)
     throw new Error(`slice APIs missing: ${JSON.stringify(life.slices)}`);
   note(`atlasLife ready: ${JSON.stringify(life.st)}`);
-  note(`slices ok, plots=${life.plots}, button=${life.btn}, save roundtrip ok`);
+  note(
+    `slices ok, plots=${life.plots}, button=${life.btn}, quest=${life.quest}, vehicle wheels=${life.vehicle.wheels}, save roundtrip ok`,
+  );
 });
 
 await step("perf harness samples all three spots", async () => {
