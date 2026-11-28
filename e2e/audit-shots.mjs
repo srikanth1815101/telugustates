@@ -151,15 +151,19 @@ await page.evaluate(() => {
     sel.dispatchEvent(new Event("change", { bubbles: true }));
   }
 });
+// Capture the in-game title screen before dismissing it.
+await shot("00-title-game-412x915.png");
+await page.evaluate(() => document.getElementById("title-play")?.click());
+await sleep(700);
 await sleep(2500); // let the first frames settle
 await shot("02-hud-walk-412x915.png");
 
-// --- 3. Life panel ---------------------------------------------------------
-console.log("\n== life panel");
-await page.click("#life-menu-btn");
+// --- 3. Market screen ------------------------------------------------------
+console.log("\n== market screen");
+await page.evaluate(() => window.__gameUI?.openScreen("market"));
 await sleep(600);
-await shot("03-life-panel-412x915.png");
-await page.click("#life-menu-close");
+await shot("03-market-screen-412x915.png");
+await page.evaluate(() => window.__gameUI?.closeScreens());
 await sleep(300);
 
 // --- 4. sowing context (plot at the walker's feet) -------------------------
@@ -184,16 +188,17 @@ await shot("05-vehicle-spawn-412x915.png");
 
 // --- 6. riding (drive engaged) --------------------------------------------
 console.log("\n== vehicle ride");
-await page.click("#life-menu-btn");
+await page.evaluate(() => window.__gameUI?.openScreen("build"));
 await sleep(500);
-const driveBtn = await page.$('#life-menu [data-drive]');
+const driveBtn = await page.$('#game-screens [data-drive]');
 if (driveBtn) {
   await driveBtn.click();
-  await page.click("#life-menu-close");
+  await page.evaluate(() => window.__gameUI?.closeScreens());
   await sleep(2000); // rider snap + a couple of frames
   await shot("06-vehicle-rider-412x915.png");
 } else {
-  problems.push("drive button not found in life menu");
+  problems.push("drive button not found in build screen");
+  await page.evaluate(() => window.__gameUI?.closeScreens());
 }
 
 // --- 7. 360x800 portrait ---------------------------------------------------
@@ -219,9 +224,9 @@ await page.setViewport({
 });
 await sleep(1200);
 await shot("08-hud-landscape-800x360.png");
-await page.click("#life-menu-btn");
+await page.evaluate(() => window.__gameUI?.openScreen("inventory"));
 await sleep(600);
-await shot("09-life-panel-landscape-800x360.png");
+await shot("09-inventory-landscape-800x360.png");
 
 await browser.close();
 server.close();

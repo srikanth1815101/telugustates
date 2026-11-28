@@ -23,17 +23,21 @@ title) cannot be captured — their absence *is* a finding.
 
 | File | Viewport | Shows |
 |---|---|---|
+| `00-title-game-412x915.png` | 412×915 | **In-game title screen** (Phase 1): logo, loading bar, Play, settings/credits/language over the live world |
 | `01-title-home-412x915.png` | 412×915 | Home page: header nav, hero card, treasury metrics, regional map teaser — a **website**, not a title screen |
-| `02-hud-walk-412x915.png` | 412×915 | Walking HUD in daylight: 3 round nav buttons, square minimap, text time/weather chip, joystick, 4 round action buttons |
-| `03-life-panel-412x915.png` | 412×915 | "Life" modal — route market text list, build chips, livestock, buggy, quests |
-| `04-sow-context-412x915.png` | 412×915 | After sowing ragi at the feet: contextual button shows crop stage (`🌿 0/4`) |
+| `02-hud-walk-412x915.png` | 412×915 | Walking HUD in daylight: rupee/day status chips, sprite-icon hotbar, right-side action stack, joystick |
+| `03-market-screen-412x915.png` | 412×915 | **Market screen** (Phase 1): tab bar, item icons, trend arrows, Go actions (baseline `9b25ab3` had the cream "Life" modal) |
+| `04-sow-context-412x915.png` | 412×915 | After sowing: contextual button `Growing 0/4`, quest-complete banner + toast, rupee counter tween |
 | `05-vehicle-spawn-412x915.png` | 412×915 | Buggy spawned — **landed upside-down**, wheels pointing up, player beside it |
 | `06-vehicle-rider-412x915.png` | 412×915 | Drive mode engaged: player **standing on the chassis** (no seat, no sit pose) |
-| `07-hud-walk-360x800.png` | 360×800 | Same HUD at the smaller portrait size (rider still engaged — see §3.B) |
-| `08-hud-landscape-800x360.png` | 800×360 | Landscape HUD |
-| `09-life-panel-landscape-800x360.png` | 800×360 | Life panel in landscape — panel is a right-side card, world washed out behind |
-| *phone* `Screenshot_…19-15-30` | real device | Buggy wedged into a signboard, wheels oversized and detached, player standing on it in a **jump pose** (arms up) |
-| *phone* `Screenshot_…19-16-18` | real device | Life panel as the player sees it: cream modal, monospace headers, `Go` buttons, no art |
+| `07-hud-walk-360x800.png` | 360×800 | Same HUD at the smaller portrait size |
+| `08-hud-landscape-800x360.png` | 800×360 | Landscape HUD (hotbar shifts left of the action row) |
+| `09-inventory-landscape-800x360.png` | 800×360 | Inventory grid in landscape |
+| *phone* `phone-01-buggy.jpg` | real device | Buggy wedged into a signboard, wheels oversized and detached, player standing on it in a **jump pose** (arms up) |
+| *phone* `phone-02-life-panel.jpg` | real device | Life panel as the player saw it before Phase 1: cream modal, monospace headers, `Go` buttons, no art |
+
+> Baseline (pre-Phase-1) copies of `02`/`03`/`09` are in git history at
+> commit `9b25ab3`.
 
 Emoji note: `02`/`04` show **blank glyph slots** where icons should be — the
 HUD relies on emoji (`🎒 🌱 🏃`), which headless Chromium (and some Android

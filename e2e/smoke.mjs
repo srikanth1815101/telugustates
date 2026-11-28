@@ -196,6 +196,35 @@ await step("3D world boots and streams a patch", async () => {
   const frames1 = await page.evaluate(() => window.atlasWalk.snapshot().frames);
   if (frames1 <= frames0) throw new Error("frame counter not advancing");
   note(`frames advanced ${frames0} → ${frames1}`);
+  // Phase 1: the title screen must show over the live world, then dismiss.
+  const title0 = await page.evaluate(() => {
+    const el = document.getElementById("title-screen");
+    return { present: !!el, visible: !!el && !el.hidden };
+  });
+  if (!title0.present || !title0.visible)
+    throw new Error(`title screen missing: ${JSON.stringify(title0)}`);
+  await page.waitForFunction(
+    () => {
+      const p = document.getElementById("title-play");
+      return !!p && !p.disabled;
+    },
+    { timeout: 15_000, polling: 200 },
+  );
+  await page.evaluate(() => document.getElementById("title-play")?.click());
+  await new Promise((r) => setTimeout(r, 600));
+  const titleGone = await page.evaluate(() => {
+    const el = document.getElementById("title-screen");
+    const play = document.getElementById("title-play");
+    return {
+      gone: el?.hidden === true,
+      cls: el?.className ?? null,
+      disabled: play?.disabled ?? null,
+      hasUI: typeof window.__gameUI,
+    };
+  });
+  if (!titleGone.gone)
+    throw new Error(`title screen did not dismiss on Play: ${JSON.stringify(titleGone)}`);
+  note("title screen shows and dismisses");
   // Phase 4/5: the life-sim namespace must boot, sow, persist and restore.
   const life = await page.evaluate(async () => {
     if (typeof window.atlasLife?.ready !== "function") return null;
@@ -211,18 +240,29 @@ await step("3D world boots and streams a patch", async () => {
     const veh = await L.spawnVehicle();
     const vp = veh.rig.position();
 
-    // --- visible UI: life menu ---
-    const menuBtn = document.getElementById("life-menu-btn");
-    menuBtn?.click();
-    await new Promise((r) => setTimeout(r, 500));
-    const menu = document.getElementById("life-menu");
-    const menuState = {
-      btn: !!menuBtn,
-      open: !!menu && !menu.hidden,
-      offers: menu?.querySelectorAll("#life-trade .life-row").length ?? 0,
-      builds: menu?.querySelectorAll("[data-build]").length ?? 0,
-      quests: menu?.querySelectorAll("#life-quests .life-q").length ?? 0,
+    // --- visible UI: tabbed game screens (Phase 1) ---
+    const invBtn = document.getElementById("inv-btn");
+    invBtn?.click();
+    await new Promise((r) => setTimeout(r, 150));
+    const screensEl = document.getElementById("game-screens");
+    const hub = {
+      btn: !!invBtn,
+      open: !!screensEl && !screensEl.hidden,
+      offers: 0,
+      builds: 0,
+      quests: 0,
     };
+    screensEl?.querySelector('[data-tab="market"]')?.click();
+    await new Promise((r) => setTimeout(r, 250));
+    hub.offers = screensEl?.querySelectorAll(".gs-offer").length ?? 0;
+    screensEl?.querySelector('[data-tab="build"]')?.click();
+    await new Promise((r) => setTimeout(r, 150));
+    hub.builds = screensEl?.querySelectorAll("[data-build]").length ?? 0;
+    screensEl?.querySelector('[data-tab="journal"]')?.click();
+    await new Promise((r) => setTimeout(r, 300));
+    hub.quests = screensEl?.querySelectorAll(".gs-quest").length ?? 0;
+    document.getElementById("gs-close")?.click();
+    await new Promise((r) => setTimeout(r, 80));
 
     // --- structures + livestock render as meshes ---
     const at = L._motor?.() ?? { x: 0, y: 0 };
@@ -259,7 +299,7 @@ await step("3D world boots and streams a patch", async () => {
         mesh: !!veh.mesh,
         wheels: veh.rig.controller.numWheels(),
       },
-      menuState,
+      menuState: hub,
       place: place.ok,
       cast: cast.ok ? "ok" : cast.why,
       meshes: { before: meshesBefore, after: meshesAfter },
@@ -269,7 +309,7 @@ await step("3D world boots and streams a patch", async () => {
         placed: L.building?.placed?.().length ?? -1,
         animals: L.livestock?.animals?.length ?? -1,
         frames: window.atlasWalk?.snapshot?.().frames ?? -1,
-        menuOpen: !document.getElementById("life-menu")?.hidden,
+        menuOpen: !document.getElementById("game-screens")?.hidden,
       },
       slices: {
         fishing: typeof L.fishing.cast === "function",
@@ -279,9 +319,12 @@ await step("3D world boots and streams a patch", async () => {
       },
     };
   });
-  // The menu was opened inside evaluate and stays open — capture it.
+  // Open the market screen for the visual record, then close it again.
+  await page.evaluate(() => window.__gameUI?.openScreen("market"));
+  await new Promise((r) => setTimeout(r, 350));
   await mkdir(artifacts, { recursive: true });
-  await page.screenshot({ path: join(artifacts, "life-menu.png") });
+  await page.screenshot({ path: join(artifacts, "game-screens.png") });
+  await page.evaluate(() => window.__gameUI?.closeScreens());
   if (!life?.bus) throw new Error("atlasLife missing or not ready");
   if (!life.sow || life.plots < 1) throw new Error("farming sow failed");
   if (!life.btn) throw new Error("farm action button missing");
@@ -291,9 +334,11 @@ await step("3D world boots and streams a patch", async () => {
   if (!life.vehicle.finite || !life.vehicle.mesh || life.vehicle.wheels !== 4)
     throw new Error(`vehicle spawn failed: ${JSON.stringify(life.vehicle)}`);
   if (!life.menuState.btn || !life.menuState.open)
-    throw new Error(`life menu missing: ${JSON.stringify(life.menuState)}`);
+    throw new Error(`game screens missing: ${JSON.stringify(life.menuState)}`);
   if (life.menuState.offers < 1 || life.menuState.builds < 5)
-    throw new Error(`life menu empty: ${JSON.stringify(life.menuState)}`);
+    throw new Error(`game screens empty: ${JSON.stringify(life.menuState)}`);
+  if (life.menuState.quests < 1)
+    throw new Error(`journal empty: ${JSON.stringify(life.menuState)}`);
   if (!life.place) throw new Error("structure placement failed");
   if (life.meshes.after < life.meshes.before + 7)
     throw new Error(
@@ -305,7 +350,7 @@ await step("3D world boots and streams a patch", async () => {
     throw new Error(`slice APIs missing: ${JSON.stringify(life.slices)}`);
   note(`atlasLife ready: ${JSON.stringify(life.st)}`);
   note(
-    `menu offers=${life.menuState.offers} builds=${life.menuState.builds} · place=${life.place} cast=${life.cast} · meshes ${life.meshes.before}→${life.meshes.after} · quest=${life.quest} vehicle=${life.vehicle.wheels}w`,
+    `screens offers=${life.menuState.offers} builds=${life.menuState.builds} quests=${life.menuState.quests} · place=${life.place} cast=${life.cast} · meshes ${life.meshes.before}→${life.meshes.after} · quest=${life.quest} vehicle=${life.vehicle.wheels}w`,
   );
 });
 

@@ -18,6 +18,8 @@
     "test": "npm run typecheck && npm run test:checks && npm run test:e2e"
   },
   "devDependencies": {
+    "@iconify-json/game-icons": "^1.2.4",
+    "@iconify-json/lucide": "^1.2.161",
     "@sparticuz/chromium": "^158.0.0",
     "fake-indexeddb": "^6.2.8",
     "puppeteer-core": "^25.19.0",
