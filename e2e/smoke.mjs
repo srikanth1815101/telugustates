@@ -296,6 +296,80 @@ await step("Rapier physics streams heightfields behind ?physics=1", async () => 
   if (!p.grounded) throw new Error("character not grounded on heightfield");
 });
 
+await step("post stack renders behind ?fx=1", async () => {
+  // Fresh direct boot first (no fx) — proves the plain path at this coord.
+  await page.goto(`${base}/#/at/14.2184118,78.4068883`, {
+    waitUntil: "domcontentloaded",
+    timeout: 60_000,
+  });
+  await page.waitForFunction(
+    () => window.atlasWalk?.snapshot()?.ready,
+    { timeout: 180_000, polling: 500 },
+  );
+  await page.waitForFunction(
+    (n) => window.atlasWalk.snapshot().frames > n + 10,
+    { timeout: 180_000, polling: 250 },
+    0,
+  );
+  const direct = await page.evaluate(() => {
+    const c = document.querySelector(".flight-deck canvas");
+    return {
+      snap: window.atlasWalk.snapshot(),
+      canvas: c ? [c.width, c.height] : null,
+      fx: window.__atlasFx,
+    };
+  });
+  note(
+    `direct: fx=${direct.fx} canvas=${direct.canvas} draws=${direct.snap.drawCalls} tris=${direct.snap.triangles} ll=${direct.snap.ll?.map((n) => +n.toFixed(3))}`,
+  );
+  await mkdir(artifacts, { recursive: true });
+  await page.screenshot({ path: join(artifacts, "fx-direct-boot.png") });
+
+  // Now the same boot with the composer forced on.
+  await page.goto(`${base}/?fx=1#/at/14.2184118,78.4068883`, {
+    waitUntil: "domcontentloaded",
+    timeout: 60_000,
+  });
+  await page.waitForFunction(
+    () => window.atlasWalk?.snapshot()?.ready,
+    { timeout: 180_000, polling: 500 },
+  );
+  await page.waitForFunction(
+    () => window.__atlasFx === "composer",
+    { timeout: 120_000, polling: 500 },
+  );
+  const frames0 = await page.evaluate(() => window.atlasWalk.snapshot().frames);
+  await page.waitForFunction(
+    (n) => window.atlasWalk.snapshot().frames > n + 12,
+    { timeout: 180_000, polling: 250 },
+    frames0,
+  );
+  const info = await page.evaluate(() => {
+    const deck = document.querySelector(".flight-deck");
+    const c = deck?.querySelector("canvas");
+    return {
+      fx: window.__atlasFx,
+      dbg: window.__atlasFxDebug,
+      snap: window.atlasWalk.snapshot(),
+      deck: deck ? [deck.clientWidth, deck.clientHeight] : null,
+      canvas: c
+        ? [c.width, c.height, c.clientWidth, c.clientHeight, c.isConnected]
+        : null,
+      hidden: document.hidden,
+    };
+  });
+  note(
+    `composer passes=${info.dbg?.passes} buf=${info.dbg?.buf} size=${info.dbg?.size} canvas=${info.dbg?.canvas} deck=${info.deck} domCanvas=${info.canvas} hidden=${info.hidden} tris=${info.snap.triangles} ll=${info.snap.ll?.map((n) => +n.toFixed(3))}`,
+  );
+  if (info.fx !== "composer") throw new Error(`fx mode regressed to ${info.fx}`);
+  if (info.dbg?.canvas?.[0] < 300)
+    throw new Error(`canvas backing too small: ${info.dbg?.canvas}`);
+  if (info.dbg?.buf?.[0] < 300)
+    throw new Error(`composer buffer too small: ${info.dbg?.buf}`);
+  await page.screenshot({ path: join(artifacts, "fx-village.png") });
+  note(`composer active through ${frames0}→+12 frames; saved fx-village.png`);
+});
+
 await step("no external network calls", async () => {
   // The only allowed exception: a pre-existing optional update check that the
   // Android wrapper documents; it must not break the page either way.

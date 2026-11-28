@@ -79,6 +79,12 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
   // authoritative). physSample is refreshed every ground() so streaming
   // always reads the live district surface even if L.s changes.
   const wantPhysics = /[?&]physics=1(?:&|$)/.test(location.search);
+  // Phase 3: opt-in post stack (bloom + ACES + SMAA). Built lazily; only
+  // used on tier 2 with the saver off, or whenever ?fx=1 is present.
+  const wantFx = /[?&]fx=1(?:&|$)/.test(location.search);
+  let postfx = null,
+    postfxP = null;
+  const fbSize = new T.Vector2();
   let physics = null,
     physicsP = null,
     physicsPrev = null,
@@ -382,6 +388,7 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
     if (size === lastSize) return;
     lastSize = size;
     renderer.setDrawingBufferSize(w, h, ratio);
+    postfx?.syncSize(w, h, Math.round(w * ratio), Math.round(h * ratio));
     cam.aspect = w / h;
     cam.updateProjectionMatrix();
     const bb = a.project.bbox_wgs84;
@@ -3252,7 +3259,38 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
       lastLabels = now;
     }
     if (now - lastHud > (mode === "ground" ? 180 : 240)) hud(now);
-    renderer.render(scene, cam);
+    // Phase 3 render path: composer when enabled, direct otherwise.
+    const fxWant =
+      postfx && (wantFx || (gov.tier === 2 && !prefs.saver && !reduced));
+    if (fxWant) {
+      renderer.getDrawingBufferSize(fbSize);
+      const bufX = fbSize.x,
+        bufY = fbSize.y;
+      renderer.getSize(fbSize);
+      postfx.syncSize(fbSize.x, fbSize.y, bufX, bufY);
+      postfx.render(dt);
+      globalThis.__atlasFx = "composer";
+    } else {
+      renderer.render(scene, cam);
+      globalThis.__atlasFx = postfx
+        ? "direct"
+        : wantFx
+          ? "loading"
+          : "off";
+    }
+    if (
+      (wantFx || (gov.tier === 2 && !prefs.saver && !reduced)) &&
+      !postfx &&
+      !postfxP
+    )
+      postfxP = import("./postfx.js")
+        .then((m) => {
+          postfx = m.createPostfx(renderer, scene, cam);
+          return postfx;
+        })
+        .catch((e) => {
+          globalThis.__atlasFx = "error:" + String(e).slice(0, 120);
+        });
     if (mode === "ground" && L && L.cover?.last) L.groundDrawn = true;
     fr++;
     elapsed += dt;
