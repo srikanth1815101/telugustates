@@ -27,6 +27,7 @@ const checks = [
   ["check-water", false],
   ["check-littoral", false],
   ["check-scene-contact", false],
+  ["check-systems", false],
 ];
 
 const results = [];

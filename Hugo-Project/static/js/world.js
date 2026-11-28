@@ -17,7 +17,9 @@ import { dev } from "./edition.js";
 import { Tread } from "./tread.js";
 import { yards, wayside, restStone } from "./timber-yard.js";
 import { PocketMap } from "./pocket-map.js";
-import { readPosition, writePosition } from "./position-book.js";
+import { writePosition } from "./position-book.js";
+import { loadPrefs, savePrefs } from "./field-prefs.js";
+import { SimClock } from "./sim-clock.js";
 import { dampGround } from "./regional-weather.js";
 import { RunoffWindow } from "./rain-ground.js";
 import { calendar, windowLight, disciplinedClock } from "./world-calendar.js";
@@ -67,61 +69,11 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
   const wallClock = disciplinedClock();
   let calendarAt = Date.now(),
     weatherCell = "";
-  const prefs = {
-    third: true,
-    relief: 2,
-    season: "auto",
-    weather: "auto",
-    reduceFlash: true,
-    time: "shared4",
-    hour: 12,
-    quality: "auto",
-    life: false,
-    motion: false,
-    walker: "woman",
-    left: false,
-    hideMini: false,
-    hideCompact: false,
-    invert: false,
-    recenter: true,
-    haptics: false,
-    saver: false,
-    gain: 1,
-  };
-  try {
-    const p = JSON.parse(localStorage.getItem("atlas-field-v5") || "{}");
-    for (const [k, set] of Object.entries({
-      walker: ["woman", "man"],
-      weather: ["auto", "Clear", "Cloudy", "Light rain", "Rain", "Heavy rain"],
-      season: ["auto", "retreat", "monsoon", "winter", "summer"],
-      time: ["shared4", "shared2", "shared6", "golden", "day", "dusk", "live"],
-      quality: ["auto", "low", "medium", "high"],
-    }))
-      if (set.includes(p[k])) prefs[k] = p[k];
-    if (typeof p.third !== "boolean") {
-      const old = readPosition(a);
-      if (typeof old?.third === "boolean") prefs.third = old.third;
-    }
-    prefs.life = p.life === true;
-    for (const k of [
-      "third",
-      "hideMini",
-      "hideCompact",
-      "invert",
-      "recenter",
-      "haptics",
-      "saver",
-      "motion",
-      "reduceFlash",
-    ])
-      if (typeof p[k] === "boolean") prefs[k] = p[k];
-    if (Number.isFinite(p.gain)) prefs.gain = clamp(p.gain, 0.4, 2.2);
-  } catch {}
-  const save = () => {
-    try {
-      localStorage.setItem("atlas-field-v5", JSON.stringify(prefs));
-    } catch {}
-  };
+  // Phase 1 split: preferences live in field-prefs.js; the motor and future
+  // systems tick through a shared fixed-step clock (1/120 s).
+  const prefs = loadPrefs(a);
+  const save = () => savePrefs(prefs);
+  const simClock = new SimClock();
   const [stops, worldConfig, naturalRoutes, walkArt] = await Promise.all([
     get(dev ? "ecology/stops.json" : "living/public/places.json"),
     get("living/world.json"),
@@ -2319,15 +2271,20 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
       Math.abs(yaw - motor.yaw) > 0.002
     )
       yaw = turn(yaw, motor.yaw, 1 - Math.exp(-h * 0.91));
-    const m = motor.advance(
-      h,
-      r * Math.cos(yaw) - f * Math.sin(yaw),
-      f * Math.cos(yaw) + r * Math.sin(yaw),
-      rate,
-      S,
-      pass,
-      walker.H,
-    );
+    // Fixed 1/120 s slices: the render rate can never stretch a motor tick,
+    // and the summed travel is what the pose/audio consume (Phase 1).
+    let m = 0;
+    simClock.advance(h, (sdt) => {
+      m += motor.advance(
+        sdt,
+        r * Math.cos(yaw) - f * Math.sin(yaw),
+        f * Math.cos(yaw) + r * Math.sin(yaw),
+        rate,
+        S,
+        pass,
+        walker.H,
+      );
+    });
     // Physics is substepped; the 62-joint palette only needs uploading for actual drawn frames.
     const ma = S.worldXYZ(motor.x, motor.y, motor.root),
       curvature =

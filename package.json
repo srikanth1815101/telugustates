@@ -19,8 +19,17 @@
   },
   "devDependencies": {
     "@sparticuz/chromium": "^158.0.0",
+    "fake-indexeddb": "^6.2.8",
     "puppeteer-core": "^25.19.0",
     "typescript": "^7.0.2",
     "vite": "^8.4.0"
+  },
+  "dependencies": {
+    "@dimforge/rapier3d-compat": "^0.21.0",
+    "bitecs": "^0.4.0",
+    "idb": "^8.0.4",
+    "postprocessing": "^6.39.6",
+    "three-mesh-bvh": "^0.10.0",
+    "yuka": "^0.7.8"
   }
 }

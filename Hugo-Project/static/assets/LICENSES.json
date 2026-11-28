@@ -1180,6 +1180,60 @@
    "license": "CC0-1.0",
    "inputSHA256": "28f99f536a0772d80052f03bcb22c9ed8fd7c6e4db7f2e8356efcf26a8e24f01",
    "sha256": "cfc0f87ea0124aa7f8251e34ae34e9fa644186d3fd236702e6c79d146b6170fc"
+  },
+  {
+   "file": "vendor/rapier.mjs",
+   "name": "Rapier physics engine (compat build, wasm inlined)",
+   "author": "Dimforge",
+   "source": "https://github.com/dimforge/rapier (npm @dimforge/rapier3d-compat 0.21.0)",
+   "license": "Apache-2.0 OR MIT",
+   "sha256": "02dc6a4e2fffc013bab08fbb44fa68f501d8303615e9afe4c7d89ad4eedda0d0",
+   "verified_on": "2026-11-28"
+  },
+  {
+   "file": "vendor/three-mesh-bvh.module.js",
+   "name": "three-mesh-bvh",
+   "author": "gkjohnson",
+   "source": "https://github.com/gkjohnson/three-mesh-bvh (npm three-mesh-bvh 0.10.0)",
+   "license": "MIT",
+   "sha256": "94a43ecdff9273da14b855a7f985d2ec03de9eb12c770946512e765b2a049bbf",
+   "verified_on": "2026-11-28"
+  },
+  {
+   "file": "vendor/bitecs.min.mjs",
+   "name": "bitECS",
+   "author": "NateTheGreatt",
+   "source": "https://github.com/NateTheGreatt/bitECS (npm bitecs 0.4.0)",
+   "license": "MIT",
+   "sha256": "0dc3062c5414eb75980cc750d97d0663f5d5e8ab91dd58b5a556937949ad5f4b",
+   "verified_on": "2026-11-28"
+  },
+  {
+   "file": "vendor/idb.mjs",
+   "name": "idb (IndexedDB promises)",
+   "author": "Jake Archibald",
+   "source": "https://github.com/jakearchibald/idb (npm idb 8.0.4)",
+   "license": "ISC",
+   "sha256": "e01b45d2e088a7197e8b41ba9b51a0876969da67cc08e6efbc3d5d7ab6ac836c",
+   "verified_on": "2026-11-28"
+  },
+  {
+   "file": "vendor/yuka.module.js",
+   "name": "Yuka AI",
+   "author": "Marco Fugate (Mugen87)",
+   "source": "https://github.com/Mugen87/yuka (npm yuka 0.7.8)",
+   "license": "MIT",
+   "sha256": "9b0c24534a47f2e1c9549a63a5e00a850577e22fe8d18dbc7a532008a027cb89",
+   "verified_on": "2026-11-28"
+  },
+  {
+   "file": "vendor/postprocessing.module.js",
+   "name": "postprocessing",
+   "author": "vanruesc",
+   "source": "https://github.com/pmndrs/postprocessing (npm postprocessing 6.39.6)",
+   "license": "MIT",
+   "sha256": "2f9eb56edeae8da295c776d5e7884e0cabac60a8c47453042453ab95442b3687",
+   "verified_on": "2026-11-28"
   }
  ]
 }
