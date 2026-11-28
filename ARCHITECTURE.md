@@ -56,7 +56,7 @@ static/js/world.js  expedition()     ← the entire 3D world (~4 000 lines)
    `static/frozen/TILE-FORMAT.md`); checks pin 1 193 terrain hashes.
 6. **Checks must pass:** the 17 `tools/check-*.mjs` listed in §5.
 
-## 3. `static/js/` — file catalogue (81 files)
+## 3. `static/js/` — file catalogue (99 files — pre-upgrade list; §9 adds the rest)
 
 ### Entry, shell and data plumbing
 
@@ -291,14 +291,76 @@ Run it once on a mid-range phone (tier 1) and once on a desktop (tier 2);
 keep both JSON reports as the Phase 0 baseline. The harness adds no network
 requests, no storage writes, and does nothing without `?perf=1`.
 
-## 8. Known constraints for upcoming phases
+## 8. Known constraints (updated by the Phase 1–5 upgrade)
 
-* `world.js` is ~4 000 lines: split it **gradually** (renderer/input/camera/
-  streaming/HUD/save/loop), re-running all 17 checks after every split.
-* No bundler yet: introducing Vite must keep the no-CDN, no-runtime-network
-  guarantee and emit into Hugo's `static/`.
-* Physics is hand-rolled today (`walk-motor.js` + `contacts.js`); a physics
-  engine (Rapier, WASM) must reproduce the existing feel — keep a toggle and
-  `check-motion/stones/swim` as the acceptance gate.
-* Resident IDs, public URLs and the save format are frozen: ask the owner
-  before changing any of them.
+* `world.js` (~4 300 lines) is split **partially**: `field-prefs.js`,
+  `sim-clock.js` and the life-sim namespace moved out; renderer/input/
+  camera/streaming remain. Re-run `tools/run-all.mjs` (now **21 checks**)
+  after every further split.
+* ~~No bundler~~ **Vite is in place** — see §9. The no-CDN, no-runtime-network
+  guarantee still holds (enforced by `e2e/smoke.mjs`).
+* Physics is dual-path: the certified hand-rolled walker stays authoritative
+  (`check-motion/stones/swim` gate); Rapier runs behind `?physics=1` and
+  powers vehicles. Keep both green.
+* Resident IDs, public URLs and the save format remain frozen: ask the owner
+  before changing any of them. The Phase 4 IndexedDB slot store is an
+  **additive** store, not a change to the existing localStorage format.
+
+## 9. Phase 1–5 upgrade (2026-11-28)
+
+Everything below landed on `arena/40b813ab-telugustates` in continuous
+commits; every step was gated by the full check suite + headless-browser e2e.
+
+### Build & deploy
+* **Vite 8** bundles `static/js` → `static/dist` (`base:"./"`, `publicDir:false`,
+  depth-1 chunks so `grid.js`'s `new URL("../", import.meta.url)` still hits
+  the site root; `entryFileNames:"entry.js"` for the dual-path template).
+  `baseof.html` loads `/dist/entry.js` when present, else `/js/entry.js`.
+* **Netlify**: `netlify.toml` (`npm ci && npm run build`, publish
+  `Hugo-Project/public`, Node 22, Hugo 0.147.8). GitHub workflows run the
+  Vite build before Hugo/APK.
+* **Importmap** `{ "three": "/vendor/three.module.min.js" }` in `baseof.html`
+  so unbundled pages share one THREE instance with vendored libs.
+
+### Engine libraries (all vendored into `static/vendor/`, LICENSES.json)
+three r187 (esbuild-minified module+core), `@dimforge/rapier3d-compat` 0.21
+(wasm inlined — offline), `three-mesh-bvh` 0.10, `bitecs` 0.4, `idb` 8,
+`yuka` 0.7.8, `postprocessing` 6.39. **WebGPU was evaluated and rejected**:
+the custom GLSL stack would need a full TSL port and Android-WebView WebGPU
+support is not reliable; WebGL2 remains the renderer.
+
+### New modules (`static/js`, 81 → 99 files)
+| Module | Role |
+|---|---|
+| `field-prefs.js` | prefs load/save/validate (extracted from world.js) |
+| `sim-clock.js` | shared fixed 1/120 s accumulator (capped catch-up) |
+| `ecs.js` | bitecs world for dynamic entities (crops, props, …) |
+| `physics.js` | Rapier: streamed 1 km² heightfields + kinematic capsule (`?physics=1`) |
+| `raycast.js` | three-mesh-bvh first-hit queries (placement/LOS) |
+| `postfx.js` | RenderPass → Bloom → ACES → SMAA, tier-2 gated / `?fx=1` |
+| `save.js` | IndexedDB slots + JSON export/import (additive store) |
+| `inventory.js` `interact.js` `quests.js` `economy.js` | bag, bus, FSM, seeded prices |
+| `ai.js` | yuka steering agents (seek/wander/flee) |
+| `farming.js` | ECS plots, water-gated growth, deterministic yields |
+| `fishing.js` | cast→bite→reel FSM, seeded catch table |
+| `vehicles.js` | Rapier ray-cast buggy (throttle/steer/brake) |
+| `livestock.js` | pen-clamped agents, flee, timed produce |
+| `building.js` | slope/overlap/cost-validated snap placement |
+| `trading.js` | deterministic daily route offers over the economy |
+
+`window.atlasLife` (world.js) wires them: `ready/event/persist/restore/
+export/import/status`, `fish/reelFish`, `spawnLivestock`, `spawnVehicle/
+drive`, plus the contextual 🌱/💧/🌾 button in the pace panel and the
+`INTRO_QUESTS` reward chain (events → quests → `economy.credit`).
+
+### Checks & gates (17 → **21** + e2e)
+`check-systems` (clock determinism, ECS, inventory, bus, quest FSM, economy,
+yuka, fake-indexeddb saves) · `check-physics` (heightfield streaming,
+character controller, wall/ramp, BVH) · `check-slices` (all six feature
+slices) · `check-budget` (eager JS ≤ 1.2 MB gzip — currently **394.7 kB**;
+vendor ≤ 9 MB). `run-all.mjs` spawns everything.
+
+`e2e/smoke.mjs` (headless Chromium/SwiftShader): home board, WebGL2, world
+streaming, 3-spot perf harness + screenshots, life-sim boot (sow → quest
+reward ₹520 → save roundtrip → vehicle), `?physics=1` heightfields,
+`?fx=1` composer — **zero console errors, zero 404s, zero external requests**.
