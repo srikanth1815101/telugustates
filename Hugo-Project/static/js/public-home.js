@@ -524,6 +524,112 @@ async function showDialog(rawKey) {
 window.addEventListener("languagechange-atlas", () => {
   if (dlg?.open && activeDialogTab) showDialog(activeDialogTab);
 });
+/* Full transaction history. The hero shows only the newest batch, so the rest
+   are rendered here into the shared dialog, which already scrolls. */
+async function showLedger(button) {
+  if (!dlg) return;
+  let rows = [];
+  try {
+    const res = await fetch(url("ledger.json"));
+    if (!res.ok) throw Error(String(res.status));
+    rows = (await res.json())?.entries ?? [];
+  } catch {
+    if (button) button.disabled = false;
+    return;
+  }
+  if (!rows.length) {
+    if (button) button.disabled = false;
+    return;
+  }
+  const num = new Intl.NumberFormat(document.documentElement.lang);
+  const signed = (n) => (n > 0 ? "+" : n < 0 ? "−" : "") + num.format(Math.abs(n));
+  const icon = (name) =>
+    `<svg class="ico" aria-hidden="true"><use href="#i-${name}"></use></svg>`;
+
+  const body = $("#dialog-body");
+  body.replaceChildren();
+
+  const h = document.createElement("h2");
+  h.textContent = msg("home.ledgerTitle");
+  const lead = document.createElement("p");
+  lead.className = "doc-lead";
+  lead.textContent = msg("home.ledgerPopupLead");
+  body.append(h, lead);
+
+  const list = document.createElement("ol");
+  list.className = "ledger-pop-list";
+  for (const e of rows) {
+    const li = document.createElement("li");
+    li.className = "ledger-pop-row";
+
+    const head = document.createElement("div");
+    head.className = "ledger-pop-head";
+    const date = document.createElement("b");
+    date.textContent = e.date;
+    head.append(date);
+    if (e.houses_added) {
+      const houses = document.createElement("small");
+      houses.textContent = `${num.format(e.houses_added)} ${msg("home.ledgerHouses")}`;
+      head.append(houses);
+    }
+    li.append(head);
+
+    // What the batch earned, then what it consumed or added.
+    const chips = document.createElement("div");
+    chips.className = "ledger-pop-chips";
+    for (const [key, field, copy] of [
+      ["like", "likes", "home.ledgerLikesEarned"],
+      ["comment", "comments", "home.ledgerCommentsEarned"],
+      ["share", "shares", "home.ledgerSharesEarned"],
+    ]) {
+      if (!e[field]) continue;
+      const c = document.createElement("span");
+      c.className = "ledger-chip";
+      c.title = msg(copy, { n: num.format(e[field]) });
+      c.innerHTML = `<i class="ledger-ico">${icon(key)}</i><b>${num.format(e[field])}</b>`;
+      chips.append(c);
+    }
+    li.append(chips);
+
+    const net = document.createElement("div");
+    net.className = "ledger-pop-net";
+    for (const [key, field] of [
+      ["food", "food"],
+      ["currency", "currency"],
+      ["gold", "gold"],
+    ]) {
+      if (!e[field]) continue;
+      const d = document.createElement("span");
+      d.className = "ledger-delta " + (e[field] < 0 ? "neg" : "pos");
+      d.innerHTML = `<i class="ledger-ico">${icon(key)}</i><b>${signed(e[field])}</b>`;
+      net.append(d);
+    }
+    li.append(net);
+
+    if (e.note) {
+      const note = document.createElement("small");
+      note.className = "ledger-pop-note";
+      note.textContent = e.note;
+      li.append(note);
+    }
+    list.append(li);
+  }
+  body.append(list);
+
+  dlg.showModal();
+  body.parentElement?.scrollTo?.({ top: 0 });
+}
+const ledgerBtn = $("#ledger-all-btn");
+if (ledgerBtn)
+  ledgerBtn.onclick = () => {
+    // Fetch once per click, but never leave the button looking stuck if the
+    // request fails: it is the only way into the history.
+    ledgerBtn.disabled = true;
+    showLedger(ledgerBtn).finally(() => {
+      ledgerBtn.disabled = false;
+    });
+  };
+
 document.addEventListener("click", (e) => {
   const action = e.target.closest("[data-open]")?.dataset.open;
   if (action) showDialog(action);

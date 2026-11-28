@@ -1,0 +1,5 @@
+{{- $entries := slice -}}
+{{- with index .Site.Data "resource_ledger" -}}
+  {{- with .entries -}}{{- $entries = . -}}{{- end -}}
+{{- end -}}
+{{- dict "entries" $entries | jsonify -}}

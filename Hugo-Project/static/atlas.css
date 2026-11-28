@@ -2971,25 +2971,19 @@ html[lang="te"] .eyebrow {
   height: 14px;
   stroke-width: 1.9;
 }
-.ledger-sub {
-  font: 640 10px/1.2 var(--mono);
-  color: #5a7358;
+/* Collapsed ledger: one batch in the hero, the rest behind the dialog button. */
+.ledger-all-btn {
+  flex: 0 0 auto;
   white-space: nowrap;
 }
-.ledger-rows {
-  list-style: none;
-  margin: 0;
-  padding: 0 12px 12px;
-  display: grid;
-  gap: 5px;
-}
-.ledger-row {
+.ledger-latest {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   grid-template-areas: "what net" "deltas net";
   align-items: center;
   gap: 2px 10px;
-  padding: 7px 9px;
+  margin: 0 12px 12px;
+  padding: 8px 10px;
   background: #fcfdf7;
   border: 1px solid #dde6d6;
   border-radius: 9px;
@@ -2998,14 +2992,25 @@ html[lang="te"] .eyebrow {
   grid-area: what;
   min-width: 0;
 }
+.ledger-badge {
+  display: inline-block;
+  margin-right: 6px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: #e8f0d8;
+  color: #3f6a3a;
+  font: 780 8.5px/1.5 var(--mono);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  vertical-align: 1px;
+}
 .ledger-date {
   font: 760 11px/1.2 var(--mono);
   color: #1a4129;
-  margin-right: 6px;
 }
 .ledger-note {
   display: block;
-  margin-top: 2px;
+  margin-top: 3px;
   font: 520 10.5px/1.35 var(--body);
   color: #5d7358;
 }
@@ -3014,7 +3019,7 @@ html[lang="te"] .eyebrow {
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
-  margin-top: 3px;
+  margin-top: 4px;
 }
 .ledger-chip {
   display: inline-flex;
@@ -3058,9 +3063,54 @@ html[lang="te"] .eyebrow {
   height: 11px;
   stroke-width: 2;
 }
+
+/* Full history, rendered into the shared dialog (which already scrolls). */
+.ledger-pop-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+.ledger-pop-row {
+  display: grid;
+  gap: 4px;
+  padding: 9px 11px;
+  background: #fcfdf7;
+  border: 1px solid #dde6d6;
+  border-radius: 10px;
+}
+.ledger-pop-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.ledger-pop-head b {
+  font: 760 12px/1.2 var(--mono);
+  color: #1a4129;
+}
+.ledger-pop-head small {
+  font: 620 10.5px/1.2 var(--body);
+  color: #5d7358;
+}
+.ledger-pop-chips,
+.ledger-pop-net {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.ledger-pop-net .ledger-delta {
+  padding: 2px 7px;
+  border-radius: 999px;
+  border: 1px solid currentcolor;
+  font-size: 10.5px;
+}
+.ledger-pop-note {
+  font: 500 10.5px/1.4 var(--body);
+  color: #5d7358;
+}
 @media (max-width: 560px) {
-  .ledger-head { padding: 10px 14px 7px; }
-  .ledger-rows { padding: 0 8px 10px; }
-  .ledger-row { padding: 7px 8px; }
-  .ledger-sub { display: none; }
+  .ledger-head { padding: 10px 14px 7px; gap: 8px; }
+  .ledger-latest { margin: 0 8px 10px; padding: 7px 8px; }
+    .ledger-all-btn { font-size: 11px; padding: 4px 9px; }
 }
