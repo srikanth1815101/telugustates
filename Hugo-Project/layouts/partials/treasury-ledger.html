@@ -5,7 +5,7 @@
 {{- $entries := slice -}}
 {{/* index, not dot notation: data keys must not depend on how Hugo
      normalises the file name. */}}
-{{- with index site.Data "resource_ledger" -}}
+{{- with index .Site.Data "resource_ledger" -}}
   {{- with .entries -}}{{- $entries = . -}}{{- end -}}
 {{- end -}}
 <div class="map-read hero-foot ledger-foot" id="treasury-ledger" aria-label="Resource transactions">
