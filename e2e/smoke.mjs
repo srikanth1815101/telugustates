@@ -246,6 +246,13 @@ await step("3D world boots and streams a patch", async () => {
     const restored = await L.restore();
     const veh = await L.spawnVehicle();
     const vp = veh.rig.position();
+    // Phase 3: enter → seated on the chassis → step out beside it.
+    const ride = {
+      entered: L.enterVehicle(),
+      driving: L._drive === true,
+      exited: L.exitVehicle(),
+      afterExit: L._drive === false,
+    };
 
     // --- visible UI: tabbed game screens (Phase 1) ---
     const invBtn = document.getElementById("inv-btn");
@@ -305,6 +312,7 @@ await step("3D world boots and streams a patch", async () => {
         finite: Number.isFinite(vp.x) && Number.isFinite(vp.y) && Number.isFinite(vp.z),
         mesh: !!veh.mesh,
         wheels: veh.rig.controller.numWheels(),
+        ride,
       },
       menuState: hub,
       place: place.ok,
@@ -340,6 +348,9 @@ await step("3D world boots and streams a patch", async () => {
     throw new Error(`first-sowing quest not completed by sow (${life.quest})`);
   if (!life.vehicle.finite || !life.vehicle.mesh || life.vehicle.wheels !== 4)
     throw new Error(`vehicle spawn failed: ${JSON.stringify(life.vehicle)}`);
+  const ride = life.vehicle.ride;
+  if (!ride.entered || !ride.driving || !ride.exited || !ride.afterExit)
+    throw new Error(`vehicle enter/exit failed: ${JSON.stringify(ride)}`);
   if (!life.menuState.btn || !life.menuState.open)
     throw new Error(`game screens missing: ${JSON.stringify(life.menuState)}`);
   if (life.menuState.offers < 1 || life.menuState.builds < 5)

@@ -74,6 +74,7 @@ code: en
  "game.herdCount": "{n} animals",
  "game.herdSub": "In your pen",
  "game.hopped": "Hopped out",
+ "game.tooFar": "Too far — walk closer to the buggy",
  "game.loading": "Loading the village…",
  "game.noQuests": "Nothing to show yet.",
  "game.oAt": "@ ₹{price}",

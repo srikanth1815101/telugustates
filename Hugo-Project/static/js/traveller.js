@@ -87,6 +87,7 @@ export function traveller(style = "woman") {
     look = 0,
     idleTime = 0,
     reduced = true,
+    sit = 0,
   }) {
     const rest =
       !swim && vel < 0.012 && air < 0.002 && landAge > 0.24 && launchAge > 0.17;
@@ -170,6 +171,10 @@ export function traveller(style = "woman") {
       b.position.x += sway;
       b.position.y -= (0.024 + 0.004 * slow) * settle;
     }
+    // Seated (driving): sink the hips to the seat height. Bone positions
+    // are re-sampled from the clip every frame, so this is safe to apply
+    // per call; the ground-contact drop below is bypassed.
+    if (sit > 0) for (const b of bones) b.position.y -= 0.3 * sit;
     let drop = 0;
     for (let i = 0; i < 2; i++) {
       const f = legs[i],
@@ -268,8 +273,25 @@ export function traveller(style = "woman") {
       f.plant = plant;
       f.loc = loc;
     }
-    drop = Math.max(-0.24, drop) * landW;
+    drop = sit > 0 ? 0 : Math.max(-0.24, drop) * landW;
     if (drop) for (const b of bones) b.position.y += drop;
+    if (sit > 0) {
+      // Reach both feet forward onto the floorboard; the two-bone solve
+      // below bends the knees into a natural seated line.
+      for (let i = 0; i < 2; i++) {
+        const f = legs[i];
+        const hip = bones[f.ix[0]];
+        f.target.set(
+          hip.position.x + (i === 0 ? -0.1 : 0.1),
+          Math.max(hip.position.y - 0.58, hip.position.y - f.L2 - 0.05),
+          hip.position.z + 0.4,
+        );
+        f.plant = false;
+        f.anchor = null;
+        f.release = 0;
+        f.shift.set(0, 0, 0);
+      }
+    }
     for (const f of legs) {
       const [u, l, k] = f.ix,
         [hip, knee, foot] = [bones[u], bones[l], bones[k]],

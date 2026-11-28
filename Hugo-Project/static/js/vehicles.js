@@ -14,10 +14,10 @@ export function createVehicleRig(opts) {
       .setTranslation(opts.x ?? 0, (opts.y ?? 0) + 0.9, opts.z ?? 0)
       .setRotation(quatFromYaw(R, opts.yaw ?? 0))
       .setLinearDamping(0.4)
-      .setAngularDamping(1.2),
+      .setAngularDamping(2.0),
   );
   world.createCollider(
-    R.ColliderDesc.cuboid(0.85, 0.3, 1.7).setDensity(0.9).setFriction(1.1),
+    R.ColliderDesc.cuboid(0.95, 0.3, 1.7).setDensity(0.9).setFriction(1.1),
     chassis,
   );
   const v = world.createVehicleController(chassis);
@@ -60,7 +60,8 @@ export function createVehicleRig(opts) {
       v.setWheelSteering(1, steer * 0.42);
       for (let i = 0; i < 4; i++) {
         v.setWheelEngineForce(i, i < 2 ? engine * 0.5 : engine * 0.5);
-        v.setWheelBrake(i, brake * 8 + (throttle === 0 ? 0.6 : 0));
+        // Idle hold is strong enough to park on a hillside.
+      v.setWheelBrake(i, brake * 8 + (throttle === 0 ? 6 : 0));
       }
       v.updateVehicle(dt);
     },

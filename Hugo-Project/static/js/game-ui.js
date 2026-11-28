@@ -436,7 +436,8 @@ export function initGameUI(host) {
         toast(t("game.buggyReady"), "buggy");
         await L.persist();
       } else if (btn.dataset.drive != null) {
-        L._drive = !L._drive;
+        if (L._drive) L.exitVehicle?.();
+        else if (!L.enterVehicle?.()) return toast(t("game.tooFar"));
         toast(L._drive ? t("game.driving") : t("game.hopped"), "buggy");
       } else return;
       renderBody();
@@ -459,6 +460,7 @@ export function initGameUI(host) {
   // ---- contextual action button rendering --------------------------------
   const farmBtn = /** @type {HTMLElement|null} */ ($("#farm-act"));
   const modeIcon = {
+    drive: "buggy",
     sow: "sow",
     water: "water",
     harvest: "harvest",

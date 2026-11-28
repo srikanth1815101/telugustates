@@ -2191,6 +2191,57 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
   // Wheel-spin accumulator for the buggy visuals — outside ground() so it
   // survives the per-frame call.
   let vehicleSpin = 0;
+  // Engine note (WebAudio, synthesised — no asset, no network) + dust
+  // puff pool for the wheels.
+  let engine = null,
+    dustClock = 0;
+  const dust = [];
+  let dustIx = 0;
+  function engineAudio() {
+    if (engine !== null) return engine;
+    try {
+      const Ctx = window.AudioContext || window.webkitAudioContext;
+      const ctx = new Ctx();
+      const osc = ctx.createOscillator();
+      osc.type = "sawtooth";
+      osc.frequency.value = 54;
+      const lp = ctx.createBiquadFilter();
+      lp.type = "lowpass";
+      lp.frequency.value = 380;
+      const gain = ctx.createGain();
+      gain.gain.value = 0;
+      osc.connect(lp).connect(gain).connect(ctx.destination);
+      osc.start();
+      engine = { ctx, osc, lp, gain };
+    } catch {
+      engine = false;
+    }
+    return engine;
+  }
+  function dustPuff(x, y, z) {
+    if (!dust.length) {
+      for (let i = 0; i < 10; i++) {
+        const m = new T.Mesh(
+          new T.PlaneGeometry(0.4, 0.4),
+          new T.MeshBasicMaterial({
+            color: 0xcbb89a,
+            transparent: true,
+            opacity: 0,
+            depthWrite: false,
+          }),
+        );
+        m.visible = false;
+        scene.add(m);
+        dust.push({ m, life: 0 });
+      }
+    }
+    const d = dust[dustIx++ % dust.length];
+    d.m.position.set(x, y, z);
+    d.m.scale.setScalar(1);
+    d.m.material.opacity = 0.45;
+    d.m.visible = true;
+    d.life = 0.55;
+  }
 
   function ground(dt, now) {
     const act = canPlay();
@@ -2243,6 +2294,17 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
       lifeRef._ground = (gx, gz) => S.ground(gx, gz);
       lifeRef._day = () =>
         calendar(Date.now(), prefs.worldConfig, prefs.time, prefs.hour).day;
+      lifeRef._unscene = (sx, sz) => [
+        S.atlas.x + sx / U,
+        S.atlas.y - sz / U,
+      ];
+      lifeRef._place = (mx, my, root) => {
+        motor.x = mx;
+        motor.y = my;
+        motor.root = root;
+        motor.air = 0;
+        if (motor.touch) motor.touch.z = root;
+      };
       lifeRef._grade = (gx, gz) => S.gradeAt(gx, gz);
       lifeRef._face = (gx, gz) => (S.floor ? S.floor(gx, gz) : S.sample(gx, gz));
       lifeRef._motor = () => ({ x: motor.x, y: motor.y, yaw: motor.yaw });
@@ -2256,11 +2318,16 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
       // --- vehicle: inputs, physics step, mesh, optional ride ---
       if (lifeRef._vehicle) {
         const rig = lifeRef._vehicle.rig;
+        const stickF = f, stickR = r;
         if (lifeRef._drive) {
           rig.input(f, -r, 0);
           r = 0;
           f = 0;
-        } else rig.input(0, 0, 0);
+        } else {
+          // Parking brake: full stop while nobody is driving — a partial
+          // brake let the buggy roll away down the audit slope.
+          rig.input(0, 0, 1);
+        }
         rig.step(h);
         lifeRef._vehicle.phys.step(h);
         const vp = rig.position();
@@ -2283,13 +2350,92 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
           }
         }
         if (lifeRef._drive) {
-          // Rider: snap the walker onto the chassis so the camera follows.
+          // Seated rider: feet on the floorboard (hips land on the seat
+          // via traveller's sit pose), yaw locked to the chassis so the
+          // camera looks over the bonnet.
           motor.x = S.atlas.x + vp.x / U;
           motor.y = S.atlas.y - vp.z / U;
-          motor.root = vp.y + 0.32;
+          motor.root = vp.y - 0.16;
           motor.air = 0;
-          motor.speed = rig.speed() ? Math.abs(rig.speed()) : 0;
+          motor.speed = 0;
           if (motor.touch) motor.touch.z = motor.root;
+          const fwd = v3.set(0, 0, 1).applyQuaternion(
+            { x: vr.x, y: vr.y, z: vr.z, w: vr.w },
+          );
+          // Walk yaw points opposite the chassis +z (see spawn note),
+          // so add PI to face the rider over the bonnet.
+          motor.yaw = Math.atan2(fwd.x, fwd.z) + Math.PI;
+        }
+        // Engine note + wheel dust (only while driving, and moving). The
+        // context is created on the enter click so autoplay policy is happy.
+        const ea = lifeRef._drive ? engineAudio() : engine || null;
+        const spd = Math.abs(rig.speed() || 0);
+        if (ea) {
+          if (ea.ctx.state === "suspended") ea.ctx.resume();
+          const t = ea.ctx.currentTime;
+          ea.osc.frequency.setTargetAtTime(
+            lifeRef._drive ? 54 + spd * 8.5 : 54,
+            t,
+            0.09,
+          );
+          ea.gain.gain.setTargetAtTime(
+            lifeRef._drive ? 0.04 + Math.min(0.05, spd * 0.0045) : 0,
+            t,
+            0.1,
+          );
+        }
+        if (lifeRef._drive && spd > 2.4) {
+          dustClock += h;
+          if (dustClock > 0.1) {
+            dustClock = 0;
+            const q = { x: vr.x, y: vr.y, z: vr.z, w: vr.w };
+            const back = v3.set(0, 0, -1).applyQuaternion(q);
+            const side = new T.Vector3(1, 0, 0).applyQuaternion(q);
+            const gy = vp.y - 0.42;
+            dustPuff(vp.x + back.x * 0.9 + side.x * 0.66, gy, vp.z + back.z * 0.9 + side.z * 0.66);
+            dustPuff(vp.x + back.x * 0.9 - side.x * 0.66, gy, vp.z + back.z * 0.9 - side.z * 0.66);
+          }
+        }
+        for (const d of dust) {
+          if (d.life <= 0) continue;
+          d.life -= h;
+          const k = Math.max(0, d.life / 0.55);
+          d.m.material.opacity = 0.45 * k;
+          d.m.scale.setScalar(1 + (1 - k) * 2.6);
+          d.m.quaternion.copy(cam.quaternion);
+          if (d.life <= 0) d.m.visible = false;
+        }
+        // Flip-safe settle: on a slope the fresh spawn can roll onto its
+        // side (audit phone-01 / shot 05). While parked and unsettled,
+        // stand it back upright a few times, then leave physics alone.
+        {
+          // Park/seat hold: whenever nobody is steering, freeze the
+          // chassis — wheel brakes alone still creep down slopes (the
+          // audit hillside roll). Any stick input releases the hold.
+          const v = lifeRef._vehicle;
+          v.rightT = (v.rightT || 0) + h;
+          const lv0 = v.rig.chassis.linvel();
+          const held = Math.hypot(lv0.x, lv0.y, lv0.z) < 0.6;
+          if (stickF === 0 && stickR === 0 && v.rightT > 0.7) {
+            const prb = v.rig.chassis;
+            prb.setLinvel({ x: 0, y: 0, z: 0 }, true);
+            prb.setAngvel({ x: 0, y: 0, z: 0 }, true);
+          }
+          // Right the chassis when it is nearly stopped and lying on
+          // its side/back (spawn settles, slope rolls). Never fights a
+          // vehicle that is actually moving.
+          const upY = 1 - 2 * (vr.x * vr.x + vr.z * vr.z);
+          if (v.rightT > 0.7 && upY < 0.55 && held) {
+            const yawNow = Math.atan2(2 * (vr.w * vr.y), 1 - 2 * vr.y * vr.y);
+            const rb = v.rig.chassis;
+            const c = Math.cos(yawNow * 0.5), sn = Math.sin(yawNow * 0.5);
+            rb.setRotation({ x: 0, y: sn, z: 0, w: c }, true);
+            const p0 = rb.translation();
+            rb.setTranslation({ x: p0.x, y: p0.y + 0.5, z: p0.z }, true);
+            rb.setLinvel({ x: 0, y: 0, z: 0 }, true);
+            rb.setAngvel({ x: 0, y: 0, z: 0 }, true);
+            v.rightT = 0;
+          }
         }
       }
 
@@ -2347,7 +2493,20 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
         let key = "",
           sub = "",
           uiMode = "";
-        if (fish && (fish.phase === "waiting" || fish.phase === "bite")) {
+        if (lifeRef._vehicle && lifeRef._drive) {
+          mode = { kind: "drive", op: "exit" };
+          key = "game.exitDrive";
+          uiMode = "drive";
+        } else if (lifeRef._vehicle) {
+          const vpos = lifeRef._vehicle.rig.position();
+          const spos = S.worldXYZ(motor.x, motor.y);
+          if (Math.hypot(vpos.x - spos[0], vpos.z - spos[2]) < 3.4) {
+            mode = { kind: "drive", op: "enter" };
+            key = "game.drive";
+            uiMode = "drive";
+          }
+        }
+        if (!key && fish && (fish.phase === "waiting" || fish.phase === "bite")) {
           mode = { kind: "fish", op: "reel" };
           if (fish.phase === "waiting") {
             key = "game.fishing";
@@ -2357,11 +2516,11 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
             key = "game.reel";
             uiMode = "reel";
           }
-        } else if (fish && (face.depth ?? 0) >= 0.5) {
+        } else if (!key && fish && (face.depth ?? 0) >= 0.5) {
           mode = { kind: "fish", op: "cast" };
           key = "game.cast";
           uiMode = "cast";
-        } else if (lifeRef.farming) {
+        } else if (!key && lifeRef.farming) {
           const act = lifeRef.farming.actionAt(motor.x, motor.y);
           mode = { kind: "farm", act };
           uiMode = act.mode;
@@ -2568,6 +2727,7 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
       look: Math.abs(toward) < 1.3 ? toward * 0.28 : 0,
       idleTime: now * 0.001,
       reduced: reduced || prefs.saver,
+      sit: lifeRef._drive ? 1 : 0,
     });
     once = false;
     x = motor.x;
@@ -2692,7 +2852,7 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
       root: motor.root,
       yaw,
       pitch,
-      distance: follow,
+      distance: lifeRef._drive ? Math.max(follow, 6.6) : follow,
       swim: motor.swim,
       eye,
       first: !third || !!roomOwner,
@@ -4352,6 +4512,12 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
     if (!farmAct || !L._face) return;
     const at = L._motor?.() ?? { x: 0, y: 0 };
     try {
+      if (farmAct.kind === "drive") {
+        const ok =
+          farmAct.op === "enter" ? L.enterVehicle?.() : L.exitVehicle?.();
+        if (farmAct.op === "enter" && !ok) return toast(msg("game.tooFar"));
+        return toast(msg(farmAct.op === "enter" ? "game.driving" : "game.hopped"));
+      }
       if (farmAct.kind === "fish") {
         const r =
           farmAct.op === "cast" ? await L.fish() : await L.reelFish();
@@ -4536,8 +4702,16 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
         R: p.R,
         world: p.world,
         x: scene[0],
-        y: scene[1] + 0.9,
+        // Ride height: the chassis hangs ~0.86 m over its wheels at rest
+        // (suspension 0.42 + wheel radius 0.34 below the axle at −0.1).
+        // Spawning lower embeds the body in the terrain and it rolls onto
+        // its side (docs/audit phone-01); this drops it 9 cm onto the
+        // suspension instead.
+        y: scene[1] + 0.95,
         z: scene[2],
+        // Face the same way the walker faces (walk yaw is the reverse
+        // of the chassis +z axis) so the rider looks over the bonnet.
+        yaw: (at.yaw ?? 0) + Math.PI,
       });
       let mesh = null;
       if (this._scene3d && this._T) {
@@ -4591,6 +4765,41 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
       }
       this._vehicle = { rig, phys: p, mesh };
       return this._vehicle;
+    },
+    /**
+     * Climb into the buggy when it is within reach. Returns false when
+     * there is no vehicle or it is too far away (the contextual button
+     * only appears near it, but the build screen can be opened anywhere).
+     */
+    enterVehicle() {
+      const v = this._vehicle;
+      if (!v || this._drive) return !!this._drive;
+      const m = this._motor();
+      const sp = this._scene(m.x, m.y);
+      const vp = v.rig.position();
+      if (Math.hypot(vp.x - sp[0], vp.z - sp[2]) > 3.4) return false;
+      this._drive = true;
+      engineAudio();
+      return true;
+    },
+    /** Step out beside the chassis (leaves the buggy where it is). */
+    exitVehicle() {
+      if (!this._drive) return false;
+      this._drive = false;
+      const v = this._vehicle;
+      if (v) {
+        const vp = v.rig.position();
+        const vr = v.rig.rotation();
+        // Chassis-local left (+x) → world offset,1.35 m clear of the body.
+        const yaw = Math.atan2(2 * (vr.w * vr.y), 1 - 2 * vr.y * vr.y);
+        const sx = vp.x + Math.cos(yaw) * 1.35;
+        const sz = vp.z - Math.sin(yaw) * 1.35;
+        const [mx, my] = this._unscene
+          ? this._unscene(sx, sz)
+          : [0, 0];
+        this._place?.(mx, my, this._sceneHeight(sx, sz));
+      }
+      return true;
     },
     /** Set driving inputs for the spawned vehicle (all optional). */
     drive(throttle = 0, steer = 0, brake = 0) {

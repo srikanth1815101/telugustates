@@ -74,6 +74,7 @@ code: te
  "game.herdCount": "{n} జంతువులు",
  "game.herdSub": "మీ పెంకట్టలో",
  "game.hopped": "దిగేశాం",
+ "game.tooFar": "చాలా దూరం — బగ్గీ దగ్గరికి నడవండి",
  "game.loading": "గ్రామం లోడ్ అవుతోంది…",
  "game.noQuests": "ఇంకా చూపించేది లేదు.",
  "game.oAt": "@ ₹{price}",
