@@ -623,6 +623,15 @@ async function route() {
     ),
     pt = hash.match(/^#\/at\/(-?[\d.]+),(-?[\d.]+)$/);
   if (!match && !f && !pt) {
+    // ?perf=1 boots straight into the 3D world so the harness can run unattended.
+    if (/[?&]perf=1(?:&|$)/.test(location.search)) {
+      history.replaceState(
+        null,
+        "",
+        location.pathname + location.search + "#/at/14.2184118,78.4068883",
+      );
+      return route();
+    }
     paper(true);
     return;
   }

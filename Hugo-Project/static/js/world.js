@@ -4002,7 +4002,7 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
   }
   last = performance.now();
   raf = requestAnimationFrame(animate);
-  return {
+  const api = {
     visit,
     restore,
     fromMap,
@@ -4073,4 +4073,20 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
       delete window.atlasWalk;
     },
   };
+  // Phase 0 perf harness: inert unless the URL carries ?perf=1.
+  if (/[?&]perf=1(?:&|$)/.test(location.search))
+    import("./perf-harness.js")
+      .then((m) =>
+        m.install(api, {
+          ll,
+          project: a.project,
+          prefs,
+          applyTier(n) {
+            gov.change(n, "perf harness");
+            applyQuality();
+          },
+        }),
+      )
+      .catch((e) => console.warn("[perf-harness]", e));
+  return api;
 }
