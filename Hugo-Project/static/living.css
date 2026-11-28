@@ -988,3 +988,20 @@ a.scenic-card small {
 #world:has(#holding-menu:not([hidden])) #route-step {
   display: none;
 }
+
+/* The home page's resource ledger is a stacked table, not the single-line
+   map strip that #public-home .map-read assumes, so opt it back out of flex. */
+#public-home .ledger-foot {
+  display: block;
+  padding: 0;
+  background: #f1f6e4;
+  border-top: 1px solid #d9e3d0;
+  font: 12px/1.5 var(--body);
+  color: var(--ink);
+}
+#public-home .ledger-foot .ledger-title,
+#public-home .ledger-foot .ledger-date,
+#public-home .ledger-foot .ledger-chip,
+#public-home .ledger-foot .ledger-delta {
+  font-family: var(--mono);
+}

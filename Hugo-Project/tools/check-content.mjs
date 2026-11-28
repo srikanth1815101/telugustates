@@ -216,6 +216,64 @@ try {
     "food",
     "gold",
   ]);
+  // The home page shows a ledger of every batch beside the live treasury, so
+  // the two have to agree. Re-derive the running balance from data/resource_ledger.json
+  // and compare against the published totals: a batch that updates one without
+  // the other fails here instead of drifting silently.
+  {
+    const ledger = JSON.parse(
+        await fs.readFile(path.join(root, "data/resource_ledger.json"), "utf8"),
+      ),
+      entries = ledger?.entries ?? [];
+    assert.ok(Array.isArray(entries) && entries.length > 0,
+      "data/resource_ledger.json must list at least one batch");
+    const int = (e, k) => {
+      assert(Number.isInteger(e[k]), `Ledger ${e.date} needs an integer ${k}`);
+      return e[k];
+    };
+    // Rows are stored newest-first for display; walk them oldest-first exactly
+    // the way the treasury was updated: add the reactions, charge for the
+    // residents already standing, floor food at zero and pay any shortfall out
+    // of currency.
+    const run = { food: 0, currency: 0, gold: 0 };
+    let houses = 0;
+    for (const e of [...entries].reverse()) {
+      assert(/^\d{4}-\d{2}-\d{2}$/.test(e.date ?? ""),
+        "Ledger entry needs a YYYY-MM-DD date: " + JSON.stringify(e.date));
+      for (const k of ["houses_before", "houses_added", "likes", "comments", "shares",
+                       "food_cut", "food_spill", "food", "currency", "gold"])
+        int(e, k);
+      // The house count is cumulative and must stay consistent batch to batch.
+      assert.equal(e.houses_before, houses,
+        `Ledger ${e.date}: houses_before should be ${houses}`);
+      houses += e.houses_added;
+
+      const before = run.food;
+      run.food += e.likes - e.houses_before - e.food_cut;
+      const spill = run.food < 0 ? -run.food : 0;
+      run.food += spill;                       // floor at zero, never negative
+      assert.equal(spill, e.food_spill,
+        `Ledger ${e.date}: shortfall should be ${spill}, not ${e.food_spill}`);
+      assert.equal(run.food - before, e.food,
+        `Ledger ${e.date}: food delta does not follow from its own numbers`);
+
+      run.currency += e.comments - e.food_spill;
+      assert.equal(e.currency, e.comments - e.food_spill,
+        `Ledger ${e.date}: currency delta is not comments minus the shortfall`);
+      run.gold += e.shares;
+      assert.equal(e.gold, e.shares,
+        `Ledger ${e.date}: gold delta is not the shares reported`);
+      assert(run.food >= 0, `Ledger ${e.date}: food went negative`);
+    }
+    assert.equal(houses, all.houses.length,
+      `Ledger accounts for ${houses} houses; the atlas holds ${all.houses.length}`);
+    assert.equal(run.food, all.resources.food,
+      `Ledger food total ${run.food} does not match content/resources/food.md`);
+    assert.equal(run.currency, all.resources.currency,
+      "Ledger currency total does not match content/resources/currency.md");
+    assert.equal(run.gold, all.resources.gold,
+      "Ledger gold total does not match content/resources/gold.md");
+  }
   assert.deepEqual(
     Object.keys(all.languages.en).sort(),
     Object.keys(all.languages.te).sort(),
