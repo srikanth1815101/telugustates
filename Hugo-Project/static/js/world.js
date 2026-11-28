@@ -74,6 +74,15 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
   const prefs = loadPrefs(a);
   const save = () => savePrefs(prefs);
   const simClock = new SimClock();
+  // Phase 2: ?physics=1 runs Rapier heightfields + a kinematic capsule in
+  // parallel with the motor (diagnostics; the certified walker stays
+  // authoritative). physSample is refreshed every ground() so streaming
+  // always reads the live district surface even if L.s changes.
+  const wantPhysics = /[?&]physics=1(?:&|$)/.test(location.search);
+  let physics = null,
+    physicsP = null,
+    physicsPrev = null,
+    physSample = null;
   const [stops, worldConfig, naturalRoutes, walkArt] = await Promise.all([
     get(dev ? "ecology/stops.json" : "living/public/places.json"),
     get("living/world.json"),
@@ -2201,6 +2210,8 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
       oy = y,
       S = L.s,
       h = Math.min(0.24, dt);
+    if (wantPhysics)
+      physSample = (sx, sz) => S.ground(S.atlas.x + sx / U, S.atlas.y - sz / U);
     // Rebuild a tiny trunk / boulder neighbourhood only when the player or the placement patch changes.
     if (
       !L.solidCentre ||
@@ -2293,6 +2304,50 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
           Math.cos(motor.yaw - lastBodyYaw),
         ) / Math.max(0.008, h);
     lastBodyYaw = motor.yaw;
+    if (wantPhysics) {
+      if (!physicsP)
+        physicsP = import("./physics.js")
+          .then((m) =>
+            m.AtlasPhysics.create({
+              heightAt: (sx, sz) =>
+                physSample ? physSample(sx, sz) : 0,
+            }),
+          )
+          .then((p) => (physics = p));
+      if (physics) {
+        physics.syncTiles(ma[0], ma[2]);
+        const delta = physicsPrev
+          ? {
+              x: ma[0] - physicsPrev.x,
+              y: ma[1] - physicsPrev.y,
+              z: ma[2] - physicsPrev.z,
+            }
+          : { x: 0, y: 0, z: 0 };
+        const res = physics.moveCharacter(
+          { x: ma[0], y: ma[1], z: ma[2] },
+          delta,
+        );
+        physicsPrev = { x: res.x, y: res.y, z: res.z };
+        physics.step(h);
+        // Grounded/gap are measured against a downward raycast onto the
+        // streamed heightfield — robust to its finite grid resolution.
+        const surf = physics.groundY(ma[0], ma[2]);
+        const gap = surf == null ? null : res.y - surf;
+        globalThis.__atlasPhysics = {
+          ready: true,
+          ...physics.stats(),
+          grounded:
+            res.grounded || (gap != null && gap > -0.35 && gap < 0.15),
+          gap: gap == null ? null : +gap.toFixed(4),
+          root: +ma[1].toFixed(4),
+          surf: surf == null ? null : +surf.toFixed(4),
+          resY: +res.y.toFixed(4),
+          hAt: physSample ? +physSample(ma[0], ma[2]).toFixed(4) : null,
+          direct: +S.ground(motor.x, motor.y).toFixed(4),
+          drift: +Math.hypot(res.x - ma[0], res.y - ma[1], res.z - ma[2]).toFixed(4),
+        };
+      } else globalThis.__atlasPhysics = { ready: false, loading: true };
+    }
     const poi =
       L.camHomes?.[0]?.centre ||
       L.bio.anim.find(

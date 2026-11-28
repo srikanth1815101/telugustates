@@ -269,6 +269,33 @@ await step("screenshots at each spot", async () => {
   }
 });
 
+await step("Rapier physics streams heightfields behind ?physics=1", async () => {
+  await page.goto(`${base}/?physics=1#/at/14.2184118,78.4068883`, {
+    waitUntil: "domcontentloaded",
+    timeout: 60_000,
+  });
+  await page.waitForFunction(
+    () => window.atlasWalk?.snapshot()?.ready,
+    { timeout: 180_000, polling: 500 },
+  );
+  // Wait for wasm init + first streamed tile + at least one stepped frame.
+  await page.waitForFunction(
+    () => window.__atlasPhysics?.ready && window.__atlasPhysics.tiles >= 1,
+    { timeout: 120_000, polling: 500 },
+  );
+  const p = await page.evaluate(() => window.__atlasPhysics);
+  note(
+    `tiles=${p.tiles} bodies=${p.bodies} colliders=${p.colliders} grounded=${p.grounded} gap=${p.gap} root=${p.root} surf=${p.surf} resY=${p.resY} hAt=${p.hAt} direct=${p.direct} drift=${p.drift} stepped=${p.stepped}`,
+  );
+  if (p.tiles < 1) throw new Error("no heightfield tiles streamed");
+  if (!(p.colliders >= 1)) throw new Error("no colliders");
+  if (!(p.stepped > 0)) throw new Error("world never stepped");
+  if (p.gap == null) throw new Error("no ground raycast hit");
+  if (Math.abs(p.gap) > 0.5)
+    throw new Error(`capsule far from heightfield (gap=${p.gap})`);
+  if (!p.grounded) throw new Error("character not grounded on heightfield");
+});
+
 await step("no external network calls", async () => {
   // The only allowed exception: a pre-existing optional update check that the
   // Android wrapper documents; it must not break the page either way.
