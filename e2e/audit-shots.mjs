@@ -174,6 +174,14 @@ await page.evaluate(async () => {
   const m = L._motor();
   L.farming.sow(m.x, m.y, "ragi");
 });
+// Wait for growth stage 1 (ragi: 45 s/stage on the sim clock) so the
+// shot shows the crop model's blades rather than bare stage-0 soil.
+await page
+  .waitForFunction(
+    () => (window.atlasLife.farming.all()[0]?.stage ?? 0) >= 1,
+    { timeout: 120_000, polling: 2000 },
+  )
+  .catch(() => console.log("  ! crop still at stage 0 (clock too slow)"));
 await sleep(1200);
 await shot("04-sow-context-412x915.png");
 

@@ -22,6 +22,8 @@ import { loadPrefs, savePrefs } from "./field-prefs.js";
 import { SimClock } from "./sim-clock.js";
 import { createLifeMeshes } from "./life-meshes.js";
 import { initGameUI } from "./game-ui.js";
+import { preloadGameModels } from "./game-models.js";
+import { MODELS } from "../../tools/model-spec.mjs";
 import { dampGround } from "./regional-weather.js";
 import { RunoffWindow } from "./rain-ground.js";
 import { calendar, windowLight, disciplinedClock } from "./world-calendar.js";
@@ -2186,6 +2188,10 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
     lastLabels = -1e8;
     dirty = true;
   }
+  // Wheel-spin accumulator for the buggy visuals — outside ground() so it
+  // survives the per-frame call.
+  let vehicleSpin = 0;
+
   function ground(dt, now) {
     const act = canPlay();
     stick = input.stick();
@@ -2259,9 +2265,23 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
         lifeRef._vehicle.phys.step(h);
         const vp = rig.position();
         const vr = rig.rotation();
-        if (lifeRef._vehicle.mesh)
-          lifeRef._vehicle.mesh.position.set(vp.x, vp.y, vp.z),
-            lifeRef._vehicle.mesh.quaternion.set(vr.x, vr.y, vr.z, vr.w);
+        if (lifeRef._vehicle.mesh) {
+          const vm = lifeRef._vehicle.mesh;
+          vm.position.set(vp.x, vp.y, vp.z);
+          vm.quaternion.set(vr.x, vr.y, vr.z, vr.w);
+          const wh = vm.userData && vm.userData.wheels;
+          if (wh && wh.fl) {
+            // Visual wheel spin: s = v·t / r (chassis-local axle is X).
+            vehicleSpin += ((rig.speed() || 0) * h) / 0.34;
+            const st = rig.steerAngle ? rig.steerAngle() : 0;
+            for (const k of ["fl", "fr", "rl", "rr"]) {
+              const w = wh[k];
+              if (!w) continue;
+              w.rotation.x = vehicleSpin;
+              if (k === "fl" || k === "fr") w.rotation.y = st;
+            }
+          }
+        }
         if (lifeRef._drive) {
           // Rider: snap the walker onto the chassis so the camera follows.
           motor.x = S.atlas.x + vp.x / U;
@@ -2307,6 +2327,17 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
 
       // --- farming: growth + contextual button (fishing overrides it) ---
       if (lifeRef.farming) lifeRef.farming.tick(h);
+      if (lifeRef.farming && lifeRef._scene3d) {
+        if (!lifeRef._meshes)
+          lifeRef._meshes = createLifeMeshes(scene, T, (mx, my, hh) =>
+            S.worldXYZ(mx, my, hh),
+          );
+        const plotList = lifeRef.farming.all().map((pl) => {
+          const [sx, sy, sz] = S.worldXYZ(pl.x, pl.z, S.ground(pl.x, pl.z));
+          return { key: String(pl.id), kind: pl.kind, stage: pl.stage, x: sx, y: sy, z: sz };
+        });
+        lifeRef._meshes.syncPlots(plotList);
+      }
       if (farmBtn) {
         const face = lifeRef._face(motor.x, motor.y);
         const fish = lifeRef.fishing;
@@ -4370,6 +4401,14 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
   // Phase 1: the game UI system (HUD cluster, hotbar, tabbed screens,
   // title screen, toasts) replaces the old Life modal.
   initGameUI(host);
+  // Warm the GLB pipeline in the background: structures, animals, crops
+  // and the buggy swap in as soon as each model lands; primitives stay
+  // visible until then. Item/tool GLBs are baked-icon sources only.
+  preloadGameModels(
+    Object.keys(MODELS).filter(
+      (n) => !n.startsWith("item_") && !["hoe", "sickle", "rod", "hammer", "can", "seeds"].includes(n),
+    ),
+  );
 
   // Phase 4/5 life-sim namespace: lazy singletons + IndexedDB persistence.
   // Additive — the localStorage prefs/position stores stay untouched.
@@ -4503,6 +4542,21 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
       let mesh = null;
       if (this._scene3d && this._T) {
         const G = this._T;
+        // Pipeline GLB (named chassis/hood/seat/steering/wheel_* nodes on
+        // the physics axle positions); primitives only as fallback.
+        const { loadGameModel } = await import("./game-models.js");
+        const tpl = await loadGameModel("buggy");
+        if (tpl) {
+          mesh = tpl.clone(true);
+          mesh.traverse((m) => { if (m.isMesh) m.castShadow = true; });
+          mesh.userData.wheels = {
+            fl: mesh.getObjectByName("wheel_fl"),
+            fr: mesh.getObjectByName("wheel_fr"),
+            rl: mesh.getObjectByName("wheel_rl"),
+            rr: mesh.getObjectByName("wheel_rr"),
+          };
+          this._scene3d.add(mesh);
+        } else {
         // Little farm buggy: red body, hood, seat back, handlebar, 4 wheels.
         mesh = new G.Group();
         const add = (geo, mat, x, y, z) => {
@@ -4533,6 +4587,7 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
           mesh.add(w);
         }
         this._scene3d.add(mesh);
+        }
       }
       this._vehicle = { rig, phys: p, mesh };
       return this._vehicle;

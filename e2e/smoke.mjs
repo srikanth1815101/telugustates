@@ -225,6 +225,13 @@ await step("3D world boots and streams a patch", async () => {
   if (!titleGone.gone)
     throw new Error(`title screen did not dismiss on Play: ${JSON.stringify(titleGone)}`);
   note("title screen shows and dismisses");
+  // The ?perf=1 harness moves the camera between spots (mode leaves
+  // "ground" while travelling) — ground() only ticks in ground mode, so
+  // wait for it before asserting on mesh reconciliation below.
+  await page.waitForFunction(
+    () => window.atlasWalk?.snapshot?.().mode === "ground",
+    { timeout: 180_000 },
+  );
   // Phase 4/5: the life-sim namespace must boot, sow, persist and restore.
   const life = await page.evaluate(async () => {
     if (typeof window.atlasLife?.ready !== "function") return null;

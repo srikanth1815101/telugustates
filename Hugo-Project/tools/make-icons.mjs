@@ -14,7 +14,7 @@ import { fileURLToPath } from "node:url";
 import { createHash } from "node:crypto";
 
 const here = dirname(fileURLToPath(import.meta.url));
-const root = join(here, "..");
+const root = join(here, "..", ".."); // repo root
 
 const lucide = (await import("@iconify-json/lucide/icons.json", { with: { type: "json" } })).default;
 const gameIcons = (await import("@iconify-json/game-icons/icons.json", { with: { type: "json" } })).default;

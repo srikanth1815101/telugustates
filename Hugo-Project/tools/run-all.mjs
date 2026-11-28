@@ -30,6 +30,7 @@ const checks = [
   ["check-systems", false],
   ["check-physics", false],
   ["check-slices", false],
+  ["check-assets", true],
   ["check-budget", false],
 ];
 

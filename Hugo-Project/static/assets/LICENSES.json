@@ -1,5 +1,5 @@
 {
- "scope": "Bundled models, terrain surfaces, photographic plates of the renderer and recorded foot/water/nearby bird foley. Map, software and fonts retain separate notices.",
+ "scope": "Bundled models, terrain surfaces, photographic plates of the renderer and recorded foot/water/nearby bird foley. Map, software and fonts retain separate notices. Procedural GLB models and their baked icons (Hugo-Project/tools/make-models.mjs) are CC0-1.0 project artwork; the UI icon sprite combines Lucide (ISC) and game-icons.net (CC-BY-3.0).",
  "files": [
   {
    "file": "library/models/atlas-bat.model.gz",
@@ -1233,6 +1233,618 @@
    "source": "https://github.com/pmndrs/postprocessing (npm postprocessing 6.39.6)",
    "license": "MIT",
    "sha256": "2f9eb56edeae8da295c776d5e7884e0cabac60a8c47453042453ab95442b3687",
+   "verified_on": "2026-11-28"
+  },
+  {
+   "file": "assets/models/buggy.glb",
+   "name": "buggy",
+   "author": "Telugu States by CSRGO project",
+   "source": "Hugo-Project/tools/make-models.mjs (procedural, three.js)",
+   "license": "CC0-1.0",
+   "sha256": "b11b9d9bbfd49c112a6922ff9918344ac5d2300b49984390d4ef9dad31fa6ad7",
+   "verified_on": "2026-11-28"
+  },
+  {
+   "file": "assets/icons/buggy.png",
+   "name": "buggy.png",
+   "author": "Telugu States by CSRGO project",
+   "source": "Hugo-Project/tools/make-models.mjs (baked render of the GLB)",
+   "license": "CC0-1.0",
+   "sha256": "78c445a5781b375193b73f0a9ff6391f0a9d934d98f91174000e02f8f5cd7df0",
+   "verified_on": "2026-11-28"
+  },
+  {
+   "file": "assets/models/fence.glb",
+   "name": "fence",
+   "author": "Telugu States by CSRGO project",
+   "source": "Hugo-Project/tools/make-models.mjs (procedural, three.js)",
+   "license": "CC0-1.0",
+   "sha256": "b8c95ac58db5aafb431b0904b018bfbb9c4c8393b6cf8e34ac3ab38e5057699b",
+   "verified_on": "2026-11-28"
+  },
+  {
+   "file": "assets/icons/fence.png",
+   "name": "fence.png",
+   "author": "Telugu States by CSRGO project",
+   "source": "Hugo-Project/tools/make-models.mjs (baked render of the GLB)",
+   "license": "CC0-1.0",
+   "sha256": "65304582ec302d60e6f859fc33cef0181087665c0595a7c91a3158122fefee37",
+   "verified_on": "2026-11-28"
+  },
+  {
+   "file": "assets/models/cot.glb",
+   "name": "cot",
+   "author": "Telugu States by CSRGO project",
+   "source": "Hugo-Project/tools/make-models.mjs (procedural, three.js)",
+   "license": "CC0-1.0",
+   "sha256": "c0c9d7690ec5981f68c1d5df3945ff1b64bb1afb0effd13c761fa8b23d825a81",
+   "verified_on": "2026-11-28"
+  },
+  {
+   "file": "assets/icons/cot.png",
+   "name": "cot.png",
+   "author": "Telugu States by CSRGO project",
+   "source": "Hugo-Project/tools/make-models.mjs (baked render of the GLB)",
+   "license": "CC0-1.0",
+   "sha256": "dc8eaddd7f4f5492f83539ad0063a38bd7ae3ae0c9a3bf450af41b6bdf716d42",
+   "verified_on": "2026-11-28"
+  },
+  {
+   "file": "assets/models/shed.glb",
+   "name": "shed",
+   "author": "Telugu States by CSRGO project",
+   "source": "Hugo-Project/tools/make-models.mjs (procedural, three.js)",
+   "license": "CC0-1.0",
+   "sha256": "a296871420b6e3e3cc0b4402a68c8a24f8b2a34b6267d0bbaa2f14db4d5b09c3",
+   "verified_on": "2026-11-28"
+  },
+  {
+   "file": "assets/icons/shed.png",
+   "name": "shed.png",
+   "author": "Telugu States by CSRGO project",
+   "source": "Hugo-Project/tools/make-models.mjs (baked render of the GLB)",
+   "license": "CC0-1.0",
+   "sha256": "deaf348fc9eeed3827415035e63defe2675a8a9de41ba29bd4029b443ffd1a8f",
+   "verified_on": "2026-11-28"
+  },
+  {
+   "file": "assets/models/well.glb",
+   "name": "well",
+   "author": "Telugu States by CSRGO project",
+   "source": "Hugo-Project/tools/make-models.mjs (procedural, three.js)",
+   "license": "CC0-1.0",
+   "sha256": "35cd88c6b0c8786a55aef8882a34a1ee302d97ce84a82096bd5827a73411b047",
+   "verified_on": "2026-11-28"
+  },
+  {
+   "file": "assets/icons/well.png",
+   "name": "well.png",
+   "author": "Telugu States by CSRGO project",
+   "source": "Hugo-Project/tools/make-models.mjs (baked render of the GLB)",
+   "license": "CC0-1.0",
+   "sha256": "74eb786b9786612da5d9daed021f95770a361edd89abdcfbe571f03a0e1fbb42",
+   "verified_on": "2026-11-28"
+  },
+  {
+   "file": "assets/models/threshing.glb",
+   "name": "threshing",
+   "author": "Telugu States by CSRGO project",
+   "source": "Hugo-Project/tools/make-models.mjs (procedural, three.js)",
+   "license": "CC0-1.0",
+   "sha256": "f27fc88027d2495682742fafb86491025755b231c1eebd06a727ca811184c477",
+   "verified_on": "2026-11-28"
+  },
+  {
+   "file": "assets/icons/threshing.png",
+   "name": "threshing.png",
+   "author": "Telugu States by CSRGO project",
+   "source": "Hugo-Project/tools/make-models.mjs (baked render of the GLB)",
+   "license": "CC0-1.0",
+   "sha256": "d6522451279f140db55f7c52e1570c9bf9921d2b3539d3ee55a92dc4e40fb460",
+   "verified_on": "2026-11-28"
+  },
+  {
+   "file": "assets/models/stall.glb",
+   "name": "stall",
+   "author": "Telugu States by CSRGO project",
+   "source": "Hugo-Project/tools/make-models.mjs (procedural, three.js)",
+   "license": "CC0-1.0",
+   "sha256": "f2bdadd3920b73ca4782f2b0a27f14ab2ca704786c209af39cb146ec1422fdbc",
+   "verified_on": "2026-11-28"
+  },
+  {
+   "file": "assets/icons/stall.png",
+   "name": "stall.png",
+   "author": "Telugu States by CSRGO project",
+   "source": "Hugo-Project/tools/make-models.mjs (baked render of the GLB)",
+   "license": "CC0-1.0",
+   "sha256": "8c274f38b9d6d8c872b2d18c3d1b5f4e3e17c376b61ba9cb632c26ffd40d240b",
+   "verified_on": "2026-11-28"
+  },
+  {
+   "file": "assets/models/cow.glb",
+   "name": "cow",
+   "author": "Telugu States by CSRGO project",
+   "source": "Hugo-Project/tools/make-models.mjs (procedural, three.js)",
+   "license": "CC0-1.0",
+   "sha256": "cc39af962d328ca4c8a1015a362b5cb58afb656faf4843bd90cbe9d638f2a882",
+   "verified_on": "2026-11-28"
+  },
+  {
+   "file": "assets/icons/cow.png",
+   "name": "cow.png",
+   "author": "Telugu States by CSRGO project",
+   "source": "Hugo-Project/tools/make-models.mjs (baked render of the GLB)",
+   "license": "CC0-1.0",
+   "sha256": "e0f0b06b3d782226d23a96f9c059237f929fdb6834773fef6866fc4573feaec9",
+   "verified_on": "2026-11-28"
+  },
+  {
+   "file": "assets/models/goat.glb",
+   "name": "goat",
+   "author": "Telugu States by CSRGO project",
+   "source": "Hugo-Project/tools/make-models.mjs (procedural, three.js)",
+   "license": "CC0-1.0",
+   "sha256": "a083c7f556a5d66110e92b5192173e2f57c26988cdbd4eac7fa0a44fd8c9f8ed",
+   "verified_on": "2026-11-28"
+  },
+  {
+   "file": "assets/icons/goat.png",
+   "name": "goat.png",
+   "author": "Telugu States by CSRGO project",
+   "source": "Hugo-Project/tools/make-models.mjs (baked render of the GLB)",
+   "license": "CC0-1.0",
+   "sha256": "e4e681625ace0b0530db53d5d743637eef36f64177d821aa18f2bb06dd067c7c",
+   "verified_on": "2026-11-28"
+  },
+  {
+   "file": "assets/models/chicken.glb",
+   "name": "chicken",
+   "author": "Telugu States by CSRGO project",
+   "source": "Hugo-Project/tools/make-models.mjs (procedural, three.js)",
+   "license": "CC0-1.0",
+   "sha256": "aeb57796027fb73d72debeae4e74bef14e82039bc7a8d000fd0e7442a947c680",
+   "verified_on": "2026-11-28"
+  },
+  {
+   "file": "assets/icons/chicken.png",
+   "name": "chicken.png",
+   "author": "Telugu States by CSRGO project",
+   "source": "Hugo-Project/tools/make-models.mjs (baked render of the GLB)",
+   "license": "CC0-1.0",
+   "sha256": "3992736c2654d8f07f104c8ca5fe24d883366fa9555a1854d184add3c9ff6bbb",
+   "verified_on": "2026-11-28"
+  },
+  {
+   "file": "assets/models/hoe.glb",
+   "name": "hoe",
+   "author": "Telugu States by CSRGO project",
+   "source": "Hugo-Project/tools/make-models.mjs (procedural, three.js)",
+   "license": "CC0-1.0",
+   "sha256": "d91cd15d7706c47567f462d8e9d4b2ab50373b84743d6ef83708779be8bd5092",
+   "verified_on": "2026-11-28"
+  },
+  {
+   "file": "assets/icons/hoe.png",
+   "name": "hoe.png",
+   "author": "Telugu States by CSRGO project",
+   "source": "Hugo-Project/tools/make-models.mjs (baked render of the GLB)",
+   "license": "CC0-1.0",
+   "sha256": "00a608a4080089a294674008df63bb03489094566a8b32894fe9aa85aad7a197",
+   "verified_on": "2026-11-28"
+  },
+  {
+   "file": "assets/models/sickle.glb",
+   "name": "sickle",
+   "author": "Telugu States by CSRGO project",
+   "source": "Hugo-Project/tools/make-models.mjs (procedural, three.js)",
+   "license": "CC0-1.0",
+   "sha256": "5df9378df6748ca30dbd02071fc3e63aa4f3e0ac16d2c9e10baed1b1078ee505",
+   "verified_on": "2026-11-28"
+  },
+  {
+   "file": "assets/icons/sickle.png",
+   "name": "sickle.png",
+   "author": "Telugu States by CSRGO project",
+   "source": "Hugo-Project/tools/make-models.mjs (baked render of the GLB)",
+   "license": "CC0-1.0",
+   "sha256": "85a10693e6dadaa1e4b0418e058e3691e44fd14fe2015af954a48811591f6c69",
+   "verified_on": "2026-11-28"
+  },
+  {
+   "file": "assets/models/rod.glb",
+   "name": "rod",
+   "author": "Telugu States by CSRGO project",
+   "source": "Hugo-Project/tools/make-models.mjs (procedural, three.js)",
+   "license": "CC0-1.0",
+   "sha256": "6bc28e1d89f34c4d289620fca0be12b6de12b99225a09a2244986d29fc56d696",
+   "verified_on": "2026-11-28"
+  },
+  {
+   "file": "assets/icons/rod.png",
+   "name": "rod.png",
+   "author": "Telugu States by CSRGO project",
+   "source": "Hugo-Project/tools/make-models.mjs (baked render of the GLB)",
+   "license": "CC0-1.0",
+   "sha256": "3e9fa96a260c11493bdc01235e7478dda96ed92129fb2276911890889f773db7",
+   "verified_on": "2026-11-28"
+  },
+  {
+   "file": "assets/models/hammer.glb",
+   "name": "hammer",
+   "author": "Telugu States by CSRGO project",
+   "source": "Hugo-Project/tools/make-models.mjs (procedural, three.js)",
+   "license": "CC0-1.0",
+   "sha256": "0a59d7f360a3966b99103513194d7969a1a879cdb52798236b9f69f94dade419",
+   "verified_on": "2026-11-28"
+  },
+  {
+   "file": "assets/icons/hammer.png",
+   "name": "hammer.png",
+   "author": "Telugu States by CSRGO project",
+   "source": "Hugo-Project/tools/make-models.mjs (baked render of the GLB)",
+   "license": "CC0-1.0",
+   "sha256": "af559749bad09aa85aff1ebba485e6e98c48c4358b79d15a9e359082d5446930",
+   "verified_on": "2026-11-28"
+  },
+  {
+   "file": "assets/models/can.glb",
+   "name": "can",
+   "author": "Telugu States by CSRGO project",
+   "source": "Hugo-Project/tools/make-models.mjs (procedural, three.js)",
+   "license": "CC0-1.0",
+   "sha256": "7e6bcf593cf1a0564660834d21ccc2394526789a8d8402105440846f1cabbc0d",
+   "verified_on": "2026-11-28"
+  },
+  {
+   "file": "assets/icons/can.png",
+   "name": "can.png",
+   "author": "Telugu States by CSRGO project",
+   "source": "Hugo-Project/tools/make-models.mjs (baked render of the GLB)",
+   "license": "CC0-1.0",
+   "sha256": "703bf088ff1b30d5297cc73cc47dbac4a2f5ac94ceccdfc261906c90edf92892",
+   "verified_on": "2026-11-28"
+  },
+  {
+   "file": "assets/models/seeds.glb",
+   "name": "seeds",
+   "author": "Telugu States by CSRGO project",
+   "source": "Hugo-Project/tools/make-models.mjs (procedural, three.js)",
+   "license": "CC0-1.0",
+   "sha256": "7e6f63a6b553fb66e66cf0646dad55349b7b39264d918f37d0e0ae26126f81ec",
+   "verified_on": "2026-11-28"
+  },
+  {
+   "file": "assets/icons/seeds.png",
+   "name": "seeds.png",
+   "author": "Telugu States by CSRGO project",
+   "source": "Hugo-Project/tools/make-models.mjs (baked render of the GLB)",
+   "license": "CC0-1.0",
+   "sha256": "1f85adc2403e10e2eae09fdde4e80c81a2fd474e15b83b3490e450778302a4b1",
+   "verified_on": "2026-11-28"
+  },
+  {
+   "file": "assets/models/crop_ragi.glb",
+   "name": "crop_ragi",
+   "author": "Telugu States by CSRGO project",
+   "source": "Hugo-Project/tools/make-models.mjs (procedural, three.js)",
+   "license": "CC0-1.0",
+   "sha256": "e93f53be006de150c9e7a4b6a9b2875eb74db41e00095c3c7c87fd2d980759ad",
+   "verified_on": "2026-11-28"
+  },
+  {
+   "file": "assets/icons/crop_ragi.png",
+   "name": "crop_ragi.png",
+   "author": "Telugu States by CSRGO project",
+   "source": "Hugo-Project/tools/make-models.mjs (baked render of the GLB)",
+   "license": "CC0-1.0",
+   "sha256": "90fe59f31f7a1723b074316f8ce411defd9f8287637d9a388498396f2c6c18f5",
+   "verified_on": "2026-11-28"
+  },
+  {
+   "file": "assets/models/crop_paddy.glb",
+   "name": "crop_paddy",
+   "author": "Telugu States by CSRGO project",
+   "source": "Hugo-Project/tools/make-models.mjs (procedural, three.js)",
+   "license": "CC0-1.0",
+   "sha256": "7bb79f3732abef60487780fcc72c20d8015c4a72b7fcf3e9aacfd4715319ee87",
+   "verified_on": "2026-11-28"
+  },
+  {
+   "file": "assets/icons/crop_paddy.png",
+   "name": "crop_paddy.png",
+   "author": "Telugu States by CSRGO project",
+   "source": "Hugo-Project/tools/make-models.mjs (baked render of the GLB)",
+   "license": "CC0-1.0",
+   "sha256": "41a5de404f2383349838d2e77f1e40b9a91ae75b5ff84251c6a2835613fd1a12",
+   "verified_on": "2026-11-28"
+  },
+  {
+   "file": "assets/models/crop_chilli.glb",
+   "name": "crop_chilli",
+   "author": "Telugu States by CSRGO project",
+   "source": "Hugo-Project/tools/make-models.mjs (procedural, three.js)",
+   "license": "CC0-1.0",
+   "sha256": "53e46529ab9b38f6518a200e546bea30b6e9224ba48feb75333722cbefb4e6a9",
+   "verified_on": "2026-11-28"
+  },
+  {
+   "file": "assets/icons/crop_chilli.png",
+   "name": "crop_chilli.png",
+   "author": "Telugu States by CSRGO project",
+   "source": "Hugo-Project/tools/make-models.mjs (baked render of the GLB)",
+   "license": "CC0-1.0",
+   "sha256": "3d47376ae6b04cf4ce60f03a5b132d504ebc3d686afcb769edbeeea75889d773",
+   "verified_on": "2026-11-28"
+  },
+  {
+   "file": "assets/models/crop_vegetable.glb",
+   "name": "crop_vegetable",
+   "author": "Telugu States by CSRGO project",
+   "source": "Hugo-Project/tools/make-models.mjs (procedural, three.js)",
+   "license": "CC0-1.0",
+   "sha256": "f0e4d0e3f8d236aa2b8dd72e3f6e4a08ffb64078b384191a51ea9c8453d27b0b",
+   "verified_on": "2026-11-28"
+  },
+  {
+   "file": "assets/icons/crop_vegetable.png",
+   "name": "crop_vegetable.png",
+   "author": "Telugu States by CSRGO project",
+   "source": "Hugo-Project/tools/make-models.mjs (baked render of the GLB)",
+   "license": "CC0-1.0",
+   "sha256": "80ab9f092f5626899f5b4436d63916fe377d20b0c4ae265350fb32d68bd64c79",
+   "verified_on": "2026-11-28"
+  },
+  {
+   "file": "assets/models/crop_cotton.glb",
+   "name": "crop_cotton",
+   "author": "Telugu States by CSRGO project",
+   "source": "Hugo-Project/tools/make-models.mjs (procedural, three.js)",
+   "license": "CC0-1.0",
+   "sha256": "04a76295ce821c41d5afa6387da5541516612c6c3a188d45e3140a8b0e10efd7",
+   "verified_on": "2026-11-28"
+  },
+  {
+   "file": "assets/icons/crop_cotton.png",
+   "name": "crop_cotton.png",
+   "author": "Telugu States by CSRGO project",
+   "source": "Hugo-Project/tools/make-models.mjs (baked render of the GLB)",
+   "license": "CC0-1.0",
+   "sha256": "b200af06a2403b147ccc5d7e2e0386526e0d262c5dd8b1e061b4e407c36465f6",
+   "verified_on": "2026-11-28"
+  },
+  {
+   "file": "assets/models/item_paddy.glb",
+   "name": "item_paddy",
+   "author": "Telugu States by CSRGO project",
+   "source": "Hugo-Project/tools/make-models.mjs (procedural, three.js)",
+   "license": "CC0-1.0",
+   "sha256": "e331b2c140fcb43e102a36e9d325d13cf6c2b29af5712b11791abf40e7bfce47",
+   "verified_on": "2026-11-28"
+  },
+  {
+   "file": "assets/icons/item_paddy.png",
+   "name": "item_paddy.png",
+   "author": "Telugu States by CSRGO project",
+   "source": "Hugo-Project/tools/make-models.mjs (baked render of the GLB)",
+   "license": "CC0-1.0",
+   "sha256": "177fbbe9e7317ab896ce0c805153a1ba5ff231b1f3b903845c508ac3044fd2af",
+   "verified_on": "2026-11-28"
+  },
+  {
+   "file": "assets/models/item_rice.glb",
+   "name": "item_rice",
+   "author": "Telugu States by CSRGO project",
+   "source": "Hugo-Project/tools/make-models.mjs (procedural, three.js)",
+   "license": "CC0-1.0",
+   "sha256": "d8072fd7aa9065b2fe7e94a017881acc8d932e36370f2efffae5f4ca1f3c571e",
+   "verified_on": "2026-11-28"
+  },
+  {
+   "file": "assets/icons/item_rice.png",
+   "name": "item_rice.png",
+   "author": "Telugu States by CSRGO project",
+   "source": "Hugo-Project/tools/make-models.mjs (baked render of the GLB)",
+   "license": "CC0-1.0",
+   "sha256": "b0fbbf67b6e4b89d87d0df6b97b20f59ef6e7da8695ab35c979ac72d26c0e8d8",
+   "verified_on": "2026-11-28"
+  },
+  {
+   "file": "assets/models/item_ragi.glb",
+   "name": "item_ragi",
+   "author": "Telugu States by CSRGO project",
+   "source": "Hugo-Project/tools/make-models.mjs (procedural, three.js)",
+   "license": "CC0-1.0",
+   "sha256": "8c01d9c1648de7072b3d6ae10ae6cef0c038f6e004e173de2050952d7eba03f4",
+   "verified_on": "2026-11-28"
+  },
+  {
+   "file": "assets/icons/item_ragi.png",
+   "name": "item_ragi.png",
+   "author": "Telugu States by CSRGO project",
+   "source": "Hugo-Project/tools/make-models.mjs (baked render of the GLB)",
+   "license": "CC0-1.0",
+   "sha256": "5c728c3bbaf2233ee621793e56d3e29a69628746804f9c2ff075d07a30ce40f0",
+   "verified_on": "2026-11-28"
+  },
+  {
+   "file": "assets/models/item_chilli.glb",
+   "name": "item_chilli",
+   "author": "Telugu States by CSRGO project",
+   "source": "Hugo-Project/tools/make-models.mjs (procedural, three.js)",
+   "license": "CC0-1.0",
+   "sha256": "abfed23dc993a9a2c0a01cc1d96d56433916f4cc099dbfa4be7bee4ae47bbff5",
+   "verified_on": "2026-11-28"
+  },
+  {
+   "file": "assets/icons/item_chilli.png",
+   "name": "item_chilli.png",
+   "author": "Telugu States by CSRGO project",
+   "source": "Hugo-Project/tools/make-models.mjs (baked render of the GLB)",
+   "license": "CC0-1.0",
+   "sha256": "8a192db43774d8b02bcbe113d1be395d6d189b60850ba1ea747103a4ef368534",
+   "verified_on": "2026-11-28"
+  },
+  {
+   "file": "assets/models/item_cotton.glb",
+   "name": "item_cotton",
+   "author": "Telugu States by CSRGO project",
+   "source": "Hugo-Project/tools/make-models.mjs (procedural, three.js)",
+   "license": "CC0-1.0",
+   "sha256": "24aa1437889a9ac5d2fc18f0f9b960b682606edc01af3aff0018bfd3f536afcb",
+   "verified_on": "2026-11-28"
+  },
+  {
+   "file": "assets/icons/item_cotton.png",
+   "name": "item_cotton.png",
+   "author": "Telugu States by CSRGO project",
+   "source": "Hugo-Project/tools/make-models.mjs (baked render of the GLB)",
+   "license": "CC0-1.0",
+   "sha256": "cc3893be9e091703a810503e790baeed157de13248ab2167b2ec883999e3c39f",
+   "verified_on": "2026-11-28"
+  },
+  {
+   "file": "assets/models/item_fish.glb",
+   "name": "item_fish",
+   "author": "Telugu States by CSRGO project",
+   "source": "Hugo-Project/tools/make-models.mjs (procedural, three.js)",
+   "license": "CC0-1.0",
+   "sha256": "9defeed75f88eaf6edd63ac9c303ae18245f4cc07f5d83b942369962f94e9604",
+   "verified_on": "2026-11-28"
+  },
+  {
+   "file": "assets/icons/item_fish.png",
+   "name": "item_fish.png",
+   "author": "Telugu States by CSRGO project",
+   "source": "Hugo-Project/tools/make-models.mjs (baked render of the GLB)",
+   "license": "CC0-1.0",
+   "sha256": "4b9ef153d939a8fa62fe2915fbccf432d5def283d9d6e1086ae7219954c2815d",
+   "verified_on": "2026-11-28"
+  },
+  {
+   "file": "assets/models/item_milk.glb",
+   "name": "item_milk",
+   "author": "Telugu States by CSRGO project",
+   "source": "Hugo-Project/tools/make-models.mjs (procedural, three.js)",
+   "license": "CC0-1.0",
+   "sha256": "bc8fd27cbce24e39ac9cceb7d5728cc1dc07c19e84a6ed6b5c42da7bd8f4c140",
+   "verified_on": "2026-11-28"
+  },
+  {
+   "file": "assets/icons/item_milk.png",
+   "name": "item_milk.png",
+   "author": "Telugu States by CSRGO project",
+   "source": "Hugo-Project/tools/make-models.mjs (baked render of the GLB)",
+   "license": "CC0-1.0",
+   "sha256": "caedc7a0c612fa5059c766df03aa7b4c34dc76b6c899481ac324f7f84f765256",
+   "verified_on": "2026-11-28"
+  },
+  {
+   "file": "assets/models/item_egg.glb",
+   "name": "item_egg",
+   "author": "Telugu States by CSRGO project",
+   "source": "Hugo-Project/tools/make-models.mjs (procedural, three.js)",
+   "license": "CC0-1.0",
+   "sha256": "d2ada01647815614a0498d48a00d11dc8d4b0c79caeee0650e14d5baff8116ad",
+   "verified_on": "2026-11-28"
+  },
+  {
+   "file": "assets/icons/item_egg.png",
+   "name": "item_egg.png",
+   "author": "Telugu States by CSRGO project",
+   "source": "Hugo-Project/tools/make-models.mjs (baked render of the GLB)",
+   "license": "CC0-1.0",
+   "sha256": "19e5a7bd82d23887d3b917b4289adaa8c7f078c6a3f8654af66228479bb96f89",
+   "verified_on": "2026-11-28"
+  },
+  {
+   "file": "assets/models/item_vegetable.glb",
+   "name": "item_vegetable",
+   "author": "Telugu States by CSRGO project",
+   "source": "Hugo-Project/tools/make-models.mjs (procedural, three.js)",
+   "license": "CC0-1.0",
+   "sha256": "7a29939064a85d05e9cb17ea15a64dfd960246960fdf85b91b1084bc66b560e1",
+   "verified_on": "2026-11-28"
+  },
+  {
+   "file": "assets/icons/item_vegetable.png",
+   "name": "item_vegetable.png",
+   "author": "Telugu States by CSRGO project",
+   "source": "Hugo-Project/tools/make-models.mjs (baked render of the GLB)",
+   "license": "CC0-1.0",
+   "sha256": "fbd346811d76735512bbeee9c0590db11d79a45583f2d39385faeb50fc4784cb",
+   "verified_on": "2026-11-28"
+  },
+  {
+   "file": "assets/models/item_seeds.glb",
+   "name": "item_seeds",
+   "author": "Telugu States by CSRGO project",
+   "source": "Hugo-Project/tools/make-models.mjs (procedural, three.js)",
+   "license": "CC0-1.0",
+   "sha256": "d6e15b82dd7de58fb7dec9182b6130c0118a3c0c067f18526e29c006169a6982",
+   "verified_on": "2026-11-28"
+  },
+  {
+   "file": "assets/icons/item_seeds.png",
+   "name": "item_seeds.png",
+   "author": "Telugu States by CSRGO project",
+   "source": "Hugo-Project/tools/make-models.mjs (baked render of the GLB)",
+   "license": "CC0-1.0",
+   "sha256": "ebbf2422844072624f8809c1286f67359ac35575e5e46fddeaa07458f4642d33",
+   "verified_on": "2026-11-28"
+  },
+  {
+   "file": "icons/sprite.svg",
+   "name": "UI + gameplay icon sprite",
+   "author": "Lucide (FEITZ) contributors; game-icons.net contributors",
+   "source": "tools/make-icons.mjs ← @iconify-json/lucide, @iconify-json/game-icons",
+   "license": "ISC (Lucide icons); CC-BY-3.0 (game-icons.net icons)",
+   "sha256": "81be5eec62f04cb15e905fcb179c77d0b670034b13de692c8f0155895772298c",
+   "verified_on": "2026-11-28"
+  },
+  {
+   "file": "vendor/GLTFExporter.js",
+   "name": "three.js GLTFExporter",
+   "author": "three.js contributors",
+   "source": "three@0.187.0 examples/jsm/exporters",
+   "license": "MIT",
+   "sha256": "569793baeba62baeb4ab0b3619b6b1495b45d4b2ba9690430497adb58307bdf2",
+   "verified_on": "2026-11-28"
+  },
+  {
+   "file": "vendor/jsm/loaders/GLTFLoader.js",
+   "name": "three.js GLTFLoader",
+   "author": "three.js contributors",
+   "source": "three@0.187.0 examples/jsm/loaders",
+   "license": "MIT",
+   "sha256": "532ac726e120039acbcd6cf54328c57acbf7b438176afaa6951257126d11bff1",
+   "verified_on": "2026-11-28"
+  },
+  {
+   "file": "vendor/jsm/utils/BufferGeometryUtils.js",
+   "name": "three.js BufferGeometryUtils",
+   "author": "three.js contributors",
+   "source": "three@0.187.0 examples/jsm/utils",
+   "license": "MIT",
+   "sha256": "7bda2a8ba836b2bcf67cb938d4b9e1bb5d1b1bc616817103ed858c0b58296ce7",
+   "verified_on": "2026-11-28"
+  },
+  {
+   "file": "vendor/jsm/utils/SkeletonUtils.js",
+   "name": "three.js SkeletonUtils",
+   "author": "three.js contributors",
+   "source": "three@0.187.0 examples/jsm/utils",
+   "license": "MIT",
+   "sha256": "b1632a703206c3d830de9fcbe515696770d04b71a15ee6b50afa6d2c3298c86f",
+   "verified_on": "2026-11-28"
+  },
+  {
+   "file": "vendor/jsm/libs/meshopt_decoder.module.js",
+   "name": "meshoptimizer decoder (three.js)",
+   "author": "three.js contributors / Vladimir Vukicevic",
+   "source": "three@0.187.0 examples/jsm/libs",
+   "license": "MIT",
+   "sha256": "d428e73a000057c6c94bfcedc3412d0c2dc14ca8800e88553aab05113ad2bf19",
    "verified_on": "2026-11-28"
   }
  ]

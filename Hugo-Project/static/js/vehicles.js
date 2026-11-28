@@ -64,6 +64,8 @@ export function createVehicleRig(opts) {
       }
       v.updateVehicle(dt);
     },
+    /** Current front-wheel steer angle in radians (for wheel visuals). */
+    steerAngle: () => steer * 0.42,
     position: () => chassis.translation(),
     rotation: () => chassis.rotation(),
     speed: () => v.currentVehicleSpeed(),

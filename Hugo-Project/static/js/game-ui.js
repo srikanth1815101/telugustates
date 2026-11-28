@@ -6,10 +6,26 @@
 // @ts-check
 import { url } from "./grid.js";
 import { msg } from "./messages.js";
+import { KIND_MODEL } from "../../tools/model-spec.mjs";
 
 const SPRITE = url("icons/sprite.svg");
 const ico = (id, cls = "ico") =>
   `<svg class="${cls}" aria-hidden="true"><use href="${SPRITE}#ico-${id}"></use></svg>`;
+
+/**
+ * Item icon: the baked 128px render of the item's GLB when one exists,
+ * layered over the sprite glyph (the img removes itself if the PNG is
+ * missing, leaving the sprite visible).
+ * @param {string} kind
+ */
+const itemIcon = (kind) => {
+  const spr = ico(KIND_ICON[kind] ?? "package");
+  const model = KIND_MODEL[kind];
+  if (!model) return spr;
+  return `<span class="gs-i gs-baked">${spr}<img src="${url(
+    `assets/icons/${model}.png`,
+  )}" alt="" onerror="this.remove()"></span>`;
+};
 
 /** Inventory kind → sprite id. */
 const KIND_ICON = {
@@ -252,8 +268,8 @@ export function initGameUI(host) {
       ? `<div class="gs-grid">${items
           .map(
             (/** @type {{kind: string, qty: number}} */ it) =>
-              `<div class="gs-slot" title="${it.kind}">${ico(
-                KIND_ICON[it.kind] ?? "package",
+              `<div class="gs-slot" title="${it.kind}">${itemIcon(
+                it.kind,
               )}<b>${it.qty}</b><span>${it.kind}</span></div>`,
           )
           .join("")}</div>`
@@ -311,7 +327,7 @@ export function initGameUI(host) {
                 ? "up"
                 : "down";
           return `<div class="gs-offer">
-            <span class="gs-o-ico">${ico(KIND_ICON[o.kind] ?? "package")}</span>
+            <span class="gs-o-ico">${itemIcon(o.kind)}</span>
             <span class="gs-o-txt">
               <b>${t(o.side === "buy" ? "game.oBuy" : "game.oSell", {
                 qty: o.qty,
@@ -758,6 +774,8 @@ const CSS = `
 .gs-body{padding:12px 14px calc(18px + env(safe-area-inset-bottom));overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
 .gs-empty{opacity:.6;font:600 13px var(--body);text-align:center;padding:26px 0}
 .gs-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(76px,1fr));gap:8px}
+.gs-baked{position:relative;display:block}
+.gs-baked img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;pointer-events:none}
 .gs-slot{position:relative;display:flex;flex-direction:column;align-items:center;gap:2px;background:#f3efe0;border:1px solid #e3ddc8;border-radius:12px;padding:10px 4px 7px;color:#194328;font:600 11px var(--body);min-height:76px}
 .gs-slot .ico{width:26px;height:26px;color:#ad4817}
 .gs-slot b{position:absolute;top:4px;right:7px;font:700 11px var(--body);color:#1b4f29}
