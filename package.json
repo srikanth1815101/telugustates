@@ -1,0 +1,26 @@
+{
+  "name": "telugu-states",
+  "private": true,
+  "type": "module",
+  "description": "Build and test tooling for the Telugu States atlas. The site itself stays dependency-free at runtime: Vite bundles static/js into static/dist, Hugo renders content, and every runtime file is served locally.",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "npm run build:js && npm run build:site",
+    "build:js": "vite build",
+    "build:site": "hugo --source Hugo-Project --minify",
+    "dev:js": "vite build --watch",
+    "dev:site": "hugo server --source Hugo-Project",
+    "typecheck": "tsc -p tsconfig.json",
+    "test:checks": "node Hugo-Project/tools/run-all.mjs",
+    "test:e2e": "node e2e/smoke.mjs",
+    "test": "npm run typecheck && npm run test:checks && npm run test:e2e"
+  },
+  "devDependencies": {
+    "@sparticuz/chromium": "^158.0.0",
+    "puppeteer-core": "^25.19.0",
+    "typescript": "^7.0.2",
+    "vite": "^8.4.0"
+  }
+}

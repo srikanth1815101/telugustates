@@ -8,3 +8,5 @@
 *.jks
 *.keystore
 .DS_Store
+node_modules/
+Hugo-Project/static/dist/

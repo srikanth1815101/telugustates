@@ -30,6 +30,14 @@ jobs:
           grep -F " $pkg" "hugo_${v}_checksums.txt" | sha256sum -c -
           mkdir -p hugo-bin; tar xzf "$pkg" -C hugo-bin hugo; echo "$RUNNER_TEMP/hugo-bin" >> "$GITHUB_PATH"
 
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Bundle the game modules (Vite)
+        run: npm ci && npx vite build
+
       - name: Build Hugo site
         run: hugo --source Hugo-Project --destination "$GITHUB_WORKSPACE/Hugo-Project/public" --minify
 

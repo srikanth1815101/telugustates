@@ -1,0 +1,34 @@
+# Point Netlify at this branch (arena/40b813ab-telugustates).
+# The site is fully static: Vite bundles the ES modules, Hugo renders the
+# content, and everything the game fetches at runtime ships inside the build.
+[build]
+  command = "npm ci && npm run build"
+  publish = "Hugo-Project/public"
+
+[build.environment]
+  NODE_VERSION = "22"
+  HUGO_VERSION = "0.147.8"
+  HUGO_ENVIRONMENT = "production"
+  HUGO_ENABLEGITINFO = "false"
+
+# The bundled entry is rebuilt on every deploy; static vendors and frozen
+# terrain are content-hashed by path, so short revalidation is enough.
+[[headers]]
+  for = "/dist/*"
+  [headers.values]
+    Cache-Control = "public, max-age=300, must-revalidate"
+
+[[headers]]
+  for = "/vendor/*"
+  [headers.values]
+    Cache-Control = "public, max-age=86400"
+
+[[headers]]
+  for = "/frozen/*"
+  [headers.values]
+    Cache-Control = "public, max-age=86400"
+
+[[headers]]
+  for = "/hydraulics/*"
+  [headers.values]
+    Cache-Control = "public, max-age=86400"
