@@ -4121,6 +4121,7 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
       host.hidden = true;
       document.body.classList.remove("walking");
       delete window.atlasWalk;
+      delete globalThis.atlasLife;
     },
   };
   // Phase 0 perf harness: inert unless the URL carries ?perf=1.
@@ -4138,5 +4139,85 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
         }),
       )
       .catch((e) => console.warn("[perf-harness]", e));
+  // Phase 4 life-sim namespace: lazy singletons + IndexedDB persistence.
+  // Additive — the localStorage prefs/position stores stay untouched.
+  const atlasLife = {
+    version: 1,
+    bus: null,
+    inventory: null,
+    quests: null,
+    economy: null,
+    _p: null,
+    ready() {
+      if (!this._p)
+        this._p = (async () => {
+          const [
+            { createBus },
+            { createInventory },
+            { createQuests },
+            { createEconomy },
+            save,
+          ] = await Promise.all([
+            import("./interact.js"),
+            import("./inventory.js"),
+            import("./quests.js"),
+            import("./economy.js"),
+            import("./save.js"),
+          ]);
+          this.bus = createBus();
+          this.inventory = createInventory();
+          this.quests = createQuests([]);
+          this.economy = createEconomy();
+          this._save = save;
+          return this;
+        })();
+      return this._p;
+    },
+    /** Publish a life event: advances quests, then fans out on the bus. */
+    async event(type, payload) {
+      const s = await this.ready();
+      s.quests.feed(type, payload);
+      return s.bus.emit(type, payload);
+    },
+    /** Persist life state to IndexedDB (slot "default"). */
+    async persist() {
+      const s = await this.ready();
+      return s._save.saveSlot("default", {
+        inventory: s.inventory.serialise(),
+        quests: s.quests.serialise(),
+        economy: s.economy.serialise(),
+      });
+    },
+    /** Restore the saved slot; false when none exists. */
+    async restore() {
+      const s = await this.ready();
+      const rec = await s._save.loadSlot("default");
+      if (!rec) return false;
+      s.inventory.restore(rec.data.inventory);
+      s.quests.restore(rec.data.quests);
+      s.economy.restore(rec.data.economy);
+      return true;
+    },
+    export() {
+      return this.ready().then((s) => s._save.exportSlot("default"));
+    },
+    async import(json) {
+      const s = await this.ready();
+      const rec = await s._save.importSlot(json, "default");
+      if (!rec) return null;
+      await this.restore();
+      return rec;
+    },
+    async status() {
+      const s = await this.ready();
+      return {
+        quests: s.quests.all(),
+        rupees: s.economy.rupees(),
+        items: s.inventory.total(),
+        goods: s.inventory.list(),
+      };
+    },
+  };
+  globalThis.atlasLife = atlasLife;
   return api;
 }

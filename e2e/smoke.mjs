@@ -196,6 +196,16 @@ await step("3D world boots and streams a patch", async () => {
   const frames1 = await page.evaluate(() => window.atlasWalk.snapshot().frames);
   if (frames1 <= frames0) throw new Error("frame counter not advancing");
   note(`frames advanced ${frames0} → ${frames1}`);
+  // Phase 4: the life-sim namespace must boot and answer in-browser.
+  const life = await page.evaluate(async () => {
+    if (typeof window.atlasLife?.ready !== "function") return null;
+    await window.atlasLife.ready();
+    const st = await window.atlasLife.status();
+    await window.atlasLife.event("test-event", { n: 1 });
+    return { st, bus: !!window.atlasLife.bus };
+  });
+  if (!life?.bus) throw new Error("atlasLife missing or not ready");
+  note(`atlasLife ready: ${JSON.stringify(life.st)}`);
 });
 
 await step("perf harness samples all three spots", async () => {
