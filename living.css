@@ -1,0 +1,1007 @@
+#public-home {
+  padding-block: 22px 50px;
+  --forest: #1b4e29;
+}
+.land-hero {
+  display: grid;
+  grid-template-columns: 1.25fr 1fr;
+  background: #e9f1d7;
+  overflow: hidden;
+  border: 1px solid #c5d59e;
+  border-radius: 18px;
+  margin: 5px 0 24px;
+}
+.hero-copy {
+  padding: clamp(22px, 4.5vw, 56px);
+}
+.land-hero h1 {
+  font:
+    500 clamp(43px, 6vw, 82px) / 1.02 Fraunces,
+    "Noto Sans Telugu",
+    serif;
+  letter-spacing: -0.045em;
+  margin: 14px 0;
+  color: #193f27;
+}
+.land-hero p {
+  max-width: 42ch;
+  line-height: 1.65;
+  color: #285c35;
+}
+.land-hero figure {
+  position: relative;
+  margin: 0;
+  min-height: 160px;
+}
+.land-hero img {
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+  position: absolute;
+}
+.land-hero figcaption {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  border-radius: 20px;
+  background: #143420df;
+  color: #fdf6e6;
+  padding: 4px 12px;
+  font-size: 12px;
+}
+#public-home .map-card {
+  width: 100%;
+}
+#public-home #map-wrap {
+  height: clamp(270px, 43vh, 450px);
+  max-height: none;
+  aspect-ratio: auto;
+}
+#public-home .map-read {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+#public-home .primary {
+  width: auto;
+  min-height: 46px;
+  padding: 9px 20px;
+}
+#public-home h2 {
+  font:
+    500 clamp(24px, 3.4vw, 40px) / 1.2 Fraunces,
+    "Noto Sans Telugu",
+    serif;
+  margin: 10px 0 15px;
+}
+#public-home .card-head h2 {
+  font-size: 22px;
+  margin: 4px 0;
+}
+.look-up {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin: 22px 0;
+}
+.look-up > div,
+.scenic,
+.treasury,
+#recent-homes {
+  padding: clamp(19px, 3.2vw, 36px);
+  border: 1px solid #c8d6a5;
+  border-radius: 14px;
+  background: #fefdf8;
+}
+.join li {
+  margin: 6px 0;
+}
+.lookup-row {
+  display: flex;
+  gap: 9px;
+  flex-wrap: wrap;
+}
+.lookup-row input {
+  min-width: 12ch;
+  flex: 1;
+  padding: 9px;
+  border: 1px solid #96b05a;
+  border-radius: 7px;
+  font: inherit;
+}
+.scenic,
+.treasury {
+  margin: 20px 0;
+}
+.treasury {
+  background: #edf2e8;
+}
+#balances {
+  display: flex;
+  flex-wrap: wrap;
+  gap: clamp(14px, 4vw, 52px);
+}
+#balances strong {
+  display: block;
+  font:
+    32px Fraunces,
+    serif;
+}
+.scenic p,
+.treasury p {
+  color: #275f36;
+}
+#scenic-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(174px, 1fr));
+  gap: 12px;
+}
+.scenic-card {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+  border: 1px solid #cfdbd0;
+  border-radius: 10px;
+  overflow: hidden;
+  background: white;
+}
+.scenic-card img {
+  width: 100%;
+  height: 100px;
+  object-fit: cover;
+}
+.scenic-card span,
+.scenic-card small {
+  display: block;
+  margin: 6px 12px;
+}
+.scenic-card small {
+  color: #306c40;
+}
+.text-link {
+  background: none;
+  border: 0;
+  text-decoration: underline;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.public-edition #flight-dock {
+  pointer-events: none;
+}
+.public-edition .flight-guide,
+.public-edition .detail-note,
+.public-edition .chart-tag {
+  display: none !important;
+}
+.public-edition [hidden] {
+  display: none !important;
+}
+body.walking.paper-map.public-edition #world {
+  display: none !important;
+}
+body.walking.paper-map.public-edition #public-home {
+  display: block !important;
+}
+#progress:not([hidden]) {
+  padding: 11px 15px;
+  background: #eaf3d7;
+  border-left: 3px solid #378039;
+}
+.public-edition #world .world-sheet input[type="range"] {
+  max-width: 100%;
+}
+.public-edition :focus-visible {
+  outline: 3px solid #b2430c;
+  outline-offset: 2px;
+}
+@media (max-width: 650px) {
+  .land-hero,
+  .look-up {
+    grid-template-columns: 1fr;
+  }
+  .land-hero figure {
+    min-height: 135px;
+  }
+  .look-up {
+    gap: 12px;
+  }
+  .public-edition .top nav {
+    gap: 3px;
+  }
+  .public-edition .top nav button,
+  .public-edition .top nav a {
+    min-width: 0;
+    padding: 5px;
+    font-size: 12px;
+  }
+  #scenic-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  #public-home .map-read {
+    font-size: 12px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  #public-home * {
+    scroll-behavior: auto;
+    animation: none;
+  }
+}
+/* Nature walk edition: the map folio, not a second splash screen. */
+body.public-edition {
+  background: linear-gradient(150deg, #f0f6e2, #fbf6ec 36%, #edf3de);
+  color: #1a4128;
+}
+#public-home .titlebar {
+  padding-block: 20px 16px;
+}
+#public-home .titlebar h1,
+#public-home .journeys h2,
+#public-home .find-inner h2 {
+  color: #163d25;
+}
+#public-home .titlebar h1 span,
+#public-home .find-inner h2 span,
+#public-home .journeys h2 span {
+  color: #957526;
+}
+#public-home .map-card {
+  background: #f8fbee;
+}
+#public-home #map-wrap {
+  height: clamp(320px, 53vh, 545px);
+  background: linear-gradient(135deg, #e1ecc8, #e4eece 58%, #d2ddd2);
+}
+#public-home #find .primary {
+  width: 100%;
+  background: linear-gradient(115deg, #1a4c28, #276838);
+  color: #fefbf2;
+}
+#public-home .sample-acres {
+  border-top: 1px solid #cedacf;
+  margin-top: 16px;
+  padding-top: 12px;
+}
+#public-home .sample-acres small {
+  font-size: 11px;
+  font-weight: 700;
+  color: #2f6a3e;
+}
+#sample-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 6px;
+}
+#sample-links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  font: 600 12px var(--body);
+  padding: 4px 8px;
+  border-radius: 7px;
+  background: #e7f0d3;
+  color: #1d512b;
+  text-decoration: none;
+}
+#scenic-cards {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+a.scenic-card {
+  position: relative;
+  isolation: isolate;
+  height: clamp(130px, 17vw, 205px);
+  border: 0;
+  border-radius: 10px;
+  color: #fefcf5;
+  background: #317242;
+}
+a.scenic-card img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: -2;
+}
+a.scenic-card:after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(0deg, #112e1ce8, transparent 92%);
+  z-index: -1;
+}
+a.scenic-card div {
+  position: absolute;
+  bottom: 11px;
+  inset-inline: 12px;
+}
+a.scenic-card span {
+  font:
+    600 clamp(16px, 2vw, 25px) / 1.15 Fraunces,
+    NotoTelugu,
+    serif;
+  margin: 3px 0;
+}
+a.scenic-card small {
+  font: 650 10px/1.25 var(--body);
+  color: #e2ebe3;
+  margin: 0;
+}
+.public-edition .treasury {
+  border-radius: 14px;
+  background: linear-gradient(145deg, #f2f7e4, #e5eecf);
+  padding: clamp(16px, 3.4vw, 38px);
+}
+.public-edition #balances {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(95px, 1fr));
+  gap: 8px;
+}
+.resource {
+  display: grid;
+  grid-template-columns: 24px 1fr;
+  align-items: center;
+  gap: 4px 9px;
+  border: 1px solid #d1ded2;
+  background: #f7fbee;
+  border-radius: 9px;
+  padding: 10px;
+}
+.resource i {
+  display: grid;
+  place-items: center;
+  color: #327745;
+}
+.resource svg {
+  width: 23px;
+  height: 23px;
+}
+.resource span {
+  grid-column: 1/-1;
+  font: 600 11px var(--body);
+  color: #2f6b3f;
+  line-height: 1.3;
+}
+#balances .resource strong {
+  font:
+    600 24px/1 Fraunces,
+    NotoTelugu,
+    serif;
+  font-variant-numeric: tabular-nums;
+}
+.resource-gold i {
+  color: #97731a;
+}
+.resource-currency i {
+  color: #8d7025;
+}
+@media (max-width: 750px) {
+  #scenic-cards {
+    grid-template-columns: 1fr 1fr;
+  }
+  #public-home #map-wrap {
+    height: clamp(280px, 40vh, 420px);
+  }
+  .public-edition #balances {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+#world .world-top {
+  right: auto;
+  width: auto;
+  height: auto;
+}
+#world .world-back,
+#world .flight-north,
+#world .flight-labels,
+#world .land-cta,
+#world .flight-guide,
+#world .chart-tag {
+  display: none !important;
+}
+#world #world-menu,
+#world .pace-panel button {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 9px;
+  background: #1a4525b9;
+  color: #fefbf2;
+  border: 1px solid #e1ecc58f;
+  box-shadow: 0 1px 4px #0f251726;
+}
+#world #world-menu {
+  border-radius: 14px;
+}
+#world #world-menu svg,
+#world .pace-panel svg {
+  width: 24px;
+  height: 24px;
+}
+#world .pace-panel {
+  gap: 9px;
+}
+#world .pace-panel button[aria-pressed="true"] {
+  background: #d5e9a7;
+  color: #194429;
+  box-shadow: inset 0 0 0 2px #317d46;
+}
+#world .joystick,
+#world.walk-view .joystick {
+  display: grid;
+  pointer-events: auto;
+  left: calc(var(--pad-l) + 16px);
+  right: auto;
+  bottom: calc(var(--pad-b) + 14px);
+  background: radial-gradient(circle at 50% 42%, #6f843e5c, #1a3e2770);
+  width: 68px;
+  height: 68px;
+}
+#world.groundless .pace-panel,
+#world.groundless .joystick,
+#world.photo-mode .walk-corner {
+  display: none !important;
+}
+#world .walk-corner {
+  position: absolute;
+  z-index: 3;
+  right: calc(var(--pad-r) + 9px);
+  top: calc(var(--pad-t) + 8px);
+  display: flex;
+  align-items: flex-end;
+  flex-direction: column;
+  gap: 3px;
+  pointer-events: none;
+  max-width: 135px;
+}
+#world .pocket-map {
+  display: block;
+  width: clamp(54px, 13vmin, 73px);
+  aspect-ratio: 1;
+  border: 1.4px solid #eef7d7bb;
+  border-radius: 7px;
+  box-shadow: 0 1px 4px #0f251740;
+  background: #9fb960;
+}
+#world .walk-corner #place-chip {
+  min-height: 0;
+  padding: 3px 5px;
+  display: block;
+  max-width: 135px;
+  border: 0;
+  border-radius: 5px;
+  text-align: right;
+  color: #f7fcec;
+  background: #193e26cf;
+  box-shadow: none;
+  pointer-events: auto;
+}
+#world .walk-corner #place-chip i {
+  display: none;
+}
+#world .walk-corner #place-chip span,
+#world .walk-corner #place-chip small {
+  display: block;
+  white-space: normal;
+  margin: 0;
+  color: inherit;
+  font: 650 10px/1.25 var(--body);
+}
+#world .walk-corner #place-chip small {
+  font-size: 9px;
+  font-weight: 500;
+  color: #e2ecc9;
+}
+#world .world-sheet {
+  left: calc(var(--pad-l) + 8px);
+  right: auto;
+  top: calc(var(--pad-t) + 55px);
+  max-height: calc(100dvh - var(--pad-t) - var(--pad-b) - 62px);
+}
+#world .quick-settings {
+  padding: 4px 0 12px;
+  border-bottom: 1px solid #cedbce;
+}
+.quick-settings button {
+  padding: 6px 10px;
+  border: 1px solid #c3d49b;
+  border-radius: 8px;
+  background: #e7f0d2;
+  color: #1c4b28;
+}
+.quick-settings label {
+  display: flex;
+  gap: 7px;
+  align-items: center;
+  min-height: 36px;
+}
+#leave-world {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  width: 100%;
+  font-weight: 700;
+}
+#leave-world svg {
+  width: 19px;
+}
+.view-picks {
+  margin: 6px 0;
+}
+.view-picks div {
+  display: flex;
+  gap: 5px;
+}
+.view-picks > span {
+  font-size: 12px;
+}
+#world.hud-rest :is(.world-top, .pace-panel, .joystick) {
+  opacity: 0.78;
+}
+#world #go-home:not([hidden]) {
+  margin-top: 12px;
+}
+#world:has(.world-sheet:not([hidden])) :is(.joystick, .pace-panel) {
+  visibility: hidden;
+}
+.public-edition #world #place-chip[hidden],
+#world .pocket-map[hidden] {
+  display: none !important;
+}
+
+#world .walk-corner #place-chip {
+  position: static;
+  top: auto;
+  left: auto;
+  transform: none;
+  align-self: flex-end;
+  min-width: 0;
+  pointer-events: none;
+}
+#world .walk-corner {
+  z-index: 2;
+}
+#world .world-sheet {
+  z-index: 6;
+}
+#world #place-chip {
+  cursor: default;
+}
+@media (min-width: 345px) and (max-width: 650px) {
+  .public-edition .top nav {
+    display: flex;
+    align-items: center;
+    gap: 1px;
+  }
+  .public-edition .top nav a,
+  .public-edition .top nav button {
+    font-size: 10px;
+    padding: 5px 3px;
+  }
+  .public-edition .brand {
+    gap: 6px;
+  }
+  .public-edition .brand img {
+    width: 32px;
+    height: 32px;
+  }
+  .public-edition .bar {
+    gap: 4px;
+  }
+  .public-edition .top .lang {
+    font-size: 10px;
+    padding: 4px 6px;
+  }
+}
+#world .quick-settings .orbit-scale {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-column: 1/-1;
+  align-items: center;
+  gap: 0.35rem 0.65rem;
+  padding: 0.65rem 0.8rem;
+  background: #e4ebe4;
+  border-radius: 0.75rem;
+  color: #193f27;
+}
+#orbit-read {
+  font-variant-numeric: tabular-nums;
+  font-weight: 650;
+}
+#world #orbit-distance {
+  display: block;
+  grid-column: 1/-1;
+  width: 100%;
+  min-width: 0;
+  accent-color: #236033;
+  margin: 0;
+}
+#world .orbit-help {
+  grid-column: 1/-1;
+  line-height: 1.45;
+  color: #566258;
+}
+
+#world.groundless .walk-corner {
+  display: none;
+}
+.orbit-tools {
+  position: absolute;
+  bottom: max(13px, env(safe-area-inset-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 7;
+  display: flex;
+  height: 45px;
+  align-items: center;
+  gap: 3px;
+  color: #fefbf2;
+  background: #183e26eb;
+  border: 1px solid #ebd7a580;
+  border-radius: 30px;
+  padding: 0 3px;
+  box-shadow: 0 2px 8px #18372426;
+  font-variant-numeric: tabular-nums;
+}
+.orbit-tools[hidden] {
+  display: none !important;
+}
+.orbit-tools button {
+  color: inherit;
+  background: transparent;
+  padding: 0;
+  min-width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 50%;
+  font: 500 24px/1 system-ui;
+}
+.orbit-tools span {
+  text-align: center;
+  min-width: 74px;
+  display: grid;
+  line-height: 1.1;
+}
+.orbit-tools small {
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 8px;
+  opacity: 0.75;
+}
+.orbit-tools output {
+  font-size: 13px;
+  font-weight: 650;
+}
+.orbit-tools button:focus-visible {
+  outline: 2px solid #f0bb37;
+}
+.world-sheet:not([hidden]) ~ .orbit-tools {
+  visibility: hidden;
+}
+
+#world .walk-corner[hidden],
+#world .world-sheet[hidden] {
+  display: none !important;
+}
+#world .action-dock,
+#world .avatar-dock {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  grid-column: 1/-1;
+  flex-wrap: wrap;
+}
+#world .avatar-dock {
+  border: 0;
+  padding: 0;
+  margin: 0.4rem 0 0.65rem;
+}
+#world .avatar-dock legend {
+  font-size: 12px;
+  font-weight: 650;
+  margin-bottom: 5px;
+  color: #2f6b3f;
+}
+#world .quick-settings .field-tool {
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 46px;
+  width: 46px;
+  min-width: 46px;
+  height: 44px;
+  padding: 0;
+  background: #f2f6e6;
+  color: #1c4f2a;
+  border: 1px solid #b9ca8f;
+  border-radius: 12px;
+}
+#world .field-tool svg {
+  width: 23px;
+  height: 23px;
+}
+#world .quick-settings .field-tool[aria-pressed="true"] {
+  background: #1e582d;
+  border-color: #1e582d;
+  color: #fefbf2;
+}
+#world .quick-settings .field-tool:focus-visible {
+  outline: 3px solid #a87f1a;
+  outline-offset: 2px;
+}
+#world.groundless .readings:not([hidden]) {
+  display: block !important;
+}
+@media (max-width: 650px) {
+  .public-edition #balances {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Contextual door action: never replaces Jump, the stick, or the player's saved outdoor camera. */
+#world #use-door {
+  position: absolute;
+  z-index: 4;
+  left: 50%;
+  bottom: calc(var(--pad-b, 0px) + 23px);
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 46px;
+  padding: 8px 15px;
+  border-radius: 24px;
+  background: #fcf5e2;
+  color: #163d25;
+  border: 1px solid #8ea950;
+  box-shadow: 0 2px 10px #112d1b60;
+  line-height: 1.2;
+  -webkit-tap-highlight-color: transparent;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 650;
+  white-space: nowrap;
+  touch-action: manipulation;
+  pointer-events: auto;
+}
+#use-door svg {
+  width: 21px;
+  height: 21px;
+}
+#use-door kbd {
+  font: 600 11px/1.3 system-ui;
+  border: 1px solid #94af57;
+  border-radius: 4px;
+  padding: 1px 4px;
+}
+#world #use-door:focus-visible {
+  outline: 3px solid #f0ba31;
+  outline-offset: 2px;
+}
+#world #use-door[hidden],
+#world.groundless #use-door,
+#world.photo-mode #use-door,
+#world:has(.world-sheet:not([hidden])) #use-door {
+  display: none !important;
+}
+.door-sr {
+  position: absolute;
+  clip-path: inset(50%);
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+@media (pointer: coarse) {
+  #use-door kbd {
+    display: none;
+  }
+}
+@media (max-width: 380px) {
+  #world #use-door {
+    bottom: calc(var(--pad-b, 0px) + 87px);
+  }
+}
+
+/* Resident destinations, outside the joystick and minimap safe areas. */
+/* Shortcuts share the upper safe area with Settings in both 3-D modes. */
+#world .holding-icon {
+  display: grid;
+  place-items: center;
+  border: 1px solid #e1ecc58f;
+  border-radius: 14px;
+  background: #1a4525c9;
+  color: #fefbf2;
+  box-shadow: 0 1px 4px #0f251726;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  padding: 9px;
+  margin: 0;
+  pointer-events: auto;
+}
+#world .holding-icon svg {
+  width: 24px;
+  height: 24px;
+}
+#world .holding-icon[aria-expanded="true"] {
+  background: #f6e3b1;
+  color: #1a4229;
+  border-color: #caa957;
+}
+#world .holding-icon:focus-visible,
+#holding-menu button:focus-visible,
+#holding-menu input:focus-visible {
+  outline: 3px solid #f7dc96;
+  outline-offset: 2px;
+}
+#holding-menu {
+  position: absolute;
+  z-index: 12;
+  top: calc(var(--pad-t, 0px) + 60px);
+  left: calc(var(--pad-l, 0px) + 10px);
+  width: min(296px, calc(100% - 22px));
+  max-height: calc(100% - 100px);
+  overflow: auto;
+  color: #fdf7e9;
+  background: #183e26f4;
+  border: 1px solid #ddc79180;
+  border-radius: 15px;
+  box-shadow: 0 6px 24px #17382340;
+  padding: 14px;
+  box-sizing: border-box;
+}
+#holding-menu header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 5px;
+}
+#holding-menu header h3 {
+  font-size: 18px;
+  line-height: 1.2;
+  margin: 2px 0 8px;
+  color: inherit;
+}
+#holding-menu small,
+#holding-menu label {
+  font-size: 12px;
+  color: #f3e9ce;
+}
+#holding-menu #close-holding {
+  background: transparent;
+  border: 0;
+  color: inherit;
+  font-size: 22px;
+  padding: 3px;
+  min-width: 34px;
+  min-height: 34px;
+}
+#holding-claim {
+  margin: 2px 0 10px;
+}
+#holding-claim label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+.holding-input-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #fbf4e4;
+  color: #163923;
+  border: 1px solid #e1cb96;
+  border-radius: 9px;
+  padding: 4px 5px 4px 10px;
+}
+.holding-input-row > span {
+  font-weight: 800;
+  color: #6b7666;
+  font-size: 14px;
+}
+.holding-input-row input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  color: #163923;
+  font: 600 13.5px system-ui;
+  height: 32px;
+  outline: none;
+}
+.holding-input-row input::placeholder {
+  color: #878e7f;
+  font-weight: 500;
+}
+#holding-verify {
+  border: 0;
+  border-radius: 7px;
+  background: #1d542c;
+  color: #fefdf8;
+  font: 700 12px system-ui;
+  padding: 7px 11px;
+  min-height: 32px;
+  white-space: nowrap;
+}
+#holding-status {
+  margin: 7px 0 0;
+  font-size: 11.5px;
+  line-height: 1.4;
+  color: #f6d98e;
+}
+#holding-distance {
+  display: block;
+  line-height: 1.4;
+}
+#holding-chart {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 3px 0 7px;
+  border-radius: 7px;
+}
+#holding-menu [hidden] {
+  display: none !important;
+}
+#holding-menu .home-pair {
+  display: flex;
+  gap: 7px;
+  margin-top: 9px;
+}
+#holding-menu .home-pair button {
+  min-height: 42px;
+  flex: 1;
+  border: 0;
+  border-radius: 8px;
+  background: #f8eed3;
+  color: #163c24;
+  font: 600 13px system-ui;
+}
+#holding-menu .home-pair button:last-child {
+  background: #e2af2c;
+}
+#holding-menu button:disabled {
+  opacity: 0.48;
+}
+#world #route-step {
+  position: absolute;
+  z-index: 4;
+  top: calc(var(--pad-t, 0px) + 61px);
+  left: calc(var(--pad-l, 0px) + 10px);
+  border-radius: 8px;
+  padding: 5px 8px;
+  background: #193f27df;
+  color: #fefbf2;
+  font: 600 12px system-ui;
+  pointer-events: none;
+}
+#world:has(#holding-menu:not([hidden])) #route-step {
+  display: none;
+}
+
+/* The home page's resource ledger is a stacked table, not the single-line
+   map strip that #public-home .map-read assumes, so opt it back out of flex. */
+#public-home .ledger-foot {
+  display: block;
+  padding: 0;
+  background: #f1f6e4;
+  border-top: 1px solid #d9e3d0;
+  font: 12px/1.5 var(--body);
+  color: var(--ink);
+}
+#public-home .ledger-foot .ledger-title,
+#public-home .ledger-foot .ledger-date,
+#public-home .ledger-foot .ledger-chip,
+#public-home .ledger-foot .ledger-delta {
+  font-family: var(--mono);
+}

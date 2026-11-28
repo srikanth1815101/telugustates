@@ -1,0 +1,8 @@
+# HST1 · Inland water heads
+
+A **head** here is an illustrative water-surface elevation in metres in the atlas DEM reference frame. It is not a live gauge, a safe depth or a prediction of a dam release. The blue outline is still obtained from the frozen coverage and mapped paths. No source tile was altered. See `../frozen/credits.md` for attribution and source licences.
+
+* `X_Y.bin.gz`: gzip, little-endian uint16 in the frozen tile’s row-major order, skipping all cells except those with a nonzero district and class 3 or 4. `((word & 32767) / 16) - 64` gives metres. Bit 15 marks standing rather than running water. One common robust observed datum is assigned to a mapped lake across tile boundaries. Smaller disconnected still-water patches also get a single datum. Medial stations smooth running reaches along, rather than across, their valleys; at confluences profiles blend. Steep headwaters can still fall. Ocean remains a separate sea-level surface with wave displacement.
+* `paths/X_Y.json.gz`: original clipped path index → per-point stage words (no flag). Narrow channels follow the fitted longitudinal profile across their width. These are not additional waterway surveys.
+* `survey/X_Y.bin.gz`: 128 × 128 uint16 over each 512-acre-cell coverage page. A zero is empty; nonzero values have the same decoding. `survey-base.gz` contains unsigned values at overview grid spacing. These support the lower-detail survey beyond the walkable area; it is still a cartographic approximation.
+* `sources.json` records the counts and quantisation. `tools/bake-water-stages.py` and `tools/bake-vector-heads.py` document the optional offline derivation. Neither Python nor regeneration is needed to open or publish the atlas.
