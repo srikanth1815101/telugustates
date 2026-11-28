@@ -89,6 +89,16 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
     physicsP = null,
     physicsPrev = null,
     physSample = null;
+  // Phase 5: farm HUD state — declared before any frame can run so
+  // ground() never hits a temporal-dead-zone reference.
+  let lifeRef = null,
+    farmBtn = null,
+    farmAct = null,
+    farmCropIx = 0;
+  function toast(t) {
+    const n = q("#room-notice");
+    if (n) n.textContent = t;
+  }
   const [stops, worldConfig, naturalRoutes, walkArt] = await Promise.all([
     get(dev ? "ecology/stops.json" : "living/public/places.json"),
     get("living/world.json"),
@@ -2219,6 +2229,32 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
       h = Math.min(0.24, dt);
     if (wantPhysics)
       physSample = (sx, sz) => S.ground(S.atlas.x + sx / U, S.atlas.y - sz / U);
+    // Phase 5: keep the life-sim fed with the live surface + advance crops.
+    if (lifeRef) {
+      lifeRef._ground = (gx, gz) => S.ground(gx, gz);
+      lifeRef._grade = (gx, gz) => S.gradeAt(gx, gz);
+      lifeRef._face = (gx, gz) => (S.floor ? S.floor(gx, gz) : S.sample(gx, gz));
+      lifeRef._motor = () => ({ x: motor.x, y: motor.y });
+      if (lifeRef.farming) {
+        lifeRef.farming.tick(h);
+        const act = (farmAct = lifeRef.farming.actionAt(motor.x, motor.y));
+        if (farmBtn) {
+          const label =
+            act.mode === "sow"
+              ? "🌱 Sow"
+              : act.mode === "water"
+                ? "💧 Water"
+                : act.mode === "harvest"
+                  ? "🌾 Harvest"
+                  : act.mode === "tend"
+                    ? `🌿 ${act.stage}/${act.stages}`
+                    : "";
+          farmBtn.hidden = !label;
+          if (label && farmBtn.textContent !== label)
+            farmBtn.textContent = label;
+        }
+      }
+    }
     // Rebuild a tiny trunk / boulder neighbourhood only when the player or the placement patch changes.
     if (
       !L.solidCentre ||
@@ -4139,7 +4175,48 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
         }),
       )
       .catch((e) => console.warn("[perf-harness]", e));
-  // Phase 4 life-sim namespace: lazy singletons + IndexedDB persistence.
+  // Phase 5: contextual farm action button inside the pace panel (it
+  // inherits .pace-panel button styling — no new CSS). The listener runs
+  // long after atlasLife exists, so the const reference is safe.
+  farmBtn = document.createElement("button");
+  farmBtn.type = "button";
+  farmBtn.id = "farm-act";
+  farmBtn.hidden = true;
+  q(".pace-panel")?.append(farmBtn);
+  const farmCrops = ["ragi", "paddy", "chilli", "cotton", "vegetable"];
+  farmBtn.addEventListener("click", async () => {
+    const L = atlasLife;
+    if (!L.farming || !farmAct || !L._face) return;
+    const at = L._motor?.() ?? { x: 0, y: 0 };
+    try {
+      if (farmAct.mode === "sow") {
+        const face = L._face(at.x, at.y);
+        if ((face.depth ?? 0) > 0.35) return toast("Too wet to sow here");
+        const g = L._grade(at.x, at.y);
+        if (Math.hypot(g[0], g[1]) > 0.84)
+          return toast("Too steep to sow here");
+        const kind = farmCrops[farmCropIx++ % farmCrops.length];
+        const r = L.farming.sow(at.x, at.y, kind);
+        if (!r.ok)
+          return toast(
+            r.why === "plot-overlap" ? "Too close to another plot" : "Cannot sow here",
+          );
+        toast(`Sowed ${kind}`);
+      } else if (farmAct.mode === "water") {
+        toast(L.farming.water(farmAct.id).ok ? "Watered the plot" : "Still wet");
+      } else if (farmAct.mode === "harvest") {
+        const r = L.farming.harvest(farmAct.id);
+        if (r.ok) {
+          L.inventory.add(r.kind, r.qty);
+          toast(`Harvested ${r.qty} ${r.kind}`);
+        } else toast("Not ready yet");
+      } else return;
+      await L.persist();
+    } catch (e) {
+      console.warn("[farm]", e);
+    }
+  });
+  // Phase 4/5 life-sim namespace: lazy singletons + IndexedDB persistence.
   // Additive — the localStorage prefs/position stores stay untouched.
   const atlasLife = {
     version: 1,
@@ -4147,6 +4224,11 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
     inventory: null,
     quests: null,
     economy: null,
+    farming: null,
+    fishing: null,
+    building: null,
+    trading: null,
+    livestock: null,
     _p: null,
     ready() {
       if (!this._p)
@@ -4156,19 +4238,41 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
             { createInventory },
             { createQuests },
             { createEconomy },
+            { createFarming },
+            { createFishing },
+            { createBuilding },
+            { createTrading },
             save,
           ] = await Promise.all([
             import("./interact.js"),
             import("./inventory.js"),
             import("./quests.js"),
             import("./economy.js"),
+            import("./farming.js"),
+            import("./fishing.js"),
+            import("./building.js"),
+            import("./trading.js"),
             import("./save.js"),
           ]);
           this.bus = createBus();
           this.inventory = createInventory();
           this.quests = createQuests([]);
           this.economy = createEconomy();
+          const ev = (t, p) => this.event(t, p);
+          this.farming = createFarming({ onEvent: ev });
+          this.fishing = createFishing({ onEvent: ev });
+          this.building = createBuilding({
+            groundY: (x, z) => (this._ground ? this._ground(x, z) : 0),
+            gradeAt: (x, z) => (this._grade ? this._grade(x, z) : [0, 0]),
+            spend: (n) => this.economy.spend(n, "build").ok,
+          });
+          this.trading = createTrading({
+            economy: this.economy,
+            inventory: this.inventory,
+            onEvent: ev,
+          });
           this._save = save;
+          lifeRef = this;
           return this;
         })();
       return this._p;
@@ -4186,6 +4290,10 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
         inventory: s.inventory.serialise(),
         quests: s.quests.serialise(),
         economy: s.economy.serialise(),
+        farming: s.farming.serialise(),
+        fishing: s.fishing.serialise(),
+        building: s.building.serialise(),
+        ...(s.livestock ? { livestock: s.livestock.serialise() } : {}),
       });
     },
     /** Restore the saved slot; false when none exists. */
@@ -4196,6 +4304,10 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
       s.inventory.restore(rec.data.inventory);
       s.quests.restore(rec.data.quests);
       s.economy.restore(rec.data.economy);
+      s.farming.restore(rec.data.farming);
+      s.fishing.restore(rec.data.fishing);
+      s.building.restore(rec.data.building);
+      if (s.livestock) s.livestock.restore(rec.data.livestock);
       return true;
     },
     export() {
@@ -4210,14 +4322,21 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
     },
     async status() {
       const s = await this.ready();
+      const day = Math.floor(Date.now() / 86400000);
       return {
         quests: s.quests.all(),
         rupees: s.economy.rupees(),
         items: s.inventory.total(),
         goods: s.inventory.list(),
+        plots: s.farming.all().length,
+        fish: s.fishing.stats(),
+        offers: s.trading.offers(day).length,
+        placed: s.building.placed().length,
       };
     },
   };
   globalThis.atlasLife = atlasLife;
+  // Boot the singletons right away (pure data — no renderer dependency).
+  atlasLife.ready().catch((e) => console.warn("[atlasLife]", e));
   return api;
 }

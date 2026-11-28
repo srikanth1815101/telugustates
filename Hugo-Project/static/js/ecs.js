@@ -28,8 +28,8 @@ export function createEcs() {
       Transform: { x: f32(), z: f32(), yaw: f32() },
       /** Metres per second. */
       Motion: { vx: f32(), vz: f32() },
-      /** Farming: world-calendar day sown + growth stage enum. */
-      Crop: { sown: f32(), stage: u8(), water: u8(), type: new Array(CAP).fill("") },
+      /** Farming: grown seconds + growth stage + water reserve (sim s). */
+      Crop: { sown: f32(), stage: u8(), water: f32(), type: new Array(CAP).fill("") },
       /** Generic carried/placed item identity. */
       Item: { kind: new Array(CAP).fill(""), qty: new Array(CAP).fill(1) },
       /** Seconds to live; negative = immortal. */

@@ -53,30 +53,49 @@ export function createEconomy(opts = {}) {
     rupees: () => rupees,
     ledger: () => ledger.slice(),
     /**
-     * Buy qty of kind on `day`. Returns {ok, total} or {ok:false, why}.
-     * Deterministic: same args ⇒ same result.
+     * Buy qty of kind on `day`. `rate` scales the day price (route
+     * discounts pass < 1). Deterministic: same args ⇒ same result.
      */
-    buy(kind, qty, day) {
+    buy(kind, qty, day, rate = 1) {
       const p = price(kind, day);
       if (p == null) return { ok: false, why: "unknown-good" };
       if (!Number.isInteger(qty) || qty <= 0)
         return { ok: false, why: "bad-qty" };
-      const total = p * qty;
+      const unit = Math.max(1, Math.round(p * rate));
+      const total = unit * qty;
       if (total > rupees) return { ok: false, why: "insufficient-funds" };
       rupees -= total;
       ledger.push({ day, kind, qty, side: "buy", total });
-      return { ok: true, total, price: p };
+      return { ok: true, total, price: unit };
     },
-    /** Sell qty of kind on `day` at 86% of the day price (market spread). */
-    sell(kind, qty, day) {
+    /** Sell qty on `day` at `rate` of the day price (market default 86%). */
+    sell(kind, qty, day, rate = 0.86) {
       const p = price(kind, day);
       if (p == null) return { ok: false, why: "unknown-good" };
       if (!Number.isInteger(qty) || qty <= 0)
         return { ok: false, why: "bad-qty" };
-      const total = Math.round(p * 0.86) * qty;
+      const unit = Math.max(1, Math.round(p * rate));
+      const total = unit * qty;
       rupees += total;
       ledger.push({ day, kind, qty, side: "sell", total });
-      return { ok: true, total, price: Math.round(p * 0.86) };
+      return { ok: true, total, price: unit };
+    },
+    /** Credit rupees directly (route payouts, quest rewards). */
+    credit(amount, note = "") {
+      if (!Number.isFinite(amount) || amount <= 0)
+        return { ok: false, why: "bad-amount" };
+      rupees += amount;
+      ledger.push({ day: 0, kind: note || "credit", qty: 1, side: "credit", total: amount });
+      return { ok: true, total: amount };
+    },
+    /** Debit rupees directly (building costs). */
+    spend(amount, note = "") {
+      if (!Number.isFinite(amount) || amount <= 0)
+        return { ok: false, why: "bad-amount" };
+      if (amount > rupees) return { ok: false, why: "insufficient-funds" };
+      rupees -= amount;
+      ledger.push({ day: 0, kind: note || "spend", qty: 1, side: "spend", total: amount });
+      return { ok: true, total: amount };
     },
     serialise() {
       return { seed, rupees, ledger };

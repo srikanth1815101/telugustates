@@ -196,16 +196,38 @@ await step("3D world boots and streams a patch", async () => {
   const frames1 = await page.evaluate(() => window.atlasWalk.snapshot().frames);
   if (frames1 <= frames0) throw new Error("frame counter not advancing");
   note(`frames advanced ${frames0} → ${frames1}`);
-  // Phase 4: the life-sim namespace must boot and answer in-browser.
+  // Phase 4/5: the life-sim namespace must boot, sow, persist and restore.
   const life = await page.evaluate(async () => {
     if (typeof window.atlasLife?.ready !== "function") return null;
     await window.atlasLife.ready();
-    const st = await window.atlasLife.status();
-    await window.atlasLife.event("test-event", { n: 1 });
-    return { st, bus: !!window.atlasLife.bus };
+    const L = window.atlasLife;
+    await L.event("test-event", { n: 1 });
+    const sow = L.farming.sow(120, 120, "vegetable");
+    const st = await L.status();
+    await L.persist();
+    const restored = await L.restore();
+    return {
+      st,
+      bus: !!L.bus,
+      sow: sow.ok,
+      plots: L.farming.all().length,
+      btn: !!document.getElementById("farm-act"),
+      restored,
+      slices: {
+        fishing: typeof L.fishing.cast === "function",
+        building: typeof L.building.place === "function",
+        trading: typeof L.trading.offers === "function",
+      },
+    };
   });
   if (!life?.bus) throw new Error("atlasLife missing or not ready");
+  if (!life.sow || life.plots < 1) throw new Error("farming sow failed");
+  if (!life.btn) throw new Error("farm action button missing");
+  if (!life.restored) throw new Error("save roundtrip failed");
+  if (!life.slices.fishing || !life.slices.building || !life.slices.trading)
+    throw new Error(`slice APIs missing: ${JSON.stringify(life.slices)}`);
   note(`atlasLife ready: ${JSON.stringify(life.st)}`);
+  note(`slices ok, plots=${life.plots}, button=${life.btn}, save roundtrip ok`);
 });
 
 await step("perf harness samples all three spots", async () => {

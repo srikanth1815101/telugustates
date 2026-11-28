@@ -29,6 +29,7 @@ const checks = [
   ["check-scene-contact", false],
   ["check-systems", false],
   ["check-physics", false],
+  ["check-slices", false],
   ["check-budget", false],
 ];
 
