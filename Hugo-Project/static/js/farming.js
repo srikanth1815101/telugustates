@@ -6,15 +6,19 @@
 import { createEcs } from "./ecs.js";
 
 /** One watering refills this many sim-seconds of growth reserve. */
-const WATER_SECONDS = 60;
+const WATER_SECONDS = 90;
 
-/** Crop definitions: stage count, growth seconds per stage, yield range. */
+/**
+ * Crop definitions: stage count, growth seconds per stage, yield range.
+ * Tuned for playability — a full crop completes in ~3 minutes of real
+ * time with periodic watering (was ~6–10 and felt inert).
+ */
 export const CROPS = {
-  ragi: { stages: 4, stageSeconds: 90, yield: [3, 6], label: "ragi" },
-  paddy: { stages: 5, stageSeconds: 110, yield: [4, 8], label: "paddy" },
-  chilli: { stages: 4, stageSeconds: 80, yield: [2, 5], label: "chilli" },
-  cotton: { stages: 5, stageSeconds: 120, yield: [3, 7], label: "cotton" },
-  vegetable: { stages: 3, stageSeconds: 60, yield: [4, 9], label: "vegetables" },
+  ragi: { stages: 4, stageSeconds: 45, yield: [3, 6], label: "ragi" },
+  paddy: { stages: 5, stageSeconds: 55, yield: [4, 8], label: "paddy" },
+  chilli: { stages: 4, stageSeconds: 40, yield: [2, 5], label: "chilli" },
+  cotton: { stages: 5, stageSeconds: 60, yield: [3, 7], label: "cotton" },
+  vegetable: { stages: 3, stageSeconds: 30, yield: [4, 9], label: "vegetables" },
 };
 
 /** Deterministic yield in [lo, hi] from plot identity + harvest count. */

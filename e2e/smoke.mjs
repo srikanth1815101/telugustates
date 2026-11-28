@@ -210,6 +210,42 @@ await step("3D world boots and streams a patch", async () => {
     const restored = await L.restore();
     const veh = await L.spawnVehicle();
     const vp = veh.rig.position();
+
+    // --- visible UI: life menu ---
+    const menuBtn = document.getElementById("life-menu-btn");
+    menuBtn?.click();
+    await new Promise((r) => setTimeout(r, 500));
+    const menu = document.getElementById("life-menu");
+    const menuState = {
+      btn: !!menuBtn,
+      open: !!menu && !menu.hidden,
+      offers: menu?.querySelectorAll("#life-trade .life-row").length ?? 0,
+      builds: menu?.querySelectorAll("[data-build]").length ?? 0,
+      quests: menu?.querySelectorAll("#life-quests .life-q").length ?? 0,
+    };
+
+    // --- structures + livestock render as meshes ---
+    const at = L._motor?.() ?? { x: 0, y: 0 };
+    const meshesBefore = L._meshesN ?? 0;
+    const place = L.building.place("fence", at.x + 0.01, at.y + 0.01, 0);
+    if (!L.livestock)
+      await L.spawnLivestock({
+        minX: at.x - 0.1,
+        maxX: at.x + 0.1,
+        minZ: at.y - 0.1,
+        maxZ: at.y + 0.1,
+      });
+    // fishing: a real cast attempt (depth decides ok/shallow)
+    const cast = await L.fish();
+    // Poll until the world's next frames reconcile the meshes — SwiftShader
+    // frames are ~300 ms, so a fixed wait can miss them.
+    let meshesAfter = L._meshesN ?? 0;
+    const deadline = Date.now() + 6000;
+    while (meshesAfter < meshesBefore + 7 && Date.now() < deadline) {
+      await new Promise((r) => setTimeout(r, 250));
+      meshesAfter = L._meshesN ?? 0;
+    }
+
     return {
       st,
       bus: !!L.bus,
@@ -223,6 +259,18 @@ await step("3D world boots and streams a patch", async () => {
         mesh: !!veh.mesh,
         wheels: veh.rig.controller.numWheels(),
       },
+      menuState,
+      place: place.ok,
+      cast: cast.ok ? "ok" : cast.why,
+      meshes: { before: meshesBefore, after: meshesAfter },
+      diag: {
+        meshesLive: L._meshesN ?? null,
+        hasMeshes: !!L._meshes,
+        placed: L.building?.placed?.().length ?? -1,
+        animals: L.livestock?.animals?.length ?? -1,
+        frames: window.atlasWalk?.snapshot?.().frames ?? -1,
+        menuOpen: !document.getElementById("life-menu")?.hidden,
+      },
       slices: {
         fishing: typeof L.fishing.cast === "function",
         building: typeof L.building.place === "function",
@@ -231,6 +279,9 @@ await step("3D world boots and streams a patch", async () => {
       },
     };
   });
+  // The menu was opened inside evaluate and stays open — capture it.
+  await mkdir(artifacts, { recursive: true });
+  await page.screenshot({ path: join(artifacts, "life-menu.png") });
   if (!life?.bus) throw new Error("atlasLife missing or not ready");
   if (!life.sow || life.plots < 1) throw new Error("farming sow failed");
   if (!life.btn) throw new Error("farm action button missing");
@@ -239,11 +290,22 @@ await step("3D world boots and streams a patch", async () => {
     throw new Error(`first-sowing quest not completed by sow (${life.quest})`);
   if (!life.vehicle.finite || !life.vehicle.mesh || life.vehicle.wheels !== 4)
     throw new Error(`vehicle spawn failed: ${JSON.stringify(life.vehicle)}`);
+  if (!life.menuState.btn || !life.menuState.open)
+    throw new Error(`life menu missing: ${JSON.stringify(life.menuState)}`);
+  if (life.menuState.offers < 1 || life.menuState.builds < 5)
+    throw new Error(`life menu empty: ${JSON.stringify(life.menuState)}`);
+  if (!life.place) throw new Error("structure placement failed");
+  if (life.meshes.after < life.meshes.before + 7)
+    throw new Error(
+      `meshes did not reconcile: ${JSON.stringify(life.meshes)} diag=${JSON.stringify(life.diag)} (fence + 6 animals)`,
+    );
+  if (!["ok", "shallow"].includes(life.cast))
+    throw new Error(`fishing cast failed: ${life.cast}`);
   if (!life.slices.fishing || !life.slices.building || !life.slices.trading || !life.slices.livestock)
     throw new Error(`slice APIs missing: ${JSON.stringify(life.slices)}`);
   note(`atlasLife ready: ${JSON.stringify(life.st)}`);
   note(
-    `slices ok, plots=${life.plots}, button=${life.btn}, quest=${life.quest}, vehicle wheels=${life.vehicle.wheels}, save roundtrip ok`,
+    `menu offers=${life.menuState.offers} builds=${life.menuState.builds} · place=${life.place} cast=${life.cast} · meshes ${life.meshes.before}→${life.meshes.after} · quest=${life.quest} vehicle=${life.vehicle.wheels}w`,
   );
 });
 

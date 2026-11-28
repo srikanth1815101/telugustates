@@ -49,8 +49,9 @@ const report = {};
   const grown = farm.serialise().plots.find((p) => p.id === s.id);
   assert.equal(grown.stage, CROPS.ragi.stages, `ragi fully grown (${grown.stage})`);
 
-  const early = farm.harvest(dry.id); // vegetable still dry-stage
-  assert.equal(early.ok, false);
+  // A freshly sown plot can never be harvested immediately.
+  const fresh = farm.sow(30, 30, "ragi");
+  assert.equal(farm.harvest(fresh.id).why, "not-ready");
   const h1 = farm.harvest(s.id);
   assert.ok(h1.ok, "harvest ok");
   assert.ok(

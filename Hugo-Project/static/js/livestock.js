@@ -13,12 +13,16 @@ const KINDS = {
 /**
  * @param {{pen: {minX:number,maxX:number,minZ:number,maxZ:number},
  *          count?: number, kinds?: string[], produceScale?: number,
+ *          speedScale?: number,
  *          onEvent?: (type: string, payload: any) => void}} opts
+ *   speedScale converts the module's metre-based speeds into the caller's
+ *   planar unit (the world passes 1/ACRE so animals move like real stock).
  */
 export function createLivestock(opts) {
   const pen = opts.pen;
   const emit = opts.onEvent ?? (() => {});
   const scale = opts.produceScale ?? 1;
+  const speedScale = opts.speedScale ?? 1;
   const kinds = opts.kinds ?? ["cow", "chicken", "goat"];
   const count = opts.count ?? 6;
 
@@ -28,7 +32,7 @@ export function createLivestock(opts) {
     const def = KINDS[kind];
     const x = pen.minX + 0.2 + ((i * 37) % 100) / 100 * (pen.maxX - pen.minX - 0.4);
     const z = pen.minZ + 0.2 + ((i * 61) % 100) / 100 * (pen.maxZ - pen.minZ - 0.4);
-    const agent = createAgent({ x, z, speed: def.speed, wander: true });
+    const agent = createAgent({ x, z, speed: def.speed * speedScale, wander: true });
     animals.push({
       kind,
       agent,

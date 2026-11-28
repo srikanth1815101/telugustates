@@ -20,6 +20,7 @@ import { PocketMap } from "./pocket-map.js";
 import { writePosition } from "./position-book.js";
 import { loadPrefs, savePrefs } from "./field-prefs.js";
 import { SimClock } from "./sim-clock.js";
+import { createLifeMeshes } from "./life-meshes.js";
 import { dampGround } from "./regional-weather.js";
 import { RunoffWindow } from "./rain-ground.js";
 import { calendar, windowLight, disciplinedClock } from "./world-calendar.js";
@@ -2229,32 +2230,99 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
       h = Math.min(0.24, dt);
     if (wantPhysics)
       physSample = (sx, sz) => S.ground(S.atlas.x + sx / U, S.atlas.y - sz / U);
-    // Phase 5: keep the life-sim fed with the live surface + advance crops.
+    // Phase 5: keep the life-sim fed with the live surface; tick every
+    // subsystem and reconcile meshes + the contextual action button.
     if (lifeRef) {
       lifeRef._ground = (gx, gz) => S.ground(gx, gz);
       lifeRef._grade = (gx, gz) => S.gradeAt(gx, gz);
       lifeRef._face = (gx, gz) => (S.floor ? S.floor(gx, gz) : S.sample(gx, gz));
-      lifeRef._motor = () => ({ x: motor.x, y: motor.y });
+      lifeRef._motor = () => ({ x: motor.x, y: motor.y, yaw: motor.yaw });
       lifeRef._scene = (mx, my, h) =>
         S.worldXYZ(mx, my, h ?? S.ground(mx, my));
       lifeRef._sceneHeight = (sx, sz) =>
         S.ground(S.atlas.x + sx / U, S.atlas.y - sz / U);
       lifeRef._scene3d = scene;
       lifeRef._T = T;
+
+      // --- vehicle: inputs, physics step, mesh, optional ride ---
       if (lifeRef._vehicle) {
-        lifeRef._vehicle.rig.step(h);
+        const rig = lifeRef._vehicle.rig;
+        if (lifeRef._drive) {
+          rig.input(f, -r, 0);
+          r = 0;
+          f = 0;
+        } else rig.input(0, 0, 0);
+        rig.step(h);
         lifeRef._vehicle.phys.step(h);
-        const vp = lifeRef._vehicle.rig.position();
-        const vr = lifeRef._vehicle.rig.rotation();
+        const vp = rig.position();
+        const vr = rig.rotation();
         if (lifeRef._vehicle.mesh)
           lifeRef._vehicle.mesh.position.set(vp.x, vp.y, vp.z),
             lifeRef._vehicle.mesh.quaternion.set(vr.x, vr.y, vr.z, vr.w);
+        if (lifeRef._drive) {
+          // Rider: snap the walker onto the chassis so the camera follows.
+          motor.x = S.atlas.x + vp.x / U;
+          motor.y = S.atlas.y - vp.z / U;
+          motor.root = vp.y + 0.32;
+          motor.air = 0;
+          motor.speed = rig.speed() ? Math.abs(rig.speed()) : 0;
+          if (motor.touch) motor.touch.z = motor.root;
+        }
       }
-      if (lifeRef.farming) {
-        lifeRef.farming.tick(h);
-        const act = (farmAct = lifeRef.farming.actionAt(motor.x, motor.y));
-        if (farmBtn) {
-          const label =
+
+      // --- fishing: advance the cast FSM every frame ---
+      lifeRef.fishing?.tick(h);
+
+      // --- livestock: steering + production + meshes ---
+      if (lifeRef.livestock) {
+        // A running walker scatters the nearest animals.
+        if (motor.speed > 2)
+          lifeRef.livestock.threaten(motor.x, motor.y, 0.06);
+        lifeRef.livestock.tick(h);
+        if (!lifeRef._meshes)
+          lifeRef._meshes = createLifeMeshes(scene, T, (mx, my, hh) =>
+            S.worldXYZ(mx, my, hh),
+          );
+        const animals = lifeRef.livestock.animals.map((a, i) => {
+          const p = a.agent.vehicle.position;
+          const gy = S.ground(p.x, p.z);
+          const [sx, sy, sz] = S.worldXYZ(p.x, p.z, gy);
+          return { key: i, kind: a.kind, x: sx, y: sy, z: sz };
+        });
+        lifeRef._meshes.syncAnimals(animals);
+      }
+
+      // --- structures placed through the build menu ---
+      if (lifeRef.building) {
+        if (!lifeRef._meshes)
+          lifeRef._meshes = createLifeMeshes(scene, T, (mx, my, hh) =>
+            S.worldXYZ(mx, my, hh),
+          );
+        lifeRef._meshes.syncStructures(lifeRef.building.placed());
+      }
+      lifeRef._meshesN = lifeRef._meshes?.count ?? 0;
+
+      // --- farming: growth + contextual button (fishing overrides it) ---
+      if (lifeRef.farming) lifeRef.farming.tick(h);
+      if (farmBtn) {
+        const face = lifeRef._face(motor.x, motor.y);
+        const fish = lifeRef.fishing;
+        let label = "",
+          mode = null,
+          disabled = false;
+        if (fish && (fish.phase === "waiting" || fish.phase === "bite")) {
+          mode = { kind: "fish", op: "reel" };
+          if (fish.phase === "waiting") {
+            label = "⏳ Fishing…";
+            disabled = true;
+          } else label = "❗ Reel!";
+        } else if (fish && (face.depth ?? 0) >= 0.5) {
+          mode = { kind: "fish", op: "cast" };
+          label = "🎣 Cast";
+        } else if (lifeRef.farming) {
+          const act = lifeRef.farming.actionAt(motor.x, motor.y);
+          mode = { kind: "farm", act };
+          label =
             act.mode === "sow"
               ? "🌱 Sow"
               : act.mode === "water"
@@ -2264,10 +2332,11 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
                   : act.mode === "tend"
                     ? `🌿 ${act.stage}/${act.stages}`
                     : "";
-          farmBtn.hidden = !label;
-          if (label && farmBtn.textContent !== label)
-            farmBtn.textContent = label;
         }
+        farmAct = mode;
+        farmBtn.hidden = !label;
+        farmBtn.disabled = disabled;
+        if (label && farmBtn.textContent !== label) farmBtn.textContent = label;
       }
     }
     // Rebuild a tiny trunk / boulder neighbourhood only when the player or the placement patch changes.
@@ -4177,11 +4246,20 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
         rig?.dispose();
         if (mesh) {
           scene.remove(mesh);
+          mesh.traverse?.((o) => {
+            o.geometry?.dispose?.();
+            if (o.material) {
+              const mats = Array.isArray(o.material) ? o.material : [o.material];
+              for (const m of mats) m.dispose?.();
+            }
+          });
           mesh.geometry?.dispose();
           mesh.material?.dispose();
         }
         globalThis.atlasLife._vehicle = null;
       }
+      globalThis.atlasLife?._meshes?.dispose();
+      lifeRef = null;
       delete globalThis.atlasLife;
     },
   };
@@ -4211,10 +4289,29 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
   const farmCrops = ["ragi", "paddy", "chilli", "cotton", "vegetable"];
   farmBtn.addEventListener("click", async () => {
     const L = atlasLife;
-    if (!L.farming || !farmAct || !L._face) return;
+    if (!farmAct || !L._face) return;
     const at = L._motor?.() ?? { x: 0, y: 0 };
     try {
-      if (farmAct.mode === "sow") {
+      if (farmAct.kind === "fish") {
+        const r =
+          farmAct.op === "cast" ? await L.fish() : await L.reelFish();
+        toast(
+          r.ok
+            ? farmAct.op === "cast"
+              ? "Cast… watch for the bite"
+              : `Caught ${r.kind} · ${r.kg} kg`
+            : r.why === "shallow"
+              ? "Need deeper water"
+              : r.why === "too-early"
+                ? "Too early — it got away"
+                : "…",
+        );
+        if (r.ok && farmAct.op === "reel") await L.persist();
+        return;
+      }
+      if (!L.farming) return;
+      const act = farmAct.act;
+      if (act.mode === "sow") {
         const face = L._face(at.x, at.y);
         if ((face.depth ?? 0) > 0.35) return toast("Too wet to sow here");
         const g = L._grade(at.x, at.y);
@@ -4227,10 +4324,10 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
             r.why === "plot-overlap" ? "Too close to another plot" : "Cannot sow here",
           );
         toast(`Sowed ${kind}`);
-      } else if (farmAct.mode === "water") {
-        toast(L.farming.water(farmAct.id).ok ? "Watered the plot" : "Still wet");
-      } else if (farmAct.mode === "harvest") {
-        const r = L.farming.harvest(farmAct.id);
+      } else if (act.mode === "water") {
+        toast(L.farming.water(act.id).ok ? "Watered the plot" : "Still wet");
+      } else if (act.mode === "harvest") {
+        const r = L.farming.harvest(act.id);
         if (r.ok) {
           L.inventory.add(r.kind, r.qty);
           toast(`Harvested ${r.qty} ${r.kind}`);
@@ -4239,6 +4336,139 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
       await L.persist();
     } catch (e) {
       console.warn("[farm]", e);
+    }
+  });
+  // 🎒 Life menu — every remaining mechanic, visible and tappable.
+  const menuBtn = document.createElement("button");
+  menuBtn.type = "button";
+  menuBtn.id = "life-menu-btn";
+  menuBtn.textContent = "🎒";
+  menuBtn.setAttribute("aria-label", "Life menu");
+  q(".pace-panel")?.append(menuBtn);
+  const menu = document.createElement("div");
+  menu.id = "life-menu";
+  menu.hidden = true;
+  menu.innerHTML = `<header><b>Life</b><button type="button" id="life-menu-close" aria-label="Close">×</button></header>
+    <section id="life-trade"></section>
+    <section id="life-build"></section>
+    <section id="life-herd"></section>
+    <section id="life-ride"></section>
+    <section id="life-quests"></section>`;
+  host.append(menu);
+  const mStyle = document.createElement("style");
+  mStyle.textContent = `
+    #life-menu{position:absolute;right:max(12px,env(safe-area-inset-right));bottom:172px;z-index:6;width:min(300px,86vw);max-height:min(60dvh,480px);overflow:auto;background:#fdf7e9f5;border:1px solid #ffffffc4;border-radius:16px;box-shadow:0 8px 28px #15372140;padding:10px 12px;color:#194328;font:600 13px var(--body);pointer-events:auto}
+    #life-menu header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+    #life-menu header button{border:0;background:transparent;font-size:20px;cursor:pointer;color:#194328}
+    #life-menu section{margin:8px 0}
+    #life-menu .life-h{font:700 10px var(--mono);letter-spacing:.08em;text-transform:uppercase;opacity:.66;margin-bottom:4px}
+    #life-menu .life-row{display:flex;gap:6px;align-items:center;justify-content:space-between;padding:4px 0;flex-wrap:wrap}
+    #life-menu .life-row span{flex:1;min-width:110px}
+    #life-menu button.life-a{border:1px solid #ffffffc4;background:#fdf7e9;border-radius:10px;padding:6px 10px;font:700 12px var(--body);color:#194328;cursor:pointer;min-height:34px}
+    #life-menu button.life-a:active{background:#bdd08f}
+    #life-menu button.life-a[disabled]{opacity:.45}
+    #life-menu .life-q{display:flex;justify-content:space-between;padding:2px 0;font-weight:600}
+    #life-menu .life-q i{font-style:normal;opacity:.7}
+    body:not(.walking) #life-menu{display:none}`;
+  document.head.append(mStyle);
+
+  const refreshMenu = async () => {
+    if (menu.hidden) return;
+    const L = atlasLife;
+    try {
+      await L.ready();
+      const day = Math.floor(Date.now() / 86400000);
+      const offers = L.trading.offers(day);
+      menu.querySelector("#life-trade").innerHTML =
+        `<div class="life-h">Route market · ₹${L.economy.rupees()}</div>` +
+        offers
+          .map(
+            (o, i) =>
+              `<div class="life-row"><span>${o.side === "buy" ? "Buy" : "Sell"} ${o.qty} ${o.kind} @ ₹${o.price}</span><button class="life-a" data-offer="${i}">Go</button></div>`,
+          )
+          .join("");
+      menu.querySelector("#life-build").innerHTML =
+        `<div class="life-h">Build at your feet</div><div class="life-row">` +
+        Object.entries(L.building.structures)
+          .map(
+            ([k, d]) =>
+              `<button class="life-a" data-build="${k}">${d.label} ₹${d.cost}</button>`,
+          )
+          .join("") +
+        `</div>`;
+      menu.querySelector("#life-herd").innerHTML =
+        `<div class="life-h">Livestock</div><div class="life-row">` +
+        (L.livestock
+          ? `<span>${L.livestock.animals.length} animals in the pen</span>`
+          : `<span>No pen yet</span><button class="life-a" data-herd="1">Buy pen ₹30</button>`) +
+        `</div>`;
+      menu.querySelector("#life-ride").innerHTML =
+        `<div class="life-h">Buggy</div><div class="life-row">` +
+        (L._vehicle
+          ? `<button class="life-a" data-drive="1">${L._drive ? "🛑 Exit" : "🚗 Drive (joystick)"}</button>`
+          : `<span>No buggy</span><button class="life-a" data-ride="1">Spawn ₹40</button>`) +
+        `</div>`;
+      const quests = await L.status();
+      menu.querySelector("#life-quests").innerHTML =
+        `<div class="life-h">Quests</div>` +
+        Object.entries(quests.quests)
+          .map(
+            ([id, s]) =>
+              `<div class="life-q"><span>${id}</span><i>${s.state}</i></div>`,
+          )
+          .join("");
+    } catch (e) {
+      console.warn("[life-menu]", e);
+    }
+  };
+  menuBtn.addEventListener("click", () => {
+    menu.hidden = !menu.hidden;
+    refreshMenu();
+  });
+  menu.querySelector("#life-menu-close").addEventListener("click", () => {
+    menu.hidden = true;
+  });
+  menu.addEventListener("click", async (e) => {
+    const btn = e.target.closest("button");
+    if (!btn) return;
+    const L = atlasLife;
+    const at = L._motor?.() ?? { x: 0, y: 0 };
+    try {
+      if (btn.dataset.offer != null) {
+        const day = Math.floor(Date.now() / 86400000);
+        const offer = L.trading.offers(day)[Number(btn.dataset.offer)];
+        const r = L.trading.execute(offer, day);
+        toast(r.ok ? `Traded ${offer.qty} ${offer.kind} (+₹${r.total})` : `Trade failed: ${r.why}`);
+        if (r.ok) await L.persist();
+      } else if (btn.dataset.build) {
+        const g = L._grade(at.x, at.y);
+        if (Math.hypot(g[0], g[1]) > 0.84) return toast("Too steep to build here");
+        const r = L.building.place(btn.dataset.build, at.x, at.y, 0);
+        toast(r.ok ? `Built ${btn.dataset.build}` : `Cannot build: ${r.why}`);
+        if (r.ok) await L.persist();
+      } else if (btn.dataset.herd) {
+        if (!L.economy.spend(30, "pen").ok) return toast("Not enough rupees");
+        const p = 0.14;
+        await L.spawnLivestock({
+          minX: at.x - p,
+          maxX: at.x + p,
+          minZ: at.y - p,
+          maxZ: at.y + p,
+        });
+        toast("Pen ready — 6 animals");
+        await L.persist();
+      } else if (btn.dataset.ride) {
+        if (!L.economy.spend(40, "buggy").ok) return toast("Not enough rupees");
+        await L.spawnVehicle();
+        toast("Buggy ready — open the menu to drive");
+        await L.persist();
+      } else if (btn.dataset.drive != null) {
+        L._drive = !L._drive;
+        toast(L._drive ? "Driving — use the joystick" : "Hopped out");
+      }
+      refreshMenu();
+    } catch (err) {
+      console.warn("[life-menu]", err);
     }
   });
   // Phase 4/5 life-sim namespace: lazy singletons + IndexedDB persistence.
@@ -4333,7 +4563,11 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
     async spawnLivestock(pen) {
       const s = await this.ready();
       const { createLivestock } = await import("./livestock.js");
-      s.livestock = createLivestock({ pen, onEvent: (t, p) => this.event(t, p) });
+      s.livestock = createLivestock({
+        pen,
+        speedScale: 1 / U,
+        onEvent: (t, p) => this.event(t, p),
+      });
       return s.livestock;
     },
     /** Spawn a Rapier buggy at the walker (own physics world + box mesh). */
@@ -4345,7 +4579,15 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
         import("./vehicles.js"),
       ]);
       const at = s._motor?.() ?? { x: 0, y: 0 };
-      const scene = s._scene?.(at.x, at.y) ?? [0, 0, 0];
+      const base = s._scene?.(at.x, at.y) ?? [0, 0, 0];
+      // Stand the buggy ~2.2 m in front of the walker (spawn above ground so
+      // it settles down instead of intersecting the walker/terrain).
+      const yaw = at.yaw ?? 0;
+      const scene = [
+        base[0] - Math.sin(yaw) * 2.2,
+        base[1],
+        base[2] - Math.cos(yaw) * 2.2,
+      ];
       const p = await phys.AtlasPhysics.create({
         heightAt: (x, z) => (s._sceneHeight ? s._sceneHeight(x, z) : 0),
       });
@@ -4355,16 +4597,41 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
         R: p.R,
         world: p.world,
         x: scene[0],
-        y: scene[1],
+        y: scene[1] + 0.9,
         z: scene[2],
       });
       let mesh = null;
       if (this._scene3d && this._T) {
-        mesh = new this._T.Mesh(
-          new this._T.BoxGeometry(1.7, 0.6, 3.4),
-          new this._T.MeshLambertMaterial({ color: 0xb5462f }),
-        );
-        mesh.castShadow = true;
+        const G = this._T;
+        // Little farm buggy: red body, hood, seat back, handlebar, 4 wheels.
+        mesh = new G.Group();
+        const add = (geo, mat, x, y, z) => {
+          const m = new G.Mesh(geo, mat);
+          m.position.set(x, y, z);
+          m.castShadow = true;
+          mesh.add(m);
+          return m;
+        };
+        const red = new G.MeshLambertMaterial({ color: 0xb5462f });
+        const dark = new G.MeshLambertMaterial({ color: 0x3a3a3a });
+        add(new G.BoxGeometry(1.1, 0.4, 2.3), red, 0, 0.05, 0);
+        add(new G.BoxGeometry(0.9, 0.22, 0.7), red, 0, 0.34, -0.75);
+        add(new G.BoxGeometry(0.85, 0.5, 0.25), dark, 0, 0.5, 0.55);
+        add(new G.BoxGeometry(0.7, 0.06, 0.06), dark, 0, 0.55, -0.35);
+        const wheelGeo = new G.CylinderGeometry(0.34, 0.34, 0.2, 12);
+        wheelGeo.rotateZ(Math.PI / 2);
+        const wheelMat = new G.MeshLambertMaterial({ color: 0x17181c });
+        for (const [wx, wz] of [
+          [-0.5, -0.85],
+          [0.5, -0.85],
+          [-0.5, 0.85],
+          [0.5, 0.85],
+        ]) {
+          const w = new G.Mesh(wheelGeo, wheelMat);
+          w.position.set(wx, -0.42, wz);
+          w.castShadow = true;
+          mesh.add(w);
+        }
         this._scene3d.add(mesh);
       }
       this._vehicle = { rig, phys: p, mesh };
@@ -4428,7 +4695,26 @@ export async function expedition(host, a, tr, paper, fail, boundaries) {
   };
   globalThis.atlasLife = atlasLife;
   atlasLife._toast = toast;
-  // Boot the singletons right away (pure data — no renderer dependency).
-  atlasLife.ready().catch((e) => console.warn("[atlasLife]", e));
+  // Boot the singletons, then surface slice events as toasts + saves.
+  atlasLife
+    .ready()
+    .then((L) => {
+      L.bus.on("stage", (p) => toast(`🌱 ${p.kind} grew to stage ${p.stage}`));
+      L.bus.on("catch", (c) => toast(`🎣 Caught ${c.kind} · ${c.kg} kg`));
+      L.bus.on("produce", (g) => toast(`+${g.qty} ${g.kind} from the pen`));
+      L.bus.on("trade", () => {});
+      L.bus.on("bite", () => toast("❗ Something bit — reel now!"));
+      L.bus.on("escape", () => toast("It got away…"));
+      // Persist quietly after non-menu events (debounced).
+      let saveT = 0;
+      const queueSave = () => {
+        clearTimeout(saveT);
+        saveT = setTimeout(() => L.persist().catch(() => {}), 800);
+      };
+      L.bus.on("catch", queueSave);
+      L.bus.on("produce", queueSave);
+      L.bus.on("stage", queueSave);
+    })
+    .catch((e) => console.warn("[atlasLife]", e));
   return api;
 }
