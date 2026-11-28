@@ -1,0 +1,62 @@
+{{/* Resource ledger: what each batch consumed and what it added, newest first.
+     Rows live in data/resource_ledger.json so the home page, the check and the
+     published balances all read one source. Replaces the old legal strip; the
+     Legal & Disclaimer dialog is still reachable from the footer. */}}
+{{- $entries := slice -}}
+{{/* index, not dot notation: data keys must not depend on how Hugo
+     normalises the file name. */}}
+{{- with index site.Data "resource_ledger" -}}
+  {{- with .entries -}}{{- $entries = . -}}{{- end -}}
+{{- end -}}
+<div class="map-read hero-foot ledger-foot" id="treasury-ledger" aria-label="Resource transactions">
+  <div class="ledger-head">
+    <span class="ledger-title">{{ partial "i.html" "currency" }}<b data-msg="home.ledgerTitle">RESOURCE TRANSACTIONS</b></span>
+    <small class="ledger-sub" data-msg="home.ledgerSub">Consumed and added, per batch</small>
+  </div>
+  {{- if $entries }}
+  <ol class="ledger-rows">
+    {{- range $entries }}
+    <li class="ledger-row">
+      <div class="ledger-what">
+        <b class="ledger-date">{{ .date }}</b>
+        <small class="ledger-note">{{ if .houses_added }}<span data-msg="home.ledgerHouses">{{ .houses_added }} houses</span> · {{ end }}{{ .note }}</small>
+      </div>
+      <div class="ledger-deltas">
+        {{- if .likes }}
+        <span class="ledger-chip chip-food" title="{{ .likes }} likes became food">
+          <i class="ledger-ico">{{ partial "i.html" "like" }}</i><b>{{ .likes }}</b>
+        </span>
+        {{- end }}
+        {{- if .comments }}
+        <span class="ledger-chip chip-currency" title="{{ .comments }} comments became currency">
+          <i class="ledger-ico">{{ partial "i.html" "comment" }}</i><b>{{ .comments }}</b>
+        </span>
+        {{- end }}
+        {{- if .shares }}
+        <span class="ledger-chip chip-gold" title="{{ .shares }} shares became gold">
+          <i class="ledger-ico">{{ partial "i.html" "share" }}</i><b>{{ .shares }}</b>
+        </span>
+        {{- end }}
+      </div>
+      <div class="ledger-net">
+        {{- if .food }}{{ if ne .food 0 }}
+        <span class="ledger-delta {{ if lt .food 0 }}neg{{ else }}pos{{ end }}">
+          <i class="ledger-ico">{{ partial "i.html" "food" }}</i><b>{{ if gt .food 0 }}+{{ end }}{{ .food }}</b>
+        </span>
+        {{- end }}{{ end }}
+        {{- if .currency }}{{ if ne .currency 0 }}
+        <span class="ledger-delta {{ if lt .currency 0 }}neg{{ else }}pos{{ end }}">
+          <i class="ledger-ico">{{ partial "i.html" "currency" }}</i><b>{{ if gt .currency 0 }}+{{ end }}{{ .currency }}</b>
+        </span>
+        {{- end }}{{ end }}
+        {{- if .gold }}{{ if ne .gold 0 }}
+        <span class="ledger-delta {{ if lt .gold 0 }}neg{{ else }}pos{{ end }}">
+          <i class="ledger-ico">{{ partial "i.html" "gold" }}</i><b>{{ if gt .gold 0 }}+{{ end }}{{ .gold }}</b>
+        </span>
+        {{- end }}{{ end }}
+      </div>
+    </li>
+    {{- end }}
+  </ol>
+  {{- end }}
+</div>
